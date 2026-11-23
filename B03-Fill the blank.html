@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="th" data-profile="reading">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เติมคำในช่อง - แรงโน้มถ่วงของโลก (วิทยาศาสตร์ ป.4)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Sarabun & Anuphan for clean, dyslexia-friendly Thai typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600;700&family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Anuphan', 'Sarabun', sans-serif;
+            background-color: #FAF8F2; /* Calm cream-white background */
+            color: #2D3142;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            letter-spacing: 0.03em; /* Dyslexia-friendly wide letter spacing */
+        }
+
+        /* Dotted rounded empty blank slot */
+        .blank-slot-dotted {
+            border: 3.5px dotted #D97706;
+            background-color: #FFFBEB;
+            border-radius: 1.25rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .blank-slot-filled {
+            border: 3.5px solid #0EA5E9;
+            background-color: #F0F9FF;
+            border-radius: 1.25rem;
+        }
+
+        .blank-slot-correct {
+            border: 3.5px solid #22C55E;
+            background-color: #DCFCE7;
+            border-radius: 1.25rem;
+        }
+
+        /* Word-by-word reading highlight bar */
+        .reading-word {
+            position: relative;
+            padding: 0.25rem 0.55rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .reading-word::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 10%;
+            width: 80%;
+            height: 5px;
+            border-radius: 999px;
+            background-color: transparent;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .reading-word.active-highlight {
+            background-color: #FEF3C7;
+            color: #92400E;
+            transform: translateY(-2px);
+        }
+
+        .reading-word.active-highlight::after {
+            background-color: #F59E0B;
+        }
+
+        /* Large clean rectangular word tiles */
+        .word-tile {
+            background-color: #FFFFFF;
+            border: 3px solid #E2E8F0;
+            box-shadow: 0 6px 0 #CBD5E1;
+            transition: all 0.15s ease;
+        }
+
+        .word-tile:hover:not(:disabled) {
+            border-color: #94A3B8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #94A3B8;
+        }
+
+        .word-tile:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #94A3B8;
+        }
+
+        .word-tile.selected-tile {
+            opacity: 0.4;
+            border-color: #CBD5E1;
+            box-shadow: 0 2px 0 #E2E8F0;
+            transform: translateY(4px);
+        }
+
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .unjai-float {
+            animation: gentle-float 3.5s ease-in-out infinite;
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.7); opacity: 0; }
+            70% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in {
+            animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- Introductory Screen -->
+    <div id="intro-screen" class="fixed inset-0 bg-[#FAF8F2]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-300 animate-pop-in my-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <!-- Left Column: Title & Mascot & CTA -->
+                <div class="flex flex-col items-center text-center p-2">
+                    <div class="w-24 h-24 mx-auto mb-3 unjai-float">
+                        <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-sm">
+                            <polygon points="26,46 18,16 48,30" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+                            <polygon points="94,46 102,16 72,30" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+                            <polygon points="29,42 23,23 43,32" fill="#FDE68A"/>
+                            <polygon points="91,42 97,23 77,32" fill="#FDE68A"/>
+                            <circle cx="60" cy="62" r="38" fill="#FCD34D" stroke="#D97706" stroke-width="3"/>
+                            <ellipse cx="38" cy="68" rx="6" ry="4" fill="#FCA5A5" opacity="0.7"/>
+                            <ellipse cx="82" cy="68" rx="6" ry="4" fill="#FCA5A5" opacity="0.7"/>
+                            <path d="M 41 56 Q 46 49 51 56" fill="none" stroke="#374151" stroke-width="3.5" stroke-linecap="round"/>
+                            <path d="M 69 56 Q 74 49 79 56" fill="none" stroke="#374151" stroke-width="3.5" stroke-linecap="round"/>
+                            <polygon points="57,63 63,63 60,67" fill="#F472B6"/>
+                            <path d="M 52 71 Q 60 79 68 71" fill="none" stroke="#374151" stroke-width="3" stroke-linecap="round"/>
+                            <g transform="translate(74, 72) rotate(-32)">
+                                <rect x="0" y="0" width="12" height="34" rx="2" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/>
+                                <rect x="0" y="0" width="12" height="7" rx="1" fill="#F472B6"/>
+                                <polygon points="0,34 12,34 6,44" fill="#FDE68A" stroke="#D97706" stroke-width="1.5"/>
+                                <polygon points="4,40 8,40 6,44" fill="#374151"/>
+                            </g>
+                            <circle cx="78" cy="88" r="10" fill="#FCD34D" stroke="#D97706" stroke-width="2.5"/>
+                        </svg>
+                    </div>
+
+                    <span class="inline-block px-3 py-1 bg-sky-100 text-sky-700 font-bold text-xs rounded-full mb-2">
+                        วิทยาศาสตร์ ป.4 • เรื่อง แรงโน้มถ่วงของโลก
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1">อุ่นใจชวนเรียนรู้เรื่องแรงโน้มถ่วง</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-4">มวล น้ำหนัก แรงไม่สัมผัส และการเคลื่อนที่ของวัตถุ</p>
+
+                    <!-- Accessibility suitability -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 mb-4 text-left w-full shadow-xs">
+                        <div class="flex items-center gap-1.5 mb-0.5">
+                            <span class="text-lg">🌟</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-amber-900">ออกแบบเพื่อการเรียนรู้ที่สบายตา (LD-Friendly)</span>
+                        </div>
+                        <p class="text-[11px] text-amber-800 leading-relaxed">
+                            ทบทวนบทเรียนวิทยาศาสตร์เรื่องแรงโน้มถ่วงของโลก พร้อมเสียงอ่านภาษาไทยทีละคำและแถบไฮไลต์นำสายตา
+                        </p>
+                    </div>
+
+                    <button onclick="startGameFromIntro()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 text-white font-extrabold text-base sm:text-lg py-3.5 px-6 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                        <span>🚀 เริ่มเรียนรู้เลย!</span>
+                    </button>
+                </div>
+
+                <!-- Right Column: How to play steps & Quick Science Summary -->
+                <div class="bg-[#FAF8F2] rounded-2xl p-4 sm:p-5 border-2 border-[#EAE4D7] flex flex-col justify-between space-y-3">
+                    <h3 class="font-extrabold text-sm text-amber-800 uppercase tracking-wider flex items-center gap-2">
+                        🌍 สาระน่ารู้จากบทเรียน
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 bg-white p-3.5 rounded-xl border border-[#EAE4D7] shadow-xs">
+                            <span class="text-2xl bg-amber-50 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">🔊</span>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs sm:text-sm">ฟังเสียงอ่านประโยคทีละคำ</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">กดปุ่มฟังเสียงอ่านเพื่อฟังคำอธิบายวิทยาศาสตร์พร้อมแถบสีเหลืองนำสายตา</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 bg-white p-3.5 rounded-xl border border-[#EAE4D7] shadow-xs">
+                            <span class="text-2xl bg-amber-50 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">🧲</span>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs sm:text-sm">มวล (Mass) กับ น้ำหนัก (Weight)</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5"><b>มวล</b> คือปริมาณเนื้อสาร (หน่วยเป็นกรัม/กิโลกรัม) ส่วน <b>น้ำหนัก</b> คือแรงโน้มถ่วงที่ดึงดูดวัตถุ (หน่วยเป็นนิวตัน)</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-amber-200">
+                            <span class="text-base shrink-0">💡</span>
+                            <span>สามารถสลับโหมด <b>"เติมคำสำคัญ"</b> หรือ <b>"เติมตัวอักษรคำศัพท์"</b> ได้ที่มุมซ้ายล่าง</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Header: Clean, Spacious, No Timer -->
+    <header class="w-full max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <!-- Undo / Back Arrow Button -->
+        <button onclick="handleUndo()" id="undo-btn" aria-label="ย้อนกลับ / ล้างคำตอบ" title="ย้อนกลับ" class="w-14 h-14 bg-white hover:bg-slate-50 text-slate-600 rounded-2xl border-2 border-[#E5DEC9] shadow-sm flex items-center justify-center transition transform active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+        </button>
+
+        <!-- Calm Progress Indicator -->
+        <div class="flex items-center gap-3 bg-white px-6 py-2.5 rounded-full border-2 border-[#E5DEC9] shadow-sm">
+            <div id="progress-dots" class="flex items-center gap-2">
+                <!-- Dots rendered via JS -->
+            </div>
+            <span id="progress-text" class="text-lg font-bold text-slate-600 ml-2">1 / 8</span>
+        </div>
+
+        <!-- Help (?) Button -->
+        <button onclick="openHelpModal()" aria-label="วิธีเล่น" class="w-14 h-14 bg-white hover:bg-slate-50 text-sky-600 rounded-2xl border-2 border-[#E5DEC9] shadow-sm flex items-center justify-center text-2xl font-bold transition transform active:scale-95">
+            ?
+        </button>
+    </header>
+
+    <!-- Main Content Area: Generous White Space -->
+    <main class="w-full max-w-6xl mx-auto px-6 flex-1 flex flex-col items-center justify-center my-auto py-4">
+
+        <!-- Large Clean Sentence Card -->
+        <div class="w-full bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_12px_40px_rgba(45,49,66,0.06)] border-2 border-[#EAE4D7] relative mb-10">
+            
+            <!-- Top Row inside Card: Read-Aloud Button, Topic Tag & Soft Green Check Feedback Area -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
+                <div class="flex items-center gap-3">
+                    <!-- Read-Aloud Button with Speaker Icon -->
+                    <button onclick="readSentenceWordByWord()" id="read-aloud-btn" aria-label="อ่านออกเสียงทีละคำ" class="flex items-center gap-3 bg-sky-50 hover:bg-sky-100 text-sky-700 px-5 py-3 rounded-2xl border-2 border-sky-200 font-bold text-lg transition transform active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span>ฟังเสียงอ่าน</span>
+                    </button>
+
+                    <!-- Category Badge -->
+                    <span id="category-badge" class="hidden sm:inline-block bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-2xl font-bold text-sm">
+                        แรงโน้มถ่วงของโลก
+                    </span>
+                </div>
+
+                <!-- Soft Green Check Icon Feedback Area -->
+                <div id="feedback-area" class="min-h-[52px] flex items-center justify-end">
+                    <!-- Soft green check badge appears here when correct -->
+                </div>
+            </div>
+
+            <!-- Wide-Spaced Sentence with Highlighted Empty Blank Slot -->
+            <div id="sentence-display" class="min-h-[120px] flex flex-wrap items-center justify-center gap-x-3 gap-y-5 text-3xl md:text-4xl font-bold text-slate-800 leading-loose py-4">
+                <!-- Words and dotted rounded blank slot rendered dynamically -->
+            </div>
+
+            <!-- Subtitle Context for Comprehension Support -->
+            <p id="thai-translation" class="text-center text-base md:text-lg text-slate-500 font-medium mt-2">
+                <!-- Additional context / prompt -->
+            </p>
+
+            <!-- Gentle Hint / Encouragement Subtitle (Hidden unless needed) -->
+            <p id="gentle-hint" class="text-center text-lg text-amber-700 font-semibold mt-4 min-h-[28px] transition-opacity duration-300 opacity-0">
+                <!-- Gentle explanation text -->
+            </p>
+        </div>
+
+        <!-- Row of 3 Big Word-Tiles (Clean Rectangular Labels) -->
+        <div class="w-full max-w-4xl mb-6">
+            <div id="word-tiles-row" class="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
+                <!-- 3 large rectangular word tiles rendered dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Bar with Mode Switcher & Un-Jai Smiling with Pencil in the Corner -->
+    <footer class="w-full max-w-5xl mx-auto px-6 py-4 flex items-end justify-between relative">
+        <!-- Subtle Mode Switcher for Teacher/Parent -->
+        <div class="flex items-center gap-2 bg-white/80 p-1.5 rounded-2xl border border-[#E5DEC9]">
+            <button onclick="switchGameMode('word')" id="mode-btn-word" class="px-4 py-2 bg-amber-500 text-white font-bold rounded-xl text-sm transition">
+                เติมคำสำคัญ
+            </button>
+            <button onclick="switchGameMode('letter')" id="mode-btn-letter" class="px-4 py-2 text-slate-600 hover:bg-slate-100 font-bold rounded-xl text-sm transition">
+                เติมตัวอักษร
+            </button>
+        </div>
+
+        <!-- Un-Jai Holding a Pencil & Smiling in the Corner -->
+        <div onclick="readSentenceWordByWord()" title="อุ่นใจพร้อมช่วยอ่าน" class="cursor-pointer flex items-end gap-3 group">
+            <div id="unjai-bubble" class="hidden md:block bg-white border-2 border-[#E5DEC9] px-4 py-2 rounded-2xl rounded-br-none shadow-sm text-sm font-semibold text-slate-600 mb-4 transition-all">
+                แตะป้ายคำตอบด้านล่างได้เลยนะจ๊ะ
+            </div>
+            <div class="w-20 h-20 md:w-24 md:h-24 unjai-float shrink-0">
+                <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- Cat Ears -->
+                    <polygon points="26,46 18,16 48,30" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+                    <polygon points="94,46 102,16 72,30" fill="#FBBF24" stroke="#D97706" stroke-width="3" stroke-linejoin="round"/>
+                    <polygon points="29,42 23,23 43,32" fill="#FDE68A"/>
+                    <polygon points="91,42 97,23 77,32" fill="#FDE68A"/>
+                    <!-- Head -->
+                    <circle cx="60" cy="62" r="38" fill="#FCD34D" stroke="#D97706" stroke-width="3"/>
+                    <!-- Cheeks -->
+                    <ellipse cx="38" cy="68" rx="6" ry="4" fill="#FCA5A5" opacity="0.7"/>
+                    <ellipse cx="82" cy="68" rx="6" ry="4" fill="#FCA5A5" opacity="0.7"/>
+                    <!-- Smiling Eyes -->
+                    <path d="M 41 56 Q 46 49 51 56" fill="none" stroke="#374151" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M 69 56 Q 74 49 79 56" fill="none" stroke="#374151" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- Nose & Warm Smile -->
+                    <polygon points="57,63 63,63 60,67" fill="#F472B6"/>
+                    <path d="M 52 71 Q 60 79 68 71" fill="none" stroke="#374151" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Pencil Held in Paw -->
+                    <g transform="translate(22, 74) rotate(28)">
+                        <rect x="0" y="0" width="12" height="36" rx="2" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/>
+                        <rect x="0" y="0" width="12" height="7" rx="1" fill="#F472B6"/>
+                        <polygon points="0,36 12,36 6,46" fill="#FDE68A" stroke="#D97706" stroke-width="1.5"/>
+                        <polygon points="4,42 8,42 6,46" fill="#374151"/>
+                    </g>
+                    <!-- Left Paw Holding Pencil -->
+                    <circle cx="28" cy="90" r="10" fill="#FCD34D" stroke="#D97706" stroke-width="2.5"/>
+                </svg>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6 hidden">
+        <div class="bg-white rounded-[2rem] max-w-md w-full p-8 shadow-2xl border-2 border-[#EAE4D7] relative">
+            <button onclick="closeHelpModal()" class="absolute top-5 right-5 w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full font-bold text-slate-600 flex items-center justify-center">✕</button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-5">สรุปความรู้: แรงโน้มถ่วงของโลก</h2>
+            <div class="space-y-4 text-slate-600 text-base leading-relaxed">
+                <div class="flex items-start gap-3 bg-[#FAF8F2] p-4 rounded-2xl">
+                    <span class="text-2xl">🌍</span>
+                    <div><strong>แรงโน้มถ่วงของโลก:</strong> เป็นแรงไม่สัมผัสที่ดึงดูดวัตถุเข้าสู่ศูนย์กลางของโลก</div>
+                </div>
+                <div class="flex items-start gap-3 bg-[#FAF8F2] p-4 rounded-2xl">
+                    <span class="text-2xl">⚖️</span>
+                    <div><strong>มวล vs น้ำหนัก:</strong> มวลคือปริมาณเนื้อสาร (kg) ส่วนน้ำหนักคือแรงดึงดูดของโลกที่กระทำต่อวัตถุ มีหน่วยเป็น <b>นิวตัน (N)</b></div>
+                </div>
+                <div class="flex items-start gap-3 bg-[#FAF8F2] p-4 rounded-2xl">
+                    <span class="text-2xl">📏</span>
+                    <div><strong>เครื่องมือวัดน้ำหนัก:</strong> ใช้ <b>เครื่องชั่งสปริง</b> ในการวัดขนาดของแรงดึงดูดโลก</div>
+                </div>
+            </div>
+            <button onclick="closeHelpModal()" class="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl text-lg">
+                เข้าใจแล้ว
+            </button>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div id="complete-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6 hidden">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 md:p-10 shadow-2xl border-2 border-[#EAE4D7] text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-2">ยอดเยี่ยมมากเลย!</h2>
+            <p class="text-lg text-slate-500 mb-8">ทบทวนเรื่องแรงโน้มถ่วงของโลกครบทุกข้อแล้วจ้า</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="restartGame()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl shadow-md text-lg transition transform active:scale-95">
+                    เล่นใหม่อีกครั้ง
+                </button>
+                <button onclick="restBreak()" class="w-full bg-[#FAF8F2] hover:bg-slate-100 text-slate-700 border border-[#E5DEC9] font-bold py-3.5 rounded-2xl text-lg transition">
+                    พักผ่อนสักครู่
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mode A: Science Concepts from "แรงโน้มถ่วงของโลก" (Grade 4 EPUB)
+        let questionsDataWord = [
+            {
+                id: 1,
+                category: "มวลและน้ำหนัก",
+                words: ["มวล", "คือ", "___", "ทั้งหมด", "ในวัตถุ"],
+                blankIndex: 2,
+                answer: "ปริมาณเนื้อสาร",
+                options: ["ปริมาณเนื้อสาร", "แรงดึงดูด", "เครื่องมือวัด"],
+                translation: "มวลมีค่าคงที่ไม่ว่าจะอยู่ที่ใดบนโลก มีหน่วยเป็นกรัม (g) หรือกิโลกรัม (kg)",
+                explanation: "มวล คือ ปริมาณของเนื้อสารทั้งหมดที่มีอยู่ในวัตถุนั้น"
+            },
+            {
+                id: 2,
+                category: "การวัดน้ำหนัก",
+                words: ["น้ำหนัก", "ของวัตถุ", "มีหน่วยเป็น", "___"],
+                blankIndex: 3,
+                answer: "นิวตัน",
+                options: ["นิวตัน", "กรัม", "กิโลกรัม"],
+                translation: "น้ำหนักเกิดจากแรงโน้มถ่วงของโลกที่กระทำต่อมวลของวัตถุ",
+                explanation: "น้ำหนักของวัตถุจะมีหน่วยเป็น นิวตัน (N) ส่วนกรัมและกิโลกรัมเป็นหน่วยของมวล"
+            },
+            {
+                id: 3,
+                category: "ลักษณะของแรงโน้มถ่วง",
+                words: ["แรงโน้มถ่วง", "ดึงดูดวัตถุ", "เข้าสู่", "___"],
+                blankIndex: 3,
+                answer: "ศูนย์กลางโลก",
+                options: ["ศูนย์กลางโลก", "นอกโลก", "ด้านข้าง"],
+                translation: "ทำให้วัตถุต่าง ๆ มีน้ำหนักและตกลงสู่พื้นโลกเสมอ",
+                explanation: "แรงโน้มถ่วงของโลกจะดึงดูดวัตถุเข้าสู่ศูนย์กลางของโลก"
+            },
+            {
+                id: 4,
+                category: "เครื่องมือวัดน้ำหนัก",
+                words: ["เรา", "วัดน้ำหนัก", "ของวัตถุ", "โดยใช้", "___"],
+                blankIndex: 4,
+                answer: "เครื่องชั่งสปริง",
+                options: ["เครื่องชั่งสปริง", "ไม้บรรทัด", "เข็มทิศ"],
+                translation: "อาศัยหลักการยืดออกของสปริงตามแรงที่โลกกระทำต่อมวลของวัตถุ",
+                explanation: "เราสามารถวัดน้ำหนักของวัตถุที่เกิดจากแรงโน้มถ่วงของโลกได้โดยใช้ เครื่องชั่งสปริง"
+            },
+            {
+                id: 5,
+                category: "มวลและการเคลื่อนที่",
+                words: ["วัตถุ", "ที่มีมวลมาก", "จะเคลื่อนที่ได้", "___", "วัตถุที่มีมวลน้อย"],
+                blankIndex: 3,
+                answer: "ยากกว่า",
+                options: ["ยากกว่า", "ง่ายกว่า", "เท่ากัน"],
+                translation: "วัตถุที่มีเนื้อสารมากจะเปลี่ยนแปลงการเคลื่อนที่หรือเคลื่อนย้ายได้ยาก",
+                explanation: "วัตถุที่มีมวลมากจะเคลื่อนที่ได้ ยากกว่า วัตถุที่มีมวลน้อย"
+            },
+            {
+                id: 6,
+                category: "ประเภทของแรง",
+                words: ["แรงโน้มถ่วง", "ของโลก", "จัดเป็น", "___"],
+                blankIndex: 3,
+                answer: "แรงไม่สัมผัส",
+                options: ["แรงไม่สัมผัส", "แรงสัมผัส", "แรงเสียดทาน"],
+                translation: "เช่น โลกดึงดูดดวงจันทร์และดาวเทียมโดยไม่ต้องสัมผัสกับผิวโลก",
+                explanation: "แรงโน้มถ่วงของโลกไม่ต้องสัมผัสกับวัตถุโดยตรง จึงจัดเป็น แรงไม่สัมผัส (field force)"
+            },
+            {
+                id: 7,
+                category: "เปรียบเทียบโลกกับดวงจันทร์",
+                words: ["ชั่งน้ำหนัก", "บนดวงจันทร์", "จะ", "___", "บนโลก"],
+                blankIndex: 3,
+                answer: "น้อยกว่า",
+                options: ["น้อยกว่า", "มากกว่า", "เท่ากับ"],
+                translation: "ดวงจันทร์มีมวลน้อยกว่าโลก แรงดึงดูดจึงน้อยกว่าโลก 6 เท่า",
+                explanation: "แรงดึงดูดของดวงจันทร์น้อยกว่าโลก 6 เท่า น้ำหนักที่ชั่งบนดวงจันทร์จึง น้อยกว่า บนโลก"
+            },
+            {
+                id: 8,
+                category: "ระยะห่างจากศูนย์กลางโลก",
+                words: ["ยิ่งอยู่ห่าง", "จากศูนย์กลางโลก", "แรงโน้มถ่วง", "จะยิ่ง", "___"],
+                blankIndex: 4,
+                answer: "ลดน้อยลง",
+                options: ["ลดน้อยลง", "เพิ่มมากขึ้น", "เท่าเดิม"],
+                translation: "ค่าแรงโน้มถ่วงในแต่ละตำแหน่งขึ้นอยู่กับระยะห่างจากจุดศูนย์กลางโลก",
+                explanation: "หากวัตถุอยู่ห่างจากจุดศูนย์กลางของโลกมากขึ้นเท่าใด แรงโน้มถ่วงจะยิ่ง ลดน้อยลง"
+            }
+        ];
+
+        // Mode B: Key Science Vocabulary Letter Completion
+        let questionsDataLetter = [
+            {
+                id: 1,
+                category: "คำศัพท์: หน่วยของน้ำหนัก",
+                words: ["หน่วยของน้ำหนัก", "คือ"],
+                targetPrefix: "นิว",
+                targetSuffix: "ัน",
+                fullTargetWord: "นิวตัน",
+                answer: "ต",
+                options: ["ต", "ด", "ป"],
+                translation: "สัญลักษณ์ย่อคือตัว N (Newton)",
+                explanation: "คำว่า นิวตัน สะกดด้วย น-ิ-ว-ต-ั-น"
+            },
+            {
+                id: 2,
+                category: "คำศัพท์: ปริมาณเนื้อสาร",
+                words: ["ปริมาณ", "เนื้อสาร", "คือ"],
+                targetPrefix: "ม",
+                targetSuffix: "ล",
+                fullTargetWord: "มวล",
+                answer: "ว",
+                options: ["ว", "อ", "ย"],
+                translation: "มีหน่วยเป็นกรัม (g) หรือกิโลกรัม (kg)",
+                explanation: "คำว่า มวล สะกดด้วย ม-ว-ล"
+            },
+            {
+                id: 3,
+                category: "คำศัพท์: เครื่องมือวัด",
+                words: ["เครื่องชั่ง"],
+                targetPrefix: "ส",
+                targetSuffix: "ริง",
+                fullTargetWord: "สปริง",
+                answer: "ป",
+                options: ["ป", "บ", "พ"],
+                translation: "ใช้สำหรับวัดน้ำหนักของวัตถุ",
+                explanation: "คำว่า สปริง สะกดด้วย ส-ป-ร-ิ-ง"
+            },
+            {
+                id: 4,
+                category: "คำศัพท์: วัตถุท้องฟ้า",
+                words: ["แรงดึงดูด", "น้อยกว่าโลก", "6 เท่า", "คือ"],
+                targetPrefix: "ดวง",
+                targetSuffix: "ันทร์",
+                fullTargetWord: "ดวงจันทร์",
+                answer: "จ",
+                options: ["จ", "ช", "ฉ"],
+                translation: "โลกดึงดูดดวงจันทร์ไว้ด้วยแรงไม่สัมผัส",
+                explanation: "คำว่า ดวงจันทร์ สะกดด้วย ด-ว-ง-จ-ั-น-ท-ร-์"
+            },
+            {
+                id: 5,
+                category: "คำศัพท์: ทิศทางแรงดึงดูด",
+                words: ["ดึงดูดเข้าสู่"],
+                targetPrefix: "ศูนย์",
+                targetSuffix: "ลาง",
+                fullTargetWord: "ศูนย์กลาง",
+                answer: "ก",
+                options: ["ก", "ค", "ข"],
+                translation: "แรงโน้มถ่วงดึงดูดวัตถุเข้าสู่ศูนย์กลางของโลก",
+                explanation: "คำว่า ศูนย์กลาง สะกดด้วย ศ-ู-น-ย-์-ก-ล-า-ง"
+            },
+            {
+                id: 6,
+                category: "คำศัพท์: หน่วยของมวล",
+                words: ["หน่วยของมวล", "คือ"],
+                targetPrefix: "กิโล",
+                targetSuffix: "รัม",
+                fullTargetWord: "กิโลกรัม",
+                answer: "ก",
+                options: ["ก", "ค", "ต"],
+                translation: "อักษรย่อคือ kg",
+                explanation: "คำว่า กิโลกรัม สะกดด้วย ก-ิ-โ-ล-ก-ร-ั-ม"
+            }
+        ];
+
+        function applyInjectedQuestions(injected) {
+            let list = [];
+            if (Array.isArray(injected)) list = injected;
+            else if (injected && Array.isArray(injected.questions)) list = injected.questions;
+            else if (injected && Array.isArray(injected.items)) list = injected.items;
+            else if (injected && typeof injected === 'object') list = [injected];
+            if (list.length === 0) return;
+
+            try {
+                const customWords = list.map((item, idx) => {
+                    let sentence = (item.payload && item.payload.sentence_with_blank)
+                        ? item.payload.sentence_with_blank
+                        : (item.prompt || item.title || item.question || `ข้อที่ ${idx + 1}`);
+
+                    let rawChoices = [];
+                    if (item.payload && Array.isArray(item.payload.word_bank)) {
+                        rawChoices = item.payload.word_bank.map((w, wIdx) => ({ id: `wb_${wIdx}`, text: String(w) }));
+                    } else if (item.payload && Array.isArray(item.payload.choices)) {
+                        rawChoices = item.payload.choices;
+                    } else if (item.choices && Array.isArray(item.choices)) {
+                        rawChoices = item.choices;
+                    }
+
+                    let answer = '';
+                    if (item.payload && Array.isArray(item.payload.accepted_answers) && item.payload.accepted_answers.length > 0) {
+                        answer = String(item.payload.accepted_answers[0]);
+                    } else if (item.payload && item.payload.answer && Array.isArray(item.payload.answer.choice_ids)) {
+                        const ansId = item.payload.answer.choice_ids[0];
+                        const matched = rawChoices.find(c => c.id === ansId);
+                        answer = matched ? matched.text : (rawChoices[0]?.text || '');
+                    } else {
+                        const correctChoice = rawChoices.find(c => c.isCorrect || c.id === item.correctChoiceId) || rawChoices[0];
+                        answer = correctChoice?.text || correctChoice?.label || String(correctChoice || '');
+                    }
+
+                    const options = rawChoices.map(c => c.text || c.label || String(c)).filter(Boolean);
+                    if (!options.includes(answer) && answer) {
+                        options.unshift(answer);
+                    }
+                    while (options.length < 3) {
+                        options.push(options.length === 1 ? 'ตัวเลือก 2' : 'ตัวเลือก 3');
+                    }
+                    const threeOptions = [options[0], options[1], options[2]].sort(() => Math.random() - 0.5);
+
+                    let tokens = [];
+                    let bIdx = 0;
+                    if (sentence.includes('___')) {
+                        const parts = sentence.split('___');
+                        tokens = [parts[0].trim(), '___', parts[1] ? parts[1].trim() : ''].filter(Boolean);
+                        bIdx = tokens.indexOf('___');
+                    } else {
+                        tokens = [sentence, '___'];
+                        bIdx = 1;
+                    }
+
+                    return {
+                        id: idx + 1,
+                        category: "แรงโน้มถ่วงของโลก",
+                        words: tokens,
+                        blankIndex: bIdx,
+                        answer: answer,
+                        options: threeOptions,
+                        translation: item.translation || "",
+                        explanation: (item.payload && item.payload.explanation) || item.explanation || `คำตอบที่ถูกต้องคือ "${answer}"`
+                    };
+                });
+
+                if (customWords.length > 0) {
+                    questionsDataWord = customWords;
+                    currentQuestionIndex = 0;
+                    if (typeof loadQuestion === 'function') {
+                        loadQuestion();
+                    }
+                }
+            } catch (e) {
+                console.warn('[applyInjectedQuestions error]', e);
+            }
+        }
+
+        if (window.INJECTED_QUESTIONS) {
+            applyInjectedQuestions(window.INJECTED_QUESTIONS);
+        }
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'INJECT_QUESTIONS' && e.data.questions) {
+                applyInjectedQuestions(e.data.questions);
+            }
+        });
+        window.parent?.postMessage({ type: 'TEMPLATE_READY' }, '*');
+
+        let currentQuestionIndex = 0;
+        let selectedOption = null;
+        let isCorrectLocked = false;
+        let gameMode = 'word';
+        let synth = window.speechSynthesis;
+        let highlightTimers = [];
+
+        window.onload = function() {
+            setupKeyboardListeners();
+        };
+
+        function startGameFromIntro() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            loadQuestion();
+        }
+
+        function clearHighlightTimers() {
+            highlightTimers.forEach(t => clearTimeout(t));
+            highlightTimers = [];
+            document.querySelectorAll('.reading-word').forEach(el => {
+                el.classList.remove('active-highlight');
+            });
+        }
+
+        function loadQuestion() {
+            clearHighlightTimers();
+            selectedOption = null;
+            isCorrectLocked = false;
+
+            const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+            const q = dataset[currentQuestionIndex];
+
+            // Update Progress Dots & Text
+            document.getElementById('progress-text').innerText = `${currentQuestionIndex + 1} / ${dataset.length}`;
+            const dotsContainer = document.getElementById('progress-dots');
+            dotsContainer.innerHTML = '';
+            dataset.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = idx <= currentQuestionIndex
+                    ? 'w-3 h-3 rounded-full bg-amber-400 transition-all'
+                    : 'w-2.5 h-2.5 rounded-full bg-slate-200 transition-all';
+                dotsContainer.appendChild(dot);
+            });
+
+            // Update Category & Translation
+            const badgeEl = document.getElementById('category-badge');
+            if (badgeEl) badgeEl.innerText = q.category || 'แรงโน้มถ่วงของโลก';
+            const transEl = document.getElementById('thai-translation');
+            if (transEl) transEl.innerText = q.translation ? q.translation : '';
+
+            // Reset Feedback & Hint
+            document.getElementById('feedback-area').innerHTML = '';
+            const hintEl = document.getElementById('gentle-hint');
+            hintEl.classList.add('opacity-0');
+            hintEl.innerText = '';
+            document.getElementById('unjai-bubble').innerText = 'แตะป้ายคำตอบด้านล่างได้เลยนะจ๊ะ';
+
+            // Render Sentence
+            renderSentence(q);
+
+            // Render 3 Large Rectangular Word Tiles
+            renderWordTiles(q);
+
+            // Auto read-along gently
+            setTimeout(() => readSentenceWordByWord(), 350);
+        }
+
+        function renderSentence(q) {
+            const container = document.getElementById('sentence-display');
+            container.innerHTML = '';
+
+            if (gameMode === 'word') {
+                q.words.forEach((word, idx) => {
+                    if (idx === q.blankIndex) {
+                        const slot = document.createElement('div');
+                        slot.id = 'blank-slot';
+                        slot.dataset.wordIndex = idx;
+                        slot.className = 'reading-word blank-slot-dotted min-w-[160px] md:min-w-[200px] h-[68px] md:h-[76px] px-6 inline-flex items-center justify-center text-slate-400 cursor-pointer';
+                        slot.innerHTML = selectedOption
+                            ? `<span class="text-sky-700 font-extrabold">${selectedOption}</span>`
+                            : `<span class="text-amber-400/70 text-2xl">• • •</span>`;
+                        slot.onclick = () => {
+                            if (selectedOption && !isCorrectLocked) {
+                                undoSelection();
+                            }
+                        };
+                        container.appendChild(slot);
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'reading-word';
+                        span.dataset.wordIndex = idx;
+                        span.innerText = word;
+                        container.appendChild(span);
+                    }
+                });
+            } else {
+                // Mode B: Words + Target Word with Dotted Letter Slot
+                q.words.forEach((word, idx) => {
+                    const span = document.createElement('span');
+                    span.className = 'reading-word';
+                    span.dataset.wordIndex = idx;
+                    span.innerText = word;
+                    container.appendChild(span);
+                });
+
+                const targetGroup = document.createElement('div');
+                targetGroup.className = 'reading-word inline-flex items-center gap-1';
+                targetGroup.dataset.wordIndex = q.words.length;
+
+                if (q.targetPrefix) {
+                    const pre = document.createElement('span');
+                    pre.innerText = q.targetPrefix;
+                    targetGroup.appendChild(pre);
+                }
+
+                const slot = document.createElement('div');
+                slot.id = 'blank-slot';
+                slot.className = 'blank-slot-dotted min-w-[64px] h-[68px] px-3 inline-flex items-center justify-center text-amber-500 cursor-pointer';
+                slot.innerHTML = selectedOption
+                    ? `<span class="text-sky-700 font-extrabold">${selectedOption}</span>`
+                    : `<span class="text-amber-400/70 text-xl">•</span>`;
+                slot.onclick = () => {
+                    if (selectedOption && !isCorrectLocked) {
+                        undoSelection();
+                    }
+                };
+                targetGroup.appendChild(slot);
+
+                if (q.targetSuffix) {
+                    const suf = document.createElement('span');
+                    suf.innerText = q.targetSuffix;
+                    targetGroup.appendChild(suf);
+                }
+
+                container.appendChild(targetGroup);
+            }
+        }
+
+        function renderWordTiles(q) {
+            const row = document.getElementById('word-tiles-row');
+            row.innerHTML = '';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'word-tile rounded-2xl py-6 px-5 text-2xl md:text-3xl font-bold text-slate-800 flex items-center justify-center cursor-pointer focus:outline-none text-center';
+                btn.innerText = opt;
+
+                if (selectedOption === opt) {
+                    btn.classList.add('selected-tile');
+                }
+                if (isCorrectLocked) {
+                    btn.disabled = true;
+                }
+
+                btn.onclick = () => handleTileTap(opt);
+                row.appendChild(btn);
+            });
+        }
+
+        function handleTileTap(option) {
+            if (isCorrectLocked) return;
+
+            const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+            const q = dataset[currentQuestionIndex];
+            selectedOption = option;
+
+            // Update blank slot visually
+            const slot = document.getElementById('blank-slot');
+            if (slot) {
+                slot.classList.remove('blank-slot-dotted');
+                slot.classList.add('blank-slot-filled');
+                slot.innerHTML = `<span class="text-sky-700 font-extrabold">${option}</span>`;
+            }
+
+            renderWordTiles(q);
+
+            // Evaluate Answer Automatically on Tap
+            if (option === q.answer) {
+                isCorrectLocked = true;
+                if (slot) {
+                    slot.classList.remove('blank-slot-filled');
+                    slot.classList.add('blank-slot-correct');
+                    slot.innerHTML = `<span class="text-emerald-700 font-extrabold">${option}</span>`;
+                }
+
+                // Show Science Explanation gently as reinforcement
+                const hintEl = document.getElementById('gentle-hint');
+                hintEl.innerText = `✨ ${q.explanation}`;
+                hintEl.classList.remove('opacity-0');
+
+                // Show Soft Green Check Icon in Feedback Area
+                const feedbackArea = document.getElementById('feedback-area');
+                feedbackArea.innerHTML = `
+                    <div class="animate-pop-in flex items-center gap-2.5 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 px-4 py-2 rounded-2xl shadow-sm">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg">ถูกต้อง!</span>
+                    </div>
+                `;
+
+                document.getElementById('unjai-bubble').innerText = 'เก่งมากเลยจ้า!';
+                readCompletedSentenceAndAdvance(q, option);
+            } else {
+                // Gentle feedback without harsh alarms
+                const hintEl = document.getElementById('gentle-hint');
+                const explanationText = q.explanation || 'ลองทบทวนเนื้อหาเรื่องแรงโน้มถ่วงดูอีกทีนะ';
+                hintEl.innerText = `ลองคิดดูใหม่นะ: ${explanationText}`;
+                hintEl.classList.remove('opacity-0');
+                document.getElementById('unjai-bubble').innerText = 'ลองทบทวนดูอีกทีนะจ๊ะ';
+
+                speakText(`${option}... ลองคิดดูใหม่นะ`, 'th-TH');
+
+                // Gently reset the tile into the blank slot after a short pause so the child can try again
+                setTimeout(() => {
+                    if (!isCorrectLocked && selectedOption === option) {
+                        undoSelection(false);
+                    }
+                }, 2600);
+            }
+        }
+
+        function undoSelection(speak = true) {
+            if (isCorrectLocked) return;
+            selectedOption = null;
+
+            const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+            const q = dataset[currentQuestionIndex];
+
+            const slot = document.getElementById('blank-slot');
+            if (slot) {
+                slot.className = gameMode === 'word'
+                    ? 'reading-word blank-slot-dotted min-w-[160px] md:min-w-[200px] h-[68px] md:h-[76px] px-6 inline-flex items-center justify-center text-slate-400 cursor-pointer'
+                    : 'blank-slot-dotted min-w-[64px] h-[68px] px-3 inline-flex items-center justify-center text-amber-500 cursor-pointer';
+                slot.innerHTML = gameMode === 'word'
+                    ? `<span class="text-amber-400/70 text-2xl">• • •</span>`
+                    : `<span class="text-amber-400/70 text-xl">•</span>`;
+            }
+
+            renderWordTiles(q);
+            if (speak) {
+                readSentenceWordByWord();
+            }
+        }
+
+        function handleUndo() {
+            if (selectedOption && !isCorrectLocked) {
+                undoSelection(true);
+            } else if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            } else {
+                readSentenceWordByWord();
+            }
+        }
+
+        function readSentenceWordByWord() {
+            clearHighlightTimers();
+            const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+            const q = dataset[currentQuestionIndex];
+            const wordElements = document.querySelectorAll('#sentence-display .reading-word');
+
+            let spokenParts = [];
+            if (gameMode === 'word') {
+                spokenParts = q.words.map((w, idx) => {
+                    if (idx === q.blankIndex) {
+                        return selectedOption ? selectedOption : 'อะไรเอ่ย';
+                    }
+                    return w;
+                });
+            } else {
+                spokenParts = [...q.words, selectedOption ? q.fullTargetWord : 'คำอะไรเอ่ย'];
+            }
+
+            // Highlight each word sequentially with a moving highlight bar
+            const stepDuration = 620; // ms per word for comfortable dyslexia-friendly pacing
+            wordElements.forEach((el, idx) => {
+                const startTimer = setTimeout(() => {
+                    wordElements.forEach(item => item.classList.remove('active-highlight'));
+                    el.classList.add('active-highlight');
+                }, idx * stepDuration);
+                highlightTimers.push(startTimer);
+            });
+
+            const endTimer = setTimeout(() => {
+                wordElements.forEach(item => item.classList.remove('active-highlight'));
+            }, wordElements.length * stepDuration + 300);
+            highlightTimers.push(endTimer);
+
+            speakText(spokenParts.join(' '), 'th-TH');
+        }
+
+        function readCompletedSentenceAndAdvance(q, chosenOption) {
+            clearHighlightTimers();
+            const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+            const wordElements = document.querySelectorAll('#sentence-display .reading-word');
+
+            let fullSentence = '';
+            if (gameMode === 'word') {
+                fullSentence = q.words.map((w, idx) => idx === q.blankIndex ? q.answer : w).join(' ');
+            } else {
+                fullSentence = [...q.words, q.fullTargetWord].join(' ');
+            }
+
+            const stepDuration = 520;
+            const introDelay = 1000;
+            wordElements.forEach((el, idx) => {
+                const t = setTimeout(() => {
+                    wordElements.forEach(item => item.classList.remove('active-highlight'));
+                    el.classList.add('active-highlight');
+                }, introDelay + (idx * stepDuration));
+                highlightTimers.push(t);
+            });
+
+            speakText(`ถูกต้องค่ะ ${fullSentence}`, 'th-TH');
+
+            const nextTimer = setTimeout(() => {
+                clearHighlightTimers();
+                currentQuestionIndex++;
+                if (currentQuestionIndex < dataset.length) {
+                    loadQuestion();
+                } else {
+                    document.getElementById('complete-modal').classList.remove('hidden');
+                    speakText('เก่งมากเลย ทบทวนเรื่องแรงโน้มถ่วงของโลกครบทุกข้อแล้วจ้า', 'th-TH');
+                }
+            }, Math.max(3200, introDelay + (wordElements.length * stepDuration) + 1100));
+            highlightTimers.push(nextTimer);
+        }
+
+        function speakText(text, forceLang = 'th-TH') {
+            if ('speechSynthesis' in window) {
+                synth.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = forceLang;
+                utterance.rate = 0.85; // Calm, clear reading speed
+                synth.speak(utterance);
+            }
+        }
+
+        function setupKeyboardListeners() {
+            window.addEventListener('keydown', (e) => {
+                if (!document.getElementById('intro-screen').classList.contains('hidden')) return;
+                if (!document.getElementById('help-modal').classList.contains('hidden')) return;
+                if (!document.getElementById('complete-modal').classList.contains('hidden')) return;
+
+                const dataset = gameMode === 'word' ? questionsDataWord : questionsDataLetter;
+                const q = dataset[currentQuestionIndex];
+                if (e.key >= '1' && e.key <= '3') {
+                    const idx = parseInt(e.key, 10) - 1;
+                    if (idx < q.options.length) {
+                        handleTileTap(q.options[idx]);
+                    }
+                } else if (e.key === 'Backspace' || e.key === 'Escape') {
+                    handleUndo();
+                } else if (e.key === ' ') {
+                    e.preventDefault();
+                    readSentenceWordByWord();
+                }
+            });
+        }
+
+        function openHelpModal() {
+            document.getElementById('help-modal').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').classList.add('hidden');
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            document.getElementById('complete-modal').classList.add('hidden');
+            loadQuestion();
+        }
+
+        function restBreak() {
+            document.getElementById('complete-modal').classList.add('hidden');
+            document.getElementById('unjai-bubble').innerText = 'พักผ่อนตามสบายนะจ๊ะ';
+            speakText('พักผ่อนตามสบายเลยนะ ไว้มาทบทวนวิทยาศาสตร์ด้วยกันใหม่จ้า', 'th-TH');
+        }
+
+        function switchGameMode(mode) {
+            gameMode = mode;
+            currentQuestionIndex = 0;
+            if (mode === 'word') {
+                document.getElementById('mode-btn-word').className = 'px-4 py-2 bg-amber-500 text-white font-bold rounded-xl text-sm transition';
+                document.getElementById('mode-btn-letter').className = 'px-4 py-2 text-slate-600 hover:bg-slate-100 font-bold rounded-xl text-sm transition';
+            } else {
+                document.getElementById('mode-btn-letter').className = 'px-4 py-2 bg-amber-500 text-white font-bold rounded-xl text-sm transition';
+                document.getElementById('mode-btn-word').className = 'px-4 py-2 text-slate-600 hover:bg-slate-100 font-bold rounded-xl text-sm transition';
+            }
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>

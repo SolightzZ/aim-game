@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>AIM PLAY — คลังเกมการเรียนรู้</title>
+
+      <!-- Typography: Fredoka & Prompt -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Prompt:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+      <!-- Tailwind CSS -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script>
+         tailwind.config = {
+            theme: {
+               extend: {
+                  fontFamily: {
+                     prompt: ['Prompt', 'sans-serif'],
+                     fredoka: ['Fredoka', 'Prompt', 'sans-serif'],
+                  },
+                  colors: {
+                     canvas: '#F6F8FC',
+                     surface: '#FFFFFF',
+                     ink: '#1E293B',
+                  },
+                  boxShadow: {
+                     'pill': '0 6px 20px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04)',
+                     'clay': '0 8px 0 #E2E8F0, 0 16px 28px -6px rgba(15, 23, 42, 0.08)',
+                     'clay-hover': '0 12px 0 #CBD5E1, 0 24px 36px -8px rgba(15, 23, 42, 0.14)',
+                     'btn-pop': '0 4px 0 rgba(0, 0, 0, 0.18)',
+                  }
+               }
+            }
+         }
+      </script>
+
+      <style>
+         * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+         }
+
+         html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
+            background-color: #F4F7FB;
+            color: #1E293B;
+            overflow: hidden;
+            user-select: none;
+         }
+
+         /* Sunlit Playful Dot & Wave Canvas */
+         .bg-playland {
+            background-color: #F4F7FB;
+            background-image:
+               radial-gradient(circle at 12% 15%, rgba(251, 191, 36, 0.14) 0%, transparent 32%),
+               radial-gradient(circle at 88% 12%, rgba(56, 189, 248, 0.14) 0%, transparent 35%),
+               radial-gradient(circle at 82% 88%, rgba(244, 114, 182, 0.12) 0%, transparent 35%),
+               radial-gradient(circle at 18% 85%, rgba(52, 211, 153, 0.12) 0%, transparent 35%),
+               radial-gradient(#CBD5E1 1.3px, transparent 1.3px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 26px 26px;
+         }
+
+         /* High Contrast Accessibility Mode */
+         body.high-contrast .bg-playland {
+            background: #09090B !important;
+         }
+         body.high-contrast .floating-pill,
+         body.high-contrast .game-card,
+         body.high-contrast .modal-surface {
+            background-color: #121215 !important;
+            border-color: #FACC15 !important;
+            color: #FACC15 !important;
+            box-shadow: none !important;
+         }
+         body.high-contrast .card-title {
+            color: #FFFFFF !important;
+         }
+
+         /* Tactile Button & Card Physics */
+         .tactile-btn {
+            transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.14s ease, background-color 0.15s ease;
+         }
+         .tactile-btn:hover {
+            transform: translateY(-2px);
+         }
+         .tactile-btn:active {
+            transform: translateY(2px) scale(0.97);
+         }
+
+         .game-card {
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, border-color 0.2s ease;
+         }
+         .game-card:hover {
+            transform: translateY(-5px);
+         }
+         .game-card:hover .illus-group {
+            transform: scale(1.05) translateY(-2px);
+         }
+         .illus-group {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center center;
+         }
+
+         /* Subtle Ambient Float */
+         @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+         }
+         .animate-float-slow {
+            animation: floatSlow 3.6s ease-in-out infinite;
+         }
+
+         @keyframes diceSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            35% { transform: rotate(-25deg) scale(1.2); }
+            75% { transform: rotate(385deg) scale(1.15); }
+            100% { transform: rotate(360deg) scale(1); }
+         }
+         .dice-rolling {
+            animation: diceSpin 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         /* Clean Custom Scrollbar for Inner Grid */
+         .grid-scroll::-webkit-scrollbar {
+            width: 6px;
+         }
+         .grid-scroll::-webkit-scrollbar-track {
+            background: transparent;
+         }
+         .grid-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.45);
+            border-radius: 999px;
+         }
+         .grid-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.7);
+         }
+      </style>
+   </head>
+
+   <body class="bg-playland flex flex-col h-screen w-screen overflow-hidden">
+
+      <!-- Decorative Background Clouds (Pure Light Ambient Art) -->
+      <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-65">
+         <svg class="absolute -top-6 left-[6%] w-44 h-24 text-white/80 animate-float-slow" viewBox="0 0 200 100" fill="currentColor">
+            <path d="M45 80h110a30 30 0 0 0 5-59.5A42 42 0 0 0 80 18a35 35 0 0 0-35 32A25 25 0 0 0 45 80z"/>
+         </svg>
+         <svg class="absolute top-12 right-[8%] w-52 h-28 text-white/75 animate-float-slow" style="animation-delay: 1.4s" viewBox="0 0 200 100" fill="currentColor">
+            <path d="M45 80h110a30 30 0 0 0 5-59.5A42 42 0 0 0 80 18a35 35 0 0 0-35 32A25 25 0 0 0 45 80z"/>
+         </svg>
+      </div>
+
+      <!-- FULLSCREEN FLOATING HUD (No Navbar, Icon-First) -->
+      <div class="relative z-30 w-full max-w-[1440px] mx-auto px-4 sm:px-6 pt-3.5 sm:pt-5 pb-2 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+
+         <!-- Left: Brand Emblem + Trophy Counter Pill -->
+         <div class="flex items-center gap-2.5">
+            <button onclick="resetAllFilters()" title="AIM PLAY"
+               class="floating-pill tactile-btn h-12 px-3.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center gap-2.5">
+               <!-- Custom Playful Brand Logo SVG -->
+               <svg class="w-7 h-7 shrink-0" viewBox="0 0 36 36" fill="none">
+                  <rect width="36" height="36" rx="11" fill="url(#brandGrad)"/>
+                  <path d="M11 22.5C11 18.9 13.9 16 17.5 16h1c3.6 0 6.5 2.9 6.5 6.5a3.5 3.5 0 0 1-5.8 2.6l-1.2-1.1-1.2 1.1A3.5 3.5 0 0 1 11 22.5z" fill="#FFF"/>
+                  <circle cx="15" cy="20.5" r="1.3" fill="#4F46E5"/>
+                  <circle cx="21" cy="20.5" r="1.3" fill="#EC4899"/>
+                  <path d="M18 9.5l1.1 2.2 2.4.4-1.7 1.7.4 2.4-2.2-1.1-2.2 1.1.4-2.4-1.7-1.7 2.4-.4L18 9.5z" fill="#FDE047"/>
+                  <defs>
+                     <linearGradient id="brandGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="0.55" stop-color="#EC4899"/>
+                        <stop offset="1" stop-color="#F59E0B"/>
+                     </linearGradient>
+                  </defs>
+               </svg>
+               <span class="font-fredoka font-bold text-lg tracking-tight text-slate-800 hidden sm:inline">AIM PLAY</span>
+            </button>
+
+            <!-- Played Trophy Pill -->
+            <div class="floating-pill h-12 px-3.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-amber-200/90 shadow-pill flex items-center gap-2" title="ความคืบหน้า">
+               <svg class="w-6 h-6 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" fill="#FBBF24" stroke="#D97706" stroke-width="1.8"/>
+                  <path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5v1A3.5 3.5 0 0 0 6.5 12H7M17 6h2.5A1.5 1.5 0 0 1 21 7.5v1a3.5 3.5 0 0 1-3.5 3.5H17" stroke="#D97706" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M12 15v4M8.5 19h7" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
+               </svg>
+               <span id="playedCountText" class="font-fredoka font-bold text-sm sm:text-base text-amber-700">0/12</span>
+            </div>
+         </div>
+
+         <!-- Center: Minimalist Icon Category Dock -->
+         <div class="floating-pill h-12 p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center gap-1 order-3 sm:order-2 mx-auto sm:mx-0">
+            <!-- All Games -->
+            <button onclick="setCategoryFilter('all')" id="tab-all" title="ทั้งหมด"
+               class="cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all bg-slate-900 text-white shadow-sm">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>
+               </svg>
+               <span>12</span>
+            </button>
+
+            <!-- Series A: Arcade & Skill -->
+            <button onclick="setCategoryFilter('A')" id="tab-A" title="ชุด A: อาร์เคด"
+               class="cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all text-slate-600 hover:bg-pink-50 hover:text-pink-600">
+               <svg class="w-4 h-4 text-pink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/>
+               </svg>
+               <span>A</span>
+            </button>
+
+            <!-- Series B: Science & English -->
+            <button onclick="setCategoryFilter('B')" id="tab-B" title="ชุด B: วิทย์และภาษา"
+               class="cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all text-slate-600 hover:bg-sky-50 hover:text-sky-600">
+               <svg class="w-4 h-4 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"/>
+               </svg>
+               <span>B</span>
+            </button>
+
+            <!-- Series C: Health & Phonics -->
+            <button onclick="setCategoryFilter('C')" id="tab-C" title="ชุด C: สุขภาพ"
+               class="cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all text-slate-600 hover:bg-emerald-50 hover:text-emerald-600">
+               <svg class="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/>
+               </svg>
+               <span>C</span>
+            </button>
+
+            <!-- Favorite Filter Toggle -->
+            <button onclick="toggleFavoriteFilter()" id="tab-fav" title="เกมโปรด"
+               class="cat-tab h-full px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all text-slate-500 hover:bg-amber-50 hover:text-amber-500">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
+               </svg>
+            </button>
+         </div>
+
+         <!-- Right: Expandable Search + Random Dice + Settings -->
+         <div class="flex items-center gap-2 order-2 sm:order-3">
+            <!-- Expandable Compact Search Pill -->
+            <div id="searchPill" class="floating-pill h-12 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center px-3 transition-all w-12 focus-within:w-44 sm:focus-within:w-56 overflow-hidden">
+               <button onclick="focusSearch()" class="shrink-0 text-slate-600 hover:text-indigo-600 flex items-center justify-center" title="ค้นหา">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                     <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+                  </svg>
+               </button>
+               <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหา..."
+                  class="w-full bg-transparent pl-2.5 pr-1 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" />
+               <button onclick="clearSearch()" id="clearSearchBtn" class="hidden text-slate-400 hover:text-slate-700 shrink-0">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                     <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+               </button>
+            </div>
+
+            <!-- Random Dice Button -->
+            <button onclick="launchRandomGame()" title="สุ่มเกม"
+               class="tactile-btn h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-pill border-2 border-amber-300 flex items-center justify-center">
+               <svg id="diceIcon" class="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3" width="18" height="18" rx="5" fill="#FFF" fill-opacity="0.22" stroke="#FFF" stroke-width="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5" fill="#FFF"/>
+                  <circle cx="15.5" cy="8.5" r="1.5" fill="#FFF"/>
+                  <circle cx="12" cy="12" r="1.5" fill="#FFF"/>
+                  <circle cx="8.5" cy="15.5" r="1.5" fill="#FFF"/>
+                  <circle cx="15.5" cy="15.5" r="1.5" fill="#FFF"/>
+               </svg>
+            </button>
+
+            <!-- Settings Gear Icon -->
+            <button onclick="openModal('settingsModal')" title="ตั้งค่า"
+               class="floating-pill tactile-btn h-12 w-12 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill text-slate-700 hover:text-indigo-600 flex items-center justify-center">
+               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+               </svg>
+            </button>
+         </div>
+      </div>
+
+      <!-- FULLSCREEN ILLUSTRATED GAME STAGE -->
+      <main class="relative z-10 flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 pb-5 pt-1 overflow-y-auto grid-scroll flex flex-col">
+
+         <!-- Game Grid -->
+         <div id="gameGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 my-auto py-1">
+            <!-- Populated dynamically with illustrated cards -->
+         </div>
+
+         <!-- Visual Empty State (Minimalist Icon + Reset Button) -->
+         <div id="emptyState" class="hidden m-auto flex flex-col items-center justify-center text-center p-8 bg-white/90 rounded-3xl border-2 border-slate-200 shadow-pill">
+            <svg class="w-20 h-20 text-slate-300 mb-3" viewBox="0 0 64 64" fill="none">
+               <circle cx="28" cy="28" r="18" stroke="currentColor" stroke-width="5"/>
+               <path d="M41 41l13 13" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+               <path d="M22 25h12M24 32h8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+            <button onclick="resetAllFilters()" class="tactile-btn px-5 py-2.5 rounded-2xl bg-indigo-600 text-white font-fredoka font-bold text-sm flex items-center gap-2 shadow-btn-pop">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+               </svg>
+               <span>แสดงทั้งหมด</span>
+            </button>
+         </div>
+
+      </main>
+
+      <!-- ================= MINIMALIST ICON MODALS ================= -->
+
+      <!-- Settings Popover Modal -->
+      <div id="settingsModal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this) closeModal('settingsModal')">
+         <div class="modal-surface bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border-2 border-slate-200 space-y-3">
+            <div class="flex items-center justify-between pb-1">
+               <div class="flex items-center gap-2 text-slate-800 font-fredoka font-bold text-base">
+                  <svg class="w-5 h-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                     <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  <span>ตั้งค่า</span>
+               </div>
+               <button onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+               </button>
+            </div>
+
+            <!-- Sound Toggle -->
+            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
+                  <svg class="w-5 h-5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                  </svg>
+                  <span>เสียงเอฟเฟกต์</span>
+               </div>
+               <input type="checkbox" id="soundToggle" checked onchange="toggleSound(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+            </label>
+
+            <!-- High Contrast Toggle -->
+            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
+                  <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                     <circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/>
+                  </svg>
+                  <span>คอนทราสต์สูง</span>
+               </div>
+               <input type="checkbox" id="contrastToggle" onchange="toggleHighContrast(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+            </label>
+
+            <!-- New Tab Toggle -->
+            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
+                  <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  <span>เปิดแท็บใหม่</span>
+               </div>
+               <input type="checkbox" id="newTabToggle" checked onchange="toggleNewTab(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+            </label>
+
+            <!-- Reset Progress Action -->
+            <button onclick="resetPlayedProgress()" class="w-full py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs flex items-center justify-center gap-1.5 transition">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+               </svg>
+               <span>ล้างสถิติการเล่น</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- Random Game Spotlight Modal -->
+      <div id="randomModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this) closeModal('randomModal')">
+         <div class="modal-surface bg-white rounded-[32px] max-w-sm w-full p-5 text-center shadow-2xl border-2 border-amber-300 space-y-4">
+            <div id="randomModalArt" class="w-full h-36 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner">
+               <!-- Populated with bespoke SVG illustration -->
+            </div>
+            <div class="space-y-1">
+               <span id="randomModalCode" class="inline-block font-fredoka font-bold text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">A01</span>
+               <h3 id="randomModalTitle" class="card-title font-prompt font-extrabold text-lg text-slate-900 leading-snug">ชื่อเกม</h3>
+            </div>
+            <div class="flex gap-2.5 pt-1">
+               <button onclick="launchRandomGame()" title="สุ่มใหม่"
+                  class="tactile-btn w-13 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                  </svg>
+               </button>
+               <a id="randomModalPlayBtn" href="#"
+                  class="tactile-btn flex-1 h-12 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-fredoka font-bold text-base shadow-btn-pop flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                  <span>เล่นเลย</span>
+               </a>
+            </div>
+         </div>
+      </div>
+
+      <!-- ================= JAVASCRIPT & BESPOKE SVG ARTWORK ENGINE ================= -->
+      <script>
+         // High-craft bespoke SVG illustrations for each of the 12 games
+         function getGameIllustrationSVG(id) {
+            switch (id) {
+               case 'A01': // Sweet Cloud Claw Machine
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FFE4E6"/><stop offset="1" stop-color="#FBCFE8"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a01)"/>
+                     <!-- Soft Pastel Clouds -->
+                     <circle cx="38" cy="115" r="34" fill="#FFF" fill-opacity="0.8"/>
+                     <circle cx="80" cy="122" r="28" fill="#FFF" fill-opacity="0.85"/>
+                     <circle cx="215" cy="118" r="36" fill="#FFF" fill-opacity="0.8"/>
+                     <circle cx="175" cy="124" r="26" fill="#FFF" fill-opacity="0.75"/>
+                     <!-- Sparkles -->
+                     <path d="M48 28l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" fill="#F43F5E" fill-opacity="0.5"/>
+                     <path d="M214 34l2.5 5.5 5.5 2.5-5.5 2.5-2.5 5.5-2.5-5.5-5.5-2.5 5.5-2.5 2.5-5.5z" fill="#FB7185"/>
+                     <circle cx="192" cy="24" r="4" fill="#FBBF24"/>
+                     <circle cx="68" cy="48" r="3.5" fill="#F472B6"/>
+                     <!-- Crane Rod & Claw -->
+                     <rect x="127" y="0" width="6" height="26" fill="#94A3B8"/>
+                     <rect x="118" y="22" width="24" height="12" rx="6" fill="#F43F5E"/>
+                     <path d="M120 32 C102 42, 102 62, 114 70" stroke="#64748B" stroke-width="4.5" stroke-linecap="round"/>
+                     <path d="M140 32 C158 42, 158 62, 146 70" stroke="#64748B" stroke-width="4.5" stroke-linecap="round"/>
+                     <!-- Cute Bear Plushie -->
+                     <circle cx="114" cy="54" r="9" fill="#F59E0B"/>
+                     <circle cx="146" cy="54" r="9" fill="#F59E0B"/>
+                     <circle cx="114" cy="54" r="4.5" fill="#FDE68A"/>
+                     <circle cx="146" cy="54" r="4.5" fill="#FDE68A"/>
+                     <ellipse cx="130" cy="96" rx="22" ry="20" fill="#D97706"/>
+                     <ellipse cx="130" cy="97" rx="13" ry="12" fill="#FDE68A"/>
+                     <circle cx="130" cy="68" r="21" fill="#F59E0B"/>
+                     <ellipse cx="130" cy="73" rx="9" ry="7" fill="#FEF3C7"/>
+                     <circle cx="123" cy="65" r="2.5" fill="#1E293B"/>
+                     <circle cx="137" cy="65" r="2.5" fill="#1E293B"/>
+                     <circle cx="130" cy="70.5" r="2.5" fill="#78350F"/>
+                     <circle cx="118" cy="71" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                     <circle cx="142" cy="71" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                  </svg>`;
+
+               case 'A02': // Capybara Bike Runner
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FEF3C7"/><stop offset="1" stop-color="#FDE68A"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a02)"/>
+                     <!-- Sunny Hills & Path -->
+                     <path d="M0 98 Q70 76 140 96 T260 88 V135 H0 Z" fill="#86EFAC"/>
+                     <rect x="0" y="108" width="260" height="27" fill="#F59E0B" fill-opacity="0.28"/>
+                     <!-- Speed Lines -->
+                     <rect x="28" y="45" width="26" height="4" rx="2" fill="#F59E0B" fill-opacity="0.5"/>
+                     <rect x="18" y="62" width="34" height="4" rx="2" fill="#F59E0B" fill-opacity="0.4"/>
+                     <!-- Bicycle Wheels -->
+                     <circle cx="96" cy="96" r="18" fill="#FFF" stroke="#334155" stroke-width="4.5"/>
+                     <circle cx="96" cy="96" r="5" fill="#F97316"/>
+                     <circle cx="166" cy="96" r="18" fill="#FFF" stroke="#334155" stroke-width="4.5"/>
+                     <circle cx="166" cy="96" r="5" fill="#F97316"/>
+                     <!-- Bike Frame -->
+                     <path d="M96 96 L124 72 L152 72 L166 96 M124 72 L132 96 L96 96" stroke="#EF4444" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                     <path d="M148 62 L156 72" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                     <!-- Capybara Body & Head -->
+                     <ellipse cx="122" cy="58" rx="18" ry="14" fill="#B45309"/>
+                     <rect x="124" y="30" width="34" height="24" rx="12" fill="#D97706"/>
+                     <ellipse cx="151" cy="43" rx="7" ry="6" fill="#92400E"/>
+                     <circle cx="143" cy="39" r="2.2" fill="#1E293B"/>
+                     <ellipse cx="129" cy="31" rx="4" ry="5" fill="#92400E"/>
+                     <!-- Yuzu Orange on Head -->
+                     <circle cx="139" cy="24" r="6.5" fill="#FB923C"/>
+                     <path d="M139 17.5 C142 14, 146 16, 143 19" fill="#22C55E"/>
+                  </svg>`;
+
+               case 'A03': // Hungry Hippo Picnic
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#F3E8FF"/><stop offset="1" stop-color="#DDD6FE"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a03)"/>
+                     <!-- Picnic Checkered Mat -->
+                     <path d="M20 135 L55 96 H205 L240 135 Z" fill="#FFF"/>
+                     <path d="M65 96 L45 135 H85 L95 96 Z M125 96 L115 135 H155 L155 96 Z M185 96 L185 135 H225 L205 96 Z" fill="#F43F5E" fill-opacity="0.25"/>
+                     <!-- Cute Purple Hippo -->
+                     <circle cx="96" cy="36" r="8" fill="#8B5CF6"/>
+                     <circle cx="144" cy="36" r="8" fill="#8B5CF6"/>
+                     <ellipse cx="120" cy="56" rx="30" ry="24" fill="#A78BFA"/>
+                     <circle cx="108" cy="48" r="3" fill="#1E293B"/>
+                     <circle cx="132" cy="48" r="3" fill="#1E293B"/>
+                     <!-- Big Happy Snout -->
+                     <ellipse cx="120" cy="70" rx="34" ry="22" fill="#C4B5FD"/>
+                     <circle cx="109" cy="63" r="3" fill="#6D28D9"/>
+                     <circle cx="131" cy="63" r="3" fill="#6D28D9"/>
+                     <path d="M104 75 Q120 88 136 75" stroke="#6D28D9" stroke-width="3.5" stroke-linecap="round"/>
+                     <!-- Watermelon Slice -->
+                     <path d="M174 86 A22 22 0 0 0 214 86 Z" fill="#10B981"/>
+                     <path d="M178 86 A18 18 0 0 0 210 86 Z" fill="#F43F5E"/>
+                     <circle cx="190" cy="92" r="1.5" fill="#1E293B"/>
+                     <circle cx="198" cy="92" r="1.5" fill="#1E293B"/>
+                  </svg>`;
+
+               case 'A04': // Tiny Laser Hand Garden Defense
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#CCFBF1"/><stop offset="1" stop-color="#A7F3D0"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a04)"/>
+                     <!-- Garden Ground -->
+                     <path d="M0 106 Q130 92 260 106 V135 H0 Z" fill="#34D399"/>
+                     <!-- Cute Hero Glove / Hand -->
+                     <rect x="44" y="54" width="34" height="32" rx="14" fill="#FFF" stroke="#0D9488" stroke-width="3.5"/>
+                     <rect x="72" y="58" width="22" height="11" rx="5.5" fill="#FFF" stroke="#0D9488" stroke-width="3.5"/>
+                     <circle cx="61" cy="70" r="6" fill="#2DD4BF"/>
+                     <!-- Laser Beam -->
+                     <line x1="96" y1="63" x2="188" y2="63" stroke="#06B6D4" stroke-width="8" stroke-linecap="round" stroke-opacity="0.35"/>
+                     <line x1="96" y1="63" x2="188" y2="63" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
+                     <!-- Target Energy Star & Smiling Sprout -->
+                     <path d="M196 42l5 13 13 5-13 5-5 13-5-13-13-5 13-5 5-13z" fill="#FBBF24"/>
+                     <path d="M135 104 V84" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                     <ellipse cx="127" cy="86" rx="9" ry="5" transform="rotate(-25 127 86)" fill="#10B981"/>
+                     <ellipse cx="143" cy="84" rx="9" ry="5" transform="rotate(25 143 84)" fill="#10B981"/>
+                  </svg>`;
+
+               case 'B01': // Gravity Memory Pair (Earth & Apple)
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#DBEAFE"/><stop offset="1" stop-color="#C7D2FE"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b01)"/>
+                     <!-- Gravity Orbit Rings -->
+                     <circle cx="130" cy="68" r="52" stroke="#6366F1" stroke-width="2" stroke-dasharray="5 5" stroke-opacity="0.45"/>
+                     <circle cx="130" cy="68" r="38" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.3"/>
+                     <!-- Cute Earth -->
+                     <circle cx="130" cy="68" r="28" fill="#3B82F6"/>
+                     <path d="M114 54 Q124 50 128 60 T116 74 Q108 66 114 54 Z" fill="#34D399"/>
+                     <path d="M138 58 Q148 56 150 68 T136 80 Q132 70 138 58 Z" fill="#34D399"/>
+                     <circle cx="122" cy="67" r="2.2" fill="#1E293B"/>
+                     <circle cx="138" cy="67" r="2.2" fill="#1E293B"/>
+                     <path d="M126 73 Q130 77 134 73" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <!-- Orbiting Red Apple -->
+                     <circle cx="182" cy="48" r="11" fill="#EF4444"/>
+                     <path d="M182 37 C184 32, 189 33, 186 38" fill="#22C55E"/>
+                     <!-- Orbiting Moon -->
+                     <circle cx="78" cy="84" r="9" fill="#FDE047"/>
+                  </svg>`;
+
+               case 'B02': // Hook & Catch Fish
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#CFFAFE"/><stop offset="1" stop-color="#BAE6FD"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b02)"/>
+                     <!-- Ocean Waves -->
+                     <path d="M0 44 Q32 34 65 44 T130 44 T195 44 T260 44 V135 H0 Z" fill="#38BDF8" fill-opacity="0.35"/>
+                     <path d="M0 64 Q45 54 90 64 T180 64 T260 64 V135 H0 Z" fill="#0284C7" fill-opacity="0.22"/>
+                     <!-- Fishing Line & Golden Hook -->
+                     <line x1="112" y1="0" x2="112" y2="54" stroke="#475569" stroke-width="2.5"/>
+                     <path d="M112 54 V68 A9 9 0 0 1 94 68 V64" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+                     <!-- Cute Colorful Fish -->
+                     <polygon points="178,86 198,72 198,100" fill="#FB923C"/>
+                     <ellipse cx="154" cy="86" rx="28" ry="18" fill="#F97316"/>
+                     <path d="M148 69 Q154 86 148 103" stroke="#FFF" stroke-width="4.5"/>
+                     <circle cx="137" cy="82" r="3" fill="#1E293B"/>
+                     <circle cx="136" cy="81" r="1" fill="#FFF"/>
+                     <!-- Water Bubbles -->
+                     <circle cx="122" cy="74" r="3.5" fill="#FFF" fill-opacity="0.8"/>
+                     <circle cx="116" cy="60" r="2.5" fill="#FFF" fill-opacity="0.7"/>
+                  </svg>`;
+
+               case 'B03': // Fill the Blank (Word Blocks & Cute Sun Buddy)
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FEF9C3"/><stop offset="1" stop-color="#FDE68A"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b03)"/>
+                     <!-- Cute Sun-Drop Mascot -->
+                     <circle cx="84" cy="68" r="25" fill="#FBBF24"/>
+                     <circle cx="77" cy="65" r="2.5" fill="#1E293B"/>
+                     <circle cx="91" cy="65" r="2.5" fill="#1E293B"/>
+                     <path d="M80 72 Q84 76 88 72" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                     <circle cx="72" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                     <circle cx="96" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                     <!-- Word Puzzle Blocks -->
+                     <rect x="122" y="34" width="38" height="34" rx="10" fill="#FFF" stroke="#F59E0B" stroke-width="3"/>
+                     <path d="M134 51 H148" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
+                     <rect x="168" y="34" width="38" height="34" rx="10" fill="#6366F1"/>
+                     <path d="M180 51 H194 M187 44 V58" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
+                     <rect x="136" y="76" width="64" height="26" rx="9" fill="#10B981"/>
+                     <path d="M152 89 H184" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
+                  </svg>`;
+
+               case 'B04': // Speedy Lane English Racer
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FAE8FF"/><stop offset="1" stop-color="#F5D0FE"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b04)"/>
+                     <!-- Perspective Track -->
+                     <path d="M62 135 L104 34 H156 L198 135 Z" fill="#334155"/>
+                     <line x1="130" y1="38" x2="130" y2="132" stroke="#FDE047" stroke-width="3" stroke-dasharray="10 8"/>
+                     <!-- Checkered Flags -->
+                     <rect x="76" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
+                     <rect x="162" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
+                     <!-- Turbo Race Car -->
+                     <rect x="102" y="74" width="56" height="32" rx="12" fill="#EC4899"/>
+                     <rect x="110" y="64" width="40" height="20" rx="8" fill="#F472B6"/>
+                     <rect x="115" y="68" width="30" height="10" rx="4" fill="#E0F2FE"/>
+                     <circle cx="113" cy="92" r="5" fill="#FDE047"/>
+                     <circle cx="147" cy="92" r="5" fill="#FDE047"/>
+                     <rect x="97" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
+                     <rect x="153" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
+                  </svg>`;
+
+               case 'C01': // Chef Cat 0% Sweet Drink
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-c01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FFEDD5"/><stop offset="1" stop-color="#FED7AA"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-c01)"/>
+                     <!-- Conveyor Belt -->
+                     <rect x="18" y="96" width="224" height="20" rx="10" fill="#475569"/>
+                     <circle cx="38" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="84" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="130" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="176" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="222" cy="106" r="5" fill="#94A3B8"/>
+                     <!-- Cute Chef Cat -->
+                     <polygon points="74,48 80,32 92,44" fill="#FB923C"/>
+                     <polygon points="122,48 116,32 104,44" fill="#FB923C"/>
+                     <circle cx="98" cy="64" r="24" fill="#FFF"/>
+                     <!-- Chef Hat -->
+                     <rect x="85" y="24" width="26" height="14" rx="5" fill="#FFF" stroke="#CBD5E1" stroke-width="2"/>
+                     <circle cx="88" cy="22" r="8" fill="#FFF"/>
+                     <circle cx="98" cy="20" r="9" fill="#FFF"/>
+                     <circle cx="108" cy="22" r="8" fill="#FFF"/>
+                     <circle cx="90" cy="62" r="2.5" fill="#1E293B"/>
+                     <circle cx="106" cy="62" r="2.5" fill="#1E293B"/>
+                     <polygon points="98,66 95,70 101,70" fill="#FB7185"/>
+                     <!-- 0% Healthy Cup on Belt -->
+                     <rect x="156" y="54" width="32" height="40" rx="7" fill="#38BDF8"/>
+                     <rect x="153" y="50" width="38" height="7" rx="3.5" fill="#0284C7"/>
+                     <line x1="176" y1="36" x2="172" y2="50" stroke="#F43F5E" stroke-width="3.5" stroke-linecap="round"/>
+                     <text x="172" y="79" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">0%</text>
+                  </svg>`;
+
+               case 'C02': // Kidney Care Buddy
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-c02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FFE4E6"/><stop offset="1" stop-color="#FECDD3"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-c02)"/>
+                     <!-- Happy Kidney Pair -->
+                     <path d="M98 42 C76 42, 68 62, 68 74 C68 88, 78 102, 96 102 C108 102, 112 90, 106 80 C102 74, 102 68, 106 62 C112 52, 108 42, 98 42 Z" fill="#FB7185"/>
+                     <path d="M162 42 C184 42, 192 62, 192 74 C192 88, 182 102, 164 102 C152 102, 148 90, 154 80 C158 74, 158 68, 154 62 C148 52, 152 42, 162 42 Z" fill="#FB7185"/>
+                     <!-- Cute Faces -->
+                     <circle cx="84" cy="70" r="2.3" fill="#1E293B"/>
+                     <circle cx="96" cy="70" r="2.3" fill="#1E293B"/>
+                     <path d="M87 76 Q90 80 93 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <circle cx="164" cy="70" r="2.3" fill="#1E293B"/>
+                     <circle cx="176" cy="70" r="2.3" fill="#1E293B"/>
+                     <path d="M167 76 Q170 80 173 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <!-- Pure Water Droplet Between -->
+                     <path d="M130 46 C130 46, 117 64, 117 73 A13 13 0 0 0 143 73 C143 64, 130 46, 130 46 Z" fill="#38BDF8"/>
+                     <circle cx="126" cy="71" r="2.5" fill="#FFF" fill-opacity="0.8"/>
+                  </svg>`;
+
+               case 'C03': // Shark Monster Truck Bridge
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-c03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#E0F2FE"/><stop offset="1" stop-color="#BAE6FD"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-c03)"/>
+                     <!-- Cliffs & Colorful Bridge -->
+                     <rect x="0" y="96" width="58" height="39" fill="#94A3B8"/>
+                     <rect x="202" y="96" width="58" height="39" fill="#94A3B8"/>
+                     <rect x="54" y="96" width="48" height="12" rx="4" fill="#F59E0B"/>
+                     <rect x="106" y="96" width="48" height="12" rx="4" fill="#10B981"/>
+                     <rect x="158" y="96" width="48" height="12" rx="4" fill="#6366F1"/>
+                     <!-- Shark Monster Truck -->
+                     <polygon points="118,38 128,22 136,38" fill="#0284C7"/>
+                     <path d="M84 68 C84 44, 112 36, 146 36 C168 36, 180 48, 180 68 Z" fill="#0EA5E9"/>
+                     <!-- Shark Teeth & Eye -->
+                     <polygon points="154,62 160,54 166,62 172,54 176,62" fill="#FFF"/>
+                     <circle cx="152" cy="48" r="4" fill="#FFF"/>
+                     <circle cx="153" cy="48" r="2" fill="#0F172A"/>
+                     <!-- Huge Monster Wheels -->
+                     <circle cx="104" cy="78" r="17" fill="#1E293B"/>
+                     <circle cx="104" cy="78" r="7" fill="#FBBF24"/>
+                     <circle cx="160" cy="78" r="17" fill="#1E293B"/>
+                     <circle cx="160" cy="78" r="7" fill="#FBBF24"/>
+                  </svg>`;
+
+               case 'C04': // Heart Care 8 Ways
+               default:
+                  return `
+                  <svg viewBox="0 0 260 135" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-c04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FEE2E2"/><stop offset="1" stop-color="#FECACA"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-c04)"/>
+                     <!-- Pulse Line -->
+                     <path d="M24 72 H72 L84 48 L98 94 L112 58 L122 72 H236" stroke="#F87171" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"/>
+                     <!-- Vibrant Smiling Heart Hero -->
+                     <path d="M130 108 C130 108, 86 80, 86 52 C86 36, 99 26, 113 26 C122 26, 128 31, 130 36 C132 31, 138 26, 147 26 C161 26, 174 36, 174 52 C174 80, 130 108, 130 108 Z" fill="#EF4444"/>
+                     <path d="M98 44 A12 12 0 0 1 110 35" stroke="#FCA5A5" stroke-width="3.5" stroke-linecap="round"/>
+                     <circle cx="118" cy="58" r="3" fill="#FFF"/>
+                     <circle cx="142" cy="58" r="3" fill="#FFF"/>
+                     <path d="M123 67 Q130 74 137 67" stroke="#FFF" stroke-width="3" stroke-linecap="round"/>
+                     <!-- Medical Plus Shield Badge -->
+                     <circle cx="168" cy="86" r="15" fill="#FFF" stroke="#10B981" stroke-width="3"/>
+                     <path d="M168 79 V93 M161 86 H175" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
+                  </svg>`;
+            }
+         }
+
+         // Minimalist Category / Subject Icon Badge
+         function getSubjectIconSVG(series) {
+            if (series === 'A') {
+               return `<svg class="w-3.5 h-3.5 text-pink-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.3 7.2-6.3-4.6-6.3 4.6 2.3-7.2-6-4.8h7.6z"/></svg>`;
+            }
+            if (series === 'B') {
+               return `<svg class="w-3.5 h-3.5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"/></svg>`;
+            }
+            return `<svg class="w-3.5 h-3.5 text-rose-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/></svg>`;
+         }
+
+         // Game Catalog (Preserving all exact filenames & metadata)
+         const GAMES = [
+            {
+               id: 'A01',
+               series: 'A',
+               title: 'แก๊งจิ๋วบุกตู้คีบ — เมฆขนมหวาน',
+               filename: 'A01-เกมคีบตุ๊กตา.html',
+               accentBtn: 'bg-pink-500 hover:bg-pink-600',
+               badgeText: 'Arcade',
+               keywords: 'ตู้คีบ ขนมหวาน อาร์เคด'
+            },
+            {
+               id: 'A02',
+               series: 'A',
+               title: 'คาปิบาร่านักปั่น! ตะลุยด่านปิกนิก',
+               filename: 'A02-คาปิบาร่านักปั่น.html',
+               accentBtn: 'bg-amber-500 hover:bg-amber-600',
+               badgeText: 'Arcade',
+               keywords: 'คาปิบาร่า จักรยาน ปิกนิก'
+            },
+            {
+               id: 'A03',
+               series: 'A',
+               title: 'ฮิปโปงับงับ ปิกนิกหรรษา',
+               filename: 'A03-ฮิปโปงับงับ ปิกนิกหรรษา.html',
+               accentBtn: 'bg-purple-500 hover:bg-purple-600',
+               badgeText: 'Arcade',
+               keywords: 'ฮิปโป ปิกนิก อาหาร'
+            },
+            {
+               id: 'A04',
+               series: 'A',
+               title: 'เลเซอร์มือจิ๋ว พิทักษ์สวนใส',
+               filename: 'A04-เลเซอร์มือจิ๋ว พิทักษ์สวนใส.html',
+               accentBtn: 'bg-teal-500 hover:bg-teal-600',
+               badgeText: 'Arcade',
+               keywords: 'เลเซอร์ พิทักษ์สวน'
+            },
+            {
+               id: 'B01',
+               series: 'B',
+               title: 'จับคู่ความรู้: แรงโน้มถ่วงของโลก',
+               filename: 'B01-Memory Pair.html',
+               accentBtn: 'bg-indigo-600 hover:bg-indigo-700',
+               badgeText: 'วิทย์ ป.4',
+               keywords: 'วิทยาศาสตร์ ป.4 แรงโน้มถ่วง มวล น้ำหนัก'
+            },
+            {
+               id: 'B02',
+               series: 'B',
+               title: 'Hook & Catch: ตกปลาคำตอบวิทย์',
+               filename: 'B02-hook_catch_fish.html',
+               accentBtn: 'bg-sky-600 hover:bg-sky-700',
+               badgeText: 'วิทย์ ป.4',
+               keywords: 'ตกปลา วิทยาศาสตร์ ป.4 แรงดึงดูด'
+            },
+            {
+               id: 'B03',
+               series: 'B',
+               title: 'เติมคำในช่อง: แรงโน้มถ่วงของโลก',
+               filename: 'B03-Fill the blank.html',
+               accentBtn: 'bg-amber-500 hover:bg-amber-600',
+               badgeText: 'วิทย์ ป.4',
+               keywords: 'เติมคำ วิทยาศาสตร์ ป.4 แรงโน้มถ่วง น้องอุ่นใจ'
+            },
+            {
+               id: 'B04',
+               series: 'B',
+               title: 'Speedy Lane: Simple Present Tense',
+               filename: 'B04-speedy_lane_english.html',
+               accentBtn: 'bg-fuchsia-600 hover:bg-fuchsia-700',
+               badgeText: 'Eng ป.5',
+               keywords: 'ภาษาอังกฤษ ป.5 Simple Present Tense แข่งรถ'
+            },
+            {
+               id: 'C01',
+               series: 'C',
+               title: 'น้ำหวาน 0% ทำให้อ้วนไหม? เชฟเหมียว',
+               filename: 'C01-กินน้ำหวาน0_ทำให้อ้วนสายพานเชฟเหมียว.html',
+               accentBtn: 'bg-orange-500 hover:bg-orange-600',
+               badgeText: 'สุขภาพ',
+               keywords: 'สุขภาพ เชฟเหมียว สายพาน น้ำหวาน0%'
+            },
+            {
+               id: 'C02',
+               series: 'C',
+               title: 'ใส่ใจอาหาร ห่างไกลไตเรื้อรัง',
+               filename: 'C02-ใส่ใจอาหารห่างไกลไตเรื้อรัง.html',
+               accentBtn: 'bg-rose-500 hover:bg-rose-600',
+               badgeText: 'สุขภาพ',
+               keywords: 'โรคไต อาหารลดเค็ม โซเดียม สุขศึกษา'
+            },
+            {
+               id: 'C03',
+               series: 'C',
+               title: 'Shark Truck: สร้างสะพาน Phonics',
+               filename: 'C03-สร้างสะพานรถฉลาม.html',
+               accentBtn: 'bg-blue-600 hover:bg-blue-700',
+               badgeText: 'Phonics',
+               keywords: 'โฟนิกส์ Phonics รถฉลาม สร้างสะพาน ภาษาอังกฤษ'
+            },
+            {
+               id: 'C04',
+               series: 'C',
+               title: '8 วิธีรู้ทัน ป้องกันหัวใจขาดเลือด',
+               filename: 'C04-AR_8_วิธีรู้ทันป้องกันไม่ให้หัวใจขาดเลือด.html',
+               accentBtn: 'bg-red-500 hover:bg-red-600',
+               badgeText: '10 ด่าน',
+               keywords: 'หัวใจขาดเลือด สุขภาพหัวใจ 10ด่าน สุขศึกษา'
+            }
+         ];
+
+         // App State
+         let currentCategory = 'all';
+         let onlyFavorites = false;
+         let searchQuery = '';
+         let favorites = JSON.parse(localStorage.getItem('aim_favorites') || '[]');
+         let playedGames = JSON.parse(localStorage.getItem('aim_played_games') || '[]');
+         let soundEnabled = true;
+         let openInNewTab = true;
+
+         // Zero-Dependency Web Audio Synthesizer
+         const audioCtx = (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined')
+            ? new (window.AudioContext || window.webkitAudioContext)()
+            : null;
+
+         function playSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+               if (audioCtx.state === 'suspended') audioCtx.resume();
+               const now = audioCtx.currentTime;
+               const osc = audioCtx.createOscillator();
+               const gain = audioCtx.createGain();
+               osc.connect(gain);
+               gain.connect(audioCtx.destination);
+
+               if (type === 'click') {
+                  osc.type = 'sine';
+                  osc.frequency.setValueAtTime(520, now);
+                  osc.frequency.exponentialRampToValueAtTime(760, now + 0.055);
+                  gain.gain.setValueAtTime(0.11, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+                  osc.start(now);
+                  osc.stop(now + 0.06);
+               } else if (type === 'pop') {
+                  osc.type = 'triangle';
+                  osc.frequency.setValueAtTime(360, now);
+                  osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
+                  gain.gain.setValueAtTime(0.14, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                  osc.start(now);
+                  osc.stop(now + 0.1);
+               } else if (type === 'fanfare') {
+                  [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+                     const o = audioCtx.createOscillator();
+                     const g = audioCtx.createGain();
+                     o.connect(g);
+                     g.connect(audioCtx.destination);
+                     o.type = 'triangle';
+                     o.frequency.setValueAtTime(freq, now + idx * 0.07);
+                     g.gain.setValueAtTime(0.13, now + idx * 0.07);
+                     g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.2);
+                     o.start(now + idx * 0.07);
+                     o.stop(now + idx * 0.07 + 0.22);
+                  });
+               }
+            } catch (e) {}
+         }
+
+         // Initialize
+         window.addEventListener('DOMContentLoaded', () => {
+            updatePlayedUI();
+            renderGames();
+
+            if (localStorage.getItem('aim_contrast') === 'true') {
+               document.body.classList.add('high-contrast');
+               document.getElementById('contrastToggle').checked = true;
+            }
+            const savedSound = localStorage.getItem('aim_sound');
+            if (savedSound !== null) {
+               soundEnabled = savedSound === 'true';
+               document.getElementById('soundToggle').checked = soundEnabled;
+            }
+            const savedNewTab = localStorage.getItem('aim_new_tab');
+            if (savedNewTab !== null) {
+               openInNewTab = savedNewTab === 'true';
+               document.getElementById('newTabToggle').checked = openInNewTab;
+            }
+         });
+
+         // Render Illustrated Cards
+         function renderGames() {
+            const grid = document.getElementById('gameGrid');
+            const emptyState = document.getElementById('emptyState');
+            if (!grid) return;
+
+            const filtered = GAMES.filter(game => {
+               if (onlyFavorites && !favorites.includes(game.id)) return false;
+               if (currentCategory !== 'all' && game.series !== currentCategory) return false;
+               if (searchQuery.trim() !== '') {
+                  const q = searchQuery.toLowerCase().trim();
+                  const haystack = `${game.id} ${game.title} ${game.badgeText} ${game.keywords}`.toLowerCase();
+                  if (!haystack.includes(q)) return false;
+               }
+               return true;
+            });
+
+            if (filtered.length === 0) {
+               grid.innerHTML = '';
+               emptyState.classList.remove('hidden');
+               return;
+            }
+            emptyState.classList.add('hidden');
+            grid.innerHTML = '';
+
+            filtered.forEach(game => {
+               const isFav = favorites.includes(game.id);
+               const isPlayed = playedGames.includes(game.id);
+               const targetAttr = openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+
+               const card = document.createElement('div');
+               card.className = 'game-card bg-white rounded-[26px] border-2 border-slate-200/90 shadow-clay hover:shadow-clay-hover overflow-hidden flex flex-col justify-between group relative';
+
+               card.innerHTML = `
+                  <!-- Illustrated Visual Canvas (Top 62%) -->
+                  <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')"
+                     class="relative block w-full h-36 sm:h-40 overflow-hidden bg-slate-100">
+                     <div class="illus-group w-full h-full">
+                        ${getGameIllustrationSVG(game.id)}
+                     </div>
+
+                     <!-- Top-Left Code & Category Pill -->
+                     <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                        <span class="font-fredoka font-bold text-xs px-2.5 py-1 rounded-xl bg-slate-900/85 backdrop-blur-xs text-white shadow-xs">
+                           ${game.id}
+                        </span>
+                        <span class="px-2 py-1 rounded-xl bg-white/90 backdrop-blur-xs text-slate-700 font-bold text-[11px] flex items-center gap-1 shadow-xs">
+                           ${getSubjectIconSVG(game.series)}
+                           <span>${game.badgeText}</span>
+                        </span>
+                     </div>
+
+                     <!-- Played Checkmark Badge -->
+                     ${isPlayed ? `
+                     <div class="absolute bottom-2.5 left-2.5 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm border-2 border-white" title="เล่นแล้ว">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                     </div>` : ''}
+                  </a>
+
+                  <!-- Top-Right Favorite Star Button -->
+                  <button onclick="toggleFavorite('${game.id}', event)" title="เกมโปรด"
+                     class="tactile-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-xl bg-white/90 backdrop-blur-xs shadow-xs flex items-center justify-center ${isFav ? 'text-amber-400' : 'text-slate-300 hover:text-amber-400'}">
+                     <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
+                     </svg>
+                  </button>
+
+                  <!-- Minimalist Bottom Bar (Title + Tactile Play Icon) -->
+                  <div class="px-4 py-3 flex items-center justify-between gap-3 bg-white">
+                     <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')"
+                        class="card-title font-prompt font-bold text-sm sm:text-[15px] text-slate-800 group-hover:text-indigo-600 leading-snug line-clamp-2 flex-1 transition-colors">
+                        ${game.title}
+                     </a>
+
+                     <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')" title="เล่น"
+                        class="tactile-btn shrink-0 w-10 h-10 rounded-2xl ${game.accentBtn} text-white shadow-btn-pop flex items-center justify-center">
+                        <svg class="w-4 h-4 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+                           <polygon points="6 4 20 12 6 20 6 4"/>
+                        </svg>
+                     </a>
+                  </div>
+               `;
+
+               grid.appendChild(card);
+            });
+         }
+
+         // Filter Controls
+         function updateTabStyles() {
+            const tabs = ['all', 'A', 'B', 'C'];
+            tabs.forEach(id => {
+               const btn = document.getElementById(`tab-${id}`);
+               if (!btn) return;
+               const active = !onlyFavorites && currentCategory === id;
+               btn.className = active
+                  ? 'cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all bg-slate-900 text-white shadow-xs'
+                  : 'cat-tab h-full px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all text-slate-600 hover:bg-slate-100';
+            });
+
+            const favBtn = document.getElementById('tab-fav');
+            if (favBtn) {
+               favBtn.className = onlyFavorites
+                  ? 'cat-tab h-full px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all bg-amber-400 text-white shadow-xs'
+                  : 'cat-tab h-full px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all text-slate-400 hover:bg-amber-50 hover:text-amber-500';
+            }
+         }
+
+         function setCategoryFilter(series) {
+            playSound('pop');
+            onlyFavorites = false;
+            currentCategory = series;
+            updateTabStyles();
+            renderGames();
+         }
+
+         function toggleFavoriteFilter() {
+            playSound('pop');
+            onlyFavorites = !onlyFavorites;
+            updateTabStyles();
+            renderGames();
+         }
+
+         function focusSearch() {
+            playSound('click');
+            document.getElementById('searchInput').focus();
+         }
+
+         function handleSearch() {
+            const input = document.getElementById('searchInput');
+            const pill = document.getElementById('searchPill');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            searchQuery = input ? input.value : '';
+
+            if (searchQuery.trim().length > 0) {
+               clearBtn.classList.remove('hidden');
+               pill.classList.add('w-44', 'sm:w-56');
+            } else {
+               clearBtn.classList.add('hidden');
+               pill.classList.remove('w-44', 'sm:w-56');
+            }
+            renderGames();
+         }
+
+         function clearSearch() {
+            playSound('click');
+            const input = document.getElementById('searchInput');
+            if (input) input.value = '';
+            searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            document.getElementById('searchPill').classList.remove('w-44', 'sm:w-56');
+            renderGames();
+         }
+
+         function resetAllFilters() {
+            playSound('pop');
+            onlyFavorites = false;
+            currentCategory = 'all';
+            clearSearch();
+            updateTabStyles();
+            renderGames();
+         }
+
+         // Favorites & Played State
+         function toggleFavorite(id, event) {
+            if (event) {
+               event.preventDefault();
+               event.stopPropagation();
+            }
+            playSound('pop');
+            const idx = favorites.indexOf(id);
+            if (idx > -1) favorites.splice(idx, 1);
+            else favorites.push(id);
+            localStorage.setItem('aim_favorites', JSON.stringify(favorites));
+            renderGames();
+         }
+
+         function markAsPlayed(id) {
+            playSound('click');
+            if (!playedGames.includes(id)) {
+               playedGames.push(id);
+               localStorage.setItem('aim_played_games', JSON.stringify(playedGames));
+               updatePlayedUI();
+               renderGames();
+            }
+         }
+
+         function updatePlayedUI() {
+            const el = document.getElementById('playedCountText');
+            if (el) el.innerText = `${playedGames.length}/${GAMES.length}`;
+         }
+
+         function resetPlayedProgress() {
+            playSound('click');
+            playedGames = [];
+            localStorage.removeItem('aim_played_games');
+            updatePlayedUI();
+            renderGames();
+            closeModal('settingsModal');
+         }
+
+         // Random Game Launcher
+         function launchRandomGame() {
+            playSound('fanfare');
+            const dice = document.getElementById('diceIcon');
+            if (dice) {
+               dice.classList.remove('dice-rolling');
+               void dice.offsetWidth;
+               dice.classList.add('dice-rolling');
+            }
+
+            const chosen = GAMES[Math.floor(Math.random() * GAMES.length)];
+            document.getElementById('randomModalArt').innerHTML = getGameIllustrationSVG(chosen.id);
+            document.getElementById('randomModalCode').innerText = `${chosen.id} · ${chosen.badgeText}`;
+            document.getElementById('randomModalTitle').innerText = chosen.title;
+
+            const playBtn = document.getElementById('randomModalPlayBtn');
+            playBtn.href = encodeURI(chosen.filename);
+            if (openInNewTab) {
+               playBtn.target = '_blank';
+               playBtn.rel = 'noopener noreferrer';
+            } else {
+               playBtn.removeAttribute('target');
+               playBtn.removeAttribute('rel');
+            }
+            playBtn.onclick = () => {
+               markAsPlayed(chosen.id);
+               closeModal('randomModal');
+            };
+
+            openModal('randomModal');
+         }
+
+         // Modals & Accessibility Settings
+         function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('hidden');
+         }
+
+         function closeModal(id) {
+            playSound('click');
+            const m = document.getElementById(id);
+            if (m) m.classList.add('hidden');
+         }
+
+         window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+               ['settingsModal', 'randomModal'].forEach(id => {
+                  const m = document.getElementById(id);
+                  if (m && !m.classList.contains('hidden')) closeModal(id);
+               });
+            }
+         });
+
+         function toggleHighContrast(enabled) {
+            playSound('click');
+            document.body.classList.toggle('high-contrast', enabled);
+            localStorage.setItem('aim_contrast', enabled);
+         }
+
+         function toggleSound(enabled) {
+            soundEnabled = enabled;
+            localStorage.setItem('aim_sound', enabled);
+            if (enabled) playSound('click');
+         }
+
+         function toggleNewTab(enabled) {
+            openInNewTab = enabled;
+            localStorage.setItem('aim_new_tab', enabled);
+            renderGames();
+         }
+      </script>
+   </body>
+</html>

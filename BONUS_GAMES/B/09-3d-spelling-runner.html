@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>วิ่งตะลุยด่านสะกดคำ 3 มิติ — 3D Spelling Gate Runner</title>
+  <!-- Google Fonts: Sarabun & Prompt สำหรับความชัดเจนในการอ่านภาษาไทยของเด็กประถม -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700;800&family=Sarabun:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-sky-top: #cfeaff;
+      --bg-sky-bottom: #f3e8ff;
+      --card-bg: #fffdf9;
+      --card-border: #e9d5ff;
+      --text-main: #2e1065;
+      --text-muted: #5b21b6;
+      --accent-primary: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --accent-pink: #f472b6;
+      --accent-mint: #10b981;
+      --accent-amber: #f59e0b;
+      --shadow-soft: 0 10px 25px -5px rgba(91, 33, 182, 0.18);
+      --focus-ring: 0 0 0 4px rgba(139, 92, 246, 0.45);
+    }
+
+    /* High Contrast Mode Variables */
+    body.high-contrast {
+      --bg-sky-top: #090d16;
+      --bg-sky-bottom: #111827;
+      --card-bg: #000000;
+      --card-border: #facc15;
+      --text-main: #ffffff;
+      --text-muted: #fde047;
+      --accent-primary: #facc15;
+      --accent-hover: #eab308;
+      --accent-pink: #fb7185;
+      --accent-mint: #34d399;
+      --accent-amber: #fbbf24;
+      --shadow-soft: 0 0 0 2px #facc15;
+      --focus-ring: 0 0 0 4px #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+      background: linear-gradient(180deg, var(--bg-sky-top) 0%, var(--bg-sky-bottom) 100%);
+      color: var(--text-main);
+    }
+
+    /* Main Game Container */
+    #game-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 3D Perspective Canvas */
+    #game-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Top HUD Bar */
+    .top-bar {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .top-bar > * {
+      pointer-events: auto;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand-title {
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-pill {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 1.8vw, 1rem);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 2px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      transform: scale(1.06);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .icon-btn:focus-visible, button:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Floating Prompt Card (Top Center) */
+    .prompt-container {
+      position: relative;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 12px;
+      margin-top: 2px;
+      pointer-events: none;
+    }
+
+    .prompt-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      border: 3px solid var(--card-border);
+      border-radius: 26px;
+      padding: 10px 20px 14px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      max-width: 94vw;
+      width: 440px;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+    }
+
+    .prompt-card.success-pulse {
+      border-color: var(--accent-mint);
+      transform: scale(1.04);
+    }
+
+    .prompt-card.error-shake {
+      border-color: #ef4444;
+      animation: cardShake 0.4s ease;
+    }
+
+    @keyframes cardShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-5px); }
+    }
+
+    .prompt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .prompt-instruction {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(139, 92, 246, 0.12);
+      padding: 3px 12px;
+      border-radius: 999px;
+    }
+
+    body.high-contrast .prompt-instruction {
+      background: #1f2937;
+      color: #fde047;
+    }
+
+    .speak-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+      transition: transform 0.15s ease;
+    }
+
+    body.high-contrast .speak-btn {
+      color: #000000;
+    }
+
+    .speak-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .prompt-body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      width: 100%;
+      padding: 2px 0;
+    }
+
+    #prompt-illustration {
+      width: 78px;
+      height: 78px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(243, 232, 255, 0.55);
+      border-radius: 20px;
+      border: 2px dashed var(--card-border);
+      padding: 6px;
+    }
+
+    body.high-contrast #prompt-illustration {
+      background: #111827;
+    }
+
+    .word-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: clamp(2.1rem, 5vw, 2.8rem);
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: 2px;
+      line-height: 1.35;
+      min-height: 68px;
+    }
+
+    .word-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 56px;
+      height: 58px;
+      padding: 0 10px;
+      border-radius: 14px;
+      border: 3px dashed var(--accent-primary);
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--accent-primary);
+      font-size: 2.1rem;
+      position: relative;
+    }
+
+    .word-slot.pos-top::after {
+      content: "▲ บน";
+      position: absolute;
+      top: -16px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--text-muted);
+    }
+
+    .word-slot.pos-bottom::after {
+      content: "▼ ล่าง";
+      position: absolute;
+      bottom: -16px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--text-muted);
+    }
+
+    .word-completed {
+      color: var(--accent-mint);
+      transform: scale(1.08);
+      transition: transform 0.25s ease;
+    }
+
+    /* Progress Bar inside Prompt Card */
+    .stage-progress-wrap {
+      width: 100%;
+      height: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .stage-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-primary));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Feedback Toast Banner */
+    #feedback-banner {
+      position: fixed;
+      top: 52%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      z-index: 30;
+      background: var(--card-bg);
+      border: 4px solid var(--accent-mint);
+      border-radius: 28px;
+      padding: 14px 26px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 88vw;
+    }
+
+    #feedback-banner.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #feedback-banner.wrong {
+      border-color: #f97316;
+    }
+
+    #feedback-title {
+      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+
+    #feedback-sub {
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Bottom Touch & Guidance Controls */
+    .bottom-controls {
+      position: fixed;
+      bottom: 14px;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 18px;
+      pointer-events: none;
+    }
+
+    .lane-btn {
+      pointer-events: auto;
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      border: 3px solid #ffffff;
+      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%);
+      color: #ffffff;
+      font-size: 2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 0 #5b21b6, 0 14px 20px rgba(91, 33, 182, 0.35);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    body.high-contrast .lane-btn {
+      background: #facc15;
+      color: #000000;
+      border-color: #ffffff;
+      box-shadow: 0 6px 0 #ca8a04;
+    }
+
+    .lane-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 #5b21b6, 0 6px 10px rgba(91, 33, 182, 0.25);
+    }
+
+    .guidance-pill {
+      pointer-events: auto;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: clamp(0.82rem, 1.8vw, 0.98rem);
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: var(--shadow-soft);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    /* Think & Go Go Button */
+    #step-go-btn {
+      pointer-events: auto;
+      display: none;
+      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-family: inherit;
+      font-size: 1.25rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #047857, 0 12px 24px rgba(5, 150, 105, 0.4);
+      animation: bouncePulse 1.2s infinite;
+      margin-bottom: 6px;
+    }
+
+    @keyframes bouncePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    /* Modal Overlays (Start Screen, Settings, Stage Complete) */
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(30, 16, 66, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .overlay-backdrop.hidden {
+      display: none;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 4px solid var(--card-border);
+      border-radius: 32px;
+      padding: 24px;
+      max-width: 580px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: clamp(1.45rem, 3.5vw, 2rem);
+      font-weight: 800;
+      margin: 6px 0 8px;
+      color: var(--text-main);
+    }
+
+    .modal-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .stage-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stage-choice {
+      background: rgba(139, 92, 246, 0.08);
+      border: 3px solid var(--card-border);
+      border-radius: 20px;
+      padding: 12px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+
+    .stage-choice.active {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+
+    .stage-choice strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .stage-choice span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .primary-cta {
+      width: 100%;
+      background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-family: inherit;
+      font-size: 1.3rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #9d174d, 0 12px 24px rgba(219, 39, 119, 0.35);
+      transition: transform 0.12s ease;
+      margin-top: 8px;
+    }
+
+    .primary-cta:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-cta:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #9d174d;
+    }
+
+    /* Accessibility Settings Grid */
+    .settings-group {
+      text-align: left;
+      margin-bottom: 14px;
+      background: rgba(139, 92, 246, 0.06);
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+    }
+
+    .settings-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .speed-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .pill-option {
+      padding: 8px 6px;
+      border-radius: 12px;
+      border: 2px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    .pill-option.selected {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    body.high-contrast .pill-option.selected {
+      color: #000000;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+    }
+
+    .toggle-row span {
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .switch-btn {
+      min-width: 68px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .switch-btn[aria-pressed="true"] {
+      background: var(--accent-mint);
+      color: #ffffff;
+      border-color: var(--accent-mint);
+    }
+
+    /* Word Card Collection Grid (Stage Summary) */
+    .word-collection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .collected-card {
+      background: rgba(139, 92, 246, 0.08);
+      border: 2px solid var(--card-border);
+      border-radius: 18px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .collected-card:hover {
+      transform: scale(1.05);
+      border-color: var(--accent-primary);
+    }
+
+    .collected-card svg {
+      width: 46px;
+      height: 46px;
+    }
+
+    .collected-card-word {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .collected-card-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .brand-title {
+        display: none;
+      }
+      .prompt-card {
+        padding: 8px 14px 10px;
+      }
+      #prompt-illustration {
+        width: 64px;
+        height: 64px;
+      }
+      .lane-btn {
+        width: 64px;
+        height: 64px;
+      }
+      .stage-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <!-- 3D Perspective Track Canvas -->
+    <canvas id="game-canvas" aria-label="สนามวิ่งสะกดคำ 3 มิติ 3 ช่องทาง"></canvas>
+
+    <!-- Top Navigation & HUD -->
+    <header class="top-bar">
+      <div class="brand-badge">
+        <!-- Custom SVG Fluffy Mascot Mini Icon -->
+        <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true">
+          <ellipse cx="22" cy="14" rx="6" ry="12" fill="#f472b6" />
+          <ellipse cx="42" cy="14" rx="6" ry="12" fill="#f472b6" />
+          <circle cx="32" cy="36" r="22" fill="#f9a8d4" />
+          <circle cx="25" cy="33" r="3" fill="#1e1b4b" />
+          <circle cx="39" cy="33" r="3" fill="#1e1b4b" />
+          <path d="M27 41 Q32 46 37 41" stroke="#be185d" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h1 class="brand-title">วิ่งตะลุยด่านสะกดคำ 3 มิติ</h1>
+      </div>
+
+      <div class="hud-stats">
+        <div class="stat-pill" id="hud-stage">ด่าน 1/3</div>
+        <div class="stat-pill" id="hud-count">คำที่ 1/9</div>
+        <div class="stat-pill" id="hud-score">★ 0</div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="icon-btn" id="btn-audio-toggle" title="เปิด/ปิดเสียง" aria-label="เปิดหรือปิดเสียง">
+          <svg id="icon-sound-on" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="icon-sound-off" style="display:none;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btn-settings" title="ตั้งค่าการช่วยเหลือ (Accessibility)" aria-label="ตั้งค่าการเข้าถึงและความเร็ว">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Prompt Card -->
+    <section class="prompt-container" aria-live="polite">
+      <div class="prompt-card" id="prompt-card">
+        <div class="prompt-header">
+          <span class="prompt-instruction" id="prompt-instruction">เติมสระให้ถูก</span>
+          <button class="speak-btn" id="btn-repeat-word" type="button" aria-label="ฟังเสียงอ่านคำศัพท์ซ้ำ">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            ฟังเสียงคำ
+          </button>
+        </div>
+
+        <div class="prompt-body">
+          <div id="prompt-illustration" role="img" aria-label="ภาพประกอบคำศัพท์"></div>
+          <div class="word-display" id="word-display">ด <span class="word-slot">?</span> ว</div>
+        </div>
+
+        <div class="stage-progress-wrap" aria-hidden="true">
+          <div class="stage-progress-fill" id="stage-progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Toast -->
+    <div id="feedback-banner" role="status" aria-live="assertive">
+      <h2 id="feedback-title">เก่งมาก!</h2>
+      <p id="feedback-sub">ดอ - อา - วอ - ดาว</p>
+    </div>
+
+    <!-- Bottom Controls -->
+    <footer class="bottom-controls">
+      <button class="lane-btn" id="btn-left" type="button" aria-label="ย้ายไปเลนซ้าย">◀</button>
+
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <button id="step-go-btn" type="button">พุ่งผ่านประตูนี้! ▶</button>
+        <div class="guidance-pill" id="guidance-text">◀ ▶ สลับเลนให้วิ่งผ่านประตูที่ถูก</div>
+      </div>
+
+      <button class="lane-btn" id="btn-right" type="button" aria-label="ย้ายไปเลนขวา">▶</button>
+    </footer>
+
+    <!-- START SCREEN MODAL -->
+    <div class="overlay-backdrop" id="start-modal">
+      <div class="modal-card">
+        <!-- Custom SVG Hero Mascot -->
+        <svg width="110" height="110" viewBox="0 0 120 120" style="margin: 0 auto; display:block;" aria-hidden="true">
+          <ellipse cx="42" cy="26" rx="11" ry="22" fill="#f472b6" stroke="#db2777" stroke-width="3"/>
+          <ellipse cx="42" cy="28" rx="5" ry="13" fill="#fbcfe8"/>
+          <ellipse cx="78" cy="26" rx="11" ry="22" fill="#f472b6" stroke="#db2777" stroke-width="3"/>
+          <ellipse cx="78" cy="28" rx="5" ry="13" fill="#fbcfe8"/>
+          <circle cx="60" cy="68" r="38" fill="#f9a8d4" stroke="#ec4899" stroke-width="3"/>
+          <circle cx="47" cy="62" r="5" fill="#1e1b4b"/>
+          <circle cx="45" cy="60" r="2" fill="#ffffff"/>
+          <circle cx="73" cy="62" r="5" fill="#1e1b4b"/>
+          <circle cx="71" cy="60" r="2" fill="#ffffff"/>
+          <ellipse cx="38" cy="72" rx="6" ry="3.5" fill="#f43f5e" opacity="0.45"/>
+          <ellipse cx="82" cy="72" rx="6" ry="3.5" fill="#f43f5e" opacity="0.45"/>
+          <path d="M51 76 Q60 85 69 76" stroke="#be185d" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+
+        <h2 class="modal-title">วิ่งตะลุยด่านสะกดคำ 3 มิติ</h2>
+        <p class="modal-subtitle">ช่วย <strong>"น้องปุยฝ้าย"</strong> สังเกตภาพและคำด้านบน แล้วสลับเลนวิ่งพุ่งผ่านประตูสระให้ถูกต้อง!</p>
+
+        <div class="stage-selector" role="radiogroup" aria-label="เลือกด่านการเรียนรู้">
+          <button type="button" class="stage-choice active" data-stage="0">
+            <strong>ด่าน 1: สระพื้นฐาน</strong>
+            <span>า, ู, ี, ือ, ิ (9 คำ)</span>
+          </button>
+          <button type="button" class="stage-choice" data-stage="1">
+            <strong>ด่าน 2: สระหน้า-ประสม</strong>
+            <span>แ-, เ-, โ-, ใ-, ไ- (9 คำ)</span>
+          </button>
+          <button type="button" class="stage-choice" data-stage="2">
+            <strong>ด่าน 3: สระเปลี่ยนรูป</strong>
+            <span>-ั, -็, สระลดรูป (9 คำ)</span>
+          </button>
+        </div>
+
+        <div class="settings-group">
+          <span class="settings-label">โหมดความเร็วสำหรับผู้เรียน (ปรับได้ตลอดเวลา):</span>
+          <div class="speed-pills">
+            <button type="button" class="pill-option" data-speed="0.65">ช้าสบายๆ</button>
+            <button type="button" class="pill-option selected" data-speed="1.0">ปกติ</button>
+            <button type="button" class="pill-option" data-speed="1.35">ท้าทาย</button>
+          </div>
+          <div class="toggle-row" style="margin-top:10px;">
+            <span>โหมดหยุดรอคิดหน้าประตู (Step-by-Step)</span>
+            <button type="button" class="switch-btn" id="start-step-toggle" aria-pressed="false">ปิด</button>
+          </div>
+        </div>
+
+        <button type="button" class="primary-cta" id="btn-start-game">เริ่มวิ่งผจญภัย! 🚀</button>
+      </div>
+    </div>
+
+    <!-- ACCESSIBILITY SETTINGS MODAL -->
+    <div class="overlay-backdrop hidden" id="settings-modal">
+      <div class="modal-card">
+        <h2 class="modal-title">ตั้งค่าการเรียนรู้และการเข้าถึง</h2>
+        <p class="modal-subtitle">ปรับจังหวะเกม ภาพ และเสียงให้เหมาะกับผู้เรียนแต่ละคน</p>
+
+        <div class="settings-group">
+          <span class="settings-label">ความเร็วในการวิ่ง</span>
+          <div class="speed-pills" id="modal-speed-pills">
+            <button type="button" class="pill-option" data-speed="0.65">ช้า (0.65x)</button>
+            <button type="button" class="pill-option selected" data-speed="1.0">ปกติ (1.0x)</button>
+            <button type="button" class="pill-option" data-speed="1.35">เร็ว (1.35x)</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="toggle-row">
+            <span>โหมดหยุดรอหน้าประตู (มีเวลาคิดไม่จำกัด)</span>
+            <button type="button" class="switch-btn" id="toggle-step-mode" aria-pressed="false">ปิด</button>
+          </div>
+          <div class="toggle-row">
+            <span>โหมดสีตัดกันชัดเจน (High Contrast)</span>
+            <button type="button" class="switch-btn" id="toggle-high-contrast" aria-pressed="false">ปิด</button>
+          </div>
+          <div class="toggle-row">
+            <span>โหมดลดการเคลื่อนไหว (Reduced Motion)</span>
+            <button type="button" class="switch-btn" id="toggle-reduced-motion" aria-pressed="false">ปิด</button>
+          </div>
+          <div class="toggle-row">
+            <span>เสียงอ่านคำและสะกดคำอัตโนมัติ (Thai TTS)</span>
+            <button type="button" class="switch-btn" id="toggle-tts" aria-pressed="true">เปิด</button>
+          </div>
+        </div>
+
+        <button type="button" class="primary-cta" id="btn-close-settings">บันทึกและเล่นต่อ</button>
+      </div>
+    </div>
+
+    <!-- STAGE COMPLETE & WORD CARD COLLECTION MODAL -->
+    <div class="overlay-backdrop hidden" id="complete-modal">
+      <div class="modal-card">
+        <h2 class="modal-title" id="complete-title">ยอดเยี่ยม! ผ่านด่านที่ 1 แล้ว</h2>
+        <p class="modal-subtitle" id="complete-sub">แตะที่การ์ดคำศัพท์ด้านล่างเพื่อฟังเสียงอ่านทบทวนทีละคำ</p>
+
+        <div class="word-collection-grid" id="word-collection-grid"></div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="primary-cta" id="btn-next-stage">ไปลุยด่านถัดไป! ▶</button>
+          <button type="button" class="pill-option" id="btn-replay-stage" style="width:100%; padding:12px; font-size:1rem;">เล่นด่านนี้อีกครั้ง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. CURRICULUM DATA (คลังคำศัพท์ 3 ด่าน รวม 27 คำ พร้อมโครงสร้างสระภาษาไทย)
+     * =========================================================================
+     */
+    const STAGES = [
+      {
+        id: 1,
+        title: "ด่าน 1: ทุ่งสระหรรษา (สระพื้นฐาน)",
+        words: [
+          { id: "star", full: "ดาว", before: "ด", after: "ว", slotPos: "inline", correct: "า", gateDisplay: "◌า", distractors: ["◌ิ", "◌ุ"], phonics: "ดอ - อา - วอ - ดาว", instruction: "เติมสระหลังพยัญชนะ" },
+          { id: "fish", full: "ปลา", before: "ปล", after: "", slotPos: "inline", correct: "า", gateDisplay: "◌า", distractors: ["◌ู", "◌ี"], phonics: "ปอ - ลอ - อา - ปลา", instruction: "เติมสระหลังพยัญชนะ" },
+          { id: "ear", full: "หู", before: "ห", after: "", slotPos: "bottom", correct: "ู", gateDisplay: "◌ู", distractors: ["◌า", "◌ี"], phonics: "หอ - อู - หู", instruction: "เติมสระล่างให้ถูก" },
+          { id: "crab", full: "ปู", before: "ป", after: "", slotPos: "bottom", correct: "ู", gateDisplay: "◌ู", distractors: ["◌ิ", "◌า"], phonics: "ปอ - อู - ปู", instruction: "เติมสระล่างให้ถูก" },
+          { id: "hand", full: "มือ", before: "ม", after: "อ", slotPos: "top", correct: "ื", gateDisplay: "◌ือ", distractors: ["◌า", "◌ู"], phonics: "มอ - อือ - มือ", instruction: "เติมสระบนให้ถูก" },
+          { id: "bird", full: "บิน", before: "บ", after: "น", slotPos: "top", correct: "ิ", gateDisplay: "◌ิ", distractors: ["◌ู", "◌า"], phonics: "บอ - อิ - นอ - บิน", instruction: "เติมสระบนให้ถูก" },
+          { id: "ghost", full: "ผี", before: "ผ", after: "", slotPos: "top", correct: "ี", gateDisplay: "◌ี", distractors: ["◌ู", "◌ุ"], phonics: "ผอ - อี - ผี", instruction: "เติมสระบนให้ถูก" },
+          { id: "kettle", full: "กา", before: "ก", after: "", slotPos: "inline", correct: "า", gateDisplay: "◌า", distractors: ["◌ี", "◌ุ"], phonics: "กอ - อา - กา", instruction: "เติมสระหลังพยัญชนะ" },
+          { id: "pig", full: "หมู", before: "หม", after: "", slotPos: "bottom", correct: "ู", gateDisplay: "◌ู", distractors: ["◌า", "◌ี"], phonics: "หอ - มอ - อู - หมู", instruction: "เติมสระล่างให้ถูก" }
+        ]
+      },
+      {
+        id: 2,
+        title: "ด่าน 2: อุโมงค์สระประสมและสระหน้า",
+        words: [
+          { id: "cat", full: "แมว", before: "", after: "มว", slotPos: "inline", correct: "แ", gateDisplay: "แ◌", distractors: ["โ◌", "ใ◌"], phonics: "มอ - แอ - วอ - แมว", instruction: "เติมสระหน้าให้ถูก" },
+          { id: "tiger", full: "เสือ", before: "", after: "สือ", slotPos: "inline", correct: "เ", gateDisplay: "เ◌ือ", distractors: ["แ◌", "ไ◌"], phonics: "สอ - เอือ - เสือ", instruction: "เติมสระหน้าให้ถูก" },
+          { id: "table", full: "โต๊ะ", before: "", after: "ต๊ะ", slotPos: "inline", correct: "โ", gateDisplay: "โ◌ะ", distractors: ["แ◌", "ใ◌"], phonics: "ตอ - โอะ - โตะ - ไม้ตรี - โต๊ะ", instruction: "เติมสระหน้าให้ถูก" },
+          { id: "heart", full: "ใจ", before: "", after: "จ", slotPos: "inline", correct: "ใ", gateDisplay: "ใ◌", distractors: ["โ◌", "เ◌"], phonics: "จอ - ใอ - ใจ", instruction: "เติมสระใอม้วนให้ถูก" },
+          { id: "chicken", full: "ไก่", before: "", after: "ก่", slotPos: "inline", correct: "ไ", gateDisplay: "ไ◌", distractors: ["โ◌", "แ◌"], phonics: "กอ - ไอ - ไก - ไม้เอก - ไก่", instruction: "เติมสระไอให้ถูก" },
+          { id: "boat", full: "เรือ", before: "เร", after: "อ", slotPos: "top", correct: "ื", gateDisplay: "เ◌ือ", distractors: ["◌า", "◌ู"], phonics: "รอ - เอือ - เรือ", instruction: "เติมสระบนให้ถูก" },
+          { id: "turtle", full: "เต่า", before: "เต", after: "า", slotPos: "top", correct: "่", gateDisplay: "เ◌่า", distractors: ["◌ู", "◌ิ"], phonics: "ตอ - เอา - เตา - ไม้เอก - เต่า", instruction: "เติมวรรณยุกต์บน" },
+          { id: "banana", full: "กล้วย", before: "กล", after: "วย", slotPos: "top", correct: "้", gateDisplay: "◌้วย", distractors: ["◌ิ", "◌ุ"], phonics: "กอ - ลอ - อัว - ยอ - กรวย - ไม้โท - กล้วย", instruction: "เติมวรรณยุกต์บน" },
+          { id: "tree", full: "ไม้", before: "", after: "ม้", slotPos: "inline", correct: "ไ", gateDisplay: "ไ◌", distractors: ["โ◌", "ใ◌"], phonics: "มอ - ไอ - ไม - ไม้โท - ไม้", instruction: "เติมสระหน้าให้ถูก" }
+        ]
+      },
+      {
+        id: 3,
+        title: "ด่าน 3: ปราสาทสระแปลงร่าง",
+        words: [
+          { id: "cow", full: "วัว", before: "ว", after: "ว", slotPos: "top", correct: "ั", gateDisplay: "◌ัว", distractors: ["◌ิ", "◌ุ"], phonics: "วอ - อัว - วัว", instruction: "เติมไม้หันอากาศ" },
+          { id: "veggie", full: "ผัก", before: "ผ", after: "ก", slotPos: "top", correct: "ั", gateDisplay: "◌ั", distractors: ["◌ี", "◌ู"], phonics: "ผอ - อะ - กอ - ผัก", instruction: "สระอะเปลี่ยนรูป" },
+          { id: "car", full: "ขับ", before: "ข", after: "บ", slotPos: "top", correct: "ั", gateDisplay: "◌ั", distractors: ["◌ุ", "◌ิ"], phonics: "ขอ - อะ - บอ - ขับ", instruction: "สระอะเปลี่ยนรูป" },
+          { id: "kid", full: "เด็ก", before: "เด", after: "ก", slotPos: "top", correct: "็", gateDisplay: "เ◌็", distractors: ["◌า", "◌ู"], phonics: "ดอ - เอะ - กอ - เด็ก", instruction: "สระเอะเปลี่ยนรูป" },
+          { id: "baby", full: "น้อง", before: "น", after: "อง", slotPos: "top", correct: "้", gateDisplay: "◌้อง", distractors: ["◌ิ", "◌ุ"], phonics: "นอ - ออ - งอ - นอง - ไม้โท - น้อง", instruction: "เติมวรรณยุกต์บน" },
+          { id: "frog", full: "กบ", before: "ก", after: "", slotPos: "inline", correct: "บ", gateDisplay: "ก◌บ", distractors: ["ม", "น"], phonics: "กอ - โอะ - บอ - กบ", instruction: "สระโอะลดรูป เติมตัวสะกด" },
+          { id: "orange", full: "ส้ม", before: "ส", after: "ม", slotPos: "top", correct: "้", gateDisplay: "◌้ม", distractors: ["◌ิ", "◌ู"], phonics: "สอ - โอะ - มอ - สม - ไม้โท - ส้ม", instruction: "สระโอะลดรูป" },
+          { id: "milk", full: "นม", before: "น", after: "", slotPos: "inline", correct: "ม", gateDisplay: "น◌ม", distractors: ["ก", "ด"], phonics: "นอ - โอะ - มอ - นม", instruction: "สระโอะลดรูป เติมตัวสะกด" },
+          { id: "sun", full: "วัน", before: "ว", after: "น", slotPos: "top", correct: "ั", gateDisplay: "◌ั", distractors: ["◌ู", "◌ี"], phonics: "วอ - อะ - นอ - วัน", instruction: "สระอะเปลี่ยนรูป" }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 2. CUSTOM VECTOR ART ILLUSTRATIONS (SVG 100% ห้ามใช้ Emoji)
+     * =========================================================================
+     */
+    const SVG_ICONS = {
+      star: `<svg viewBox="0 0 80 80"><defs><linearGradient id="gStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde047"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs><polygon points="40,8 49,28 71,31 55,46 59,68 40,57 21,68 25,46 9,31 31,28" fill="url(#gStar)" stroke="#d97706" stroke-width="3" stroke-linejoin="round"/><circle cx="34" cy="36" r="2.5" fill="#78350f"/><circle cx="46" cy="36" r="2.5" fill="#78350f"/><path d="M36 43 Q40 47 44 43" stroke="#78350f" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`,
+      fish: `<svg viewBox="0 0 80 80"><path d="M56 40 L72 24 L68 40 L72 56 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/><ellipse cx="36" cy="40" rx="24" ry="16" fill="#7dd3fc" stroke="#0284c7" stroke-width="3"/><circle cx="24" cy="36" r="3" fill="#0f172a"/><path d="M35 32 Q42 40 35 48" stroke="#0284c7" stroke-width="2.5" fill="none"/></svg>`,
+      ear: `<svg viewBox="0 0 80 80"><path d="M30 22 C48 12, 60 28, 52 46 C46 58, 34 66, 28 56" fill="#fed7aa" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/><path d="M35 30 C44 26, 48 36, 42 44" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/></svg>`,
+      crab: `<svg viewBox="0 0 80 80"><ellipse cx="40" cy="46" rx="20" ry="13" fill="#fb7185" stroke="#e11d48" stroke-width="3"/><path d="M22 36 C12 24, 22 16, 28 26" fill="#fda4af" stroke="#e11d48" stroke-width="3"/><path d="M58 36 C68 24, 58 16, 52 26" fill="#fda4af" stroke="#e11d48" stroke-width="3"/><line x1="33" y1="34" x2="33" y2="26" stroke="#e11d48" stroke-width="3"/><line x1="47" y1="34" x2="47" y2="26" stroke="#e11d48" stroke-width="3"/><circle cx="33" cy="25" r="3" fill="#0f172a"/><circle cx="47" cy="25" r="3" fill="#0f172a"/></svg>`,
+      hand: `<svg viewBox="0 0 80 80"><rect x="24" y="34" width="32" height="30" rx="12" fill="#fde68a" stroke="#d97706" stroke-width="3"/><rect x="25" y="16" width="6" height="22" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/><rect x="33" y="12" width="6" height="24" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/><rect x="41" y="14" width="6" height="22" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/><rect x="49" y="20" width="6" height="18" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/><rect x="15" y="38" width="12" height="6" rx="3" transform="rotate(-25 15 38)" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/></svg>`,
+      bird: `<svg viewBox="0 0 80 80"><ellipse cx="42" cy="44" rx="18" ry="14" fill="#60a5fa" stroke="#2563eb" stroke-width="3"/><circle cx="28" cy="34" r="11" fill="#93c5fd" stroke="#2563eb" stroke-width="3"/><polygon points="17,34 9,38 17,41" fill="#facc15" stroke="#ca8a04" stroke-width="2"/><path d="M38 38 Q54 20 64 34 Q50 44 38 44" fill="#bfdbfe" stroke="#2563eb" stroke-width="2.5"/><circle cx="26" cy="32" r="2.5" fill="#0f172a"/></svg>`,
+      ghost: `<svg viewBox="0 0 80 80"><path d="M22 62 L22 36 A18 18 0 0 1 58 36 L58 62 L50 56 L40 62 L30 56 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round"/><circle cx="34" cy="36" r="3" fill="#1e293b"/><circle cx="46" cy="36" r="3" fill="#1e293b"/><ellipse cx="40" cy="45" rx="4" ry="5" fill="#fda4af"/></svg>`,
+      kettle: `<svg viewBox="0 0 80 80"><path d="M24 34 L12 24 L14 38 Z" fill="#cbd5e1" stroke="#475569" stroke-width="2.5"/><path d="M30 24 C30 12, 54 12, 54 24" fill="none" stroke="#475569" stroke-width="4"/><rect x="22" y="26" width="40" height="36" rx="14" fill="#f87171" stroke="#dc2626" stroke-width="3"/><circle cx="42" cy="24" r="4" fill="#facc15"/></svg>`,
+      pig: `<svg viewBox="0 0 80 80"><circle cx="40" cy="44" r="22" fill="#f9a8d4" stroke="#db2777" stroke-width="3"/><polygon points="22,28 18,16 32,22" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/><polygon points="58,28 62,16 48,22" fill="#f472b6" stroke="#db2777" stroke-width="2.5"/><ellipse cx="40" cy="49" rx="9" ry="6" fill="#f472b6" stroke="#db2777" stroke-width="2"/><circle cx="37" cy="49" r="1.8" fill="#831843"/><circle cx="43" cy="49" r="1.8" fill="#831843"/><circle cx="32" cy="39" r="2.5" fill="#1e1b4b"/><circle cx="48" cy="39" r="2.5" fill="#1e1b4b"/></svg>`,
+      cat: `<svg viewBox="0 0 80 80"><polygon points="20,34 18,14 34,26" fill="#fdba74" stroke="#ea580c" stroke-width="3"/><polygon points="60,34 62,14 46,26" fill="#fdba74" stroke="#ea580c" stroke-width="3"/><circle cx="40" cy="44" r="21" fill="#fed7aa" stroke="#ea580c" stroke-width="3"/><circle cx="33" cy="41" r="2.8" fill="#1e293b"/><circle cx="47" cy="41" r="2.8" fill="#1e293b"/><polygon points="37,47 43,47 40,51" fill="#fb7185"/><line x1="14" y1="45" x2="26" y2="47" stroke="#9a3412" stroke-width="2"/><line x1="66" y1="45" x2="54" y2="47" stroke="#9a3412" stroke-width="2"/></svg>`,
+      tiger: `<svg viewBox="0 0 80 80"><circle cx="22" cy="24" r="8" fill="#fb923c" stroke="#c2410c" stroke-width="3"/><circle cx="58" cy="24" r="8" fill="#fb923c" stroke="#c2410c" stroke-width="3"/><circle cx="40" cy="44" r="22" fill="#fb923c" stroke="#c2410c" stroke-width="3"/><path d="M36 23 L40 31 L44 23" fill="#1e293b"/><line x1="20" y1="42" x2="28" y2="42" stroke="#1e293b" stroke-width="3"/><line x1="52" y1="42" x2="60" y2="42" stroke="#1e293b" stroke-width="3"/><circle cx="33" cy="40" r="2.8" fill="#1e293b"/><circle cx="47" cy="40" r="2.8" fill="#1e293b"/><polygon points="37,48 43,48 40,52" fill="#be123c"/></svg>`,
+      table: `<svg viewBox="0 0 80 80"><rect x="14" y="28" width="52" height="10" rx="4" fill="#d97706" stroke="#78350f" stroke-width="3"/><rect x="20" y="38" width="7" height="28" rx="2" fill="#b45309" stroke="#78350f" stroke-width="2.5"/><rect x="53" y="38" width="7" height="28" rx="2" fill="#b45309" stroke="#78350f" stroke-width="2.5"/></svg>`,
+      heart: `<svg viewBox="0 0 80 80"><path d="M40 66 C16 50, 12 28, 26 20 C34 16, 40 24, 40 28 C40 24, 46 16, 54 20 C68 28, 64 50, 40 66 Z" fill="#f43f5e" stroke="#be123c" stroke-width="3"/></svg>`,
+      chicken: `<svg viewBox="0 0 80 80"><path d="M34 18 C34 10, 40 10, 40 16 C42 10, 48 12, 46 18" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/><circle cx="40" cy="42" r="20" fill="#fef08a" stroke="#eab308" stroke-width="3"/><polygon points="36,44 44,44 40,52" fill="#f97316" stroke="#c2410c" stroke-width="2"/><circle cx="33" cy="38" r="2.8" fill="#1e293b"/><circle cx="47" cy="38" r="2.8" fill="#1e293b"/></svg>`,
+      boat: `<svg viewBox="0 0 80 80"><polygon points="40,14 40,46 62,46" fill="#fda4af" stroke="#e11d48" stroke-width="2.5"/><polygon points="37,18 37,46 20,46" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/><path d="M14 50 L66 50 L56 64 L24 64 Z" fill="#92400e" stroke="#451a03" stroke-width="3"/></svg>`,
+      turtle: `<svg viewBox="0 0 80 80"><circle cx="64" cy="46" r="8" fill="#86efac" stroke="#15803d" stroke-width="2.5"/><rect x="22" y="52" width="8" height="10" rx="3" fill="#86efac" stroke="#15803d" stroke-width="2.5"/><rect x="46" y="52" width="8" height="10" rx="3" fill="#86efac" stroke="#15803d" stroke-width="2.5"/><path d="M18 52 A22 22 0 0 1 60 52 Z" fill="#22c55e" stroke="#15803d" stroke-width="3"/></svg>`,
+      banana: `<svg viewBox="0 0 80 80"><path d="M22 20 C20 48, 42 64, 64 56 C52 54, 34 42, 30 18 Z" fill="#facc15" stroke="#ca8a04" stroke-width="3" stroke-linejoin="round"/></svg>`,
+      tree: `<svg viewBox="0 0 80 80"><rect x="34" y="46" width="12" height="20" rx="3" fill="#92400e" stroke="#451a03" stroke-width="2.5"/><circle cx="40" cy="32" r="18" fill="#4ade80" stroke="#16a34a" stroke-width="3"/><circle cx="28" cy="38" r="12" fill="#4ade80" stroke="#16a34a" stroke-width="3"/><circle cx="52" cy="38" r="12" fill="#4ade80" stroke="#16a34a" stroke-width="3"/></svg>`,
+      cow: `<svg viewBox="0 0 80 80"><path d="M24 22 Q16 14 22 12" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/><path d="M56 22 Q64 14 58 12" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/><rect x="20" y="22" width="40" height="40" rx="16" fill="#ffffff" stroke="#334155" stroke-width="3"/><circle cx="28" cy="30" r="7" fill="#334155"/><ellipse cx="40" cy="50" rx="14" ry="9" fill="#fbcfe8" stroke="#db2777" stroke-width="2.5"/><circle cx="32" cy="36" r="2.8" fill="#0f172a"/><circle cx="48" cy="36" r="2.8" fill="#0f172a"/></svg>`,
+      veggie: `<svg viewBox="0 0 80 80"><path d="M40 62 C20 56, 18 32, 30 24 C36 20, 44 20, 50 24 C62 32, 60 56, 40 62 Z" fill="#4ade80" stroke="#15803d" stroke-width="3"/><path d="M40 60 L40 28 M40 46 L30 38 M40 40 L50 32" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+      car: `<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="22" fill="none" stroke="#334155" stroke-width="6"/><circle cx="40" cy="40" r="7" fill="#ef4444"/><line x1="40" y1="18" x2="40" y2="33" stroke="#334155" stroke-width="5"/><line x1="21" y1="50" x2="34" y2="43" stroke="#334155" stroke-width="5"/><line x1="59" y1="50" x2="46" y2="43" stroke="#334155" stroke-width="5"/></svg>`,
+      kid: `<svg viewBox="0 0 80 80"><circle cx="40" cy="42" r="20" fill="#fed7aa" stroke="#ea580c" stroke-width="3"/><path d="M22 36 C24 18, 56 18, 58 36" fill="#1e293b"/><circle cx="33" cy="41" r="2.8" fill="#1e293b"/><circle cx="47" cy="41" r="2.8" fill="#1e293b"/><path d="M35 49 Q40 54 45 49" stroke="#be123c" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`,
+      baby: `<svg viewBox="0 0 80 80"><circle cx="40" cy="42" r="19" fill="#fde68a" stroke="#d97706" stroke-width="3"/><path d="M38 23 C36 15, 44 15, 42 23" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/><circle cx="34" cy="41" r="2.5" fill="#1e293b"/><circle cx="46" cy="41" r="2.5" fill="#1e293b"/><circle cx="40" cy="50" r="4" fill="#fb7185"/></svg>`,
+      frog: `<svg viewBox="0 0 80 80"><circle cx="28" cy="28" r="8" fill="#4ade80" stroke="#15803d" stroke-width="3"/><circle cx="52" cy="28" r="8" fill="#4ade80" stroke="#15803d" stroke-width="3"/><circle cx="28" cy="28" r="3" fill="#0f172a"/><circle cx="52" cy="28" r="3" fill="#0f172a"/><ellipse cx="40" cy="46" rx="22" ry="15" fill="#4ade80" stroke="#15803d" stroke-width="3"/><path d="M28 48 Q40 56 52 48" stroke="#15803d" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+      orange: `<svg viewBox="0 0 80 80"><circle cx="40" cy="44" r="20" fill="#fb923c" stroke="#ea580c" stroke-width="3"/><path d="M40 24 Q50 14 56 22 Q46 26 40 24" fill="#22c55e" stroke="#15803d" stroke-width="2"/></svg>`,
+      milk: `<svg viewBox="0 0 80 80"><polygon points="28,16 52,16 56,28 24,28" fill="#60a5fa" stroke="#2563eb" stroke-width="2.5"/><rect x="24" y="28" width="32" height="36" rx="4" fill="#ffffff" stroke="#2563eb" stroke-width="3"/><rect x="24" y="42" width="32" height="12" fill="#93c5fd"/></svg>`,
+      sun: `<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="16" fill="#fde047" stroke="#eab308" stroke-width="3"/><g stroke="#f59e0b" stroke-width="4" stroke-linecap="round"><line x1="40" y1="12" x2="40" y2="18"/><line x1="40" y1="62" x2="40" y2="68"/><line x1="12" y1="40" x2="18" y2="40"/><line x1="62" y1="40" x2="68" y2="40"/><line x1="20" y1="20" x2="25" y2="25"/><line x1="55" y1="55" x2="60" y2="60"/><line x1="60" y1="20" x2="55" y2="25"/><line x1="25" y1="55" x2="20" y2="60"/></g></svg>`
+    };
+
+    /**
+     * =========================================================================
+     * 3. AUDIO & THAI SPEECH ENGINE (Web Audio API + Web Speech API th-TH)
+     * =========================================================================
+     */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.soundEnabled = true;
+        this.ttsEnabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      playTone(freq, type, duration, vol = 0.15, slideTo = null) {
+        if (!this.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+        }
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      playLaneSwitch() {
+        this.playTone(320, 'sine', 0.12, 0.12, 520);
+      }
+
+      playStep() {
+        this.playTone(150, 'triangle', 0.05, 0.05, 110);
+      }
+
+      playCorrect() {
+        if (!this.soundEnabled) return;
+        this.playTone(523.25, 'sine', 0.14, 0.18); // C5
+        setTimeout(() => this.playTone(659.25, 'sine', 0.14, 0.18), 90); // E5
+        setTimeout(() => this.playTone(783.99, 'sine', 0.25, 0.2), 180); // G5
+      }
+
+      playWrong() {
+        if (!this.soundEnabled) return;
+        this.playTone(240, 'triangle', 0.18, 0.16, 170);
+      }
+
+      playStageFanfare() {
+        if (!this.soundEnabled) return;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => {
+          setTimeout(() => this.playTone(n, 'sine', 0.25, 0.18), idx * 110);
+        });
+      }
+
+      speakThai(text) {
+        if (!this.ttsEnabled || !this.soundEnabled) return;
+        if (!('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'th-TH';
+          utter.rate = 0.92;
+          utter.pitch = 1.12;
+          window.speechSynthesis.speak(utter);
+        } catch (e) {
+          // Fallback gracefully if speechSynthesis is restricted
+        }
+      }
+    }
+
+    const audio = new SoundEngine();
+
+    /**
+     * =========================================================================
+     * 4. GAME STATE & ACCESSIBILITY PERSISTENCE
+     * =========================================================================
+     */
+    const state = {
+      running: false,
+      paused: false,
+      stageIndex: 0,
+      wordIndex: 0,
+      score: 0,
+      playerLane: 1, // 0: Left, 1: Center, 2: Right
+      visualLaneX: 1, // Smoothly interpolated lane position
+      gateZ: 1.0, // 1.0 = horizon (far), 0.0 = player line (near)
+      gates: [], // [{ lane: 0..2, label: '◌า', raw: 'า', isCorrect: bool }]
+      waitingAtGate: false,
+      rebounding: false,
+      wordSolved: false,
+      runTime: 0,
+      lastStepTick: 0,
+      particles: [],
+      flyingVowel: null,
+      // Accessibility settings
+      speedMultiplier: 1.0,
+      stepByStepMode: false,
+      highContrast: false,
+      reducedMotion: false
+    };
+
+    function savePreferences() {
+      try {
+        localStorage.setItem('spellingRunnerPrefs', JSON.stringify({
+          speedMultiplier: state.speedMultiplier,
+          stepByStepMode: state.stepByStepMode,
+          highContrast: state.highContrast,
+          reducedMotion: state.reducedMotion,
+          soundEnabled: audio.soundEnabled,
+          ttsEnabled: audio.ttsEnabled
+        }));
+      } catch (e) {}
+    }
+
+    function loadPreferences() {
+      try {
+        const raw = localStorage.getItem('spellingRunnerPrefs');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (typeof p.speedMultiplier === 'number') state.speedMultiplier = p.speedMultiplier;
+        if (typeof p.stepByStepMode === 'boolean') state.stepByStepMode = p.stepByStepMode;
+        if (typeof p.highContrast === 'boolean') state.highContrast = p.highContrast;
+        if (typeof p.reducedMotion === 'boolean') state.reducedMotion = p.reducedMotion;
+        if (typeof p.soundEnabled === 'boolean') audio.soundEnabled = p.soundEnabled;
+        if (typeof p.ttsEnabled === 'boolean') audio.ttsEnabled = p.ttsEnabled;
+      } catch (e) {}
+    }
+
+    /**
+     * =========================================================================
+     * 5. DOM REFERENCES & UI SYNC
+     * =========================================================================
+     */
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const elHudStage = document.getElementById('hud-stage');
+    const elHudCount = document.getElementById('hud-count');
+    const elHudScore = document.getElementById('hud-score');
+    const elPromptCard = document.getElementById('prompt-card');
+    const elPromptInstruction = document.getElementById('prompt-instruction');
+    const elPromptIllus = document.getElementById('prompt-illustration');
+    const elWordDisplay = document.getElementById('word-display');
+    const elProgressFill = document.getElementById('stage-progress-fill');
+    const elFeedbackBanner = document.getElementById('feedback-banner');
+    const elFeedbackTitle = document.getElementById('feedback-title');
+    const elFeedbackSub = document.getElementById('feedback-sub');
+    const elStepGoBtn = document.getElementById('step-go-btn');
+    const elGuidanceText = document.getElementById('guidance-text');
+
+    function syncAccessibilityUI() {
+      document.body.classList.toggle('high-contrast', state.highContrast);
+
+      document.querySelectorAll('.pill-option[data-speed]').forEach(btn => {
+        const sp = parseFloat(btn.dataset.speed);
+        btn.classList.toggle('selected', Math.abs(sp - state.speedMultiplier) < 0.05);
+      });
+
+      const toggles = [
+        { id: 'start-step-toggle', val: state.stepByStepMode },
+        { id: 'toggle-step-mode', val: state.stepByStepMode },
+        { id: 'toggle-high-contrast', val: state.highContrast },
+        { id: 'toggle-reduced-motion', val: state.reducedMotion },
+        { id: 'toggle-tts', val: audio.ttsEnabled }
+      ];
+
+      toggles.forEach(t => {
+        const el = document.getElementById(t.id);
+        if (el) {
+          el.setAttribute('aria-pressed', String(t.val));
+          el.textContent = t.val ? 'เปิด' : 'ปิด';
+        }
+      });
+
+      document.getElementById('icon-sound-on').style.display = audio.soundEnabled ? 'block' : 'none';
+      document.getElementById('icon-sound-off').style.display = audio.soundEnabled ? 'none' : 'block';
+    }
+
+    function getCurrentStage() {
+      return STAGES[state.stageIndex];
+    }
+
+    function getCurrentWord() {
+      return getCurrentStage().words[state.wordIndex];
+    }
+
+    function updatePromptUI(solved = false) {
+      const stage = getCurrentStage();
+      const word = getCurrentWord();
+
+      elHudStage.textContent = `ด่าน ${stage.id}/${STAGES.length}`;
+      elHudCount.textContent = `คำที่ ${state.wordIndex + 1}/${stage.words.length}`;
+      elHudScore.textContent = `★ ${state.score}`;
+
+      const pct = ((state.wordIndex + (solved ? 1 : 0)) / stage.words.length) * 100;
+      elProgressFill.style.width = `${pct}%`;
+
+      elPromptInstruction.textContent = word.instruction;
+      elPromptIllus.innerHTML = SVG_ICONS[word.id] || SVG_ICONS.star;
+
+      if (solved) {
+        elWordDisplay.innerHTML = `<span class="word-completed">${word.full}</span>`;
+      } else {
+        const posClass = word.slotPos === 'top' ? 'pos-top' : (word.slotPos === 'bottom' ? 'pos-bottom' : '');
+        elWordDisplay.innerHTML = `${word.before}<span class="word-slot ${posClass}" aria-label="ช่องว่างเติมสระ">?</span>${word.after}`;
+      }
+    }
+
+    function showFeedback(isCorrect, title, subText, duration = 1400) {
+      elFeedbackBanner.classList.remove('wrong', 'visible');
+      if (!isCorrect) elFeedbackBanner.classList.add('wrong');
+      elFeedbackTitle.textContent = title;
+      elFeedbackSub.textContent = subText;
+      elFeedbackBanner.classList.add('visible');
+
+      clearTimeout(showFeedback._timer);
+      showFeedback._timer = setTimeout(() => {
+        elFeedbackBanner.classList.remove('visible');
+      }, duration);
+    }
+
+    /**
+     * =========================================================================
+     * 6. WORD & GATE SETUP LOGIC
+     * =========================================================================
+     */
+    function setupCurrentWord(speakPrompt = true) {
+      const word = getCurrentWord();
+      state.gateZ = 1.0;
+      state.waitingAtGate = false;
+      state.rebounding = false;
+      state.wordSolved = false;
+      state.flyingVowel = null;
+      elStepGoBtn.style.display = 'none';
+      elGuidanceText.style.display = 'block';
+
+      // Create 3 gates (1 correct + 2 distractors) shuffled across lanes 0, 1, 2
+      const options = [
+        { label: word.gateDisplay, raw: word.correct, isCorrect: true },
+        { label: word.distractors[0], raw: word.distractors[0].replace('◌', ''), isCorrect: false },
+        { label: word.distractors[1], raw: word.distractors[1].replace('◌', ''), isCorrect: false }
+      ];
+
+      // Fisher-Yates shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      state.gates = options.map((opt, idx) => ({
+        lane: idx,
+        label: opt.label,
+        raw: opt.raw,
+        isCorrect: opt.isCorrect,
+        state: 'normal' // 'normal' | 'correct' | 'wrong'
+      }));
+
+      updatePromptUI(false);
+
+      if (speakPrompt) {
+        audio.speakThai(`${word.full} ... ${word.instruction}`);
+      }
+    }
+
+    function switchLane(delta) {
+      if (!state.running || state.paused || state.wordSolved) return;
+      const next = Math.max(0, Math.min(2, state.playerLane + delta));
+      if (next !== state.playerLane) {
+        state.playerLane = next;
+        audio.playLaneSwitch();
+      }
+    }
+
+    function setLaneDirect(laneIdx) {
+      if (!state.running || state.paused || state.wordSolved) return;
+      if (laneIdx >= 0 && laneIdx <= 2 && laneIdx !== state.playerLane) {
+        state.playerLane = laneIdx;
+        audio.playLaneSwitch();
+      }
+    }
+
+    function handleGateCollision() {
+      const word = getCurrentWord();
+      const chosenGate = state.gates[state.playerLane];
+
+      if (chosenGate.isCorrect) {
+        // SUCCESS!
+        state.wordSolved = true;
+        state.waitingAtGate = false;
+        elStepGoBtn.style.display = 'none';
+        chosenGate.state = 'correct';
+        state.score += 100;
+
+        audio.playCorrect();
+        audio.speakThai(`${word.phonics} ... เก่งมาก!`);
+
+        elPromptCard.classList.add('success-pulse');
+        setTimeout(() => elPromptCard.classList.remove('success-pulse'), 450);
+
+        updatePromptUI(true);
+        showFeedback(true, `ถูกต้อง! "${word.full}"`, word.phonics, 1750);
+
+        // Spawn celebration sparkles
+        spawnSparkles(canvas.width * 0.5, canvas.height * 0.62, '#10b981', 28);
+
+        // Launch flying vowel animation towards prompt card
+        state.flyingVowel = {
+          text: chosenGate.label,
+          startX: getLaneScreenX(state.playerLane, 0.12),
+          startY: getTrackY(0.12) - 45,
+          targetX: canvas.width * 0.52,
+          targetY: 120,
+          progress: 0
+        };
+
+        setTimeout(() => {
+          if (!state.running) return;
+          advanceWordOrStage();
+        }, 1850);
+      } else {
+        // GENTLE BOUNCE-BACK SHIELD (No harsh game over)
+        chosenGate.state = 'wrong';
+        state.rebounding = true;
+        state.waitingAtGate = false;
+        elStepGoBtn.style.display = 'none';
+
+        audio.playWrong();
+        const wrongPreview = `${word.before}${chosenGate.raw}${word.after}`;
+        audio.speakThai(`ยังไม่ใช่นะ ถ้าใส่ตัวนี้จะเป็น ${wrongPreview} ลองเปลี่ยนเลนดูอีกที`);
+
+        elPromptCard.classList.add('error-shake');
+        setTimeout(() => elPromptCard.classList.remove('error-shake'), 450);
+
+        showFeedback(false, `ลองใหม่อีกทีนะ!`, `ถ้าเลือก ${chosenGate.label} จะไม่ใช่คำว่า "${word.full}"`, 1600);
+        spawnSparkles(getLaneScreenX(state.playerLane, 0.12), getTrackY(0.12) - 30, '#f97316', 14);
+      }
+    }
+
+    function advanceWordOrStage() {
+      const stage = getCurrentStage();
+      if (state.wordIndex + 1 < stage.words.length) {
+        state.wordIndex++;
+        setupCurrentWord(true);
+      } else {
+        // Stage Complete!
+        state.running = false;
+        audio.playStageFanfare();
+        audio.speakThai(`ยินดีด้วย! ผ่าน${stage.title}แล้ว`);
+        openStageCompleteModal();
+      }
+    }
+
+    function openStageCompleteModal() {
+      const stage = getCurrentStage();
+      document.getElementById('complete-title').textContent = `ยอดเยี่ยม! ผ่าน${stage.title}แล้ว`;
+      const grid = document.getElementById('word-collection-grid');
+      grid.innerHTML = '';
+
+      stage.words.forEach(w => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'collected-card';
+        card.setAttribute('aria-label', `ฟังเสียงคำว่า ${w.full}`);
+        card.innerHTML = `
+          ${SVG_ICONS[w.id] || SVG_ICONS.star}
+          <div class="collected-card-word">${w.full}</div>
+          <div class="collected-card-hint">🔊 แตะฟังเสียง</div>
+        `;
+        card.addEventListener('click', () => {
+          audio.playLaneSwitch();
+          audio.speakThai(w.phonics);
+        });
+        grid.appendChild(card);
+      });
+
+      const nextBtn = document.getElementById('btn-next-stage');
+      if (state.stageIndex + 1 < STAGES.length) {
+        nextBtn.textContent = `ไปลุยด่านที่ ${state.stageIndex + 2} ต่อเลย! ▶`;
+      } else {
+        nextBtn.textContent = `เล่นครบทุกด่านแล้ว! กลับสู่ด่าน 1 🏆`;
+      }
+
+      document.getElementById('complete-modal').classList.remove('hidden');
+    }
+
+    /**
+     * =========================================================================
+     * 7. 3D PERSPECTIVE PROJECTION & CANVAS RENDERING ENGINE
+     * =========================================================================
+     */
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // Perspective mapping helpers (z: 1.0 = far horizon, 0.0 = near camera)
+    function getHorizonY() {
+      return window.innerHeight * 0.34;
+    }
+
+    function getGroundBottomY() {
+      return window.innerHeight;
+    }
+
+    function getTrackY(z) {
+      // Non-linear perspective depth curve for authentic 3D road feel
+      const perspective = Math.pow(1 - z, 1.65);
+      return getHorizonY() + (getGroundBottomY() - getHorizonY()) * perspective;
+    }
+
+    function getTrackHalfWidth(z) {
+      const nearHalf = Math.min(window.innerWidth * 0.44, 340);
+      const farHalf = Math.min(window.innerWidth * 0.09, 68);
+      const perspective = Math.pow(1 - z, 1.35);
+      return farHalf + (nearHalf - farHalf) * perspective;
+    }
+
+    function getLaneScreenX(laneIndex, z) {
+      // laneIndex: 0 (left = -1), 1 (center = 0), 2 (right = +1)
+      const centerX = window.innerWidth * 0.5;
+      const halfW = getTrackHalfWidth(z);
+      const laneOffset = (laneIndex - 1) * (halfW * 0.66);
+      return centerX + laneOffset;
+    }
+
+    function spawnSparkles(x, y, color, count) {
+      if (state.reducedMotion) return;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 5;
+        state.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          size: 4 + Math.random() * 5,
+          color,
+          alpha: 1
+        });
+      }
+    }
+
+    function drawPastelEnvironment(w, h, horizonY) {
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+      if (state.highContrast) {
+        skyGrad.addColorStop(0, '#020617');
+        skyGrad.addColorStop(1, '#0f172a');
+      } else {
+        skyGrad.addColorStop(0, '#bae6fd');
+        skyGrad.addColorStop(1, '#f3e8ff');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, horizonY + 10);
+
+      // Soft Pastel Clouds in Sky
+      if (!state.highContrast) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+        const drift = state.reducedMotion ? 0 : Math.sin(state.runTime * 0.3) * 14;
+        drawCloud(w * 0.16 + drift, horizonY * 0.52, 42);
+        drawCloud(w * 0.84 - drift, horizonY * 0.48, 48);
+      }
+
+      // Ground / Meadow Backdrop
+      const groundGrad = ctx.createLinearGradient(0, horizonY, 0, h);
+      if (state.highContrast) {
+        groundGrad.addColorStop(0, '#111827');
+        groundGrad.addColorStop(1, '#030712');
+      } else {
+        groundGrad.addColorStop(0, '#e9d5ff');
+        groundGrad.addColorStop(1, '#ddd6fe');
+      }
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, horizonY, w, h - horizonY);
+    }
+
+    function drawCloud(cx, cy, r) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.75, cy + r * 0.12, r * 0.75, 0, Math.PI * 2);
+      ctx.arc(cx - r * 0.75, cy + r * 0.15, r * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function draw3DTrack(w, h) {
+      const centerX = w * 0.5;
+      const topY = getTrackY(1.0);
+      const botY = getTrackY(0.0);
+      const topHalf = getTrackHalfWidth(1.0);
+      const botHalf = getTrackHalfWidth(0.0);
+
+      // Main 3D Track Trapezoid
+      ctx.beginPath();
+      ctx.moveTo(centerX - topHalf, topY);
+      ctx.lineTo(centerX + topHalf, topY);
+      ctx.lineTo(centerX + botHalf, botY);
+      ctx.lineTo(centerX - botHalf, botY);
+      ctx.closePath();
+
+      const trackGrad = ctx.createLinearGradient(0, topY, 0, botY);
+      if (state.highContrast) {
+        trackGrad.addColorStop(0, '#1f2937');
+        trackGrad.addColorStop(1, '#000000');
+      } else {
+        trackGrad.addColorStop(0, '#c4b5fd');
+        trackGrad.addColorStop(0.5, '#a78bfa');
+        trackGrad.addColorStop(1, '#8b5cf6');
+      }
+      ctx.fillStyle = trackGrad;
+      ctx.fill();
+
+      // Track Outer Rails (Glowing Borders)
+      ctx.strokeStyle = state.highContrast ? '#facc15' : '#ffffff';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(centerX - topHalf, topY);
+      ctx.lineTo(centerX - botHalf, botY);
+      ctx.moveTo(centerX + topHalf, topY);
+      ctx.lineTo(centerX + botHalf, botY);
+      ctx.stroke();
+
+      // Moving Horizontal Speed Stripes (gives illusion of forward motion)
+      const stripeCount = 8;
+      const scrollOffset = (state.runTime * 1.4) % 1;
+      for (let i = 0; i < stripeCount; i++) {
+        const z = ((i + scrollOffset) / stripeCount);
+        const y = getTrackY(z);
+        const hw = getTrackHalfWidth(z);
+        ctx.strokeStyle = state.highContrast
+          ? `rgba(250, 204, 21, ${(1 - z) * 0.35})`
+          : `rgba(255, 255, 255, ${(1 - z) * 0.32})`;
+        ctx.lineWidth = Math.max(1.5, (1 - z) * 4);
+        ctx.beginPath();
+        ctx.moveTo(centerX - hw, y);
+        ctx.lineTo(centerX + hw, y);
+        ctx.stroke();
+      }
+
+      // 3-Lane Divider Lines
+      [-0.33, 0.33].forEach(ratio => {
+        ctx.strokeStyle = state.highContrast ? 'rgba(255,255,255,0.65)' : 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([14, 14]);
+        ctx.beginPath();
+        ctx.moveTo(centerX + topHalf * ratio, topY);
+        ctx.lineTo(centerX + botHalf * ratio, botY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+    }
+
+    function draw3DVowelGates() {
+      if (!state.gates.length) return;
+      const z = state.gateZ;
+      const scale = Math.max(0.18, Math.pow(1 - z, 1.15));
+      const baseY = getTrackY(z);
+      const gateW = Math.min(window.innerWidth * 0.25, 165) * scale;
+      const gateH = 145 * scale;
+
+      // Fog alpha when very far away
+      const alpha = Math.min(1, (1.05 - z) * 2.4);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0.15, alpha);
+
+      state.gates.forEach((gate, idx) => {
+        const cx = getLaneScreenX(idx, z);
+        const left = cx - gateW * 0.5;
+        const top = baseY - gateH;
+        const isTargeted = (idx === state.playerLane);
+
+        // Gate Pillar & Arch Colors
+        let fillTop = '#ffffff';
+        let fillBot = '#f5f3ff';
+        let borderCol = isTargeted ? '#f472b6' : '#c4b5fd';
+        let textCol = '#2e1065';
+
+        if (state.highContrast) {
+          fillTop = '#000000';
+          fillBot = '#111827';
+          borderCol = isTargeted ? '#34d399' : '#facc15';
+          textCol = '#ffffff';
+        }
+
+        if (gate.state === 'correct') {
+          fillTop = '#d1fae5';
+          fillBot = '#6ee7b7';
+          borderCol = '#10b981';
+          textCol = '#064e3b';
+        } else if (gate.state === 'wrong') {
+          fillTop = '#ffedd5';
+          fillBot = '#fdba74';
+          borderCol = '#f97316';
+          textCol = '#7c2d12';
+        }
+
+        // Active lane spotlight under gate
+        if (isTargeted && !state.wordSolved) {
+          ctx.fillStyle = state.highContrast ? 'rgba(52, 211, 153, 0.25)' : 'rgba(244, 114, 182, 0.28)';
+          ctx.beginPath();
+          ctx.ellipse(cx, baseY, gateW * 0.58, 14 * scale, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Gate 3D Arch Frame
+        const radius = 18 * scale;
+        ctx.fillStyle = fillTop;
+        ctx.strokeStyle = borderCol;
+        ctx.lineWidth = (isTargeted ? 6 : 3.5) * scale;
+
+        roundRect(ctx, left, top, gateW, gateH, radius);
+        ctx.fill();
+        ctx.stroke();
+
+        // Inner Arch Opening
+        const pad = 10 * scale;
+        ctx.fillStyle = fillBot;
+        roundRect(ctx, left + pad, top + pad, gateW - pad * 2, gateH - pad, radius * 0.7);
+        ctx.fill();
+
+        // Vowel Label (แสดงสระคู่กับตัว 'อ' เช่น อา, อี, อู, เอือ, แอ เพื่อให้อ่านและเห็นตำแหน่งสระชัดเจน)
+        const fontSize = Math.max(16, Math.round(54 * scale));
+        drawThaiVowelWithGuide(ctx, gate.label, cx, top + gateH * 0.54, fontSize, textCol);
+      });
+
+      ctx.restore();
+    }
+
+    /**
+     * วาดสระภาษาไทยบน Canvas โดยแทนที่สัญลักษณ์ "◌" ด้วยตัวอักษร "อ" (เช่น อา, อี, อู, เอือ, แอ)
+     * เพื่อให้สระบน/ล่างเกาะบนตัว อ ได้ตามหลักภาษาไทยและอ่านออกเสียงได้ชัดเจน
+     */
+    function drawThaiVowelWithGuide(context, rawLabel, centerX, centerY, fontSize, textColor) {
+      context.save();
+      const displayLabel = rawLabel.replace(/◌/g, 'อ');
+      context.font = `800 ${fontSize}px 'Prompt', 'Sarabun', sans-serif`;
+      context.textBaseline = 'middle';
+      context.textAlign = 'center';
+      context.fillStyle = textColor;
+      context.fillText(displayLabel, centerX, centerY);
+      context.restore();
+    }
+
+    function drawFluffyRunner() {
+      const playerZ = 0.11;
+      const cx = getLaneScreenX(state.visualLaneX, playerZ);
+      const groundY = getTrackY(playerZ);
+
+      // Running bounce & banking tilt
+      const bounce = state.reducedMotion ? 0 : Math.abs(Math.sin(state.runTime * 11)) * 12;
+      const tilt = (state.playerLane - state.visualLaneX) * 0.35;
+      const y = groundY - 46 - bounce;
+
+      ctx.save();
+
+      // Ground Shadow
+      ctx.fillStyle = 'rgba(46, 16, 101, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(cx, groundY - 4, 34 - bounce * 0.4, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.translate(cx, y);
+      ctx.rotate(tilt);
+
+      // Cute Little Feet
+      const leftFootY = state.reducedMotion ? 36 : 34 + Math.sin(state.runTime * 11) * 6;
+      const rightFootY = state.reducedMotion ? 36 : 34 - Math.sin(state.runTime * 11) * 6;
+      ctx.fillStyle = '#db2777';
+      ctx.beginPath();
+      ctx.ellipse(-14, leftFootY, 9, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(14, rightFootY, 9, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Long Fluffy Ears (wiggling)
+      const earWiggle = state.reducedMotion ? 0 : Math.sin(state.runTime * 11) * 0.12;
+      ctx.save();
+      ctx.translate(-16, -34);
+      ctx.rotate(-0.18 + earWiggle);
+      ctx.fillStyle = '#f472b6';
+      ctx.strokeStyle = '#db2777';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, -14, 9, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(16, -34);
+      ctx.rotate(0.18 - earWiggle);
+      ctx.fillStyle = '#f472b6';
+      ctx.strokeStyle = '#db2777';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, -14, 9, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Fluffy Cloud-like Body
+      ctx.fillStyle = state.highContrast ? '#facc15' : '#f9a8d4';
+      ctx.strokeStyle = state.highContrast ? '#ffffff' : '#ec4899';
+      ctx.lineWidth = 3.5;
+
+      const puffs = 10;
+      const bodyR = 34;
+      ctx.beginPath();
+      for (let i = 0; i <= puffs * 2; i++) {
+        const ang = (i / (puffs * 2)) * Math.PI * 2;
+        const r = i % 2 === 0 ? bodyR + 3 : bodyR - 1;
+        const px = Math.cos(ang) * r;
+        const py = Math.sin(ang) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Face (Viewed from slightly behind/3-quarter cute back-head + side cheeks)
+      // Cute Tail Puff
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 14, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Little Side Cheeks & Ribbon
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(0, -28, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawParticlesAndFlyingVowel() {
+      // Sparkles
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15;
+        p.alpha -= 0.025;
+        if (p.alpha <= 0) {
+          state.particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Flying Vowel Snap Animation
+      if (state.flyingVowel) {
+        const fv = state.flyingVowel;
+        fv.progress = Math.min(1, fv.progress + 0.055);
+        const ease = 1 - Math.pow(1 - fv.progress, 3);
+        const curX = fv.startX + (fv.targetX - fv.startX) * ease;
+        const curY = fv.startY + (fv.targetY - fv.startY) * ease;
+
+        drawThaiVowelWithGuide(ctx, fv.text, curX, curY, 44, '#10b981');
+
+        if (fv.progress >= 1) {
+          state.flyingVowel = null;
+        }
+      }
+    }
+
+    function roundRect(context, x, y, w, h, r) {
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + w, y, x + w, y + h, r);
+      context.arcTo(x + w, y + h, x, y + h, r);
+      context.arcTo(x, y + h, x, y, r);
+      context.arcTo(x, y, x + w, y, r);
+      context.closePath();
+    }
+
+    /**
+     * =========================================================================
+     * 8. MAIN GAME LOOP (60 FPS)
+     * =========================================================================
+     */
+    let lastTimestamp = 0;
+
+    function gameLoop(timestamp) {
+      const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000 || 0.016);
+      lastTimestamp = timestamp;
+
+      // Smoothly interpolate character horizontal lane movement
+      state.visualLaneX += (state.playerLane - state.visualLaneX) * Math.min(1, dt * 14);
+
+      if (state.running && !state.paused) {
+        if (!state.waitingAtGate && !state.wordSolved) {
+          state.runTime += dt * state.speedMultiplier;
+
+          // Footstep audio rhythm
+          if (Math.floor(state.runTime * 3.5) !== state.lastStepTick) {
+            state.lastStepTick = Math.floor(state.runTime * 3.5);
+            audio.playStep();
+          }
+
+          if (state.rebounding) {
+            // Smoothly bounce back to give learner another try
+            state.gateZ += dt * 0.65;
+            if (state.gateZ >= 0.68) {
+              state.gateZ = 0.68;
+              state.rebounding = false;
+              state.gates.forEach(g => (g.state = 'normal'));
+            }
+          } else {
+            // Move gates toward player
+            const baseSpeed = 0.24 * state.speedMultiplier;
+            state.gateZ -= dt * baseSpeed;
+
+            // Step-by-Step Accessibility Mode: pause right in front of gate
+            if (state.stepByStepMode && state.gateZ <= 0.24 && state.gateZ > 0.14) {
+              state.gateZ = 0.24;
+              state.waitingAtGate = true;
+              elStepGoBtn.style.display = 'inline-block';
+              elGuidanceText.style.display = 'none';
+            }
+
+            // Check gate pass collision
+            if (state.gateZ <= 0.12) {
+              state.gateZ = 0.12;
+              handleGateCollision();
+            }
+          }
+        }
+      } else {
+        // Gentle idle bob on start screen
+        state.runTime += dt * 0.6;
+      }
+
+      // Render 3D Scene
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      drawPastelEnvironment(w, h, getHorizonY());
+      draw3DTrack(w, h);
+      draw3DVowelGates();
+      drawFluffyRunner();
+      drawParticlesAndFlyingVowel();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    /**
+     * =========================================================================
+     * 9. INPUT HANDLERS (Keyboard Arrow + WASD, Touch/Swipe, Canvas Tap, Buttons)
+     * =========================================================================
+     */
+    window.addEventListener('keydown', (e) => {
+      const code = e.code;
+      const key = e.key.toLowerCase();
+
+      if (e.key === 'ArrowLeft' || key === 'a' || code === 'KeyA' || e.key === 'ฟ') {
+        e.preventDefault();
+        switchLane(-1);
+      } else if (e.key === 'ArrowRight' || key === 'd' || code === 'KeyD' || e.key === 'ก') {
+        e.preventDefault();
+        switchLane(1);
+      } else if ((e.key === 'ArrowUp' || key === 'w' || code === 'KeyW' || e.key === 'ไ' || e.key === 'Enter' || e.key === ' ') && state.waitingAtGate) {
+        e.preventDefault();
+        confirmStepAndGo();
+      } else if (e.key === 'ArrowDown' || key === 's' || code === 'KeyS' || e.key === 'ห') {
+        e.preventDefault();
+        setLaneDirect(1);
+      }
+    });
+
+    // Touch Swipe & Direct Lane Tap on Canvas
+    let touchStartX = null;
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (touchStartX === null) return;
+      const endX = e.changedTouches[0].clientX;
+      const diffX = endX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(diffX) > 32) {
+        switchLane(diffX < 0 ? -1 : 1);
+      } else {
+        // Tap directly on Left / Center / Right third of screen
+        const ratio = endX / window.innerWidth;
+        if (ratio < 0.36) setLaneDirect(0);
+        else if (ratio > 0.64) setLaneDirect(2);
+        else setLaneDirect(1);
+      }
+    }, { passive: true });
+
+    // Mouse Click directly on Left / Center / Right lane on Canvas
+    canvas.addEventListener('click', (e) => {
+      const ratio = e.clientX / window.innerWidth;
+      if (ratio < 0.36) setLaneDirect(0);
+      else if (ratio > 0.64) setLaneDirect(2);
+      else setLaneDirect(1);
+    });
+
+    document.getElementById('btn-left').addEventListener('click', () => switchLane(-1));
+    document.getElementById('btn-right').addEventListener('click', () => switchLane(1));
+
+    function confirmStepAndGo() {
+      if (!state.waitingAtGate) return;
+      state.waitingAtGate = false;
+      state.gateZ = 0.12;
+      elStepGoBtn.style.display = 'none';
+      elGuidanceText.style.display = 'block';
+      handleGateCollision();
+    }
+
+    elStepGoBtn.addEventListener('click', confirmStepAndGo);
+
+    // Repeat Word Audio Button
+    document.getElementById('btn-repeat-word').addEventListener('click', () => {
+      audio.init();
+      const word = getCurrentWord();
+      audio.speakThai(`${word.full} ... ${word.instruction}`);
+    });
+
+    // Audio Mute Toggle
+    document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+      audio.soundEnabled = !audio.soundEnabled;
+      if (!audio.soundEnabled && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      syncAccessibilityUI();
+      savePreferences();
+    });
+
+    // Stage Selector on Start Screen
+    document.querySelectorAll('.stage-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stage-choice').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.stageIndex = parseInt(btn.dataset.stage, 10) || 0;
+      });
+    });
+
+    // Speed Selectors (Start & Settings Modal)
+    document.querySelectorAll('.pill-option[data-speed]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.speedMultiplier = parseFloat(btn.dataset.speed) || 1.0;
+        syncAccessibilityUI();
+        savePreferences();
+      });
+    });
+
+    // Step-by-step toggles
+    function toggleStepMode() {
+      state.stepByStepMode = !state.stepByStepMode;
+      if (!state.stepByStepMode && state.waitingAtGate) {
+        state.waitingAtGate = false;
+        elStepGoBtn.style.display = 'none';
+        elGuidanceText.style.display = 'block';
+      }
+      syncAccessibilityUI();
+      savePreferences();
+    }
+
+    document.getElementById('start-step-toggle').addEventListener('click', toggleStepMode);
+    document.getElementById('toggle-step-mode').addEventListener('click', toggleStepMode);
+
+    document.getElementById('toggle-high-contrast').addEventListener('click', () => {
+      state.highContrast = !state.highContrast;
+      syncAccessibilityUI();
+      savePreferences();
+    });
+
+    document.getElementById('toggle-reduced-motion').addEventListener('click', () => {
+      state.reducedMotion = !state.reducedMotion;
+      syncAccessibilityUI();
+      savePreferences();
+    });
+
+    document.getElementById('toggle-tts').addEventListener('click', () => {
+      audio.ttsEnabled = !audio.ttsEnabled;
+      syncAccessibilityUI();
+      savePreferences();
+    });
+
+    // Start Game CTA
+    document.getElementById('btn-start-game').addEventListener('click', () => {
+      audio.init();
+      document.getElementById('start-modal').classList.add('hidden');
+      state.wordIndex = 0;
+      state.score = 0;
+      state.playerLane = 1;
+      state.visualLaneX = 1;
+      state.running = true;
+      state.paused = false;
+      setupCurrentWord(true);
+    });
+
+    // Settings Modal Open / Close
+    document.getElementById('btn-settings').addEventListener('click', () => {
+      state.paused = true;
+      document.getElementById('settings-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+      document.getElementById('settings-modal').classList.add('hidden');
+      state.paused = false;
+    });
+
+    // Stage Complete Actions
+    document.getElementById('btn-next-stage').addEventListener('click', () => {
+      document.getElementById('complete-modal').classList.add('hidden');
+      state.stageIndex = (state.stageIndex + 1) % STAGES.length;
+      state.wordIndex = 0;
+      state.running = true;
+      setupCurrentWord(true);
+    });
+
+    document.getElementById('btn-replay-stage').addEventListener('click', () => {
+      document.getElementById('complete-modal').classList.add('hidden');
+      state.wordIndex = 0;
+      state.running = true;
+      setupCurrentWord(true);
+    });
+
+    /**
+     * =========================================================================
+     * 10. INITIALIZATION ON WINDOW LOAD
+     * =========================================================================
+     */
+    window.onload = function () {
+      loadPreferences();
+      syncAccessibilityUI();
+      resizeCanvas();
+      setupCurrentWord(false);
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>วิหคเวหาเจ็ต AR — SkyJet Supersonic AR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #070b19;
+      --panel-bg: rgba(15, 23, 42, 0.84);
+      --panel-border: rgba(56, 189, 248, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-gold: #fde047;
+      --text-main: #f8fafc;
+      --font-scale: 1;
+    }
+
+    html {
+      font-family: 'Sarabun', sans-serif;
+      font-size: calc(16px * var(--font-scale));
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    body.high-contrast {
+      --bg-deep: #000000;
+      --panel-bg: #050505;
+      --panel-border: #fde047;
+      --text-main: #ffffff;
+    }
+
+    .glass-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+    }
+
+    body.high-contrast .glass-panel {
+      backdrop-filter: none;
+      border-width: 2px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #ffffff;
+      border: 1px solid rgba(125, 211, 252, 0.55);
+      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.4);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.9);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .btn-secondary:hover { background: rgba(51, 65, 85, 0.95); }
+    .btn-secondary:active { transform: scale(0.97); }
+
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #fde047;
+      outline-offset: 2px;
+    }
+
+    .modal-scroll {
+      max-height: 88vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  </style>
+  <style>
+    #game-rules {
+      --rules-accent: #dceafa;
+      --rules-ink: #432744;
+      box-sizing: border-box;
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(44rem, calc(100% - 1.5rem));
+      max-height: calc(100% - 1.5rem);
+      padding: 0;
+      overflow: hidden;
+      border: 2px solid var(--rules-ink);
+      border-radius: 24px;
+      background: #fffdf7;
+      color: var(--rules-ink);
+      box-shadow: 0 6px 0 var(--rules-ink), 0 20px 52px #2d1a3059;
+      font: clamp(1.125rem, 1.05rem + .35vw, 1.375rem)/1.5 "Leelawadee UI", Tahoma, sans-serif;
+    }
+    #game-rules[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+    #game-rules::backdrop { background: #27172cbd; }
+    #game-rules .rules-content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+    #game-rules .rules-heading {
+      padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2.25rem);
+      border-bottom: 1px solid #4327443d;
+      background: var(--rules-accent);
+    }
+    #game-rules .rules-label { margin: 0; font-weight: 800; }
+    #game-rules h2 {
+      margin: .25rem 0 0;
+      font-size: clamp(1.625rem, 1.4rem + 1.3vw, 2.5rem);
+      line-height: 1.25;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    #game-rules ol {
+      counter-reset: rule;
+      list-style: none;
+      margin: 0;
+      padding: .4rem clamp(.9rem, 4vw, 2.25rem) 0;
+    }
+    #game-rules li {
+      counter-increment: rule;
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      align-items: start;
+      gap: .7rem;
+      padding-block: clamp(.5rem, 1.3vw, .85rem);
+    }
+    #game-rules li + li { border-top: 1px solid #e6dce5; }
+    #game-rules li::before {
+      content: counter(rule);
+      display: grid;
+      place-items: center;
+      min-height: 2rem;
+      border-radius: 10px;
+      background: var(--rules-accent);
+      font-weight: 800;
+    }
+    #game-rules .rules-switch {
+      margin: .35rem clamp(.9rem, 4vw, 2.25rem) .8rem;
+      padding: .55rem .8rem;
+      border-inline-start: 3px solid var(--rules-ink);
+      border-radius: 8px;
+      background: #f4eef7;
+      overflow-wrap: anywhere;
+    }
+    #game-rules .rules-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .3rem .7rem;
+      padding: .65rem clamp(.9rem, 4vw, 2.25rem);
+      border-top: 1px solid #e6dce5;
+      background: #fffdf7;
+    }
+    #game-rules button, #game-rules a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: .35rem .75rem;
+      font: inherit;
+      font-weight: 800;
+      color: inherit;
+    }
+    #game-rules button {
+      flex: 1;
+      background: #ffd166;
+      border: 2px solid var(--rules-ink);
+      border-radius: 12px;
+      box-shadow: 0 3px 0 var(--rules-ink);
+      cursor: pointer;
+    }
+    #game-rules button:hover { background: #ffe192; }
+    #game-rules a { text-decoration: underline; text-underline-offset: .2em; }
+    #game-rules :focus-visible { outline: 3px solid #6c2aa3; outline-offset: 2px; }
+    #game-rules .rules-content:focus-visible { outline-offset: -4px; }
+    @media (forced-colors: active) {
+      #game-rules li::before { border: 1px solid CanvasText; }
+    }
+  </style>
+</head>
+<body class="flex flex-col h-full w-full">
+  <dialog id="game-rules" aria-labelledby="game-rules-title">
+    <div class="rules-content" role="region" aria-label="กติกาและการควบคุม" tabindex="0">
+      <div class="rules-heading">
+        <p class="rules-label">วิธีเล่น</p>
+        <h2 id="game-rules-title">วิหคเวหาเจ็ต AR</h2>
+      </div>
+      <ol role="list">
+        <li><span>เลือกวิธีเล่น แล้ว <strong>ขยับมือหน้ากล้อง</strong> หรือเลื่อนเมาส์และแตะตำแหน่งในฉากเพื่อบังคับเจ็ต</span></li>
+        <li><span>พาเจ็ตลอด <strong>วงแหวน</strong> และเก็บ <strong>เทอร์โบ</strong> เพื่อพุ่งเร็วขึ้น</span></li>
+        <li><span>หลบอุกกาบาต โดรน และเมฆสายฟ้า เก็บเซลล์ซ่อมเกราะแล้วบินให้ไกลที่สุด</span></li>
+      </ol>
+      <p class="rules-switch">ในโหมด <strong>สวิตช์ปุ่มเดียว</strong> กด Space เพื่อสลับระดับความสูงของเจ็ต</p>
+    </div>
+    <form method="dialog" class="rules-actions">
+      <button type="submit" autofocus>เข้าเกม</button>
+      <a href="./index.html#bonus-title">กลับลานเกม</a>
+    </form>
+  </dialog>
+
+  <!-- แถบด้านบน: สถานะการบิน พลังงานเกราะ คะแนน และปุ่มควบคุม -->
+  <header id="topBar" class="w-full px-3 py-2 sm:px-4 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 glass-panel z-20 shrink-0">
+    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+      <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/90 border border-cyan-400/50 flex items-center justify-center shrink-0" aria-hidden="true">
+        <svg viewBox="0 0 64 64" class="w-8 h-8">
+          <polygon points="8,36 28,28 56,32 28,38" fill="#38bdf8"/>
+          <polygon points="20,30 34,14 40,30" fill="#0284c7"/>
+          <polygon points="18,36 28,48 34,36" fill="#0284c7"/>
+          <polygon points="36,29 48,31 38,33" fill="#fde047"/>
+          <polygon points="4,32 14,29 14,35" fill="#fb923c"/>
+        </svg>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="stageBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-400/40">
+            ระดับ 1 • Mach 1.0
+          </span>
+          <span id="progressText" class="text-xs font-bold text-amber-300">
+            ระยะ 0 ม. • คะแนน 0
+          </span>
+          <span id="hullBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-200 border border-emerald-400/40">
+            เกราะยาน: 100%
+          </span>
+          <span id="shieldBadge" class="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-400/50">
+            บาเรียพลาสมา!
+          </span>
+          <span id="modeBadge" class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-100 border border-indigo-300/30">
+            โหมด: รอเลือกวิธีเล่น
+          </span>
+        </div>
+        <p id="guideSpeech" class="text-sm sm:text-base font-semibold leading-snug truncate mt-0.5" aria-live="polite">
+          ยกมือขึ้นบังคับเครื่องบินเจ็ต เก็บเทอร์โบพุ่งทะยาน และหลบอุกกาบาตให้นานที่สุด!
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <button id="btnPause" type="button" class="btn-secondary hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-bold min-h-[40px]" aria-label="พักหรือเล่นต่อ">
+        พักเกม
+      </button>
+      <button id="btnRecalibrate" type="button" class="btn-secondary hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-bold min-h-[40px]" aria-label="ปรับเทียบตำแหน่งมือใหม่">
+        ปรับเทียบมือ
+      </button>
+      <button id="btnStopCamera" type="button" class="btn-secondary hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-bold min-h-[40px] text-rose-300 border-rose-400/40" aria-label="หยุดกล้อง">
+        หยุดกล้อง
+      </button>
+      <button id="btnMute" type="button" class="btn-secondary px-3 py-2 rounded-xl text-xs sm:text-sm font-bold min-h-[40px]" aria-pressed="false" aria-label="เปิดหรือปิดเสียง">
+        เสียง: เปิด
+      </button>
+      <button id="btnMenu" type="button" class="btn-secondary hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-bold min-h-[40px]" aria-label="กลับเมนูหลัก">
+        เมนู
+      </button>
+      <button id="btnSettings" type="button" class="btn-secondary p-2.5 rounded-xl min-h-[40px] min-w-[40px] flex items-center justify-center" aria-label="ตั้งค่าการเล่นและการเข้าถึง">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- พื้นที่เล่นหลัก -->
+  <main id="stageContainer" class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center">
+    <video id="webcamVideo" playsinline muted class="hidden"></video>
+    <canvas id="gameCanvas" class="block w-full h-full"></canvas>
+
+    <!-- ป้ายแจ้งเตือนสถานะชั่วคราว -->
+    <div id="statusBanner" class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-2xl glass-panel text-center transition-opacity duration-300 opacity-0 max-w-[92vw]">
+      <p id="statusBannerText" class="text-sm sm:text-base font-bold text-amber-200"></p>
+    </div>
+
+    <!-- แถบควบคุมโหมดสวิตช์ปุ่มเดียว -->
+    <div id="oneSwitchBar" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+      <button id="btnOneSwitchAction" type="button" class="btn-primary px-6 py-4 rounded-2xl text-base sm:text-lg font-extrabold shadow-xl">
+        แตะหรือกด Spacebar เพื่อเปลี่ยนระดับเพดานบิน
+      </button>
+    </div>
+
+    <!-- หน้าจอเริ่มต้น (Start Overlay) -->
+    <section id="startOverlay" class="absolute inset-0 z-30 flex items-center justify-center p-3 sm:p-6 bg-[#070b19]/85 backdrop-blur-md">
+      <div class="glass-panel rounded-3xl p-5 sm:p-7 max-w-xl w-full modal-scroll shadow-2xl">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/25 border border-cyan-400/50 flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 64 64" class="w-9 h-9">
+              <polygon points="8,36 28,28 56,32 28,38" fill="#38bdf8"/>
+              <polygon points="20,30 34,14 40,30" fill="#0284c7"/>
+              <polygon points="18,36 28,48 34,36" fill="#0284c7"/>
+              <polygon points="36,29 48,31 38,33" fill="#fde047"/>
+              <polygon points="4,32 14,29 14,35" fill="#fb923c"/>
+            </svg>
+          </div>
+          <div>
+            <h1 id="jet-mode-heading" tabindex="-1" class="text-xl sm:text-2xl font-extrabold text-white leading-tight">วิหคเวหาเจ็ต AR — SkyJet Supersonic AR</h1>
+            <p class="text-xs sm:text-sm text-cyan-300">ขับเครื่องบินเจ็ตความเร็วเหนือเสียงด้วยมือเปล่า ยิ่งบินไกลยิ่งเร็วและมันส์!</p>
+          </div>
+        </div>
+
+        <p class="text-sm sm:text-base text-slate-200 leading-relaxed mb-3">
+          บังคับ<strong>เครื่องบินเจ็ตไฮเทค</strong>ด้วยมือเปล่าข้างเดียว! เก็บ<strong>แคปซูลเทอร์โบ (Turbo)</strong> เพื่อเร่งความเร็วทะลุกำแพงเสียงพร้อมเปลวไฟไอพ่นสีฟ้า ลอด<strong>วงแหวนไฮเปอร์</strong> เก็บ<strong>เซลล์ซ่อมเกราะ</strong> และหลบ<strong>โดรนเลเซอร์ อุกกาบาต และเมฆสายฟ้า</strong> ที่จะถาโถมเร็วขึ้นเรื่อยๆ จนกว่าพลังงานเกราะจะหมด!
+        </p>
+
+        <div class="grid grid-cols-3 gap-2 mb-4 text-center text-xs">
+          <div class="rounded-xl p-2 bg-slate-900/80 border border-cyan-400/30">
+            <span class="block font-bold text-cyan-300">เจ็ตไอพ่นสุดเฟี้ยว</span>
+            <span class="text-slate-300">เอียงปีกตามมือ+เปลวไฟท้าย</span>
+          </div>
+          <div class="rounded-xl p-2 bg-slate-900/80 border border-amber-400/30">
+            <span class="block font-bold text-amber-300">เทอร์โบ & วงแหวน</span>
+            <span class="text-slate-300">พุ่งความเร็วแสงชนกระจุย</span>
+          </div>
+          <div class="rounded-xl p-2 bg-slate-900/80 border border-rose-400/30">
+            <span class="block font-bold text-rose-300">ความยากไต่ระดับ</span>
+            <span class="text-slate-300">ท้าทายสถิติจนกว่าเกราะหมด</span>
+          </div>
+        </div>
+
+        <!-- กล่องสถานะกล้องและการโหลดโมเดล -->
+        <div class="rounded-2xl p-3.5 bg-slate-900/75 border border-slate-700/80 mb-4 space-y-2 text-xs sm:text-sm text-slate-300">
+          <p class="font-bold text-cyan-200">ข้อมูลความเป็นส่วนตัวและการทำงานของกล้อง:</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>ขอเปิดกล้องเฉพาะเมื่อคุณกดปุ่มด้านล่าง ใช้เฉพาะภาพวิดีโอ (ไม่ใช้ไมโครโฟน)</li>
+            <li>ประมวลผลภาพในเบราว์เซอร์ของคุณเท่านั้น ไม่มีการบันทึกหรืออัปโหลดภาพ</li>
+            <li>ต้องใช้อินเทอร์เน็ตเพื่อโหลดโมเดลตรวจจับมือ MediaPipe และเปิดผ่าน HTTPS หรือ localhost</li>
+          </ul>
+          <div id="modelLoadFeedback" class="hidden pt-1 text-amber-300 font-semibold" role="status"></div>
+        </div>
+
+        <!-- ปุ่มเลือกโหมดการเล่น -->
+        <div class="space-y-2.5">
+          <button id="btnStartCamera" type="button" class="btn-primary w-full py-3.5 px-4 rounded-2xl text-base font-bold flex items-center justify-center gap-2">
+            <span>เปิดกล้องเล่นด้วยมือเปล่า (โหมด AR)</span>
+          </button>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button id="btnStartPointer" type="button" class="btn-secondary py-3 px-4 rounded-2xl text-sm font-bold">
+              เล่นด้วยเมาส์ / หน้าจอสัมผัส
+            </button>
+            <button id="btnStartSwitch" type="button" class="btn-secondary py-3 px-4 rounded-2xl text-sm font-bold">
+              โหมดสวิตช์ปุ่มเดียว (One-Switch)
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-700/70 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <span>หากพรีวิวบล็อกกล้อง สามารถบันทึกไฟล์ไปเปิดบนเบราว์เซอร์ได้</span>
+          <a href="./index.html#bonus-title" class="underline text-cyan-300 font-semibold py-2">← กลับลานเกม</a>
+          <button id="btnExportHtml" type="button" class="underline text-cyan-300 hover:text-cyan-200 font-semibold py-1">
+            บันทึกไฟล์เกม (.html)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- หน้าต่างตั้งค่าขั้นสูง (Settings Modal) -->
+    <section id="settingsModal" class="hidden absolute inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="glass-panel rounded-3xl p-5 sm:p-6 max-w-lg w-full modal-scroll shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <h2 id="settingsTitle" class="text-lg sm:text-xl font-extrabold text-white">ตั้งค่าการบินและการเข้าถึง</h2>
+          <button id="btnCloseSettings" type="button" class="btn-secondary px-3 py-1.5 rounded-xl text-sm font-bold">ปิด</button>
+        </div>
+
+        <div class="space-y-3 text-sm">
+          <div>
+            <label for="optSpeedMode" class="block font-bold text-cyan-200 mb-1">ความเร็วพื้นฐานของเครื่องบิน</label>
+            <select id="optSpeedMode" class="w-full rounded-xl bg-slate-800 border border-slate-600 p-2.5 text-white">
+              <option value="slow">ช้า (ฝึกควบคุมทิศทางสบายๆ)</option>
+              <option value="normal" selected>ปานกลาง (แนะนำ)</option>
+              <option value="fast">เร็ว (ท้าทายความไว)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="optZoneSize" class="block font-bold text-cyan-200 mb-1">ขนาดพื้นที่ขยับมือ (สำหรับท่านั่ง)</label>
+            <select id="optZoneSize" class="w-full rounded-xl bg-slate-800 border border-slate-600 p-2.5 text-white">
+              <option value="small">เล็ก (ขยับข้อมือช่วงสั้นๆ ใกล้ลำตัว)</option>
+              <option value="medium" selected>กลาง (พื้นที่มาตรฐาน)</option>
+              <option value="large">ใหญ่ (ขยับแขนกว้าง)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="optHandSide" class="block font-bold text-cyan-200 mb-1">ข้างมือที่ใช้ควบคุม (ล็อกมือเดียว)</label>
+            <select id="optHandSide" class="w-full rounded-xl bg-slate-800 border border-slate-600 p-2.5 text-white">
+              <option value="auto" selected>ล็อกมือแรกที่ตรวจพบอัตโนมัติ</option>
+              <option value="Left">มือซ้าย</option>
+              <option value="Right">มือขวา</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="flex justify-between font-bold text-cyan-200 mb-1">
+              <label for="optSmoothing">ความนุ่มนวล (Smoothing)</label>
+              <span id="valSmoothing">65%</span>
+            </div>
+            <input id="optSmoothing" type="range" min="10" max="90" value="65" class="w-full accent-cyan-400" />
+          </div>
+
+          <div>
+            <div class="flex justify-between font-bold text-cyan-200 mb-1">
+              <label for="optDeadZone">ระยะกันสั่น (Dead Zone)</label>
+              <span id="valDeadZone">8 px</span>
+            </div>
+            <input id="optDeadZone" type="range" min="0" max="25" value="8" class="w-full accent-cyan-400" />
+          </div>
+
+          <hr class="border-slate-700" />
+
+          <div>
+            <label for="optFontScale" class="block font-bold text-amber-200 mb-1">ขนาดตัวอักษร</label>
+            <select id="optFontScale" class="w-full rounded-xl bg-slate-800 border border-slate-600 p-2.5 text-white">
+              <option value="1" selected>ปกติ (100%)</option>
+              <option value="1.15">ใหญ่ (115%)</option>
+              <option value="1.3">ใหญ่มาก (130%)</option>
+            </select>
+          </div>
+
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer">
+            <span class="font-bold text-white">โหมดคอนทราสต์สูง (High Contrast)</span>
+            <input id="optHighContrast" type="checkbox" class="w-5 h-5 accent-amber-400" />
+          </label>
+
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer">
+            <span class="font-bold text-white">ลดการเคลื่อนไหวและเอฟเฟกต์ (Reduced Motion)</span>
+            <input id="optReducedMotion" type="checkbox" class="w-5 h-5 accent-amber-400" />
+          </label>
+
+          <div class="pt-1">
+            <button id="btnToggleFullscreen" type="button" class="btn-secondary w-full py-2.5 rounded-xl font-bold">
+              สลับโหมดเต็มจอ (Fullscreen)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- หน้าต่างสรุปผลเมื่อเกราะยานหมด (Game Over / Flight Report Modal) -->
+    <section id="victoryModal" class="hidden absolute inset-0 z-30 flex items-center justify-center p-4 bg-[#070b19]/85 backdrop-blur-md">
+      <div class="glass-panel rounded-3xl p-6 max-w-md w-full text-center shadow-2xl space-y-4 border-2 border-cyan-400/50">
+        <div class="w-16 h-16 mx-auto rounded-full bg-cyan-500/20 border-2 border-cyan-300 flex items-center justify-center">
+          <svg viewBox="0 0 64 64" class="w-11 h-11">
+            <polygon points="8,36 28,28 56,32 28,38" fill="#38bdf8"/>
+            <polygon points="20,30 34,14 40,30" fill="#0284c7"/>
+            <polygon points="36,29 48,31 38,33" fill="#fde047"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-extrabold text-cyan-300">สิ้นสุดภารกิจการบิน!</h2>
+        <div id="finalStatsBox" class="rounded-2xl bg-slate-900/90 border border-slate-700 p-4 space-y-1.5 text-sm sm:text-base">
+          <p id="victorySummary" class="text-slate-200 font-semibold"></p>
+          <p id="bestRecordText" class="text-amber-300 font-bold text-sm"></p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+          <button id="btnPlayAgain" type="button" class="btn-primary flex-1 py-3.5 px-4 rounded-2xl text-base font-bold">
+            ทะยานขึ้นบินอีกครั้ง!
+          </button>
+          <button id="btnBackToMenuFromOver" type="button" class="btn-secondary py-3.5 px-4 rounded-2xl text-sm font-bold">
+            กลับเมนูหลัก
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    /**
+     * วิหคเวหาเจ็ต AR — SkyJet Supersonic AR
+     * เกมขับเครื่องบินเจ็ตความเร็วเหนือเสียงด้วยมือเปล่าจริง (MediaPipe Hand Landmarker)
+     */
+
+    // =========================================================================
+    // 1. ระบบเสียง Web Audio สุดเฟี้ยว
+    // =========================================================================
+    class JetAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.activeNodes = [];
+        this.starScale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      stopCurrent() {
+        const now = this.ctx ? this.ctx.currentTime : 0;
+        this.activeNodes.forEach(({ osc, gain }) => {
+          try {
+            gain.gain.cancelScheduledValues(now);
+            gain.gain.setTargetAtTime(0.0001, now, 0.03);
+            osc.stop(now + 0.1);
+          } catch (_) {}
+        });
+        this.activeNodes = [];
+      }
+
+      playSweep(startFreq, endFreq, duration = 0.45, type = 'sawtooth', volume = 0.10, delay = 0, allowOverlap = true) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        if (!allowOverlap) this.stopCurrent();
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(Math.max(startFreq, endFreq) * 2.2, now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration + 0.04);
+
+        const entry = { osc, gain };
+        this.activeNodes.push(entry);
+        osc.onended = () => {
+          this.activeNodes = this.activeNodes.filter(n => n !== entry);
+        };
+      }
+
+      playEnergyCollect(combo = 0) {
+        this.stopCurrent();
+        const note = this.starScale[combo % this.starScale.length];
+        this.playSweep(note, note * 1.25, 0.22, 'triangle', 0.11, 0, true);
+        this.playSweep(note * 1.5, note * 2, 0.28, 'sine', 0.06, 0.04, true);
+      }
+
+      playTurboBoost() {
+        this.stopCurrent();
+        this.playSweep(180, 1480, 0.55, 'sawtooth', 0.11, 0, true);
+        this.playSweep(620, 2200, 0.45, 'sine', 0.09, 0.05, true);
+        this.playSweep(150, 48, 0.35, 'triangle', 0.14, 0.08, true);
+      }
+
+      playShieldOrRepair() {
+        this.stopCurrent();
+        this.playSweep(330, 660, 0.28, 'sine', 0.10, 0, true);
+        this.playSweep(523.25, 1046.5, 0.35, 'triangle', 0.09, 0.10, true);
+      }
+
+      playHullDamage() {
+        this.stopCurrent();
+        this.playSweep(240, 55, 0.36, 'sawtooth', 0.13, 0, true);
+        this.playSweep(440, 220, 0.25, 'square', 0.06, 0.05, true);
+      }
+
+      playJetDown() {
+        this.stopCurrent();
+        this.playSweep(520, 65, 0.85, 'sawtooth', 0.12, 0, true);
+        this.playSweep(320, 45, 0.95, 'triangle', 0.11, 0.15, true);
+      }
+    }
+
+    const sound = new JetAudioEngine();
+
+    // =========================================================================
+    // 2. การตั้งค่าและสถานะของเกมเครื่องบินเจ็ต
+    // =========================================================================
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const config = {
+      speedMode: 'normal',
+      zoneSize: 'medium',
+      smoothing: 0.65,
+      deadZonePx: 8,
+      handPreference: 'auto',
+      reducedMotion: prefersReducedMotion,
+      highContrast: false
+    };
+
+    const state = {
+      screen: 'start',
+      inputMode: 'none',
+      paused: false,
+      calibrating: false,
+      calibrationProgress: 0,
+
+      cameraActive: false,
+      modelReady: false,
+      handDetected: false,
+      lockedHandedness: null,
+      targetHandNorm: { x: 0.25, y: 0.5 },
+
+      jet: {
+        x: 160,
+        y: 300,
+        tilt: 0,
+        hull: 100,
+        maxHull: 100,
+        hasBarrier: false,
+        invulnTimer: 0,
+        turboTimer: 0,
+        wingTrailTop: [],
+        wingTrailBot: []
+      },
+
+      distance: 0,
+      bestDistance: 0,
+      score: 0,
+      bestScore: 0,
+      difficultyLevel: 1,
+      combo: 0,
+      lastGuideSpeech: '',
+      statusTimer: 0,
+
+      obstacles: [],
+      collectibles: [],
+      speedLines: [],
+      bgClouds: [],
+      particles: [],
+      spawnTimer: 0,
+
+      switchAltitudes: [0.18, 0.38, 0.60, 0.82],
+      switchAltIndex: 1
+    };
+
+    // =========================================================================
+    // 3. อ้างอิง DOM Elements
+    // =========================================================================
+    const videoEl = document.getElementById('webcamVideo');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const stageContainer = document.getElementById('stageContainer');
+
+    const guideSpeechEl = document.getElementById('guideSpeech');
+    const stageBadgeEl = document.getElementById('stageBadge');
+    const progressTextEl = document.getElementById('progressText');
+    const hullBadgeEl = document.getElementById('hullBadge');
+    const shieldBadgeEl = document.getElementById('shieldBadge');
+    const modeBadgeEl = document.getElementById('modeBadge');
+    const statusBannerEl = document.getElementById('statusBanner');
+    const statusBannerTextEl = document.getElementById('statusBannerText');
+
+    const startOverlayEl = document.getElementById('startOverlay');
+    const modelLoadFeedbackEl = document.getElementById('modelLoadFeedback');
+    const settingsModalEl = document.getElementById('settingsModal');
+    const victoryModalEl = document.getElementById('victoryModal');
+    const victorySummaryEl = document.getElementById('victorySummary');
+    const bestRecordTextEl = document.getElementById('bestRecordText');
+    const oneSwitchBarEl = document.getElementById('oneSwitchBar');
+
+    const btnPause = document.getElementById('btnPause');
+    const btnRecalibrate = document.getElementById('btnRecalibrate');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    const btnMute = document.getElementById('btnMute');
+    const btnMenu = document.getElementById('btnMenu');
+
+    // =========================================================================
+    // 4. ระบบตรวจจับมือจริง (MediaPipe Hand Landmarker)
+    // =========================================================================
+    let handLandmarker = null;
+    let mediaStream = null;
+    let lastVideoTime = -1;
+
+    function getActiveZoneRect() {
+      const ratios = {
+        small: { w: 0.34, h: 0.42 },
+        medium: { w: 0.48, h: 0.56 },
+        large: { w: 0.64, h: 0.70 }
+      };
+      const r = ratios[config.zoneSize] || ratios.medium;
+      const w = canvasWidth * r.w;
+      const h = canvasHeight * r.h;
+      const x = (canvasWidth - w) / 2;
+      const y = (canvasHeight - h) / 2;
+      return { x, y, w, h };
+    }
+
+    function mapCameraNormToGameNorm(mirroredCamX, camY) {
+      const ratios = {
+        small: { w: 0.34, h: 0.42 },
+        medium: { w: 0.48, h: 0.56 },
+        large: { w: 0.64, h: 0.70 }
+      };
+      const r = ratios[config.zoneSize] || ratios.medium;
+      const minX = 0.5 - r.w / 2;
+      const minY = 0.5 - r.h / 2;
+      const nx = Math.max(0, Math.min(1, (mirroredCamX - minX) / r.w));
+      const ny = Math.max(0, Math.min(1, (camY - minY) / r.h));
+      return { x: nx, y: ny };
+    }
+
+    async function initMediaPipeAndCamera() {
+      modelLoadFeedbackEl.classList.remove('hidden');
+      modelLoadFeedbackEl.textContent = 'กำลังขออนุญาตเปิดกล้องและโหลดโมเดลตรวจจับมือ MediaPipe...';
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        modelLoadFeedbackEl.textContent = 'เบราว์เซอร์หรือหน้าต่างพรีวิวนี้ไม่รองรับการเปิดกล้อง กรุณาเลือกเล่นด้วยเมาส์/สัมผัส หรือบันทึกไฟล์ .html ไปเปิดภายนอก';
+        return false;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        });
+        videoEl.srcObject = mediaStream;
+        await videoEl.play();
+        state.cameraActive = true;
+      } catch (err) {
+        modelLoadFeedbackEl.textContent = `ไม่สามารถเปิดกล้องได้ (${err.name || 'ถูกปฏิเสธสิทธิ์'}) — คุณสามารถเล่นด้วยเมาส์/สัมผัสได้ทันที`;
+        return false;
+      }
+
+      try {
+        if (!handLandmarker) {
+          const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
+          const { FilesetResolver, HandLandmarker } = vision;
+          const filesetResolver = await FilesetResolver.forVisionTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+          );
+          handLandmarker = await HandLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+              delegate: 'GPU'
+            },
+            runningMode: 'VIDEO',
+            numHands: 2,
+            minHandDetectionConfidence: 0.5,
+            minHandPresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+        }
+        state.modelReady = true;
+        modelLoadFeedbackEl.textContent = 'เชื่อมต่อกล้องและโมเดลตรวจจับมือสำเร็จ!';
+        return true;
+      } catch (err) {
+        stopCameraTracks();
+        modelLoadFeedbackEl.textContent = 'โหลดโมเดลตรวจจับมือไม่สำเร็จ (อาจไม่มีอินเทอร์เน็ตหรือถูกบล็อก) กรุณาลองใหม่หรือเล่นด้วยเมาส์/สัมผัส';
+        return false;
+      }
+    }
+
+    function stopCameraTracks() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+      videoEl.srcObject = null;
+      state.cameraActive = false;
+      state.handDetected = false;
+      state.lockedHandedness = null;
+    }
+
+    function processCameraHands() {
+      if (!state.cameraActive || !state.modelReady || !handLandmarker || videoEl.readyState < 2) {
+        return;
+      }
+      if (videoEl.currentTime === lastVideoTime) return;
+      lastVideoTime = videoEl.currentTime;
+
+      const results = handLandmarker.detectForVideo(videoEl, performance.now());
+      if (!results || !results.landmarks || results.landmarks.length === 0) {
+        state.handDetected = false;
+        return;
+      }
+
+      let chosenIndex = 0;
+      const handednesses = results.handednesses || [];
+
+      if (config.handPreference !== 'auto') {
+        const matchIdx = handednesses.findIndex(
+          h => h[0] && h[0].categoryName === config.handPreference
+        );
+        if (matchIdx === -1) {
+          state.handDetected = false;
+          return;
+        }
+        chosenIndex = matchIdx;
+      } else if (state.lockedHandedness) {
+        const lockIdx = handednesses.findIndex(
+          h => h[0] && h[0].categoryName === state.lockedHandedness
+        );
+        if (lockIdx !== -1) {
+          chosenIndex = lockIdx;
+        } else if (handednesses[0] && handednesses[0][0]) {
+          state.lockedHandedness = handednesses[0][0].categoryName;
+          chosenIndex = 0;
+        }
+      } else if (handednesses[0] && handednesses[0][0]) {
+        state.lockedHandedness = handednesses[0][0].categoryName;
+        chosenIndex = 0;
+      }
+
+      const lm = results.landmarks[chosenIndex];
+      const palmX = (lm[0].x + lm[5].x + lm[9].x + lm[13].x + lm[17].x) / 5;
+      const palmY = (lm[0].y + lm[5].y + lm[9].y + lm[13].y + lm[17].y) / 5;
+
+      const mirroredX = 1 - palmX;
+      state.targetHandNorm = mapCameraNormToGameNorm(mirroredX, palmY);
+      state.handDetected = true;
+    }
+
+    // =========================================================================
+    // 5. โหมดสำรอง (เมาส์ / สัมผัส และ สวิตช์ปุ่มเดียว) + การปรับขนาด Canvas
+    // =========================================================================
+    let canvasWidth = 800;
+    let canvasHeight = 600;
+
+    function resizeCanvas() {
+      const rect = stageContainer.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvasWidth = Math.max(280, rect.width);
+      canvasHeight = Math.max(260, rect.height);
+      canvas.width = Math.floor(canvasWidth * dpr);
+      canvas.height = Math.floor(canvasHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function updatePointerTarget(clientX, clientY) {
+      if (state.inputMode !== 'pointer' || state.paused || state.screen !== 'playing') return;
+      const rect = canvas.getBoundingClientRect();
+      const nx = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const ny = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+      state.targetHandNorm = { x: nx, y: ny };
+      state.handDetected = true;
+    }
+
+    canvas.addEventListener('pointermove', (e) => {
+      updatePointerTarget(e.clientX, e.clientY);
+    });
+    canvas.addEventListener('pointerdown', (e) => {
+      sound.init();
+      updatePointerTarget(e.clientX, e.clientY);
+    });
+
+    function triggerOneSwitchAltitude() {
+      if (state.inputMode !== 'switch' || state.paused || state.screen !== 'playing') return;
+      sound.init();
+      if (state.calibrating) {
+        state.calibrating = false;
+        speakGuide('ปรับเทียบเรียบร้อย บังคับเครื่องบินเจ็ตหลบสิ่งกีดขวางได้เลย!');
+        return;
+      }
+      state.switchAltIndex = (state.switchAltIndex + 1) % state.switchAltitudes.length;
+      state.targetHandNorm.x = 0.25;
+      state.targetHandNorm.y = state.switchAltitudes[state.switchAltIndex];
+      state.handDetected = true;
+      sound.playSweep(520, 780, 0.14, 'triangle', 0.06, 0, true);
+    }
+
+    document.getElementById('btnOneSwitchAction').addEventListener('click', triggerOneSwitchAltitude);
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && state.inputMode === 'switch' && state.screen === 'playing') {
+        e.preventDefault();
+        triggerOneSwitchAltitude();
+      }
+    });
+
+    // =========================================================================
+    // 6. การเริ่มต้นรอบการบิน การไต่ระดับความยาก และไอเทมเทอร์โบ
+    // =========================================================================
+    function speakGuide(text) {
+      if (state.lastGuideSpeech === text) return;
+      state.lastGuideSpeech = text;
+      guideSpeechEl.textContent = text;
+    }
+
+    function showStatusBanner(text, durationMs = 2200) {
+      state.statusTimer = durationMs;
+      statusBannerTextEl.textContent = text;
+      statusBannerEl.classList.remove('opacity-0');
+    }
+
+    function beginFlightSession() {
+      state.screen = 'playing';
+      state.paused = false;
+      state.distance = 0;
+      state.score = 0;
+      state.difficultyLevel = 1;
+      state.combo = 0;
+      state.obstacles = [];
+      state.collectibles = [];
+      state.particles = [];
+      state.spawnTimer = 0.5;
+
+      state.jet.x = canvasWidth * 0.20;
+      state.jet.y = canvasHeight * 0.5;
+      state.jet.tilt = 0;
+      state.jet.hull = 100;
+      state.jet.hasBarrier = false;
+      state.jet.invulnTimer = 0;
+      state.jet.turboTimer = 0;
+      state.jet.wingTrailTop = [];
+      state.jet.wingTrailBot = [];
+      state.targetHandNorm = { x: 0.22, y: 0.5 };
+
+      state.bgClouds = [];
+      for (let i = 0; i < 6; i++) {
+        state.bgClouds.push({
+          x: Math.random() * canvasWidth,
+          y: canvasHeight * (0.14 + Math.random() * 0.72),
+          scale: 0.55 + Math.random() * 0.75,
+          speed: 35 + Math.random() * 45
+        });
+      }
+
+      state.speedLines = [];
+      for (let i = 0; i < 18; i++) {
+        state.speedLines.push({
+          x: Math.random() * canvasWidth,
+          y: Math.random() * canvasHeight,
+          len: 28 + Math.random() * 65,
+          speedMult: 0.8 + Math.random() * 0.7
+        });
+      }
+
+      victoryModalEl.classList.add('hidden');
+      shieldBadgeEl.classList.add('hidden');
+      btnPause.classList.remove('hidden');
+      btnPause.textContent = 'พักเกม';
+      btnMenu.classList.remove('hidden');
+
+      if (state.inputMode === 'camera') {
+        btnRecalibrate.classList.remove('hidden');
+        btnStopCamera.classList.remove('hidden');
+        oneSwitchBarEl.classList.add('hidden');
+        modeBadgeEl.textContent = 'โหมด: ขับเจ็ตด้วยมือ AR';
+      } else if (state.inputMode === 'pointer') {
+        btnRecalibrate.classList.add('hidden');
+        btnStopCamera.classList.add('hidden');
+        oneSwitchBarEl.classList.add('hidden');
+        modeBadgeEl.textContent = 'โหมด: เมาส์ / สัมผัส';
+      } else {
+        btnRecalibrate.classList.add('hidden');
+        btnStopCamera.classList.add('hidden');
+        oneSwitchBarEl.classList.remove('hidden');
+        modeBadgeEl.textContent = 'โหมด: สวิตช์ปุ่มเดียว';
+      }
+
+      updateFlightHUD();
+      speakGuide('ขยับมือบังคับเครื่องบินเจ็ต เก็บเทอร์โบพุ่งทะยาน และหลบสิ่งกีดขวางให้นานที่สุด!');
+    }
+
+    function triggerCalibration() {
+      if (state.inputMode !== 'camera') return;
+      state.calibrating = true;
+      state.calibrationProgress = 0;
+      speakGuide('ยกมือข้างเดียวไว้ในกรอบแสงตรงกลางเพื่อปรับเทียบคันบังคับเครื่องบินเจ็ต');
+    }
+
+    function updateFlightHUD() {
+      const mach = (1.0 + (state.difficultyLevel - 1) * 0.25 + (state.jet.turboTimer > 0 ? 1.2 : 0)).toFixed(1);
+      stageBadgeEl.textContent = `ระดับ ${state.difficultyLevel} • Mach ${mach}`;
+      progressTextEl.textContent = `ระยะ ${Math.floor(state.distance)} ม. • คะแนน ${state.score}`;
+
+      const hullPct = Math.max(0, Math.round(state.jet.hull));
+      hullBadgeEl.textContent = `เกราะยาน: ${hullPct}%`;
+      hullBadgeEl.className = 'text-xs font-bold px-2 py-0.5 rounded-full border ' + (
+        hullPct > 50
+          ? 'bg-emerald-500/25 text-emerald-200 border-emerald-400/40'
+          : hullPct > 25
+            ? 'bg-amber-500/25 text-amber-200 border-amber-400/40'
+            : 'bg-rose-500/35 text-rose-200 border-rose-400/60'
+      );
+
+      shieldBadgeEl.classList.toggle('hidden', !state.jet.hasBarrier);
+    }
+
+    function triggerGameOver() {
+      state.screen = 'gameover';
+      state.paused = true;
+      sound.playJetDown();
+
+      const finalDist = Math.floor(state.distance);
+      if (finalDist > state.bestDistance) state.bestDistance = finalDist;
+      if (state.score > state.bestScore) state.bestScore = state.score;
+
+      victorySummaryEl.textContent = `คุณบินไปได้ไกล ${finalDist} เมตร (ระดับความเร็ว ${state.difficultyLevel}) ทำคะแนนรวม ${state.score} แต้ม!`;
+      bestRecordTextEl.textContent = `สถิติสูงสุดรอบนี้: ${state.bestDistance} เมตร • ${state.bestScore} แต้ม`;
+      victoryModalEl.classList.remove('hidden');
+      speakGuide('พลังงานเกราะหมดแล้ว! กด "ทะยานขึ้นบินอีกครั้ง" เพื่อทำลายสถิติได้เลย');
+    }
+
+    function spawnWave() {
+      const marginY = canvasHeight * 0.14;
+      const usableH = canvasHeight - marginY * 2;
+      const safeLaneY = marginY + Math.random() * usableH;
+
+      const countObstacles = state.difficultyLevel === 1
+        ? 1
+        : state.difficultyLevel <= 3
+          ? (Math.random() < 0.65 ? 2 : 1)
+          : (canvasHeight > 460 && Math.random() < 0.45 ? 3 : 2);
+
+      const baseR = Math.max(30, Math.min(canvasWidth, canvasHeight) * 0.05);
+      const placedYs = [];
+
+      for (let idx = 0; idx < countObstacles; idx++) {
+        let obsY = marginY + Math.random() * usableH;
+        let tries = 0;
+        while (
+          tries < 12 &&
+          (Math.abs(obsY - safeLaneY) < 118 || placedYs.some(py => Math.abs(obsY - py) < 105))
+        ) {
+          obsY = marginY + Math.random() * usableH;
+          tries++;
+        }
+        if (Math.abs(obsY - safeLaneY) < 110) continue;
+        placedYs.push(obsY);
+
+        const pool = ['stormCloud'];
+        if (state.difficultyLevel >= 2) pool.push('laserDrone', 'windmill');
+        if (state.difficultyLevel >= 3) pool.push('meteor');
+        const obsType = pool[Math.floor(Math.random() * pool.length)];
+
+        state.obstacles.push({
+          type: obsType,
+          x: canvasWidth + 90 + idx * 135,
+          y: obsY,
+          vy: obsType === 'meteor' ? (obsY > canvasHeight * 0.5 ? -95 : 95) : 0,
+          r: obsType === 'meteor' ? baseR * 0.85 : baseR,
+          phase: Math.random() * Math.PI * 2,
+          destroyed: false
+        });
+      }
+
+      const roll = Math.random();
+      if (roll < 0.30) {
+        state.collectibles.push({
+          type: 'turbo',
+          x: canvasWidth + 105,
+          y: safeLaneY,
+          r: 32,
+          collected: false
+        });
+      } else if (roll < 0.48) {
+        state.collectibles.push({
+          type: 'hyperRing',
+          x: canvasWidth + 115,
+          y: safeLaneY,
+          r: 46,
+          collected: false
+        });
+      } else if (roll < 0.62 && state.jet.hull < 85) {
+        state.collectibles.push({
+          type: 'repair',
+          x: canvasWidth + 105,
+          y: safeLaneY,
+          r: 30,
+          collected: false
+        });
+      } else if (roll < 0.72 && !state.jet.hasBarrier) {
+        state.collectibles.push({
+          type: 'barrier',
+          x: canvasWidth + 105,
+          y: safeLaneY,
+          r: 30,
+          collected: false
+        });
+      } else {
+        const starCount = 3;
+        for (let i = 0; i < starCount; i++) {
+          state.collectibles.push({
+            type: 'star',
+            x: canvasWidth + 95 + i * 54,
+            y: safeLaneY + Math.sin(i * 0.9) * 16,
+            r: 22,
+            collected: false
+          });
+        }
+      }
+    }
+
+    function spawnBurstParticles(x, y, color, count = 16) {
+      if (config.reducedMotion) return;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+        const speed = 2.0 + Math.random() * 4.5;
+        state.particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1.0,
+          color,
+          size: 3.5 + Math.random() * 4
+        });
+      }
+    }
+
+    // =========================================================================
+    // 7. การอัปเดตการบินของเครื่องบินเจ็ต
+    // =========================================================================
+    function updateSimulation(dt) {
+      if (state.paused) return;
+
+      if (state.statusTimer > 0) {
+        state.statusTimer -= dt * 1000;
+        if (state.statusTimer <= 0) statusBannerEl.classList.add('opacity-0');
+      }
+
+      if (state.inputMode === 'camera') {
+        processCameraHands();
+      }
+
+      if (state.screen === 'playing' && state.inputMode === 'camera' && !state.handDetected) {
+        statusBannerTextEl.textContent = 'พักมือได้เลย ยกมือเมื่อพร้อม (เครื่องบินกำลังรักษาระดับรอคุณอยู่)';
+        statusBannerEl.classList.remove('opacity-0');
+        return;
+      } else if (state.statusTimer <= 0) {
+        statusBannerEl.classList.add('opacity-0');
+      }
+
+      if (state.calibrating) {
+        if (state.handDetected) {
+          state.calibrationProgress += dt * 1000;
+          if (state.calibrationProgress >= 800) {
+            state.calibrating = false;
+            sound.playTurboBoost();
+            speakGuide('ล็อกเป้าหมายแล้ว! ขยับมือบังคับเครื่องบินเจ็ต เก็บเทอร์โบและหลบสิ่งกีดขวาง!');
+          }
+        } else {
+          state.calibrationProgress = Math.max(0, state.calibrationProgress - dt * 400);
+        }
+        return;
+      }
+
+      if (state.screen !== 'playing') return;
+
+      const newLevel = 1 + Math.floor(state.distance / 220);
+      if (newLevel > state.difficultyLevel) {
+        state.difficultyLevel = newLevel;
+        sound.playShieldOrRepair();
+        showStatusBanner(`ความเร็วเพิ่มขึ้น! เข้าสู่ระดับความยากที่ ${state.difficultyLevel}`, 2400);
+      }
+
+      const userSpeedMult = config.speedMode === 'slow' ? 0.76 : config.speedMode === 'fast' ? 1.26 : 1.0;
+      const levelSpeedScale = 1 + Math.min(1.4, (state.difficultyLevel - 1) * 0.14);
+      const turboMult = state.jet.turboTimer > 0 ? 1.72 : 1.0;
+      const scrollSpeed = canvasWidth * 0.34 * userSpeedMult * levelSpeedScale * turboMult;
+
+      if (state.jet.invulnTimer > 0) state.jet.invulnTimer = Math.max(0, state.jet.invulnTimer - dt);
+      if (state.jet.turboTimer > 0) state.jet.turboTimer = Math.max(0, state.jet.turboTimer - dt);
+
+      const desiredX = canvasWidth * (0.15 + state.targetHandNorm.x * 0.28);
+      const desiredY = canvasHeight * (0.10 + state.targetHandNorm.y * 0.80);
+
+      const dx = desiredX - state.jet.x;
+      const dy = desiredY - state.jet.y;
+      const distMove = Math.hypot(dx, dy);
+
+      if (distMove > config.deadZonePx * 0.45) {
+        const followAlpha = Math.min(1, dt * (13 - config.smoothing * 7));
+        state.jet.x += dx * followAlpha;
+        state.jet.y += dy * followAlpha;
+        state.jet.tilt = Math.max(-0.55, Math.min(0.55, dy * 0.009));
+      } else {
+        state.jet.tilt *= 0.86;
+      }
+
+      if (!config.reducedMotion) {
+        const cosT = Math.cos(state.jet.tilt);
+        const sinT = Math.sin(state.jet.tilt);
+        state.jet.wingTrailTop.push({
+          x: state.jet.x - 12 * cosT + 18 * sinT,
+          y: state.jet.y - 12 * sinT - 18 * cosT,
+          life: 1.0,
+          isTurbo: state.jet.turboTimer > 0
+        });
+        state.jet.wingTrailBot.push({
+          x: state.jet.x - 12 * cosT - 18 * sinT,
+          y: state.jet.y - 12 * sinT + 18 * cosT,
+          life: 1.0,
+          isTurbo: state.jet.turboTimer > 0
+        });
+        if (state.jet.wingTrailTop.length > 24) state.jet.wingTrailTop.shift();
+        if (state.jet.wingTrailBot.length > 24) state.jet.wingTrailBot.shift();
+      }
+      [state.jet.wingTrailTop, state.jet.wingTrailBot].forEach(trail => {
+        for (let i = trail.length - 1; i >= 0; i--) {
+          trail[i].x -= scrollSpeed * dt * 0.85;
+          trail[i].life -= dt * 3.0;
+          if (trail[i].life <= 0) trail.splice(i, 1);
+        }
+      });
+
+      state.speedLines.forEach(line => {
+        line.x -= scrollSpeed * line.speedMult * (state.jet.turboTimer > 0 ? 1.8 : 1.1) * dt;
+        if (line.x < -100) {
+          line.x = canvasWidth + 60;
+          line.y = Math.random() * canvasHeight;
+        }
+      });
+
+      state.bgClouds.forEach(c => {
+        c.x -= (c.speed + scrollSpeed * 0.25) * dt;
+        if (c.x < -140) {
+          c.x = canvasWidth + 140;
+          c.y = canvasHeight * (0.14 + Math.random() * 0.72);
+        }
+      });
+
+      const distGain = (scrollSpeed * dt) / 12;
+      state.distance += distGain;
+      state.score += Math.round(distGain * (state.jet.turboTimer > 0 ? 3 : 1));
+      updateFlightHUD();
+
+      state.spawnTimer -= dt;
+      if (state.spawnTimer <= 0) {
+        spawnWave();
+        const baseInterval = config.speedMode === 'slow' ? 2.2 : config.speedMode === 'fast' ? 1.45 : 1.8;
+        const levelIntervalReduction = Math.min(0.85, (state.difficultyLevel - 1) * 0.11);
+        state.spawnTimer = Math.max(0.78, baseInterval - levelIntervalReduction);
+      }
+
+      const jetHitRadius = 21;
+      for (let i = state.obstacles.length - 1; i >= 0; i--) {
+        const obs = state.obstacles[i];
+        obs.x -= scrollSpeed * dt;
+        obs.phase += dt * 4;
+
+        if (obs.type === 'meteor') {
+          obs.y += obs.vy * dt;
+          if (obs.y < canvasHeight * 0.12 || obs.y > canvasHeight * 0.88) obs.vy *= -1;
+        } else if (obs.type === 'laserDrone') {
+          obs.y += Math.sin(obs.phase) * 75 * dt;
+        }
+
+        const dist = Math.hypot(state.jet.x - obs.x, state.jet.y - obs.y);
+        if (!obs.destroyed && dist < jetHitRadius + obs.r * 0.82) {
+          obs.destroyed = true;
+
+          if (state.jet.turboTimer > 0) {
+            state.score += 150;
+            sound.playEnergyCollect(4);
+            spawnBurstParticles(obs.x, obs.y, '#38bdf8', 22);
+            showStatusBanner('ชนกระจุยด้วยพลังเทอร์โบ! +150 คะแนน', 1500);
+          } else if (state.jet.hasBarrier) {
+            state.jet.hasBarrier = false;
+            state.jet.invulnTimer = 1.4;
+            sound.playShieldOrRepair();
+            spawnBurstParticles(obs.x, obs.y, '#e879f9', 20);
+            showStatusBanner('บาเรียพลาสมากันกระแทกไว้ได้!', 1800);
+          } else if (state.jet.invulnTimer <= 0) {
+            const dmg = 25;
+            state.jet.hull = Math.max(0, state.jet.hull - dmg);
+            state.jet.invulnTimer = 1.5;
+            state.combo = 0;
+            sound.playHullDamage();
+            spawnBurstParticles(state.jet.x, state.jet.y, '#f87171', 20);
+            updateFlightHUD();
+
+            if (state.jet.hull <= 0) {
+              triggerGameOver();
+              return;
+            } else {
+              showStatusBanner(`โดนสิ่งกีดขวาง! เกราะยานเหลือ ${Math.round(state.jet.hull)}%`, 2000);
+            }
+          }
+        }
+
+        if (obs.destroyed || obs.x < -120) state.obstacles.splice(i, 1);
+      }
+
+      for (let i = state.collectibles.length - 1; i >= 0; i--) {
+        const item = state.collectibles[i];
+        item.x -= scrollSpeed * dt;
+
+        const dist = Math.hypot(state.jet.x - item.x, state.jet.y - item.y);
+        if (dist < 115) {
+          item.x += (state.jet.x - item.x) * 0.16;
+          item.y += (state.jet.y - item.y) * 0.16;
+        }
+
+        if (!item.collected && dist < jetHitRadius + item.r) {
+          item.collected = true;
+          if (item.type === 'star') {
+            state.combo++;
+            state.score += 25 + state.combo * 5;
+            sound.playEnergyCollect(state.combo);
+            spawnBurstParticles(item.x, item.y, '#fde047', 12);
+          } else if (item.type === 'turbo' || item.type === 'hyperRing') {
+            state.jet.turboTimer = 3.2;
+            state.jet.invulnTimer = Math.max(state.jet.invulnTimer, 3.2);
+            state.score += 200;
+            sound.playTurboBoost();
+            spawnBurstParticles(item.x, item.y, '#38bdf8', 26);
+            showStatusBanner('TURBO BOOST! พุ่งทะลุกำแพงเสียง ชนสิ่งกีดขวางกระจุย!', 2400);
+          } else if (item.type === 'repair') {
+            state.jet.hull = Math.min(state.jet.maxHull, state.jet.hull + 25);
+            state.score += 80;
+            sound.playShieldOrRepair();
+            spawnBurstParticles(item.x, item.y, '#34d399', 18);
+            showStatusBanner('ซ่อมเกราะยาน +25%!', 1800);
+          } else if (item.type === 'barrier') {
+            state.jet.hasBarrier = true;
+            state.score += 80;
+            sound.playShieldOrRepair();
+            spawnBurstParticles(item.x, item.y, '#e879f9', 18);
+            showStatusBanner('เปิดบาเรียพลาสมาแล้ว!', 1800);
+          }
+          updateFlightHUD();
+        }
+
+        if (item.collected || item.x < -100) state.collectibles.splice(i, 1);
+      }
+
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 1.8;
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
+    }
+
+    // =========================================================================
+    // 8. ระบบวาดฉากน่านฟ้า เครื่องบินเจ็ตสุดเฟี้ยว และสิ่งกีดขวาง (Canvas 2D)
+    // =========================================================================
+    function drawSkyAndWebcam(timeSec) {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+      if (config.highContrast) {
+        skyGrad.addColorStop(0, '#02040a');
+        skyGrad.addColorStop(1, '#0f172a');
+      } else if (state.difficultyLevel === 1) {
+        skyGrad.addColorStop(0, '#090d16');
+        skyGrad.addColorStop(1, '#0c4a6e');
+      } else if (state.difficultyLevel === 2) {
+        skyGrad.addColorStop(0, '#0f0722');
+        skyGrad.addColorStop(1, '#312e81');
+      } else {
+        skyGrad.addColorStop(0, '#05050f');
+        skyGrad.addColorStop(1, '#1e1b4b');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      if (state.cameraActive && videoEl.readyState >= 2) {
+        const vw = videoEl.videoWidth || 640;
+        const vh = videoEl.videoHeight || 480;
+        const scale = Math.max(canvasWidth / vw, canvasHeight / vh);
+        const drawW = vw * scale;
+        const drawH = vh * scale;
+        const offsetX = (canvasWidth - drawW) / 2;
+        const offsetY = (canvasHeight - drawH) / 2;
+
+        ctx.save();
+        ctx.translate(canvasWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.globalAlpha = config.highContrast ? 0.24 : 0.40;
+        ctx.drawImage(videoEl, offsetX, offsetY, drawW, drawH);
+        ctx.restore();
+
+        ctx.fillStyle = config.highContrast ? 'rgba(2, 4, 10, 0.55)' : 'rgba(9, 13, 22, 0.46)';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      }
+
+      if (!config.reducedMotion) {
+        ctx.save();
+        const isTurbo = state.jet.turboTimer > 0;
+        ctx.strokeStyle = isTurbo ? 'rgba(56, 189, 248, 0.45)' : 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = isTurbo ? 2.5 : 1.2;
+        state.speedLines.forEach(line => {
+          ctx.beginPath();
+          ctx.moveTo(line.x, line.y);
+          ctx.lineTo(line.x + line.len * (isTurbo ? 1.8 : 1), line.y);
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.fillStyle = config.highContrast ? 'rgba(255,255,255,0.08)' : 'rgba(186, 230, 253, 0.11)';
+      state.bgClouds.forEach(c => {
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 34 * c.scale, 0, Math.PI * 2);
+        ctx.arc(c.x + 28 * c.scale, c.y - 10 * c.scale, 42 * c.scale, 0, Math.PI * 2);
+        ctx.arc(c.x + 60 * c.scale, c.y, 32 * c.scale, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    function drawObstacles(timeSec) {
+      state.obstacles.forEach(obs => {
+        ctx.save();
+        ctx.translate(obs.x, obs.y);
+
+        if (obs.type === 'stormCloud') {
+          ctx.fillStyle = config.highContrast ? '#1e293b' : '#312e81';
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(-obs.r * 0.45, 4, obs.r * 0.58, 0, Math.PI * 2);
+          ctx.arc(0, -8, obs.r * 0.72, 0, Math.PI * 2);
+          ctx.arc(obs.r * 0.45, 4, obs.r * 0.58, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.moveTo(-4, obs.r * 0.4);
+          ctx.lineTo(-12, obs.r * 0.85);
+          ctx.lineTo(-2, obs.r * 0.85);
+          ctx.lineTo(-8, obs.r * 1.25);
+          ctx.lineTo(10, obs.r * 0.72);
+          ctx.lineTo(0, obs.r * 0.72);
+          ctx.closePath();
+          ctx.fill();
+        } else if (obs.type === 'laserDrone') {
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, obs.r * 0.78, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fb7185';
+          ctx.beginPath();
+          ctx.arc(0, 0, obs.r * 0.34, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (obs.type === 'windmill') {
+          const rot = config.reducedMotion ? 0.4 : timeSec * 2.5;
+          ctx.rotate(rot);
+          ctx.fillStyle = '#f43f5e';
+          for (let i = 0; i < 4; i++) {
+            ctx.rotate(Math.PI / 2);
+            ctx.beginPath();
+            ctx.roundRect(-6, 0, 12, obs.r * 1.18, 6);
+            ctx.fill();
+          }
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.arc(0, 0, 11, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (obs.type === 'meteor') {
+          ctx.fillStyle = '#ea580c';
+          ctx.beginPath();
+          ctx.moveTo(obs.r * 1.6, -obs.r * 0.4);
+          ctx.lineTo(-obs.r * 0.5, -obs.r * 0.85);
+          ctx.lineTo(-obs.r * 0.5, obs.r * 0.85);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#7c2d12';
+          ctx.strokeStyle = '#fdba74';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, obs.r * 0.82, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      });
+    }
+
+    function drawCollectibles(timeSec) {
+      const pulse = config.reducedMotion ? 1 : 1 + Math.sin(timeSec * 6) * 0.1;
+
+      state.collectibles.forEach(item => {
+        ctx.save();
+        ctx.translate(item.x, item.y);
+
+        if (item.type === 'star') {
+          ctx.scale(pulse, pulse);
+          ctx.fillStyle = '#fde047';
+          ctx.strokeStyle = '#b45309';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i < 10; i++) {
+            const rad = i % 2 === 0 ? item.r : item.r * 0.45;
+            const a = (Math.PI * i) / 5 - Math.PI / 2;
+            const px = Math.cos(a) * rad;
+            const py = Math.sin(a) * rad;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else if (item.type === 'turbo') {
+          ctx.scale(pulse, pulse);
+          ctx.fillStyle = '#0284c7';
+          ctx.strokeStyle = '#7dd3fc';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.roundRect(-24, -15, 48, 30, 15);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fde047';
+          ctx.font = '800 12px Sarabun, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('TURBO', 0, 4);
+        } else if (item.type === 'hyperRing') {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 7;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 20, item.r, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 13, item.r * 0.8, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (item.type === 'repair') {
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+          ctx.strokeStyle = '#34d399';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, item.r * pulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(-10, -3.5, 20, 7);
+          ctx.fillRect(-3.5, -10, 7, 20);
+        } else if (item.type === 'barrier') {
+          ctx.fillStyle = 'rgba(232, 121, 249, 0.28)';
+          ctx.strokeStyle = '#e879f9';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, item.r * pulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '700 12px Sarabun, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('บาเรีย', 0, 4);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    function drawSkyJet(timeSec) {
+      const j = state.jet;
+      const isTurbo = j.turboTimer > 0;
+
+      [j.wingTrailTop, j.wingTrailBot].forEach(trail => {
+        if (trail.length > 1) {
+          ctx.save();
+          ctx.lineCap = 'round';
+          for (let i = 1; i < trail.length; i++) {
+            const p0 = trail[i - 1];
+            const p1 = trail[i];
+            ctx.strokeStyle = p1.isTurbo
+              ? `rgba(56, 189, 248, ${p1.life * 0.9})`
+              : `rgba(224, 242, 254, ${p1.life * 0.45})`;
+            ctx.lineWidth = Math.max(1.5, p1.life * (p1.isTurbo ? 6 : 3));
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      });
+
+      if (!isTurbo && j.invulnTimer > 0 && Math.floor(j.invulnTimer * 10) % 2 === 0 && !config.reducedMotion) {
+        return;
+      }
+
+      ctx.save();
+      ctx.translate(j.x, j.y);
+      ctx.rotate(j.tilt);
+
+      if (isTurbo) {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(46, 0);
+        ctx.lineTo(-10, -44);
+        ctx.moveTo(46, 0);
+        ctx.lineTo(-10, 44);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(16, 0, 38, -0.95, 0.95);
+        ctx.stroke();
+      }
+
+      const flameFlicker = config.reducedMotion ? 1 : 0.85 + Math.sin(timeSec * 45) * 0.22;
+      const flameLen = (isTurbo ? 64 : 32) * flameFlicker;
+      ctx.fillStyle = isTurbo ? '#38bdf8' : '#fb923c';
+      ctx.beginPath();
+      ctx.moveTo(-26, -7);
+      ctx.lineTo(-26 - flameLen, 0);
+      ctx.lineTo(-26, 7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(-26, -3.5);
+      ctx.lineTo(-26 - flameLen * 0.55, 0);
+      ctx.lineTo(-26, 3.5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = isTurbo ? '#0284c7' : '#0369a1';
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-14, -5);
+      ctx.lineTo(-26, -28);
+      ctx.lineTo(-8, -26);
+      ctx.lineTo(10, -4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-14, 5);
+      ctx.lineTo(-26, 28);
+      ctx.lineTo(-8, 26);
+      ctx.lineTo(10, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(42, 0);
+      ctx.quadraticCurveTo(16, -12, -28, -9);
+      ctx.lineTo(-30, 9);
+      ctx.quadraticCurveTo(16, 12, 42, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isTurbo ? '#38bdf8' : '#0284c7';
+      ctx.beginPath();
+      ctx.moveTo(30, 0);
+      ctx.lineTo(-24, -4);
+      ctx.lineTo(-24, 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(12, -3, 12, 5, -0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (j.hasBarrier) {
+        ctx.fillStyle = 'rgba(232, 121, 249, 0.22)';
+        ctx.strokeStyle = '#e879f9';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(4, 0, 44, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      state.particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawCalibrationOverlay() {
+      const z = getActiveZoneRect();
+      ctx.save();
+      ctx.fillStyle = 'rgba(7, 11, 25, 0.58)';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([12, 8]);
+      ctx.strokeRect(z.x, z.y, z.w, z.h);
+      ctx.setLineDash([]);
+
+      const pct = Math.min(1, state.calibrationProgress / 800);
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx.fillRect(z.x, z.y + z.h - 14, z.w * pct, 14);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 18px Sarabun, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ยกมือข้างเดียวค้างไว้ในกรอบนี้เพื่อปรับเทียบ', canvasWidth / 2, z.y - 16);
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 9. Animation Loop หลัก
+    // =========================================================================
+    let lastTimestamp = performance.now();
+
+    function mainLoop(timestamp) {
+      const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
+      lastTimestamp = timestamp;
+      const timeSec = timestamp / 1000;
+
+      updateSimulation(dt);
+      drawSkyAndWebcam(timeSec);
+
+      if (state.screen === 'playing') {
+        drawCollectibles(timeSec);
+        drawObstacles(timeSec);
+        drawParticles();
+        drawSkyJet(timeSec);
+
+        if (state.calibrating) {
+          drawCalibrationOverlay();
+        }
+      }
+
+      requestAnimationFrame(mainLoop);
+    }
+
+    requestAnimationFrame(mainLoop);
+
+    // =========================================================================
+    // 10. Event Listeners ปุ่มควบคุมและหน้าต่างตั้งค่า
+    // =========================================================================
+    document.getElementById('btnStartCamera').addEventListener('click', async () => {
+      sound.init();
+      const ok = await initMediaPipeAndCamera();
+      if (ok) {
+        state.inputMode = 'camera';
+        startOverlayEl.classList.add('hidden');
+        beginFlightSession();
+        triggerCalibration();
+      }
+    });
+
+    document.getElementById('btnStartPointer').addEventListener('click', () => {
+      sound.init();
+      stopCameraTracks();
+      state.inputMode = 'pointer';
+      state.handDetected = true;
+      startOverlayEl.classList.add('hidden');
+      beginFlightSession();
+    });
+
+    document.getElementById('btnStartSwitch').addEventListener('click', () => {
+      sound.init();
+      stopCameraTracks();
+      state.inputMode = 'switch';
+      state.handDetected = true;
+      startOverlayEl.classList.add('hidden');
+      beginFlightSession();
+    });
+
+    btnPause.addEventListener('click', () => {
+      if (state.screen !== 'playing') return;
+      state.paused = !state.paused;
+      btnPause.textContent = state.paused ? 'เล่นต่อ' : 'พักเกม';
+      speakGuide(state.paused ? 'พักการบินชั่วคราว กด "เล่นต่อ" เมื่อพร้อม' : 'กลับมาบินต่อแล้ว!');
+    });
+
+    btnRecalibrate.addEventListener('click', () => {
+      triggerCalibration();
+    });
+
+    btnStopCamera.addEventListener('click', () => {
+      stopCameraTracks();
+      state.inputMode = 'pointer';
+      state.handDetected = true;
+      btnRecalibrate.classList.add('hidden');
+      btnStopCamera.classList.add('hidden');
+      modeBadgeEl.textContent = 'โหมด: เมาส์ / สัมผัส';
+      showStatusBanner('หยุดกล้องแล้ว สลับมาควบคุมด้วยเมาส์/สัมผัสทันที', 2500);
+    });
+
+    btnMenu.addEventListener('click', () => {
+      stopCameraTracks();
+      state.screen = 'start';
+      state.inputMode = 'none';
+      state.paused = false;
+      state.calibrating = false;
+      btnPause.classList.add('hidden');
+      btnRecalibrate.classList.add('hidden');
+      btnStopCamera.classList.add('hidden');
+      btnMenu.classList.add('hidden');
+      oneSwitchBarEl.classList.add('hidden');
+      victoryModalEl.classList.add('hidden');
+      shieldBadgeEl.classList.add('hidden');
+      startOverlayEl.classList.remove('hidden');
+      stageBadgeEl.textContent = 'ระดับ 1 • Mach 1.0';
+      progressTextEl.textContent = 'ระยะ 0 ม. • คะแนน 0';
+      hullBadgeEl.textContent = 'เกราะยาน: 100%';
+      modeBadgeEl.textContent = 'โหมด: รอเลือกวิธีเล่น';
+      speakGuide('ยกมือขึ้นบังคับเครื่องบินเจ็ต เก็บเทอร์โบพุ่งทะยาน และหลบอุกกาบาตให้นานที่สุด!');
+    });
+
+    function syncSoundUI() {
+      btnMute.textContent = sound.enabled ? 'เสียง: เปิด' : 'เสียง: ปิด';
+      btnMute.setAttribute('aria-pressed', String(!sound.enabled));
+    }
+
+    btnMute.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      if (!sound.enabled) sound.stopCurrent();
+      syncSoundUI();
+    });
+
+    // ตั้งค่าขั้นสูง
+    const optSpeedMode = document.getElementById('optSpeedMode');
+    const optZoneSize = document.getElementById('optZoneSize');
+    const optHandSide = document.getElementById('optHandSide');
+    const optSmoothing = document.getElementById('optSmoothing');
+    const valSmoothing = document.getElementById('valSmoothing');
+    const optDeadZone = document.getElementById('optDeadZone');
+    const valDeadZone = document.getElementById('valDeadZone');
+    const optFontScale = document.getElementById('optFontScale');
+    const optHighContrast = document.getElementById('optHighContrast');
+    const optReducedMotion = document.getElementById('optReducedMotion');
+
+    optReducedMotion.checked = config.reducedMotion;
+
+    document.getElementById('btnSettings').addEventListener('click', () => {
+      settingsModalEl.classList.remove('hidden');
+    });
+
+    document.getElementById('btnCloseSettings').addEventListener('click', () => {
+      settingsModalEl.classList.add('hidden');
+    });
+
+    optSpeedMode.addEventListener('change', (e) => {
+      config.speedMode = e.target.value;
+    });
+
+    optZoneSize.addEventListener('change', (e) => {
+      config.zoneSize = e.target.value;
+    });
+
+    optHandSide.addEventListener('change', (e) => {
+      config.handPreference = e.target.value;
+      state.lockedHandedness = null;
+    });
+
+    optSmoothing.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      config.smoothing = val / 100;
+      valSmoothing.textContent = `${val}%`;
+    });
+
+    optDeadZone.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      config.deadZonePx = val;
+      valDeadZone.textContent = `${val} px`;
+    });
+
+    optFontScale.addEventListener('change', (e) => {
+      document.documentElement.style.setProperty('--font-scale', e.target.value);
+    });
+
+    optHighContrast.addEventListener('change', (e) => {
+      config.highContrast = e.target.checked;
+      document.body.classList.toggle('high-contrast', config.highContrast);
+    });
+
+    optReducedMotion.addEventListener('change', (e) => {
+      config.reducedMotion = e.target.checked;
+    });
+
+    document.getElementById('btnToggleFullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    document.getElementById('btnBackToMenuFromOver').addEventListener('click', () => {
+      victoryModalEl.classList.add('hidden');
+      btnMenu.click();
+    });
+
+    document.getElementById('btnPlayAgain').addEventListener('click', () => {
+      victoryModalEl.classList.add('hidden');
+      beginFlightSession();
+    });
+
+    document.getElementById('btnExportHtml').addEventListener('click', () => {
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'skyjet_supersonic_ar.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+  <script>
+    {
+      const rules = document.getElementById('game-rules');
+      rules.addEventListener('close', () => {
+        document.getElementById('jet-mode-heading')?.focus();
+      }, { once: true });
+      rules.showModal();
+    }
+  </script>
+</body>
+</html>

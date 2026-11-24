@@ -33,7 +33,7 @@
                   }
                }
             }
-         }
+         };
       </script>
 
       <style>
@@ -68,20 +68,48 @@
             background-attachment: fixed;
          }
 
-         /* High Contrast Accessibility Mode */
-         body.high-contrast .bg-playland {
+         /* High Contrast Accessibility Mode (Fixed selector: body.high-contrast.bg-playland) */
+         body.high-contrast,
+         body.high-contrast.bg-playland {
             background: #09090B !important;
+            background-image: none !important;
+            color: #FEF08A !important;
+         }
+         body.high-contrast .ambient-clouds {
+            opacity: 0.08 !important;
          }
          body.high-contrast .floating-pill,
          body.high-contrast .game-card,
-         body.high-contrast .modal-surface {
+         body.high-contrast .bonus-mini-card,
+         body.high-contrast .bonus-surface,
+         body.high-contrast .modal-surface,
+         body.high-contrast #emptyState {
             background-color: #121215 !important;
             border-color: #FACC15 !important;
             color: #FACC15 !important;
             box-shadow: none !important;
          }
-         body.high-contrast .card-title {
+         body.high-contrast .game-card > div,
+         body.high-contrast .bonus-mini-card > div,
+         body.high-contrast .modal-surface .bg-white,
+         body.high-contrast .modal-surface .bg-white\/80,
+         body.high-contrast .modal-surface .bg-slate-50,
+         body.high-contrast .modal-surface .bg-slate-100,
+         body.high-contrast .modal-surface .bg-slate-100\/80,
+         body.high-contrast .modal-surface .bg-slate-100\/90 {
+            background-color: #18181B !important;
+            border-color: #52525B !important;
+            color: #FEF08A !important;
+         }
+         body.high-contrast .card-title,
+         body.high-contrast .modal-surface h3,
+         body.high-contrast .modal-surface p,
+         body.high-contrast .modal-surface span,
+         body.high-contrast input {
             color: #FFFFFF !important;
+         }
+         body.high-contrast input::placeholder {
+            color: #A1A1AA !important;
          }
 
          /* Tactile Button & Card Physics */
@@ -99,16 +127,19 @@
             .game-card:hover .illus-group {
                transform: scale(1.05) translateY(-2px);
             }
+            .bonus-mini-card:hover {
+               transform: translateY(-3px);
+            }
          }
          .tactile-btn:active {
             transform: translateY(2px) scale(0.96);
          }
 
-         .game-card {
+         .game-card, .bonus-mini-card {
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
             touch-action: manipulation;
          }
-         .game-card:active {
+         .game-card:active, .bonus-mini-card:active {
             transform: scale(0.98);
          }
          .illus-group {
@@ -144,12 +175,19 @@
             animation: winnerPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
          }
 
-         @keyframes pointerBounce {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(4px); }
+         @keyframes pointerBounceLeft {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(4px); }
          }
-         .pointer-tick {
-            animation: pointerBounce 0.12s ease-out;
+         @keyframes pointerBounceRight {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(-4px); }
+         }
+         .pointer-tick-left {
+            animation: pointerBounceLeft 0.12s ease-out;
+         }
+         .pointer-tick-right {
+            animation: pointerBounceRight 0.12s ease-out;
          }
 
          @keyframes suspensePulse {
@@ -162,8 +200,8 @@
          }
 
          @keyframes shockwaveRing {
-            0% { transform: scale(0.95); opacity: 0.55; }
-            100% { transform: scale(1.06); opacity: 0; }
+            0% { transform: translateY(-50%) scale(0.95); opacity: 0.55; }
+            100% { transform: translateY(-50%) scale(1.06); opacity: 0; }
          }
          .shockwave-active {
             animation: shockwaveRing 0.5s ease-out forwards;
@@ -212,7 +250,7 @@
    <body class="bg-playland flex flex-col min-h-[100dvh] w-full">
 
       <!-- Decorative Background Clouds (Pure Light Ambient Art) -->
-      <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-65">
+      <div class="ambient-clouds fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-65">
          <svg class="absolute -top-6 left-[4%] w-36 sm:w-44 h-24 text-white/80 animate-float-slow" viewBox="0 0 200 100" fill="currentColor">
             <path d="M45 80h110a30 30 0 0 0 5-59.5A42 42 0 0 0 80 18a35 35 0 0 0-35 32A25 25 0 0 0 45 80z"/>
          </svg>
@@ -222,15 +260,15 @@
       </div>
 
       <!-- STICKY MOBILE-FIRST FLOATING HUD -->
-      <header class="sticky top-0 z-30 w-full bg-[#F4F7FB]/85 backdrop-blur-md border-b border-slate-200/60 sm:border-none sm:bg-transparent sm:backdrop-blur-none pt-[max(0.65rem,env(safe-area-inset-top))] pb-2">
+      <header class="sticky top-0 z-30 w-full pointer-events-none pt-[max(0.65rem,env(safe-area-inset-top))] pb-2">
          <div class="w-full max-w-[1440px] mx-auto px-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2.5">
 
-            <!-- Top Row on Mobile: Brand + Progress (Left) & Actions (Right) -->
-            <div class="flex items-center justify-between gap-2 w-full sm:w-auto">
-               <!-- Left: Brand Emblem + Trophy Counter Pill -->
-               <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-                  <button onclick="resetAllFilters()" title="AIM PLAY"
-                     class="floating-pill tactile-btn h-11 sm:h-12 px-2.5 sm:px-3.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center gap-2 shrink-0">
+            <!-- Top Row on Mobile: Floating Emblem + Counters (Left) & Icon Controls (Right) -->
+            <div class="flex items-center justify-between gap-1.5 sm:gap-2 w-full sm:w-auto">
+               <!-- Left Floating Pills: Brand Emblem + 12-Game Trophy + Bonus Vault Gift -->
+               <div class="pointer-events-auto flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <button type="button" onclick="resetAllFilters()" title="AIM PLAY — รีเซ็ตตัวกรอง" aria-label="AIM PLAY"
+                     class="floating-pill tactile-btn h-11 sm:h-12 w-11 sm:w-12 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center justify-center shrink-0">
                      <svg class="w-7 h-7 shrink-0" viewBox="0 0 36 36" fill="none">
                         <rect width="36" height="36" rx="11" fill="url(#brandGrad)"/>
                         <path d="M11 22.5C11 18.9 13.9 16 17.5 16h1c3.6 0 6.5 2.9 6.5 6.5a3.5 3.5 0 0 1-5.8 2.6l-1.2-1.1-1.2 1.1A3.5 3.5 0 0 1 11 22.5z" fill="#FFF"/>
@@ -245,32 +283,43 @@
                            </linearGradient>
                         </defs>
                      </svg>
-                     <span class="font-fredoka font-bold text-base sm:text-lg tracking-tight text-slate-800 hidden min-[360px]:inline">AIM PLAY</span>
                   </button>
 
-                  <!-- Played Trophy Pill -->
-                  <div class="floating-pill h-11 sm:h-12 px-2.5 sm:px-3.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-amber-200/90 shadow-pill flex items-center gap-1.5 shrink-0" title="ความคืบหน้า">
-                     <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none">
+                  <!-- Played Trophy Counter Pill -->
+                  <div id="playedCountPill" class="floating-pill h-11 sm:h-12 px-2.5 sm:px-3 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-amber-200/90 shadow-pill flex items-center gap-1.5 shrink-0" title="เล่นแล้ว 0/12 เกม">
+                     <svg class="w-5 h-5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none">
                         <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" fill="#FBBF24" stroke="#D97706" stroke-width="1.8"/>
                         <path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5v1A3.5 3.5 0 0 0 6.5 12H7M17 6h2.5A1.5 1.5 0 0 1 21 7.5v1a3.5 3.5 0 0 1-3.5 3.5H17" stroke="#D97706" stroke-width="1.8" stroke-linecap="round"/>
                         <path d="M12 15v4M8.5 19h7" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
                      </svg>
-                     <span id="playedCountText" class="font-fredoka font-bold text-xs sm:text-base text-amber-700">0/12</span>
+                     <span id="playedCountText" class="font-fredoka font-bold text-xs sm:text-sm text-amber-700">0/12</span>
                   </div>
+
+                  <!-- Bonus Vault Gift Pill (+13) -->
+                  <button type="button" onclick="openBonusVault()" title="คลังเกมเสริม" aria-label="คลังเกมเสริม"
+                     class="floating-pill tactile-btn h-11 sm:h-12 px-2.5 sm:px-3 rounded-2xl bg-white/95 hover:bg-indigo-50 backdrop-blur-md border-2 border-indigo-200/80 hover:border-indigo-300 shadow-pill flex items-center gap-1.5 text-indigo-600 shrink-0">
+                     <svg class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="8" width="18" height="4" rx="1.5"/>
+                        <path d="M12 8v13"/>
+                        <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                        <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+                     </svg>
+                     <span id="hudBonusCountText" class="font-fredoka font-bold text-xs sm:text-sm text-indigo-600">+13</span>
+                  </button>
                </div>
 
-               <!-- Mobile-Only Action Buttons (Search Toggle, Randomizer, Settings) -->
-               <div class="flex sm:hidden items-center gap-1.5 shrink-0">
-                  <button onclick="toggleMobileSearch()" id="mobileSearchToggleBtn" aria-label="ค้นหา"
+               <!-- Mobile-Only Floating Icon Actions (Search, Randomizer, Settings) -->
+               <div class="pointer-events-auto flex sm:hidden items-center gap-1.5 shrink-0">
+                  <button type="button" onclick="toggleMobileSearch()" id="mobileSearchToggleBtn" aria-label="ค้นหา"
                      class="floating-pill tactile-btn h-11 w-11 rounded-2xl bg-white/95 border-2 border-slate-200/90 shadow-pill text-slate-700 flex items-center justify-center">
                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
                      </svg>
                   </button>
 
-                  <button onclick="openRandomizer()" aria-label="สุ่มเกม"
-                     class="tactile-btn relative h-11 w-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 text-white shadow-pill border-2 border-amber-200 flex items-center justify-center">
-                     <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none">
+                  <button type="button" onclick="openRandomizer()" aria-label="สุ่มเกม"
+                     class="tactile-btn relative h-11 w-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 text-white shadow-pill border-2 border-amber-200 flex items-center justify-center">
+                     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
                         <rect x="3" y="3" width="18" height="18" rx="5" fill="#FFF" fill-opacity="0.22" stroke="#FFF" stroke-width="2"/>
                         <circle cx="8.5" cy="8.5" r="1.5" fill="#FFF"/>
                         <circle cx="15.5" cy="8.5" r="1.5" fill="#FFF"/>
@@ -278,28 +327,28 @@
                         <circle cx="8.5" cy="15.5" r="1.5" fill="#FFF"/>
                         <circle cx="15.5" cy="15.5" r="1.5" fill="#FFF"/>
                      </svg>
-                     <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-yellow-300 border-2 border-white"></span>
+                     <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-300 border-2 border-white"></span>
                   </button>
 
-                  <button onclick="openModal('settingsModal')" aria-label="ตั้งค่า"
+                  <button type="button" onclick="openModal('settingsModal')" aria-label="ตั้งค่า"
                      class="floating-pill tactile-btn h-11 w-11 rounded-2xl bg-white/95 border-2 border-slate-200/90 shadow-pill text-slate-700 flex items-center justify-center">
                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                      </svg>
                   </button>
                </div>
             </div>
 
-            <!-- Mobile Collapsible Full-Width Search Bar -->
-            <div id="mobileSearchDrawer" class="hidden sm:hidden w-full">
+            <!-- Mobile Collapsible Search Pill -->
+            <div id="mobileSearchDrawer" class="pointer-events-auto hidden sm:hidden w-full">
                <div class="floating-pill h-11 rounded-2xl bg-white border-2 border-indigo-300 shadow-pill flex items-center px-3 gap-2">
                   <svg class="w-4 h-4 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                      <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
                   </svg>
-                  <input type="text" id="mobileSearchInput" oninput="handleSearch(this.value)" placeholder="ค้นหา..."
+                  <input type="text" id="mobileSearchInput" oninput="handleSearch(this.value)" placeholder="ค้นหาเกม..."
                      class="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" />
-                  <button onclick="clearSearch(true)" aria-label="ล้าง" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+                  <button type="button" onclick="clearSearch(true)" aria-label="ล้าง" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <path d="M18 6L6 18M6 6l12 12"/>
                      </svg>
@@ -307,10 +356,10 @@
                </div>
             </div>
 
-            <!-- Center: Minimalist Icon Category Dock (Full-width equal grid on mobile, compact pill on desktop) -->
-            <div class="floating-pill h-11 sm:h-12 p-1 sm:p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill grid grid-cols-5 sm:flex items-center gap-1 w-full sm:w-auto">
-               <!-- All Games -->
-               <button onclick="setCategoryFilter('all')" id="tab-all" title="ทั้งหมด"
+            <!-- Center: Category Dock -->
+            <div class="pointer-events-auto floating-pill h-11 sm:h-12 p-1 sm:p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill grid grid-cols-5 sm:flex items-center gap-1 w-full sm:w-auto">
+               <!-- All 12 Core Games -->
+               <button type="button" onclick="setCategoryFilter('all')" id="tab-all" title="ทั้งหมด 12 เกม"
                   class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all bg-slate-900 text-white shadow-sm">
                   <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                      <rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>
@@ -319,7 +368,7 @@
                </button>
 
                <!-- Group 1-4: Science & English -->
-               <button onclick="setCategoryFilter('1-4')" id="tab-1-4" title="ชุด 1-4: วิทย์และภาษา"
+               <button type="button" onclick="setCategoryFilter('1-4')" id="tab-1-4" title="หมวด 1-4 (วิทย์-อังกฤษ)"
                   class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-sky-50 hover:text-sky-600">
                   <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                      <circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"/>
@@ -327,45 +376,46 @@
                   <span>1-4</span>
                </button>
 
-               <!-- Group 5-8: Arcade & Skill -->
-               <button onclick="setCategoryFilter('5-8')" id="tab-5-8" title="ชุด 5-8: อาร์เคด"
-                  class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-pink-50 hover:text-pink-600">
-                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                     <line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/>
+               <!-- Group 5-8: Health & Phonics (B01-B04) -->
+               <button type="button" onclick="setCategoryFilter('5-8')" id="tab-5-8" title="หมวด 5-8 (สุขภาพ-โฟนิกส์)"
+                  class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-rose-50 hover:text-rose-600">
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                     <path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/>
                   </svg>
                   <span>5-8</span>
                </button>
 
-               <!-- Group 9-12: Health & Phonics -->
-               <button onclick="setCategoryFilter('9-12')" id="tab-9-12" title="ชุด 9-12: สุขภาพและโฟนิกส์"
-                  class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-emerald-50 hover:text-emerald-600">
-                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                     <path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/>
+               <!-- Group 9-12: Arcade & Skill (C01-C04) -->
+               <button type="button" onclick="setCategoryFilter('9-12')" id="tab-9-12" title="หมวด 9-12 (อาร์เคด)"
+                  class="cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-pink-50 hover:text-pink-600">
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                     <line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/>
                   </svg>
                   <span>9-12</span>
                </button>
 
                <!-- Favorite Filter Toggle -->
-               <button onclick="toggleFavoriteFilter()" id="tab-fav" title="เกมโปรด"
-                  class="cat-tab h-full px-2 sm:px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all text-slate-500 hover:bg-amber-50 hover:text-amber-500">
+               <button type="button" onclick="toggleFavoriteFilter()" id="tab-fav" title="เกมโปรด"
+                  class="cat-tab h-full px-2 sm:px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all text-slate-500 hover:bg-amber-50 hover:text-amber-500">
                   <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
                   </svg>
+                  <span class="hidden md:inline">โปรด</span>
                </button>
             </div>
 
-            <!-- Desktop-Only Right Controls: Expandable Search + Randomizer + Settings -->
-            <div class="hidden sm:flex items-center gap-2 shrink-0">
+            <!-- Desktop-Only Right Floating Controls: Search + Randomizer + Settings -->
+            <div class="pointer-events-auto hidden sm:flex items-center gap-2 shrink-0">
                <!-- Expandable Compact Search Pill -->
                <div id="searchPill" class="floating-pill h-12 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill flex items-center px-3 transition-all w-12 focus-within:w-52 lg:focus-within:w-60 overflow-hidden">
-                  <button onclick="focusSearch()" class="shrink-0 text-slate-600 hover:text-indigo-600 flex items-center justify-center" aria-label="ค้นหา">
+                  <button type="button" onclick="focusSearch()" class="shrink-0 text-slate-600 hover:text-indigo-600 flex items-center justify-center" aria-label="ค้นหา">
                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
                      </svg>
                   </button>
-                  <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="ค้นหา..."
+                  <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="ค้นหาเกม..."
                      class="w-full bg-transparent pl-2.5 pr-1 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" />
-                  <button onclick="clearSearch(false)" id="clearSearchBtn" aria-label="ล้าง" class="hidden text-slate-400 hover:text-slate-700 shrink-0">
+                  <button type="button" onclick="clearSearch(false)" id="clearSearchBtn" aria-label="ล้าง" class="hidden text-slate-400 hover:text-slate-700 shrink-0">
                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <path d="M18 6L6 18M6 6l12 12"/>
                      </svg>
@@ -373,7 +423,7 @@
                </div>
 
                <!-- Random Slot Launcher Icon Button -->
-               <button onclick="openRandomizer()" aria-label="สุ่มเกม"
+               <button type="button" onclick="openRandomizer()" title="สุ่มเกม" aria-label="สุ่มเกม"
                   class="tactile-btn relative h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 text-white shadow-pill border-2 border-amber-200 flex items-center justify-center">
                   <svg id="diceIcon" class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none">
                      <rect x="3" y="3" width="18" height="18" rx="5" fill="#FFF" fill-opacity="0.22" stroke="#FFF" stroke-width="2"/>
@@ -387,36 +437,56 @@
                </button>
 
                <!-- Settings Gear Icon -->
-               <button onclick="openModal('settingsModal')" aria-label="ตั้งค่า"
+               <button type="button" onclick="openModal('settingsModal')" title="ตั้งค่า" aria-label="ตั้งค่า"
                   class="floating-pill tactile-btn h-12 w-12 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-pill text-slate-700 hover:text-indigo-600 flex items-center justify-center">
                   <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                      <circle cx="12" cy="12" r="3"/>
-                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                   </svg>
                </button>
             </div>
          </div>
       </header>
 
-      <!-- RESPONSIVE GAME STAGE -->
-      <main class="relative z-10 flex-1 w-full max-w-[1440px] mx-auto px-3 sm:px-6 pt-1.5 sm:pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col">
+      <!-- RESPONSIVE FULLSCREEN GAME STAGE -->
+      <main class="relative z-10 flex-1 w-full max-w-[1440px] mx-auto px-3 sm:px-6 pt-0.5 sm:pt-1 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex flex-col justify-between gap-3 sm:gap-5">
 
-         <!-- Responsive Grid: 2 Columns on Mobile (>=350px), 3 on Tablet/Laptop, 4 on Wide Desktop -->
+         <!-- PRIMARY STAGE: 12 CORE HERO GAMES -->
          <div id="gameGrid" class="grid grid-cols-1 min-[350px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 my-auto py-1">
             <!-- Populated dynamically with illustrated cards -->
          </div>
 
+         <!-- Live Search Match Strip for Bonus Games (Appears only when searching) -->
+         <div id="bonusSearchMatches" class="hidden w-full bonus-surface bg-white/90 backdrop-blur-md rounded-3xl border-2 border-indigo-200/80 p-3 sm:p-4 shadow-pill space-y-2.5">
+            <div class="flex items-center justify-between">
+               <div class="flex items-center gap-2 text-indigo-600 font-prompt font-bold text-xs sm:text-sm">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                     <rect x="3" y="8" width="18" height="4" rx="1.5"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                  </svg>
+                  <span>คลังเกมเสริมที่พบ</span>
+                  <span id="bonusSearchMatchCount" class="font-fredoka px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs">0</span>
+               </div>
+               <button type="button" onclick="openBonusVault(searchQuery)" aria-label="ดูทั้งหมด" class="tactile-btn px-3 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-prompt font-bold text-xs flex items-center gap-1">
+                  <span>ทั้งหมด</span>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+               </button>
+            </div>
+            <div id="bonusSearchGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5"></div>
+         </div>
+
          <!-- Visual Empty State -->
          <div id="emptyState" class="hidden m-auto flex flex-col items-center justify-center text-center p-8 bg-white/95 rounded-3xl border-2 border-slate-200 shadow-pill max-w-xs w-full">
-            <svg class="w-16 h-16 sm:w-20 sm:h-20 text-slate-300 mb-4" viewBox="0 0 64 64" fill="none">
+            <svg class="w-16 h-16 sm:w-20 sm:h-20 text-slate-300 mb-3" viewBox="0 0 64 64" fill="none">
                <circle cx="28" cy="28" r="18" stroke="currentColor" stroke-width="5"/>
                <path d="M41 41l13 13" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
                <path d="M22 25h12M24 32h8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
             </svg>
-            <button onclick="resetAllFilters()" aria-label="รีเซ็ต" class="tactile-btn w-14 h-12 rounded-2xl bg-indigo-600 text-white font-prompt font-bold text-sm flex items-center justify-center shadow-btn-pop">
-               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <p class="font-prompt font-bold text-sm text-slate-600 mb-4">ไม่พบเกมที่ค้นหา</p>
+            <button type="button" onclick="resetAllFilters()" aria-label="ล้างตัวกรอง" class="tactile-btn px-5 h-11 rounded-2xl bg-indigo-600 text-white font-prompt font-bold text-sm flex items-center justify-center gap-2 shadow-btn-pop">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
                   <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
                </svg>
+               <span>ล้างตัวกรอง</span>
             </button>
          </div>
 
@@ -424,83 +494,195 @@
 
       <!-- ================= MODALS ================= -->
 
-      <!-- Settings Popover Modal -->
-      <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this) closeModal('settingsModal')">
-         <div class="modal-surface bg-white rounded-3xl max-w-xs w-full p-5 shadow-2xl border-2 border-slate-200 space-y-3">
-            <div class="flex items-center justify-between pb-1">
-               <div class="flex items-center gap-2 text-slate-800 font-prompt font-bold text-base">
-                  <svg class="w-5 h-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                     <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  <span>ตั้งค่า</span>
+      <!-- BONUS VAULT MODAL (MINI-GAME DRAWER) -->
+      <div id="bonusModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-2.5 sm:p-5 hidden" onclick="if(event.target===this) closeModal('bonusModal')">
+         <div class="modal-surface modal-enter bg-[#F8FAFC] rounded-[30px] max-w-4xl w-full max-h-[88dvh] shadow-2xl border-2 border-slate-200 flex flex-col overflow-hidden">
+
+            <!-- Vault Top Header -->
+            <div class="bg-white px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-200/80 flex items-center justify-between gap-2 shrink-0">
+               <!-- Gift Emblem, Title & Progress Pill -->
+               <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center shadow-sm shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="8" width="18" height="4" rx="1.5"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+                     </svg>
+                  </div>
+                  <span class="hidden sm:inline font-prompt font-extrabold text-base text-slate-800 truncate">คลังเกมเสริม</span>
+                  <span id="vaultPlayedBadge" class="font-fredoka font-bold text-xs sm:text-sm px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200/80 shrink-0">0/13</span>
                </div>
-               <button onclick="closeModal('settingsModal')" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+
+               <!-- Vault Search + Mini Randomizer + Close -->
+               <div class="flex items-center gap-2">
+                  <div class="h-10 rounded-xl bg-slate-100 focus-within:bg-white border border-transparent focus-within:border-indigo-300 flex items-center px-2.5 w-32 sm:w-48 transition-all">
+                     <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+                     </svg>
+                     <input type="text" id="bonusVaultSearchInput" oninput="handleBonusSearch(this.value)" placeholder="ค้นหาเกมเสริม..."
+                        class="w-full bg-transparent pl-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" />
+                  </div>
+
+                  <!-- Random Pick a Bonus Game Button -->
+                  <button type="button" onclick="spinBonusFromVault()" title="สุ่มเกมเสริม" aria-label="สุ่มเกมเสริม"
+                     class="tactile-btn h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="18" height="18" rx="5" fill="#FFF" fill-opacity="0.22" stroke="#FFF" stroke-width="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5" fill="#FFF"/>
+                        <circle cx="15.5" cy="15.5" r="1.5" fill="#FFF"/>
+                        <circle cx="12" cy="12" r="1.5" fill="#FFF"/>
+                     </svg>
+                  </button>
+
+                  <button type="button" onclick="closeModal('bonusModal')" aria-label="ปิด"
+                     class="tactile-btn h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+               </div>
+            </div>
+
+            <!-- Icon + Text Category Chips -->
+            <div class="bg-white/80 px-4 py-2.5 border-b border-slate-200/70 flex flex-wrap items-center gap-1.5 shrink-0">
+               <button type="button" onclick="setBonusCategory('all')" id="btab-all" aria-label="ทั้งหมด"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900 text-white transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                  <span>ทั้งหมด</span>
+                  <span id="btab-count-all" class="font-fredoka">13</span>
+               </button>
+
+               <button type="button" onclick="setBonusCategory('brain')" id="btab-brain" aria-label="ฝึกสมอง"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-violet-600 hover:bg-violet-50 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3h-1v3a4 4 0 0 1-8 0v-3H7a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/></svg>
+                  <span>ฝึกสมอง</span>
+               </button>
+
+               <button type="button" onclick="setBonusCategory('arcade')" id="btab-arcade" aria-label="ไวพริบ"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-amber-600 hover:bg-amber-50 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>ไวพริบ</span>
+               </button>
+
+               <button type="button" onclick="setBonusCategory('stem')" id="btab-stem" aria-label="คณิต-วิทย์"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-sky-600 hover:bg-sky-50 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                  <span>คณิต-วิทย์</span>
+               </button>
+
+               <button type="button" onclick="setBonusCategory('word')" id="btab-word" aria-label="ภาษา-ศิลป์"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-rose-600 hover:bg-rose-50 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+                  <span>ภาษา-ศิลป์</span>
+               </button>
+
+               <button type="button" onclick="toggleBonusFavoriteFilter()" id="btab-fav" aria-label="เกมเสริมโปรด"
+                  class="bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition">
+                  <svg class="w-4 h-4 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/></svg>
+                  <span>โปรด</span>
+               </button>
+            </div>
+
+            <!-- Scrollable Compact Mini-Cards Grid -->
+            <div class="flex-1 overflow-y-auto p-3.5 sm:p-5">
+               <div id="bonusVaultGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5">
+                  <!-- Populated dynamically with compact icon-illustrated bonus cards -->
+               </div>
+
+               <div id="bonusVaultEmpty" class="hidden py-12 flex flex-col items-center justify-center text-center">
+                  <svg class="w-14 h-14 text-slate-300 mb-3" viewBox="0 0 64 64" fill="none">
+                     <circle cx="28" cy="28" r="18" stroke="currentColor" stroke-width="5"/>
+                     <path d="M41 41l13 13" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+                  </svg>
+                  <p class="font-prompt font-bold text-sm text-slate-500 mb-3">ไม่พบเกมเสริมที่ค้นหา</p>
+                  <button type="button" onclick="resetBonusFilters()" aria-label="ล้างตัวกรอง" class="tactile-btn px-4 h-10 rounded-xl bg-indigo-600 text-white font-prompt font-bold text-xs flex items-center justify-center gap-1.5">
+                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                     </svg>
+                     <span>ล้างตัวกรอง</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Settings Modal (With Clear Thai Labels) -->
+      <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this) closeModal('settingsModal')">
+         <div class="modal-surface modal-enter bg-white rounded-3xl max-w-xs sm:max-w-sm w-full p-4 sm:p-5 shadow-2xl border-2 border-slate-200 space-y-3">
+            <div class="flex items-center justify-between pb-1">
+               <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                     </svg>
+                  </div>
+                  <h3 class="font-prompt font-extrabold text-base text-slate-800">ตั้งค่า</h3>
+               </div>
+               <button type="button" onclick="closeModal('settingsModal')" aria-label="ปิด" class="tactile-btn w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                </button>
             </div>
 
             <!-- Sound Toggle -->
-            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
-               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
-                  <svg class="w-5 h-5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                  </svg>
-                  <span>เสียงเอฟเฟกต์</span>
+            <label class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                     </svg>
+                  </div>
+                  <span class="font-prompt font-bold text-sm text-slate-700 truncate">เสียงเอฟเฟกต์</span>
                </div>
-               <input type="checkbox" id="soundToggle" checked onchange="toggleSound(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+               <input type="checkbox" id="soundToggle" checked onchange="toggleSound(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer shrink-0" />
             </label>
 
             <!-- High Contrast Toggle -->
-            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
-               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
-                  <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                     <circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/>
-                  </svg>
-                  <span>คอนทราสต์สูง</span>
+            <label class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/>
+                     </svg>
+                  </div>
+                  <span class="font-prompt font-bold text-sm text-slate-700 truncate">โหมดคอนทราสต์สูง</span>
                </div>
-               <input type="checkbox" id="contrastToggle" onchange="toggleHighContrast(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+               <input type="checkbox" id="contrastToggle" onchange="toggleHighContrast(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer shrink-0" />
             </label>
 
             <!-- New Tab Toggle -->
-            <label class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
-               <div class="flex items-center gap-2.5 font-semibold text-sm text-slate-700">
-                  <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                  </svg>
-                  <span>เปิดแท็บใหม่</span>
+            <label class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+               <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                     </svg>
+                  </div>
+                  <span class="font-prompt font-bold text-sm text-slate-700 truncate">เปิดเกมในแท็บใหม่</span>
                </div>
-               <input type="checkbox" id="newTabToggle" checked onchange="toggleNewTab(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+               <input type="checkbox" id="newTabToggle" checked onchange="toggleNewTab(this.checked)" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer shrink-0" />
             </label>
 
-            <!-- Reset Progress Action -->
-            <button onclick="resetPlayedProgress()" class="w-full py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs flex items-center justify-center gap-1.5 transition">
-               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <!-- Reset Progress Action (Safe 2-step inline confirmation) -->
+            <button type="button" id="resetProgressBtn" onclick="handleResetProgressClick()" class="tactile-btn w-full h-11 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-prompt font-bold text-sm flex items-center justify-center gap-2 transition">
+               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
                   <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
                </svg>
-               <span>ล้างสถิติการเล่น</span>
+               <span id="resetProgressLabel">ล้างสถิติการเล่น</span>
             </button>
          </div>
       </div>
 
       <!-- INTERACTIVE ARCADE DRUM RANDOMIZER MODAL (BORDERLESS LIGHT THEME + SIGNATURE COLORS) -->
-      <div id="randomModal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden" onclick="if(event.target===this) closeRandomModal()">
-         <div id="randomModalCard" style="--aura-color: rgba(245, 158, 11, 0.20);"
-            class="modal-surface relative bg-white rounded-[32px] max-w-[360px] sm:max-w-sm w-full p-4 sm:p-5 text-center shadow-[0_24px_60px_-12px_rgba(15,23,42,0.22)] space-y-3 overflow-hidden">
-
-            <!-- Dynamic Light-Theme Signature Aura Wash -->
-            <div id="modalAuraBg" class="absolute inset-0 pointer-events-none transition-all duration-300"
-               style="background: radial-gradient(circle at 50% 28%, var(--aura-color), transparent 72%);"></div>
+      <div id="randomModal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden" onclick="if(event.target===this) closeRandomModal()">
+         <div id="randomModalCard" class="modal-surface modal-enter relative bg-white/95 backdrop-blur-xl rounded-[32px] max-w-[380px] sm:max-w-[420px] w-full p-4 sm:p-5 shadow-2xl border-2 border-white/80 flex flex-col gap-3 overflow-hidden"
+            style="box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.25), 0 0 40px var(--aura-color, rgba(245, 158, 11, 0.2));">
 
             <!-- Confetti Celebration Canvas Overlay -->
             <canvas id="confettiCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-30"></canvas>
 
             <!-- Top Icon Header: Roulette Emblem + Suspense Stage Lights + Close Icon -->
             <div class="relative z-10 flex items-center justify-between gap-2">
-               <div id="modalDiceBadge" class="w-10 h-10 rounded-2xl bg-amber-400 text-white flex items-center justify-center shadow-xs transition-colors duration-200 shrink-0">
+               <div id="modalDiceBadge" class="w-10 h-10 rounded-2xl bg-amber-400 text-white flex items-center justify-center shadow-sm transition-colors duration-200 shrink-0">
                   <svg id="modalDiceIcon" class="w-5 h-5" viewBox="0 0 24 24" fill="none">
                      <rect x="3" y="3" width="18" height="18" rx="5" fill="#FFF" fill-opacity="0.25" stroke="#FFF" stroke-width="2"/>
                      <circle cx="8.5" cy="8.5" r="1.5" fill="#FFF"/>
-                     <circle cx="15.5" cy="15.5" r="1.5" fill="#FFF"/>
+                     <circle cx="15.5" cy="8.5" r="1.5" fill="#FFF"/>
                      <circle cx="12" cy="12" r="1.5" fill="#FFF"/>
                   </svg>
                </div>
@@ -511,40 +693,46 @@
                   <span id="stageDot-1" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-150"></span>
                   <span id="stageDot-2" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-150"></span>
                   <span id="stageDot-3" class="w-3.5 h-3.5 rounded-full bg-slate-300 flex items-center justify-center transition-all duration-150">
-                     <svg class="w-2 h-2 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z"/></svg>
+                     <svg class="w-2 h-2 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2z"/></svg>
                   </span>
                </div>
 
-               <button onclick="closeRandomModal()" aria-label="ปิด"
+               <button type="button" onclick="closeRandomModal()" aria-label="ปิด"
                   class="tactile-btn w-10 h-10 rounded-2xl bg-slate-100/90 hover:bg-slate-200/90 text-slate-600 flex items-center justify-center shrink-0">
-                  <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                </button>
             </div>
 
-            <!-- Borderless Segmented Pool Selector Pills -->
-            <div class="relative z-10 grid grid-cols-3 gap-1 p-1 bg-slate-100/90 rounded-2xl text-xs font-fredoka font-bold">
-               <button onclick="setSpinMode('all')" id="spinMode-all" aria-label="ทั้งหมด"
-                  class="py-2 px-2 rounded-xl bg-white text-slate-800 shadow-xs transition flex items-center justify-center gap-1.5">
+            <!-- Borderless Segmented Pool Selector Pills (12 Main | Unplayed | Filtered | Bonus +13) -->
+            <div class="relative z-10 grid grid-cols-4 gap-1 p-1 bg-slate-100/90 rounded-2xl text-xs font-fredoka font-bold">
+               <button type="button" onclick="setSpinMode('all')" id="spinMode-all" aria-label="12 เกมหลัก"
+                  class="py-2 px-1.5 rounded-xl bg-white text-slate-800 shadow-sm transition flex items-center justify-center gap-1">
                   <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
                   <span id="spinCount-all">12</span>
                </button>
-               <button onclick="setSpinMode('unplayed')" id="spinMode-unplayed" aria-label="ยังไม่เล่น"
-                  class="py-2 px-2 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1.5">
+               <button type="button" onclick="setSpinMode('unplayed')" id="spinMode-unplayed" aria-label="ยังไม่เล่น"
+                  class="py-2 px-1.5 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1">
                   <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2z"/></svg>
                   <span id="spinCount-unplayed">12</span>
                </button>
-               <button onclick="setSpinMode('filtered')" id="spinMode-filtered" aria-label="ตามหมวด"
-                  class="py-2 px-2 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+               <button type="button" onclick="setSpinMode('filtered')" id="spinMode-filtered" aria-label="ตามหมวด"
+                  class="py-2 px-1.5 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                   <span id="spinCount-filtered">12</span>
+               </button>
+               <button type="button" onclick="setSpinMode('bonus')" id="spinMode-bonus" aria-label="เกมเสริม"
+                  class="py-2 px-1.5 rounded-xl text-slate-500 hover:text-indigo-600 transition flex items-center justify-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1.5"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></svg>
+                  <span id="spinCount-bonus">+13</span>
                </button>
             </div>
 
             <!-- Redesigned Borderless Cylindrical Drum Stage (Tap anywhere to instant-stop) -->
-            <div onclick="handleReelTap()" id="reelFrame"
+            <div onclick="handleReelTap()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleReelTap();}"
+               id="reelFrame" role="button" tabindex="0" aria-label="แตะเพื่อหยุดสุ่มทันที"
                class="relative z-10 w-full h-[232px] sm:h-[248px] rounded-[26px] bg-slate-100/80 shadow-[inset_0_2px_10px_rgba(15,23,42,0.06)] overflow-hidden cursor-pointer select-none">
 
-               <!-- Soft Luminous Center Spotlight Pedestal (No hard border) -->
+               <!-- Soft Luminous Center Spotlight Pedestal -->
                <div id="reelHighlightBox"
                   class="absolute inset-x-3.5 top-1/2 -translate-y-1/2 h-[176px] sm:h-[192px] rounded-[22px] bg-white shadow-[0_10px_26px_-6px_rgba(15,23,42,0.12)] pointer-events-none z-0 transition-shadow duration-200"></div>
 
@@ -569,7 +757,7 @@
 
                <!-- Minimalist Skip Icon Pill while spinning -->
                <div id="skipSpinHint" class="absolute bottom-2.5 right-3 z-20 pointer-events-none">
-                  <span class="w-7 h-7 rounded-full bg-slate-900/55 text-white flex items-center justify-center backdrop-blur-xs">
+                  <span class="w-7 h-7 rounded-full bg-slate-900/55 text-white flex items-center justify-center backdrop-blur-sm">
                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2.5" height="16" rx="1"/></svg>
                   </span>
                </div>
@@ -577,21 +765,21 @@
 
             <!-- Action Bar: [Re-spin] [Signature-Colored Play CTA] [Favorite Star] -->
             <div class="relative z-10 flex items-center gap-2 pt-0.5">
-               <button onclick="startSlotSpin()" id="respinBtn" aria-label="สุ่มใหม่"
-                  class="tactile-btn h-12 w-12 sm:w-13 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+               <button type="button" onclick="startSlotSpin()" id="respinBtn" aria-label="สุ่มใหม่"
+                  class="tactile-btn h-12 w-12 sm:w-[52px] rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
                   </svg>
                </button>
 
-               <a id="randomModalPlayBtn" href="#"
-                  class="tactile-btn flex-1 h-12 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-prompt font-bold text-base shadow-btn-pop flex items-center justify-center gap-2 transition-all">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-                  <span id="randomPlayBtnLabel">เล่นเลย!</span>
+               <a id="randomModalPlayBtn" href="#" aria-label="เล่นเกมนี้"
+                  class="tactile-btn flex-1 h-12 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-prompt font-bold text-sm sm:text-base shadow-btn-pop flex items-center justify-center gap-2 whitespace-nowrap transition-all">
+                  <svg id="randomPlayBtnIcon" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                  <span>เล่นเกมนี้</span>
                </a>
 
-               <button onclick="toggleWinnerFavorite()" id="randomFavBtn" aria-label="เกมโปรด"
-                  class="tactile-btn h-12 w-12 sm:w-13 rounded-2xl bg-slate-100 hover:bg-amber-50 text-slate-300 flex items-center justify-center shrink-0 transition-colors">
+               <button type="button" onclick="toggleWinnerFavorite()" id="randomFavBtn" aria-label="เกมโปรด"
+                  class="tactile-btn h-12 w-12 sm:w-[52px] rounded-2xl bg-slate-100 hover:bg-amber-50 text-slate-300 flex items-center justify-center shrink-0 transition-colors">
                   <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
                   </svg>
@@ -602,7 +790,10 @@
 
       <!-- ================= JAVASCRIPT & BESPOKE SVG ARTWORK ENGINE ================= -->
       <script>
-         // Safe storage helpers (gracefully handle sandboxed iframe storage & corrupted JSON)
+         // Unique SVG ID generator to avoid duplicate gradient IDs across cards & randomizer reel
+         let svgUidCounter = 0;
+
+         // Safe storage helpers
          function safeGetStorage(key, fallback) {
             try {
                const val = localStorage.getItem(key);
@@ -632,18 +823,428 @@
             } catch (e) {}
          }
 
-         // High-craft bespoke SVG illustrations for each of the 12 games
+         // Human-readable Thai labels for Bonus Categories
+         const BONUS_CATEGORY_LABELS = {
+            brain: 'ฝึกสมอง',
+            arcade: 'ไวพริบ',
+            stem: 'คณิต-วิทย์',
+            word: 'ภาษา-ศิลป์'
+         };
+
+         // Bespoke SVG Illustration Generator for Bonus Mini-Games
+         function getBonusIllustrationSVG(iconType, theme) {
+            const primary = (theme && theme.primary) || '#6366F1';
+            const light = (theme && theme.light) || '#EEF2FF';
+            const border = (theme && theme.border) || '#C7D2FE';
+
+            const artworkMap = {
+               town: `
+                  <circle cx="212" cy="28" r="13" fill="#FBBF24"/>
+                  <rect x="44" y="42" width="44" height="58" rx="8" fill="#38BDF8"/>
+                  <polygon points="40,44 66,24 92,44" fill="#0284C7"/>
+                  <rect x="54" y="54" width="10" height="10" rx="2" fill="#FFF"/>
+                  <rect x="70" y="54" width="10" height="10" rx="2" fill="#FFF"/>
+                  <rect x="96" y="34" width="48" height="66" rx="8" fill="${primary}"/>
+                  <polygon points="92,36 120,16 148,36" fill="#F59E0B"/>
+                  <rect x="108" y="48" width="10" height="10" rx="2" fill="#FFF"/>
+                  <rect x="124" y="48" width="10" height="10" rx="2" fill="#FFF"/>
+                  <path d="M138 100 L186 74 L214 74 L214 100 Z" fill="#10B981"/>
+                  <path d="M138 92 L186 66 L214 66" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
+                  <circle cx="174" cy="64" r="7" fill="#FFF" stroke="${primary}" stroke-width="2.5"/>
+                  <circle cx="174" cy="52" r="4.5" fill="#F97316"/>
+                  <rect x="24" y="98" width="212" height="16" rx="8" fill="#059669"/>`,
+
+               runner: `
+                  <polygon points="92,28 168,28 224,122 36,122" fill="#312E81"/>
+                  <line x1="117" y1="28" x2="98" y2="122" stroke="#A5B4FC" stroke-width="2.5" stroke-dasharray="6 5"/>
+                  <line x1="143" y1="28" x2="162" y2="122" stroke="#A5B4FC" stroke-width="2.5" stroke-dasharray="6 5"/>
+                  <rect x="74" y="44" width="26" height="24" rx="6" fill="#F59E0B"/>
+                  <text x="87" y="61" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="15">C</text>
+                  <rect x="117" y="36" width="26" height="24" rx="6" fill="#10B981"/>
+                  <text x="130" y="53" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="15">A</text>
+                  <rect x="160" y="44" width="26" height="24" rx="6" fill="#EC4899"/>
+                  <text x="173" y="61" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="15">T</text>
+                  <circle cx="130" cy="76" r="11" fill="#FDE047"/>
+                  <rect x="118" y="88" width="24" height="22" rx="9" fill="#38BDF8"/>
+                  <path d="M114 96 L102 90 M146 96 L158 90" stroke="#FDE047" stroke-width="4" stroke-linecap="round"/>`,
+
+               senses: `
+                  <circle cx="130" cy="72" r="24" fill="#FBBF24"/>
+                  <circle cx="122" cy="69" r="2.6" fill="#1E293B"/>
+                  <circle cx="138" cy="69" r="2.6" fill="#1E293B"/>
+                  <path d="M124 77 Q130 83 136 77" stroke="#1E293B" stroke-width="2.6" stroke-linecap="round"/>
+                  <circle cx="76" cy="46" r="15" fill="#FFF" stroke="#0284C7" stroke-width="2.5"/>
+                  <ellipse cx="76" cy="46" rx="8" ry="5" fill="#38BDF8"/>
+                  <circle cx="76" cy="46" r="2.5" fill="#0F172A"/>
+                  <circle cx="184" cy="46" r="15" fill="#FFF" stroke="#F97316" stroke-width="2.5"/>
+                  <path d="M182 39 C188 39, 189 53, 182 53" stroke="#F97316" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="130" cy="28" r="14" fill="#FFF" stroke="#EC4899" stroke-width="2.5"/>
+                  <circle cx="130" cy="28" r="5" fill="#F43F5E"/>
+                  <circle cx="78" cy="96" r="15" fill="#FFF" stroke="#EF4444" stroke-width="2.5"/>
+                  <circle cx="78" cy="97" r="7" fill="#EF4444"/>
+                  <path d="M78 90 L81 86" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="182" cy="96" r="15" fill="#FFF" stroke="${primary}" stroke-width="2.5"/>
+                  <rect x="176" y="91" width="12" height="11" rx="4" fill="#10B981"/>`,
+
+               cashier: `
+                  <rect x="68" y="24" width="32" height="22" rx="4" fill="#FFF" stroke="#94A3B8" stroke-width="2"/>
+                  <line x1="74" y1="31" x2="94" y2="31" stroke="#94A3B8" stroke-width="2"/>
+                  <line x1="74" y1="37" x2="88" y2="37" stroke="#94A3B8" stroke-width="2"/>
+                  <rect x="108" y="22" width="46" height="24" rx="6" fill="#0F172A" stroke="${primary}" stroke-width="3"/>
+                  <text x="131" y="38" text-anchor="middle" fill="#34D399" font-family="Fredoka" font-weight="700" font-size="13">฿25</text>
+                  <rect x="58" y="44" width="104" height="52" rx="14" fill="${primary}"/>
+                  <rect x="52" y="90" width="116" height="18" rx="7" fill="#0369A1"/>
+                  <rect x="72" y="54" width="14" height="10" rx="3" fill="#FFF"/>
+                  <rect x="92" y="54" width="14" height="10" rx="3" fill="#FFF"/>
+                  <rect x="112" y="54" width="14" height="10" rx="3" fill="#FBBF24"/>
+                  <rect x="132" y="54" width="16" height="24" rx="4" fill="#10B981"/>
+                  <rect x="72" y="68" width="14" height="10" rx="3" fill="#FFF"/>
+                  <rect x="92" y="68" width="14" height="10" rx="3" fill="#FFF"/>
+                  <rect x="112" y="68" width="14" height="10" rx="3" fill="#F43F5E"/>
+                  <circle cx="192" cy="96" r="14" fill="#FBBF24" stroke="#D97706" stroke-width="3"/>
+                  <text x="192" y="101" text-anchor="middle" fill="#78350F" font-family="Fredoka" font-weight="700" font-size="14">฿</text>
+                  <circle cx="198" cy="74" r="12" fill="#FDE047" stroke="#D97706" stroke-width="2.5"/>`,
+
+               sorter: `
+                  <rect x="34" y="84" width="192" height="22" rx="11" fill="#475569"/>
+                  <circle cx="52" cy="95" r="5" fill="#CBD5E1"/>
+                  <circle cx="91" cy="95" r="5" fill="#CBD5E1"/>
+                  <circle cx="130" cy="95" r="5" fill="#CBD5E1"/>
+                  <circle cx="169" cy="95" r="5" fill="#CBD5E1"/>
+                  <circle cx="208" cy="95" r="5" fill="#CBD5E1"/>
+                  <rect x="52" y="46" width="42" height="36" rx="10" fill="#F59E0B"/>
+                  <text x="73" y="70" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="18">A</text>
+                  <rect x="109" y="40" width="42" height="42" rx="10" fill="${primary}"/>
+                  <text x="130" y="67" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="20">B</text>
+                  <rect x="166" y="46" width="42" height="36" rx="10" fill="#10B981"/>
+                  <text x="187" y="70" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="18">C</text>
+                  <path d="M118 24 L130 14 L142 24" stroke="${primary}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+
+               magic: `
+                  <path d="M84 86 L124 24 L156 86 Z" fill="${primary}"/>
+                  <ellipse cx="120" cy="86" rx="48" ry="11" fill="#581C87"/>
+                  <path d="M96 72 Q120 78 144 72" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M122 44 L124 50 L130 52 L124 54 L122 60 L120 54 L114 52 L120 50 Z" fill="#FDE047"/>
+                  <line x1="154" y1="98" x2="196" y2="54" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
+                  <line x1="186" y1="64" x2="196" y2="54" stroke="#FBBF24" stroke-width="6" stroke-linecap="round"/>
+                  <rect x="174" y="24" width="24" height="24" rx="7" fill="#FFF" stroke="#F59E0B" stroke-width="2.5"/>
+                  <text x="186" y="41" text-anchor="middle" fill="${primary}" font-family="Fredoka" font-weight="700" font-size="14">A</text>
+                  <circle cx="164" cy="40" r="4" fill="#FBBF24"/>
+                  <circle cx="206" cy="74" r="4.5" fill="#EC4899"/>`,
+
+               carpath: `
+                  <path d="M22 114 C64 114, 72 44, 130 44 C188 44, 196 114, 238 114" stroke="#475569" stroke-width="24" stroke-linecap="round"/>
+                  <path d="M22 114 C64 114, 72 44, 130 44 C188 44, 196 114, 238 114" stroke="#FDE047" stroke-width="2.5" stroke-dasharray="7 7" stroke-linecap="round"/>
+                  <rect x="52" y="24" width="26" height="22" rx="6" fill="#FFF" stroke="${primary}" stroke-width="2.5"/>
+                  <text x="65" y="40" text-anchor="middle" fill="${primary}" font-family="Fredoka" font-weight="700" font-size="13">Ph</text>
+                  <rect x="182" y="24" width="26" height="22" rx="6" fill="#FFF" stroke="#0284C7" stroke-width="2.5"/>
+                  <text x="195" y="40" text-anchor="middle" fill="#0284C7" font-family="Fredoka" font-weight="700" font-size="13">Ch</text>
+                  <rect x="102" y="64" width="56" height="26" rx="11" fill="${primary}"/>
+                  <rect x="112" y="54" width="36" height="16" rx="7" fill="#FB7185"/>
+                  <circle cx="114" cy="90" r="8" fill="#0F172A"/>
+                  <circle cx="114" cy="90" r="3.5" fill="#CBD5E1"/>
+                  <circle cx="146" cy="90" r="8" fill="#0F172A"/>
+                  <circle cx="146" cy="90" r="3.5" fill="#CBD5E1"/>`,
+
+               basket: `
+                  <circle cx="88" cy="34" r="15" fill="#EF4444"/>
+                  <text x="88" y="39" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">W</text>
+                  <circle cx="134" cy="26" r="15" fill="#10B981"/>
+                  <text x="134" y="31" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">O</text>
+                  <circle cx="174" cy="42" r="15" fill="#3B82F6"/>
+                  <text x="174" y="47" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">D</text>
+                  <path d="M104 68 Q130 44 156 68" stroke="#B45309" stroke-width="4.5" stroke-linecap="round"/>
+                  <path d="M84 68 H176 L164 108 H96 Z" fill="#F59E0B" stroke="#B45309" stroke-width="3" stroke-linejoin="round"/>
+                  <line x1="90" y1="82" x2="170" y2="82" stroke="#B45309" stroke-width="2.5"/>
+                  <line x1="93" y1="95" x2="167" y2="95" stroke="#B45309" stroke-width="2.5"/>
+                  <line x1="115" y1="68" x2="119" y2="108" stroke="#B45309" stroke-width="2.5"/>
+                  <line x1="145" y1="68" x2="141" y2="108" stroke="#B45309" stroke-width="2.5"/>`,
+
+               breakfast: `
+                  <rect x="30" y="88" width="200" height="22" rx="11" fill="#475569"/>
+                  <circle cx="50" cy="99" r="5" fill="#CBD5E1"/>
+                  <circle cx="90" cy="99" r="5" fill="#CBD5E1"/>
+                  <circle cx="130" cy="99" r="5" fill="#CBD5E1"/>
+                  <circle cx="170" cy="99" r="5" fill="#CBD5E1"/>
+                  <circle cx="210" cy="99" r="5" fill="#CBD5E1"/>
+                  <rect x="56" y="44" width="32" height="42" rx="6" fill="#38BDF8"/>
+                  <polygon points="56,44 72,32 88,44" fill="#0284C7"/>
+                  <rect x="62" y="54" width="20" height="14" rx="3" fill="#FFF"/>
+                  <ellipse cx="132" cy="82" rx="30" ry="7" fill="#FFF" stroke="#CBD5E1" stroke-width="2"/>
+                  <path d="M110 74 C108 62, 124 56, 136 60 C148 58, 156 68, 150 76 C142 82, 114 80, 110 74 Z" fill="#FFF"/>
+                  <circle cx="132" cy="70" r="9" fill="#FBBF24"/>
+                  <rect x="174" y="52" width="32" height="34" rx="8" fill="#F59E0B" stroke="#B45309" stroke-width="3"/>
+                  <rect x="179" y="58" width="22" height="22" rx="4" fill="#FEF3C7"/>`,
+
+               orange: `
+                  <rect x="46" y="24" width="24" height="32" rx="11" fill="#EF4444" stroke="#FBBF24" stroke-width="2.5"/>
+                  <line x1="58" y1="14" x2="58" y2="24" stroke="#FBBF24" stroke-width="3"/>
+                  <line x1="58" y1="56" x2="58" y2="66" stroke="#FBBF24" stroke-width="3"/>
+                  <path d="M92 78 H184 L174 108 H102 Z" fill="#EF4444" stroke="#FBBF24" stroke-width="3" stroke-linejoin="round"/>
+                  <circle cx="122" cy="64" r="20" fill="#F97316"/>
+                  <ellipse cx="128" cy="43" rx="9" ry="4.5" transform="rotate(-20 128 43)" fill="#10B981"/>
+                  <circle cx="156" cy="66" r="19" fill="#FB923C"/>
+                  <ellipse cx="162" cy="46" rx="8" ry="4" transform="rotate(-20 162 46)" fill="#10B981"/>
+                  <path d="M198 30 L201 37 L208 40 L201 43 L198 50 L195 43 L188 40 L195 37 Z" fill="#FBBF24"/>`,
+
+               snakes: `
+                  <rect x="56" y="26" width="44" height="40" rx="8" fill="#DBEAFE" stroke="${primary}" stroke-width="2.5"/>
+                  <text x="78" y="51" text-anchor="middle" fill="${primary}" font-family="Fredoka" font-weight="700" font-size="16">3</text>
+                  <rect x="100" y="26" width="44" height="40" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2.5"/>
+                  <text x="122" y="51" text-anchor="middle" fill="#D97706" font-family="Fredoka" font-weight="700" font-size="16">4</text>
+                  <rect x="56" y="66" width="44" height="40" rx="8" fill="#FCE7F3" stroke="#EC4899" stroke-width="2.5"/>
+                  <text x="78" y="91" text-anchor="middle" fill="#DB2777" font-family="Fredoka" font-weight="700" font-size="16">1</text>
+                  <rect x="100" y="66" width="44" height="40" rx="8" fill="#D1FAE5" stroke="#10B981" stroke-width="2.5"/>
+                  <text x="122" y="91" text-anchor="middle" fill="#059669" font-family="Fredoka" font-weight="700" font-size="16">2</text>
+                  <line x1="70" y1="98" x2="88" y2="34" stroke="#D97706" stroke-width="3.5" stroke-linecap="round"/>
+                  <line x1="82" y1="98" x2="100" y2="34" stroke="#D97706" stroke-width="3.5" stroke-linecap="round"/>
+                  <line x1="74" y1="80" x2="86" y2="80" stroke="#D97706" stroke-width="3"/>
+                  <line x1="79" y1="62" x2="91" y2="62" stroke="#D97706" stroke-width="3"/>
+                  <line x1="84" y1="45" x2="96" y2="45" stroke="#D97706" stroke-width="3"/>
+                  <path d="M132 38 C144 48, 114 66, 130 82 C138 90, 126 98, 118 96" stroke="#10B981" stroke-width="7" stroke-linecap="round"/>
+                  <circle cx="132" cy="36" r="6" fill="#059669"/>
+                  <rect x="164" y="48" width="42" height="42" rx="11" fill="#FFF" stroke="#1E293B" stroke-width="3"/>
+                  <circle cx="176" cy="60" r="3.5" fill="#EF4444"/>
+                  <circle cx="185" cy="69" r="3.5" fill="#1E293B"/>
+                  <circle cx="194" cy="78" r="3.5" fill="#EF4444"/>`,
+
+               bubbles: `
+                  <circle cx="82" cy="54" r="22" fill="#38BDF8" fill-opacity="0.28" stroke="#0284C7" stroke-width="3"/>
+                  <path d="M72 44 A11 11 0 0 1 82 39" stroke="#FFF" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="136" cy="64" r="30" fill="#EC4899" fill-opacity="0.25" stroke="#EC4899" stroke-width="3.5"/>
+                  <circle cx="136" cy="64" r="23" stroke="#FBBF24" stroke-width="2" stroke-dasharray="6 4"/>
+                  <path d="M120 48 A16 16 0 0 1 138 42" stroke="#FFF" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="188" cy="46" r="16" fill="#A855F7" fill-opacity="0.28" stroke="#9333EA" stroke-width="3"/>
+                  <path d="M181 39 A8 8 0 0 1 189 36" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="178" cy="94" r="14" fill="#10B981" fill-opacity="0.28" stroke="#059669" stroke-width="3"/>
+                  <path d="M96 96 L99 102 L105 105 L99 108 L96 114 L93 108 L87 105 L93 102 Z" fill="#FBBF24"/>`,
+
+               jetbird: `
+                  <path d="M52 24 H38 V38 M208 24 H222 V38 M52 112 H38 V98 M208 112 H222 V98" stroke="${primary}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M56 96 Q84 88 104 76" stroke="#FFF" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M68 106 Q92 98 112 86" stroke="#38BDF8" stroke-width="4" stroke-linecap="round"/>
+                  <polygon points="108,68 74,46 128,54" fill="#F59E0B"/>
+                  <path d="M94 74 C112 52, 146 44, 174 52 L192 58 L174 68 C154 84, 122 88, 94 74 Z" fill="${primary}"/>
+                  <polygon points="124,74 102,98 144,78" fill="#0284C7"/>
+                  <circle cx="162" cy="58" r="4.5" fill="#FFF"/>
+                  <circle cx="163" cy="58" r="2.2" fill="#0F172A"/>
+                  <polygon points="174,52 194,58 174,64" fill="#FBBF24"/>`
+            };
+
+            return `
+               <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                  <rect width="260" height="135" fill="${light}"/>
+                  <circle cx="34" cy="26" r="24" fill="${border}" fill-opacity="0.35"/>
+                  <circle cx="228" cy="112" r="30" fill="${border}" fill-opacity="0.35"/>
+                  ${artworkMap[iconType] || artworkMap.bubbles}
+               </svg>
+            `;
+         }
+
+         // Bespoke SVG Illustration Generator for Core 12 Games + Bonus Games (with unique gradient IDs)
          function getGameIllustrationSVG(id) {
+            const bonusMatch = typeof BONUS_GAMES !== 'undefined' ? BONUS_GAMES.find(g => g.id === id) : null;
+            if (bonusMatch) {
+               return getBonusIllustrationSVG(bonusMatch.iconType, bonusMatch.theme);
+            }
+
+            const uid = ++svgUidCounter;
+
             switch (id) {
-               case '05': case '5': case 'A01':
+               case '01': case '1': case 'A01':
                   return `
                   <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
                      <defs>
-                        <linearGradient id="bg-a01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="bg-a01-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#DBEAFE"/><stop offset="1" stop-color="#C7D2FE"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a01-${uid})"/>
+                     <circle cx="130" cy="68" r="52" stroke="#6366F1" stroke-width="2" stroke-dasharray="5 5" stroke-opacity="0.45"/>
+                     <circle cx="130" cy="68" r="38" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.3"/>
+                     <circle cx="130" cy="68" r="28" fill="#3B82F6"/>
+                     <path d="M114 54 Q124 50 128 60 T116 74 Q108 66 114 54 Z" fill="#34D399"/>
+                     <path d="M138 58 Q148 56 150 68 T136 80 Q132 70 138 58 Z" fill="#34D399"/>
+                     <circle cx="122" cy="67" r="2.2" fill="#1E293B"/>
+                     <circle cx="138" cy="67" r="2.2" fill="#1E293B"/>
+                     <path d="M126 73 Q130 77 134 73" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <circle cx="182" cy="48" r="11" fill="#EF4444"/>
+                     <path d="M182 37 C184 32, 189 33, 186 38" fill="#22C55E"/>
+                     <circle cx="78" cy="84" r="9" fill="#FDE047"/>
+                  </svg>`;
+
+               case '02': case '2': case 'A02':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a02-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#CFFAFE"/><stop offset="1" stop-color="#BAE6FD"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a02-${uid})"/>
+                     <path d="M0 44 Q32 34 65 44 T130 44 T195 44 T260 44 V135 H0 Z" fill="#38BDF8" fill-opacity="0.35"/>
+                     <path d="M0 64 Q45 54 90 64 T180 64 T260 64 V135 H0 Z" fill="#0284C7" fill-opacity="0.22"/>
+                     <line x1="112" y1="0" x2="112" y2="54" stroke="#475569" stroke-width="2.5"/>
+                     <path d="M112 54 V68 A9 9 0 0 1 94 68 V64" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+                     <polygon points="178,86 198,72 198,100" fill="#FB923C"/>
+                     <ellipse cx="154" cy="86" rx="28" ry="18" fill="#F97316"/>
+                     <path d="M148 69 Q154 86 148 103" stroke="#FFF" stroke-width="4.5"/>
+                     <circle cx="137" cy="82" r="3" fill="#1E293B"/>
+                     <circle cx="136" cy="81" r="1" fill="#FFF"/>
+                     <circle cx="122" cy="74" r="3.5" fill="#FFF" fill-opacity="0.8"/>
+                     <circle cx="116" cy="60" r="2.5" fill="#FFF" fill-opacity="0.7"/>
+                  </svg>`;
+
+               case '03': case '3': case 'A03':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a03-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FEF9C3"/><stop offset="1" stop-color="#FDE68A"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a03-${uid})"/>
+                     <circle cx="84" cy="68" r="25" fill="#FBBF24"/>
+                     <circle cx="77" cy="65" r="2.5" fill="#1E293B"/>
+                     <circle cx="91" cy="65" r="2.5" fill="#1E293B"/>
+                     <path d="M80 72 Q84 76 88 72" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                     <circle cx="72" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                     <circle cx="96" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
+                     <rect x="122" y="34" width="38" height="34" rx="10" fill="#FFF" stroke="#F59E0B" stroke-width="3"/>
+                     <path d="M134 51 H148" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
+                     <rect x="168" y="34" width="38" height="34" rx="10" fill="#6366F1"/>
+                     <path d="M180 51 H194 M187 44 V58" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
+                     <rect x="136" y="76" width="64" height="26" rx="9" fill="#10B981"/>
+                     <path d="M152 89 H184" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
+                  </svg>`;
+
+               case '04': case '4': case 'A04':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-a04-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FAE8FF"/><stop offset="1" stop-color="#F5D0FE"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-a04-${uid})"/>
+                     <path d="M62 135 L104 34 H156 L198 135 Z" fill="#334155"/>
+                     <line x1="130" y1="38" x2="130" y2="132" stroke="#FDE047" stroke-width="3" stroke-dasharray="10 8"/>
+                     <rect x="76" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
+                     <rect x="162" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
+                     <rect x="102" y="74" width="56" height="32" rx="12" fill="#EC4899"/>
+                     <rect x="110" y="64" width="40" height="20" rx="8" fill="#F472B6"/>
+                     <rect x="115" y="68" width="30" height="10" rx="4" fill="#E0F2FE"/>
+                     <circle cx="113" cy="92" r="5" fill="#FDE047"/>
+                     <circle cx="147" cy="92" r="5" fill="#FDE047"/>
+                     <rect x="97" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
+                     <rect x="153" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
+                  </svg>`;
+
+               case '05': case '5': case 'B01':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b01-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FFEDD5"/><stop offset="1" stop-color="#FED7AA"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b01-${uid})"/>
+                     <rect x="18" y="96" width="224" height="20" rx="10" fill="#475569"/>
+                     <circle cx="38" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="84" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="130" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="176" cy="106" r="5" fill="#94A3B8"/>
+                     <circle cx="222" cy="106" r="5" fill="#94A3B8"/>
+                     <polygon points="74,48 80,32 92,44" fill="#FB923C"/>
+                     <polygon points="122,48 116,32 104,44" fill="#FB923C"/>
+                     <circle cx="98" cy="64" r="24" fill="#FFF"/>
+                     <rect x="85" y="24" width="26" height="14" rx="5" fill="#FFF" stroke="#CBD5E1" stroke-width="2"/>
+                     <circle cx="88" cy="22" r="8" fill="#FFF"/>
+                     <circle cx="98" cy="20" r="9" fill="#FFF"/>
+                     <circle cx="108" cy="22" r="8" fill="#FFF"/>
+                     <circle cx="90" cy="62" r="2.5" fill="#1E293B"/>
+                     <circle cx="106" cy="62" r="2.5" fill="#1E293B"/>
+                     <polygon points="98,66 95,70 101,70" fill="#FB7185"/>
+                     <rect x="156" y="54" width="32" height="40" rx="7" fill="#38BDF8"/>
+                     <rect x="153" y="50" width="38" height="7" rx="3.5" fill="#0284C7"/>
+                     <line x1="176" y1="36" x2="172" y2="50" stroke="#F43F5E" stroke-width="3.5" stroke-linecap="round"/>
+                     <text x="172" y="79" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">0%</text>
+                  </svg>`;
+
+               case '06': case '6': case 'B02':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b02-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FFE4E6"/><stop offset="1" stop-color="#FECDD3"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b02-${uid})"/>
+                     <path d="M98 42 C76 42, 68 62, 68 74 C68 88, 78 102, 96 102 C108 102, 112 90, 106 80 C102 74, 102 68, 106 62 C112 52, 108 42, 98 42 Z" fill="#FB7185"/>
+                     <path d="M162 42 C184 42, 192 62, 192 74 C192 88, 182 102, 164 102 C152 102, 148 90, 154 80 C158 74, 158 68, 154 62 C148 52, 152 42, 162 42 Z" fill="#FB7185"/>
+                     <circle cx="84" cy="70" r="2.3" fill="#1E293B"/>
+                     <circle cx="96" cy="70" r="2.3" fill="#1E293B"/>
+                     <path d="M87 76 Q90 80 93 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <circle cx="164" cy="70" r="2.3" fill="#1E293B"/>
+                     <circle cx="176" cy="70" r="2.3" fill="#1E293B"/>
+                     <path d="M167 76 Q170 80 173 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+                     <path d="M130 46 C130 46, 117 64, 117 73 A13 13 0 0 0 143 73 C143 64, 130 46, 130 46 Z" fill="#38BDF8"/>
+                     <circle cx="126" cy="71" r="2.5" fill="#FFF" fill-opacity="0.8"/>
+                  </svg>`;
+
+               case '07': case '7': case 'B03':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b03-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#E0F2FE"/><stop offset="1" stop-color="#BAE6FD"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b03-${uid})"/>
+                     <rect x="0" y="96" width="58" height="39" fill="#94A3B8"/>
+                     <rect x="202" y="96" width="58" height="39" fill="#94A3B8"/>
+                     <rect x="54" y="96" width="48" height="12" rx="4" fill="#F59E0B"/>
+                     <rect x="106" y="96" width="48" height="12" rx="4" fill="#10B981"/>
+                     <rect x="158" y="96" width="48" height="12" rx="4" fill="#6366F1"/>
+                     <polygon points="118,38 128,22 136,38" fill="#0284C7"/>
+                     <path d="M84 68 C84 44, 112 36, 146 36 C168 36, 180 48, 180 68 Z" fill="#0EA5E9"/>
+                     <polygon points="154,62 160,54 166,62 172,54 176,62" fill="#FFF"/>
+                     <circle cx="152" cy="48" r="4" fill="#FFF"/>
+                     <circle cx="153" cy="48" r="2" fill="#0F172A"/>
+                     <circle cx="104" cy="78" r="17" fill="#1E293B"/>
+                     <circle cx="104" cy="78" r="7" fill="#FBBF24"/>
+                     <circle cx="160" cy="78" r="17" fill="#1E293B"/>
+                     <circle cx="160" cy="78" r="7" fill="#FBBF24"/>
+                  </svg>`;
+
+               case '08': case '8': case 'B04':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-b04-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                           <stop stop-color="#FEE2E2"/><stop offset="1" stop-color="#FECACA"/>
+                        </linearGradient>
+                     </defs>
+                     <rect width="260" height="135" fill="url(#bg-b04-${uid})"/>
+                     <path d="M24 72 H72 L84 48 L98 94 L112 58 L122 72 H236" stroke="#F87171" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"/>
+                     <path d="M130 108 C130 108, 86 80, 86 52 C86 36, 99 26, 113 26 C122 26, 128 31, 130 36 C132 31, 138 26, 147 26 C161 26, 174 36, 174 52 C174 80, 130 108, 130 108 Z" fill="#EF4444"/>
+                     <path d="M98 44 A12 12 0 0 1 110 35" stroke="#FCA5A5" stroke-width="3.5" stroke-linecap="round"/>
+                     <circle cx="118" cy="58" r="3" fill="#FFF"/>
+                     <circle cx="142" cy="58" r="3" fill="#FFF"/>
+                     <path d="M123 67 Q130 74 137 67" stroke="#FFF" stroke-width="3" stroke-linecap="round"/>
+                     <circle cx="168" cy="86" r="15" fill="#FFF" stroke="#10B981" stroke-width="3"/>
+                     <path d="M168 79 V93 M161 86 H175" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
+                  </svg>`;
+
+               case '09': case '9': case 'C01':
+                  return `
+                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
+                     <defs>
+                        <linearGradient id="bg-c01-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
                            <stop stop-color="#FFE4E6"/><stop offset="1" stop-color="#FBCFE8"/>
                         </linearGradient>
                      </defs>
-                     <rect width="260" height="135" fill="url(#bg-a01)"/>
+                     <rect width="260" height="135" fill="url(#bg-c01-${uid})"/>
                      <circle cx="38" cy="115" r="34" fill="#FFF" fill-opacity="0.8"/>
                      <circle cx="80" cy="122" r="28" fill="#FFF" fill-opacity="0.85"/>
                      <circle cx="215" cy="118" r="36" fill="#FFF" fill-opacity="0.8"/>
@@ -671,15 +1272,15 @@
                      <circle cx="142" cy="71" r="3" fill="#FB7185" fill-opacity="0.6"/>
                   </svg>`;
 
-               case '06': case '6': case 'A02':
+               case '10': case 'C02':
                   return `
                   <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
                      <defs>
-                        <linearGradient id="bg-a02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="bg-c02-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
                            <stop stop-color="#FEF3C7"/><stop offset="1" stop-color="#FDE68A"/>
                         </linearGradient>
                      </defs>
-                     <rect width="260" height="135" fill="url(#bg-a02)"/>
+                     <rect width="260" height="135" fill="url(#bg-c02-${uid})"/>
                      <path d="M0 98 Q70 76 140 96 T260 88 V135 H0 Z" fill="#86EFAC"/>
                      <rect x="0" y="108" width="260" height="27" fill="#F59E0B" fill-opacity="0.28"/>
                      <rect x="28" y="45" width="26" height="4" rx="2" fill="#F59E0B" fill-opacity="0.5"/>
@@ -699,15 +1300,15 @@
                      <path d="M139 17.5 C142 14, 146 16, 143 19" fill="#22C55E"/>
                   </svg>`;
 
-               case '07': case '7': case 'A03':
+               case '11': case 'C03':
                   return `
                   <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
                      <defs>
-                        <linearGradient id="bg-a03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="bg-c03-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
                            <stop stop-color="#F3E8FF"/><stop offset="1" stop-color="#DDD6FE"/>
                         </linearGradient>
                      </defs>
-                     <rect width="260" height="135" fill="url(#bg-a03)"/>
+                     <rect width="260" height="135" fill="url(#bg-c03-${uid})"/>
                      <path d="M20 135 L55 96 H205 L240 135 Z" fill="#FFF"/>
                      <path d="M65 96 L45 135 H85 L95 96 Z M125 96 L115 135 H155 L155 96 Z M185 96 L185 135 H225 L205 96 Z" fill="#F43F5E" fill-opacity="0.25"/>
                      <circle cx="96" cy="36" r="8" fill="#8B5CF6"/>
@@ -725,15 +1326,16 @@
                      <circle cx="198" cy="92" r="1.5" fill="#1E293B"/>
                   </svg>`;
 
-               case '08': case '8': case 'A04':
+               case '12': case 'C04':
+               default:
                   return `
                   <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
                      <defs>
-                        <linearGradient id="bg-a04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="bg-c04-${uid}" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
                            <stop stop-color="#CCFBF1"/><stop offset="1" stop-color="#A7F3D0"/>
                         </linearGradient>
                      </defs>
-                     <rect width="260" height="135" fill="url(#bg-a04)"/>
+                     <rect width="260" height="135" fill="url(#bg-c04-${uid})"/>
                      <path d="M0 106 Q130 92 260 106 V135 H0 Z" fill="#34D399"/>
                      <rect x="44" y="54" width="34" height="32" rx="14" fill="#FFF" stroke="#0D9488" stroke-width="3.5"/>
                      <rect x="72" y="58" width="22" height="11" rx="5.5" fill="#FFF" stroke="#0D9488" stroke-width="3.5"/>
@@ -745,216 +1347,41 @@
                      <ellipse cx="127" cy="86" rx="9" ry="5" transform="rotate(-25 127 86)" fill="#10B981"/>
                      <ellipse cx="143" cy="84" rx="9" ry="5" transform="rotate(25 143 84)" fill="#10B981"/>
                   </svg>`;
-
-               case '01': case '1': case 'B01':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-b01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#DBEAFE"/><stop offset="1" stop-color="#C7D2FE"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-b01)"/>
-                     <circle cx="130" cy="68" r="52" stroke="#6366F1" stroke-width="2" stroke-dasharray="5 5" stroke-opacity="0.45"/>
-                     <circle cx="130" cy="68" r="38" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.3"/>
-                     <circle cx="130" cy="68" r="28" fill="#3B82F6"/>
-                     <path d="M114 54 Q124 50 128 60 T116 74 Q108 66 114 54 Z" fill="#34D399"/>
-                     <path d="M138 58 Q148 56 150 68 T136 80 Q132 70 138 58 Z" fill="#34D399"/>
-                     <circle cx="122" cy="67" r="2.2" fill="#1E293B"/>
-                     <circle cx="138" cy="67" r="2.2" fill="#1E293B"/>
-                     <path d="M126 73 Q130 77 134 73" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
-                     <circle cx="182" cy="48" r="11" fill="#EF4444"/>
-                     <path d="M182 37 C184 32, 189 33, 186 38" fill="#22C55E"/>
-                     <circle cx="78" cy="84" r="9" fill="#FDE047"/>
-                  </svg>`;
-
-               case '02': case '2': case 'B02':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-b02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#CFFAFE"/><stop offset="1" stop-color="#BAE6FD"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-b02)"/>
-                     <path d="M0 44 Q32 34 65 44 T130 44 T195 44 T260 44 V135 H0 Z" fill="#38BDF8" fill-opacity="0.35"/>
-                     <path d="M0 64 Q45 54 90 64 T180 64 T260 64 V135 H0 Z" fill="#0284C7" fill-opacity="0.22"/>
-                     <line x1="112" y1="0" x2="112" y2="54" stroke="#475569" stroke-width="2.5"/>
-                     <path d="M112 54 V68 A9 9 0 0 1 94 68 V64" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
-                     <polygon points="178,86 198,72 198,100" fill="#FB923C"/>
-                     <ellipse cx="154" cy="86" rx="28" ry="18" fill="#F97316"/>
-                     <path d="M148 69 Q154 86 148 103" stroke="#FFF" stroke-width="4.5"/>
-                     <circle cx="137" cy="82" r="3" fill="#1E293B"/>
-                     <circle cx="136" cy="81" r="1" fill="#FFF"/>
-                     <circle cx="122" cy="74" r="3.5" fill="#FFF" fill-opacity="0.8"/>
-                     <circle cx="116" cy="60" r="2.5" fill="#FFF" fill-opacity="0.7"/>
-                  </svg>`;
-
-               case '03': case '3': case 'B03':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-b03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#FEF9C3"/><stop offset="1" stop-color="#FDE68A"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-b03)"/>
-                     <circle cx="84" cy="68" r="25" fill="#FBBF24"/>
-                     <circle cx="77" cy="65" r="2.5" fill="#1E293B"/>
-                     <circle cx="91" cy="65" r="2.5" fill="#1E293B"/>
-                     <path d="M80 72 Q84 76 88 72" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
-                     <circle cx="72" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
-                     <circle cx="96" cy="70" r="3" fill="#FB7185" fill-opacity="0.6"/>
-                     <rect x="122" y="34" width="38" height="34" rx="10" fill="#FFF" stroke="#F59E0B" stroke-width="3"/>
-                     <path d="M134 51 H148" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
-                     <rect x="168" y="34" width="38" height="34" rx="10" fill="#6366F1"/>
-                     <path d="M180 51 H194 M187 44 V58" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
-                     <rect x="136" y="76" width="64" height="26" rx="9" fill="#10B981"/>
-                     <path d="M152 89 H184" stroke="#FFF" stroke-width="3.5" stroke-linecap="round"/>
-                  </svg>`;
-
-               case '04': case '4': case 'B04':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-b04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#FAE8FF"/><stop offset="1" stop-color="#F5D0FE"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-b04)"/>
-                     <path d="M62 135 L104 34 H156 L198 135 Z" fill="#334155"/>
-                     <line x1="130" y1="38" x2="130" y2="132" stroke="#FDE047" stroke-width="3" stroke-dasharray="10 8"/>
-                     <rect x="76" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
-                     <rect x="162" y="30" width="22" height="14" rx="3" fill="#FFF" stroke="#1E293B" stroke-width="2"/>
-                     <rect x="102" y="74" width="56" height="32" rx="12" fill="#EC4899"/>
-                     <rect x="110" y="64" width="40" height="20" rx="8" fill="#F472B6"/>
-                     <rect x="115" y="68" width="30" height="10" rx="4" fill="#E0F2FE"/>
-                     <circle cx="113" cy="92" r="5" fill="#FDE047"/>
-                     <circle cx="147" cy="92" r="5" fill="#FDE047"/>
-                     <rect x="97" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
-                     <rect x="153" y="96" width="10" height="14" rx="4" fill="#0F172A"/>
-                  </svg>`;
-
-               case '09': case '9': case 'C01':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-c01" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#FFEDD5"/><stop offset="1" stop-color="#FED7AA"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-c01)"/>
-                     <rect x="18" y="96" width="224" height="20" rx="10" fill="#475569"/>
-                     <circle cx="38" cy="106" r="5" fill="#94A3B8"/>
-                     <circle cx="84" cy="106" r="5" fill="#94A3B8"/>
-                     <circle cx="130" cy="106" r="5" fill="#94A3B8"/>
-                     <circle cx="176" cy="106" r="5" fill="#94A3B8"/>
-                     <circle cx="222" cy="106" r="5" fill="#94A3B8"/>
-                     <polygon points="74,48 80,32 92,44" fill="#FB923C"/>
-                     <polygon points="122,48 116,32 104,44" fill="#FB923C"/>
-                     <circle cx="98" cy="64" r="24" fill="#FFF"/>
-                     <rect x="85" y="24" width="26" height="14" rx="5" fill="#FFF" stroke="#CBD5E1" stroke-width="2"/>
-                     <circle cx="88" cy="22" r="8" fill="#FFF"/>
-                     <circle cx="98" cy="20" r="9" fill="#FFF"/>
-                     <circle cx="108" cy="22" r="8" fill="#FFF"/>
-                     <circle cx="90" cy="62" r="2.5" fill="#1E293B"/>
-                     <circle cx="106" cy="62" r="2.5" fill="#1E293B"/>
-                     <polygon points="98,66 95,70 101,70" fill="#FB7185"/>
-                     <rect x="156" y="54" width="32" height="40" rx="7" fill="#38BDF8"/>
-                     <rect x="153" y="50" width="38" height="7" rx="3.5" fill="#0284C7"/>
-                     <line x1="176" y1="36" x2="172" y2="50" stroke="#F43F5E" stroke-width="3.5" stroke-linecap="round"/>
-                     <text x="172" y="79" text-anchor="middle" fill="#FFF" font-family="Fredoka" font-weight="700" font-size="14">0%</text>
-                  </svg>`;
-
-               case '10': case 'C02':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-c02" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#FFE4E6"/><stop offset="1" stop-color="#FECDD3"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-c02)"/>
-                     <path d="M98 42 C76 42, 68 62, 68 74 C68 88, 78 102, 96 102 C108 102, 112 90, 106 80 C102 74, 102 68, 106 62 C112 52, 108 42, 98 42 Z" fill="#FB7185"/>
-                     <path d="M162 42 C184 42, 192 62, 192 74 C192 88, 182 102, 164 102 C152 102, 148 90, 154 80 C158 74, 158 68, 154 62 C148 52, 152 42, 162 42 Z" fill="#FB7185"/>
-                     <circle cx="84" cy="70" r="2.3" fill="#1E293B"/>
-                     <circle cx="96" cy="70" r="2.3" fill="#1E293B"/>
-                     <path d="M87 76 Q90 80 93 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
-                     <circle cx="164" cy="70" r="2.3" fill="#1E293B"/>
-                     <circle cx="176" cy="70" r="2.3" fill="#1E293B"/>
-                     <path d="M167 76 Q170 80 173 76" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
-                     <path d="M130 46 C130 46, 117 64, 117 73 A13 13 0 0 0 143 73 C143 64, 130 46, 130 46 Z" fill="#38BDF8"/>
-                     <circle cx="126" cy="71" r="2.5" fill="#FFF" fill-opacity="0.8"/>
-                  </svg>`;
-
-               case '11': case 'C03':
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-c03" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#E0F2FE"/><stop offset="1" stop-color="#BAE6FD"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-c03)"/>
-                     <rect x="0" y="96" width="58" height="39" fill="#94A3B8"/>
-                     <rect x="202" y="96" width="58" height="39" fill="#94A3B8"/>
-                     <rect x="54" y="96" width="48" height="12" rx="4" fill="#F59E0B"/>
-                     <rect x="106" y="96" width="48" height="12" rx="4" fill="#10B981"/>
-                     <rect x="158" y="96" width="48" height="12" rx="4" fill="#6366F1"/>
-                     <polygon points="118,38 128,22 136,38" fill="#0284C7"/>
-                     <path d="M84 68 C84 44, 112 36, 146 36 C168 36, 180 48, 180 68 Z" fill="#0EA5E9"/>
-                     <polygon points="154,62 160,54 166,62 172,54 176,62" fill="#FFF"/>
-                     <circle cx="152" cy="48" r="4" fill="#FFF"/>
-                     <circle cx="153" cy="48" r="2" fill="#0F172A"/>
-                     <circle cx="104" cy="78" r="17" fill="#1E293B"/>
-                     <circle cx="104" cy="78" r="7" fill="#FBBF24"/>
-                     <circle cx="160" cy="78" r="17" fill="#1E293B"/>
-                     <circle cx="160" cy="78" r="7" fill="#FBBF24"/>
-                  </svg>`;
-
-               case '12': case 'C04':
-               default:
-                  return `
-                  <svg viewBox="0 0 260 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full" fill="none">
-                     <defs>
-                        <linearGradient id="bg-c04" x1="0" y1="0" x2="260" y2="135" gradientUnits="userSpaceOnUse">
-                           <stop stop-color="#FEE2E2"/><stop offset="1" stop-color="#FECACA"/>
-                        </linearGradient>
-                     </defs>
-                     <rect width="260" height="135" fill="url(#bg-c04)"/>
-                     <path d="M24 72 H72 L84 48 L98 94 L112 58 L122 72 H236" stroke="#F87171" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"/>
-                     <path d="M130 108 C130 108, 86 80, 86 52 C86 36, 99 26, 113 26 C122 26, 128 31, 130 36 C132 31, 138 26, 147 26 C161 26, 174 36, 174 52 C174 80, 130 108, 130 108 Z" fill="#EF4444"/>
-                     <path d="M98 44 A12 12 0 0 1 110 35" stroke="#FCA5A5" stroke-width="3.5" stroke-linecap="round"/>
-                     <circle cx="118" cy="58" r="3" fill="#FFF"/>
-                     <circle cx="142" cy="58" r="3" fill="#FFF"/>
-                     <path d="M123 67 Q130 74 137 67" stroke="#FFF" stroke-width="3" stroke-linecap="round"/>
-                     <circle cx="168" cy="86" r="15" fill="#FFF" stroke="#10B981" stroke-width="3"/>
-                     <path d="M168 79 V93 M161 86 H175" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
-                  </svg>`;
             }
          }
 
-         // Minimalist Category / Subject Icon Badge
+         // Minimalist Category / Subject Icon Badge (Core + Bonus Categories)
          function getSubjectIconSVG(series) {
-            if (series === '1-4' || series === 'B') {
+            if (series === '1-4' || series === 'A') {
                return `<svg class="w-3.5 h-3.5 text-sky-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"/></svg>`;
             }
-            if (series === '5-8' || series === 'A') {
-               return `<svg class="w-3.5 h-3.5 text-pink-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.3 7.2-6.3-4.6-6.3 4.6 2.3-7.2-6-4.8h7.6z"/></svg>`;
+            if (series === '5-8' || series === 'B') {
+               return `<svg class="w-3.5 h-3.5 text-rose-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/></svg>`;
             }
-            return `<svg class="w-3.5 h-3.5 text-rose-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7-4.5-9-9.2C1.4 7.7 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.4.9-1.4 2.5-2.4 4.5-2.4 3.5 0 6.1 3.2 4.5 6.8-2 4.7-9 9.2-9 9.2z"/></svg>`;
+            if (series === 'brain') {
+               return `<svg class="w-3.5 h-3.5 text-violet-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3h-1v3a4 4 0 0 1-8 0v-3H7a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/></svg>`;
+            }
+            if (series === 'arcade') {
+               return `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+            }
+            if (series === 'stem') {
+               return `<svg class="w-3.5 h-3.5 text-sky-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>`;
+            }
+            if (series === 'word') {
+               return `<svg class="w-3.5 h-3.5 text-rose-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>`;
+            }
+            return `<svg class="w-3.5 h-3.5 text-pink-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.3 7.2-6.3-4.6-6.3 4.6 2.3-7.2-6-4.8h7.6z"/></svg>`;
          }
 
-         // Game Catalog (Preserving all exact filenames & signature Light Theme palettes)
+         // Core 12 Hero Games Catalog (Matched directly to root folder filenames A01-A04, B01-B04, C01-C04)
          const GAMES = [
             {
                id: '01',
                series: '1-4',
                title: 'จับคู่ความรู้: แรงโน้มถ่วงของโลก',
                filename: 'A01-Memory Pair.html',
-               accentBtn: 'bg-indigo-600 hover:bg-indigo-700',
                badgeText: 'วิทย์ ป.4',
-               keywords: 'วิทยาศาสตร์ ป.4 แรงโน้มถ่วง มวล น้ำหนัก 01 1',
+               keywords: 'วิทยาศาสตร์ ป.4 แรงโน้มถ่วง มวล น้ำหนัก 01 1 A01',
                theme: { primary: '#4F46E5', light: '#EEF2FF', border: '#A5B4FC', aura: 'rgba(79, 70, 229, 0.24)', btnGrad: 'linear-gradient(135deg, #4F46E5, #6366F1)' }
             },
             {
@@ -962,9 +1389,8 @@
                series: '1-4',
                title: 'Hook & Catch: ตกปลาคำตอบวิทย์',
                filename: 'A02-hook_catch_fish.html',
-               accentBtn: 'bg-sky-600 hover:bg-sky-700',
                badgeText: 'วิทย์ ป.4',
-               keywords: 'ตกปลา วิทยาศาสตร์ ป.4 แรงดึงดูด 02 2',
+               keywords: 'ตกปลา วิทยาศาสตร์ ป.4 แรงดึงดูด 02 2 A02',
                theme: { primary: '#0284C7', light: '#E0F2FE', border: '#7DD3FC', aura: 'rgba(2, 132, 199, 0.24)', btnGrad: 'linear-gradient(135deg, #0284C7, #0EA5E9)' }
             },
             {
@@ -972,9 +1398,8 @@
                series: '1-4',
                title: 'เติมคำในช่อง: แรงโน้มถ่วงของโลก',
                filename: 'A03-Fill the blank.html',
-               accentBtn: 'bg-amber-500 hover:bg-amber-600',
                badgeText: 'วิทย์ ป.4',
-               keywords: 'เติมคำ วิทยาศาสตร์ ป.4 แรงโน้มถ่วง น้องอุ่นใจ 03 3',
+               keywords: 'เติมคำ วิทยาศาสตร์ ป.4 แรงโน้มถ่วง น้องอุ่นใจ 03 3 A03',
                theme: { primary: '#D97706', light: '#FEF3C7', border: '#FCD34D', aura: 'rgba(245, 158, 11, 0.26)', btnGrad: 'linear-gradient(135deg, #F59E0B, #D97706)' }
             },
             {
@@ -982,90 +1407,163 @@
                series: '1-4',
                title: 'Speedy Lane: Simple Present Tense',
                filename: 'A04-speedy_lane_english.html',
-               accentBtn: 'bg-fuchsia-600 hover:bg-fuchsia-700',
                badgeText: 'Eng ป.5',
-               keywords: 'ภาษาอังกฤษ ป.5 Simple Present Tense แข่งรถ 04 4',
+               keywords: 'ภาษาอังกฤษ ป.5 Simple Present Tense แข่งรถ 04 4 A04',
                theme: { primary: '#C026D3', light: '#FAE8FF', border: '#F0ABFC', aura: 'rgba(192, 38, 211, 0.24)', btnGrad: 'linear-gradient(135deg, #C026D3, #E879F9)' }
             },
             {
                id: '05',
                series: '5-8',
-               title: 'แก๊งจิ๋วบุกตู้คีบ — เมฆขนมหวาน',
-               filename: 'B01-เกมคีบตุ๊กตา.html',
-               accentBtn: 'bg-pink-500 hover:bg-pink-600',
-               badgeText: 'Arcade',
-               keywords: 'ตู้คีบ ขนมหวาน อาร์เคด 05 5',
-               theme: { primary: '#E11D48', light: '#FFE4E6', border: '#FDA4AF', aura: 'rgba(225, 29, 72, 0.24)', btnGrad: 'linear-gradient(135deg, #EC4899, #F43F5E)' }
+               title: 'น้ำหวาน 0% ทำให้อ้วนไหม? เชฟเหมียว',
+               filename: 'B01-กินน้ำหวาน0_ทำให้อ้วนสายพานเชฟเหมียว.html',
+               badgeText: 'สุขภาพ',
+               keywords: 'สุขภาพ เชฟเหมียว สายพาน น้ำหวาน0% 05 5 B01',
+               theme: { primary: '#F97316', light: '#FFF7ED', border: '#FED7AA', aura: 'rgba(249, 115, 22, 0.25)', btnGrad: 'linear-gradient(135deg, #FB923C, #EA580C)' }
             },
             {
                id: '06',
                series: '5-8',
-               title: 'คาปิบาร่านักปั่น! ตะลุยด่านปิกนิก',
-               filename: 'B02-คาปิบาร่านักปั่น.html',
-               accentBtn: 'bg-amber-500 hover:bg-amber-600',
-               badgeText: 'Arcade',
-               keywords: 'คาปิบาร่า จักรยาน ปิกนิก 06 6',
-               theme: { primary: '#EA580C', light: '#FFEDD5', border: '#FDBA74', aura: 'rgba(234, 88, 12, 0.25)', btnGrad: 'linear-gradient(135deg, #F97316, #EA580C)' }
+               title: 'ใส่ใจอาหาร ห่างไกลไตเรื้อรัง',
+               filename: 'B02-ใส่ใจอาหารห่างไกลไตเรื้อรัง.html',
+               badgeText: 'สุขภาพ',
+               keywords: 'โรคไต อาหารลดเค็ม โซเดียม สุขศึกษา 06 6 B02',
+               theme: { primary: '#F43F5E', light: '#FFF1F2', border: '#FECDD3', aura: 'rgba(244, 63, 94, 0.24)', btnGrad: 'linear-gradient(135deg, #FB7185, #E11D48)' }
             },
             {
                id: '07',
                series: '5-8',
-               title: 'ฮิปโปงับงับ ปิกนิกหรรษา',
-               filename: 'B03-ฮิปโปงับงับ ปิกนิกหรรษา.html',
-               accentBtn: 'bg-purple-500 hover:bg-purple-600',
-               badgeText: 'Arcade',
-               keywords: 'ฮิปโป ปิกนิก อาหาร 07 7',
-               theme: { primary: '#7C3AED', light: '#EDE9FE', border: '#C4B5FD', aura: 'rgba(124, 58, 237, 0.24)', btnGrad: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' }
+               title: 'Shark Truck: สร้างสะพาน Phonics',
+               filename: 'B03-สร้างสะพานรถฉลาม.html',
+               badgeText: 'Phonics',
+               keywords: 'โฟนิกส์ Phonics รถฉลาม สร้างสะพาน ภาษาอังกฤษ 07 7 B03',
+               theme: { primary: '#2563EB', light: '#EFF6FF', border: '#93C5FD', aura: 'rgba(37, 99, 235, 0.24)', btnGrad: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }
             },
             {
                id: '08',
                series: '5-8',
-               title: 'เลเซอร์มือจิ๋ว พิทักษ์สวนใส',
-               filename: 'B04-เลเซอร์มือจิ๋ว พิทักษ์สวนใส.html',
-               accentBtn: 'bg-teal-500 hover:bg-teal-600',
-               badgeText: 'Arcade',
-               keywords: 'เลเซอร์ พิทักษ์สวน 08 8',
-               theme: { primary: '#0D9488', light: '#CCFBF1', border: '#5EEAD4', aura: 'rgba(13, 148, 136, 0.24)', btnGrad: 'linear-gradient(135deg, #14B8A6, #0D9488)' }
+               title: '8 วิธีรู้ทัน ป้องกันหัวใจขาดเลือด',
+               filename: 'B04-AR_8_วิธีรู้ทันป้องกันไม่ให้หัวใจขาดเลือด.html',
+               badgeText: '10 ด่าน',
+               keywords: 'หัวใจขาดเลือด สุขภาพหัวใจ 10ด่าน สุขศึกษา 08 8 B04',
+               theme: { primary: '#DC2626', light: '#FEF2F2', border: '#FCA5A5', aura: 'rgba(220, 38, 38, 0.24)', btnGrad: 'linear-gradient(135deg, #EF4444, #DC2626)' }
             },
             {
                id: '09',
                series: '9-12',
-               title: 'น้ำหวาน 0% ทำให้อ้วนไหม? เชฟเหมียว',
-               filename: 'C01-กินน้ำหวาน0_ทำให้อ้วนสายพานเชฟเหมียว.html',
-               accentBtn: 'bg-orange-500 hover:bg-orange-600',
-               badgeText: 'สุขภาพ',
-               keywords: 'สุขภาพ เชฟเหมียว สายพาน น้ำหวาน0% 09 9',
-               theme: { primary: '#F97316', light: '#FFF7ED', border: '#FED7AA', aura: 'rgba(249, 115, 22, 0.25)', btnGrad: 'linear-gradient(135deg, #FB923C, #EA580C)' }
+               title: 'แก๊งจิ๋วบุกตู้คีบ — เมฆขนมหวาน',
+               filename: 'C01-เกมคีบตุ๊กตา.html',
+               badgeText: 'Arcade',
+               keywords: 'ตู้คีบ ขนมหวาน อาร์เคด 09 9 C01',
+               theme: { primary: '#E11D48', light: '#FFE4E6', border: '#FDA4AF', aura: 'rgba(225, 29, 72, 0.24)', btnGrad: 'linear-gradient(135deg, #EC4899, #F43F5E)' }
             },
             {
                id: '10',
                series: '9-12',
-               title: 'ใส่ใจอาหาร ห่างไกลไตเรื้อรัง',
-               filename: 'C02-ใส่ใจอาหารห่างไกลไตเรื้อรัง.html',
-               accentBtn: 'bg-rose-500 hover:bg-rose-600',
-               badgeText: 'สุขภาพ',
-               keywords: 'โรคไต อาหารลดเค็ม โซเดียม สุขศึกษา 10',
-               theme: { primary: '#F43F5E', light: '#FFF1F2', border: '#FECDD3', aura: 'rgba(244, 63, 94, 0.24)', btnGrad: 'linear-gradient(135deg, #FB7185, #E11D48)' }
+               title: 'คาปิบาร่านักปั่น! ตะลุยด่านปิกนิก',
+               filename: 'C02-คาปิบาร่านักปั่น.html',
+               badgeText: 'Arcade',
+               keywords: 'คาปิบาร่า จักรยาน ปิกนิก 10 C02',
+               theme: { primary: '#EA580C', light: '#FFEDD5', border: '#FDBA74', aura: 'rgba(234, 88, 12, 0.25)', btnGrad: 'linear-gradient(135deg, #F97316, #EA580C)' }
             },
             {
                id: '11',
                series: '9-12',
-               title: 'Shark Truck: สร้างสะพาน Phonics',
-               filename: 'C03-สร้างสะพานรถฉลาม.html',
-               accentBtn: 'bg-blue-600 hover:bg-blue-700',
-               badgeText: 'Phonics',
-               keywords: 'โฟนิกส์ Phonics รถฉลาม สร้างสะพาน ภาษาอังกฤษ 11',
-               theme: { primary: '#2563EB', light: '#EFF6FF', border: '#93C5FD', aura: 'rgba(37, 99, 235, 0.24)', btnGrad: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }
+               title: 'ฮิปโปงับงับ ปิกนิกหรรษา',
+               filename: 'C03-ฮิปโปงับงับ ปิกนิกหรรษา.html',
+               badgeText: 'Arcade',
+               keywords: 'ฮิปโป ปิกนิก อาหาร 11 C03',
+               theme: { primary: '#7C3AED', light: '#EDE9FE', border: '#C4B5FD', aura: 'rgba(124, 58, 237, 0.24)', btnGrad: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' }
             },
             {
                id: '12',
                series: '9-12',
-               title: '8 วิธีรู้ทัน ป้องกันหัวใจขาดเลือด',
-               filename: 'C04-AR_8_วิธีรู้ทันป้องกันไม่ให้หัวใจขาดเลือด.html',
-               accentBtn: 'bg-red-500 hover:bg-red-600',
-               badgeText: '10 ด่าน',
-               keywords: 'หัวใจขาดเลือด สุขภาพหัวใจ 10ด่าน สุขศึกษา 12',
-               theme: { primary: '#DC2626', light: '#FEF2F2', border: '#FCA5A5', aura: 'rgba(220, 38, 38, 0.24)', btnGrad: 'linear-gradient(135deg, #EF4444, #DC2626)' }
+               title: 'เลเซอร์มือจิ๋ว พิทักษ์สวนใส',
+               filename: 'C04-เลเซอร์มือจิ๋ว พิทักษ์สวนใส.html',
+               badgeText: 'Arcade',
+               keywords: 'เลเซอร์ พิทักษ์สวน 12 C04',
+               theme: { primary: '#0D9488', light: '#CCFBF1', border: '#5EEAD4', aura: 'rgba(13, 148, 136, 0.24)', btnGrad: 'linear-gradient(135deg, #14B8A6, #0D9488)' }
+            }
+         ];
+
+         // Bonus Mini-Games Vault (13 Extra Games from BONUS_GAMES/B and BONUS_GAMES/C)
+         const BONUS_GAMES = [
+            {
+               id: 'E01', series: 'brain', category: 'brain', iconType: 'town',
+               title: 'Accessible Town: เมืองน่าอยู่เพื่อทุกคน', filename: 'BONUS_GAMES/B/04-accessible-town.html', badgeText: '01',
+               keywords: 'Accessible Town เมืองน่าอยู่ สังคม อารยสถาปัตย์ 04 01 B04',
+               theme: { primary: '#0D9488', light: '#CCFBF1', border: '#5EEAD4', aura: 'rgba(13, 148, 136, 0.22)', btnGrad: 'linear-gradient(135deg, #14B8A6, #0D9488)' }
+            },
+            {
+               id: 'E02', series: 'word', category: 'word', iconType: 'runner',
+               title: '3D Spelling Runner: นักวิ่งสะกดคำ', filename: 'BONUS_GAMES/B/09-3d-spelling-runner.html', badgeText: '02',
+               keywords: '3D Spelling Runner สะกดคำ ภาษาอังกฤษ วิ่ง 09 02 B09',
+               theme: { primary: '#4F46E5', light: '#EEF2FF', border: '#A5B4FC', aura: 'rgba(79, 70, 229, 0.22)', btnGrad: 'linear-gradient(135deg, #6366F1, #4F46E5)' }
+            },
+            {
+               id: 'E03', series: 'stem', category: 'stem', iconType: 'senses',
+               title: '5 Senses Buddy: คู่หูประสาทสัมผัสทั้ง 5', filename: 'BONUS_GAMES/B/10-5-senses-buddy.html', badgeText: '03',
+               keywords: '5 Senses Buddy ประสาทสัมผัสทั้ง 5 วิทยาศาสตร์ ร่างกาย 10 03 B10',
+               theme: { primary: '#059669', light: '#D1FAE5', border: '#6EE7B7', aura: 'rgba(5, 150, 105, 0.22)', btnGrad: 'linear-gradient(135deg, #10B981, #059669)' }
+            },
+            {
+               id: 'E04', series: 'stem', category: 'stem', iconType: 'cashier',
+               title: 'Cashier Change Shop: แคชเชียร์ทอนเงิน', filename: 'BONUS_GAMES/B/12-cashier-change-shop.html', badgeText: '04',
+               keywords: 'Cashier Change Shop แคชเชียร์ ทอนเงิน คณิตศาสตร์ คิดเลข 12 04 B12',
+               theme: { primary: '#0284C7', light: '#E0F2FE', border: '#7DD3FC', aura: 'rgba(2, 132, 199, 0.22)', btnGrad: 'linear-gradient(135deg, #0EA5E9, #0284C7)' }
+            },
+            {
+               id: 'E05', series: 'word', category: 'word', iconType: 'sorter',
+               title: 'Conveyor Word Sorter: สายพานแยกคำศัพท์', filename: 'BONUS_GAMES/B/13-conveyor-word-sorter.html', badgeText: '05',
+               keywords: 'Conveyor Word Sorter สายพาน แยกคำศัพท์ ภาษาอังกฤษ 13 05 B13',
+               theme: { primary: '#7C3AED', light: '#F3E8FF', border: '#D8B4FE', aura: 'rgba(124, 58, 237, 0.22)', btnGrad: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' }
+            },
+            {
+               id: 'E06', series: 'word', category: 'word', iconType: 'magic',
+               title: 'Magic Spell: เวทมนตร์สะกดคำ', filename: 'BONUS_GAMES/B/16-magic-spell.html', badgeText: '06',
+               keywords: 'Magic Spell เวทมนตร์ สะกดคำ ภาษาอังกฤษ 16 06 B16',
+               theme: { primary: '#9333EA', light: '#F3E8FF', border: '#D8B4FE', aura: 'rgba(147, 51, 234, 0.22)', btnGrad: 'linear-gradient(135deg, #A855F7, #9333EA)' }
+            },
+            {
+               id: 'E07', series: 'word', category: 'word', iconType: 'carpath',
+               title: 'Phonics Car Path: รถซิ่งเส้นทางโฟนิกส์', filename: 'BONUS_GAMES/B/17-phonics-car-path.html', badgeText: '07',
+               keywords: 'Phonics Car Path รถซิ่ง โฟนิกส์ ภาษาอังกฤษ 17 07 B17',
+               theme: { primary: '#E11D48', light: '#FFE4E6', border: '#FDA4AF', aura: 'rgba(225, 29, 72, 0.22)', btnGrad: 'linear-gradient(135deg, #F43F5E, #E11D48)' }
+            },
+            {
+               id: 'E08', series: 'arcade', category: 'arcade', iconType: 'basket',
+               title: 'Word Basket Catch: ตะกร้ารับคำศัพท์', filename: 'BONUS_GAMES/B/20-word-basket-catch.html', badgeText: '08',
+               keywords: 'Word Basket Catch ตะกร้ารับคำศัพท์ ไวพริบ ภาษาอังกฤษ 20 08 B20',
+               theme: { primary: '#D97706', light: '#FEF3C7', border: '#FCD34D', aura: 'rgba(217, 119, 6, 0.22)', btnGrad: 'linear-gradient(135deg, #F59E0B, #D97706)' }
+            },
+            {
+               id: 'E09', series: 'arcade', category: 'arcade', iconType: 'breakfast',
+               title: 'Breakfast Conveyor: สายพานอาหารเช้า', filename: 'BONUS_GAMES/B/21-breakfast-conveyor.html', badgeText: '09',
+               keywords: 'Breakfast Conveyor สายพานอาหารเช้า โภชนาการ ไวพริบ 21 09 B21',
+               theme: { primary: '#EA580C', light: '#FFEDD5', border: '#FDBA74', aura: 'rgba(234, 88, 12, 0.22)', btnGrad: 'linear-gradient(135deg, #F97316, #EA580C)' }
+            },
+            {
+               id: 'E10', series: 'brain', category: 'brain', iconType: 'orange',
+               title: 'Orange Delivery: ภารกิจส่งส้มมงคล', filename: 'BONUS_GAMES/B/23-orange-delivery-cny.htm', badgeText: '10',
+               keywords: 'Orange Delivery CNY ส่งส้มมงคล ตรุษจีน วางแผน 23 10 B23',
+               theme: { primary: '#F97316', light: '#FFF7ED', border: '#FED7AA', aura: 'rgba(249, 115, 22, 0.22)', btnGrad: 'linear-gradient(135deg, #FB923C, #EA580C)' }
+            },
+            {
+               id: 'E11', series: 'stem', category: 'stem', iconType: 'snakes',
+               title: 'Snakes & Ladders: บันไดงูนับเลขต่อ', filename: 'BONUS_GAMES/B/24-snakes-ladders-count-on.html', badgeText: '11',
+               keywords: 'Snakes Ladders Count On บันไดงู นับเลข คณิตศาสตร์ 24 11 B24',
+               theme: { primary: '#2563EB', light: '#DBEAFE', border: '#93C5FD', aura: 'rgba(37, 99, 235, 0.22)', btnGrad: 'linear-gradient(135deg, #3B82F6, #2563EB)' }
+            },
+            {
+               id: 'E12', series: 'arcade', category: 'arcade', iconType: 'bubbles',
+               title: 'ป๊อป! ฟองสายรุ้ง', filename: 'BONUS_GAMES/C/ป๊อป! ฟองสายรุ้ง.html', badgeText: '12',
+               keywords: 'ป๊อป! ฟองสายรุ้ง ลูกโป่ง ฟองสบู่ สีรุ้ง 12 C01',
+               theme: { primary: '#EC4899', light: '#FCE7F3', border: '#F9A8D4', aura: 'rgba(236, 72, 153, 0.22)', btnGrad: 'linear-gradient(135deg, #F472B6, #DB2777)' }
+            },
+            {
+               id: 'E13', series: 'arcade', category: 'arcade', iconType: 'jetbird',
+               title: 'วิหคเวหาเจ็ต AR', filename: 'BONUS_GAMES/C/วิหคเวหาเจ็ต AR.html', badgeText: '13',
+               keywords: 'วิหคเวหาเจ็ต AR เครื่องบินเจ็ต กล้อง AR 13 C02',
+               theme: { primary: '#0891B2', light: '#CFFAFE', border: '#67E8F9', aura: 'rgba(8, 145, 178, 0.22)', btnGrad: 'linear-gradient(135deg, #06B6D4, #0891B2)' }
             }
          ];
 
@@ -1073,13 +1571,18 @@
          let currentCategory = 'all';
          let onlyFavorites = false;
          let searchQuery = '';
+         let bonusCategory = 'all';
+         let bonusOnlyFavorites = false;
+         let bonusSearchQuery = '';
          let favorites = safeGetJSON('aim_favorites', []);
          let playedGames = safeGetJSON('aim_played_games', []);
          let soundEnabled = true;
          let openInNewTab = true;
+         let resetConfirmArmed = false;
+         let resetConfirmTimer = null;
 
          // Slot Randomizer State
-         let spinMode = 'all'; // 'all' | 'unplayed' | 'filtered'
+         let spinMode = 'all'; // 'all' | 'unplayed' | 'filtered' | 'bonus'
          let isSpinning = false;
          let spinAnimId = null;
          let spinSetupRafId = null;
@@ -1176,28 +1679,32 @@
             } catch (e) {}
          }
 
-         // Initialize
+         // Initialize Application
          window.addEventListener('DOMContentLoaded', () => {
-            updatePlayedUI();
-            renderGames();
-
             if (safeGetStorage('aim_contrast', 'false') === 'true') {
                document.body.classList.add('high-contrast');
-               document.getElementById('contrastToggle').checked = true;
+               const ct = document.getElementById('contrastToggle');
+               if (ct) ct.checked = true;
             }
             const savedSound = safeGetStorage('aim_sound', null);
             if (savedSound !== null) {
                soundEnabled = savedSound === 'true';
-               document.getElementById('soundToggle').checked = soundEnabled;
+               const st = document.getElementById('soundToggle');
+               if (st) st.checked = soundEnabled;
             }
             const savedNewTab = safeGetStorage('aim_new_tab', null);
             if (savedNewTab !== null) {
                openInNewTab = savedNewTab === 'true';
-               document.getElementById('newTabToggle').checked = openInNewTab;
+               const nt = document.getElementById('newTabToggle');
+               if (nt) nt.checked = openInNewTab;
             }
+
+            updatePlayedUI();
+            renderGames();
+            renderBonusDock();
          });
 
-         // Filter Logic Helper
+         // Filter Logic Helper (12 Core Games)
          function getFilteredGames() {
             return GAMES.filter(game => {
                if (onlyFavorites && !favorites.includes(game.id)) return false;
@@ -1211,20 +1718,119 @@
             });
          }
 
-         // Render Illustrated Cards (Mobile-Optimized 2-Col + Desktop 4-Col)
+         // Filter Logic Helper (Bonus Vault Games)
+         function getFilteredBonusGames() {
+            return BONUS_GAMES.filter(game => {
+               if (bonusOnlyFavorites && !favorites.includes(game.id)) return false;
+               if (bonusCategory !== 'all' && game.category !== bonusCategory) return false;
+               if (bonusSearchQuery.trim() !== '') {
+                  const q = bonusSearchQuery.toLowerCase().trim();
+                  const haystack = `${game.id} ${game.title} ${game.keywords}`.toLowerCase();
+                  if (!haystack.includes(q)) return false;
+               }
+               return true;
+            });
+         }
+
+         // Compact Illustrated Card Builder for Bonus Vault & Live Search Strip
+         function buildCompactBonusCardHTML(game) {
+            const isFav = favorites.includes(game.id);
+            const isPlayed = playedGames.includes(game.id);
+            const targetAttr = openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+            const shortNum = game.badgeText || game.id.replace('E', '');
+
+            return `
+               <div style="border-color: ${game.theme.border}"
+                  class="bonus-mini-card bg-white rounded-[20px] border-2 shadow-sm hover:shadow-md overflow-hidden flex flex-col justify-between relative group">
+                  <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')"
+                     class="relative block w-full h-24 sm:h-28 overflow-hidden bg-slate-100">
+                     <div class="illus-group w-full h-full">
+                        ${getBonusIllustrationSVG(game.iconType, game.theme)}
+                     </div>
+                     <div class="absolute top-2 left-2 flex items-center gap-1">
+                        <span style="background-color: ${game.theme.primary}" class="font-fredoka font-bold text-[10px] px-2 py-0.5 rounded-lg text-white shadow-sm">
+                           ${shortNum}
+                        </span>
+                        <span class="w-5 h-5 rounded-lg bg-white/95 flex items-center justify-center shadow-sm">
+                           ${getSubjectIconSVG(game.category)}
+                        </span>
+                     </div>
+                     ${isPlayed ? `
+                     <div class="absolute bottom-1.5 left-2 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm border border-white" title="เล่นแล้ว">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                     </div>` : ''}
+                  </a>
+
+                  <button type="button" onclick="toggleFavorite('${game.id}', event)" aria-label="เกมโปรด"
+                     class="tactile-btn absolute top-1.5 right-1.5 w-7 h-7 rounded-lg bg-white/95 shadow-sm flex items-center justify-center ${isFav ? 'text-amber-400' : 'text-slate-300 hover:text-amber-400'}">
+                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
+                     </svg>
+                  </button>
+
+                  <div class="px-2.5 py-2 flex items-center justify-between gap-1.5 bg-white flex-1">
+                     <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')"
+                        class="card-title font-prompt font-bold text-xs text-slate-800 leading-snug line-clamp-2 flex-1">
+                        ${game.title}
+                     </a>
+                     <a href="${encodeURI(game.filename)}" ${targetAttr} onclick="markAsPlayed('${game.id}')" aria-label="เล่น"
+                        style="background: ${game.theme.btnGrad}"
+                        class="tactile-btn shrink-0 w-7 h-7 rounded-xl text-white shadow-sm flex items-center justify-center">
+                        <svg class="w-3 h-3 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+                           <polygon points="6 4 20 12 6 20 6 4"/>
+                        </svg>
+                     </a>
+                  </div>
+               </div>
+            `;
+         }
+
+         // Render Illustrated Cards (Primary 12 Games + Live Bonus Search Strip)
          function renderGames() {
             const grid = document.getElementById('gameGrid');
             const emptyState = document.getElementById('emptyState');
+            const bonusSearchBox = document.getElementById('bonusSearchMatches');
+            const bonusSearchGrid = document.getElementById('bonusSearchGrid');
+            const bonusSearchCount = document.getElementById('bonusSearchMatchCount');
             if (!grid) return;
 
             const filtered = getFilteredGames();
+            const q = searchQuery.trim().toLowerCase();
 
-            if (filtered.length === 0) {
+            // Check live search matches inside BONUS_GAMES when searching
+            let bonusMatches = [];
+            if (q !== '' && bonusSearchBox && bonusSearchGrid) {
+               bonusMatches = BONUS_GAMES.filter(g => {
+                  if (onlyFavorites && !favorites.includes(g.id)) return false;
+                  const hay = `${g.id} ${g.title} ${g.keywords}`.toLowerCase();
+                  return hay.includes(q);
+               });
+
+               if (bonusMatches.length > 0) {
+                  bonusSearchBox.classList.remove('hidden');
+                  if (bonusSearchCount) bonusSearchCount.innerText = `+${bonusMatches.length}`;
+                  bonusSearchGrid.innerHTML = bonusMatches.slice(0, 6).map(g => buildCompactBonusCardHTML(g)).join('');
+               } else {
+                  bonusSearchBox.classList.add('hidden');
+               }
+            } else if (bonusSearchBox) {
+               bonusSearchBox.classList.add('hidden');
+            }
+
+            if (filtered.length === 0 && bonusMatches.length === 0) {
                grid.innerHTML = '';
+               grid.classList.add('hidden');
                emptyState.classList.remove('hidden');
                return;
             }
+
             emptyState.classList.add('hidden');
+            if (filtered.length === 0) {
+               grid.innerHTML = '';
+               grid.classList.add('hidden');
+               return;
+            }
+            grid.classList.remove('hidden');
             grid.innerHTML = '';
 
             filtered.forEach(game => {
@@ -1246,10 +1852,10 @@
 
                      <!-- Top-Left Code & Category Pill -->
                      <div class="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 flex items-center gap-1 sm:gap-1.5">
-                        <span style="background-color: ${game.theme.primary}" class="font-fredoka font-bold text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl text-white shadow-xs">
+                        <span style="background-color: ${game.theme.primary}" class="font-fredoka font-bold text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl text-white shadow-sm">
                            ${game.id}
                         </span>
-                        <span class="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl bg-white/95 backdrop-blur-xs text-slate-700 font-bold text-[10px] sm:text-[11px] flex items-center gap-1 shadow-xs">
+                        <span class="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl bg-white/95 backdrop-blur-sm text-slate-700 font-bold text-[10px] sm:text-[11px] flex items-center gap-1 shadow-sm">
                            ${getSubjectIconSVG(game.series)}
                            <span>${game.badgeText}</span>
                         </span>
@@ -1263,9 +1869,9 @@
                   </a>
 
                   <!-- Top-Right Favorite Star Button -->
-                  <button onclick="toggleFavorite('${game.id}', event)" aria-label="เกมโปรด"
-                     class="tactile-btn absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/95 backdrop-blur-xs shadow-xs flex items-center justify-center ${isFav ? 'text-amber-400' : 'text-slate-300 hover:text-amber-400'}">
-                     <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                  <button type="button" onclick="toggleFavorite('${game.id}', event)" aria-label="เกมโปรด"
+                     class="tactile-btn absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center ${isFav ? 'text-amber-400' : 'text-slate-300 hover:text-amber-400'}">
+                     <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5z"/>
                      </svg>
                   </button>
@@ -1291,23 +1897,145 @@
             });
          }
 
-         // Filter Controls
+         function renderBonusDock() {
+            const hudBadge = document.getElementById('hudBonusCountText');
+            const spinBonusBadge = document.getElementById('spinCount-bonus');
+            const btabAll = document.getElementById('btab-count-all');
+
+            const totalBonus = BONUS_GAMES.length;
+            if (hudBadge) hudBadge.innerText = `+${totalBonus}`;
+            if (spinBonusBadge) spinBonusBadge.innerText = `+${totalBonus}`;
+            if (btabAll) btabAll.innerText = `${totalBonus}`;
+         }
+
+         function openBonusVault(prefillQuery = '') {
+            playSound('pop');
+            bonusSearchQuery = prefillQuery || '';
+            // If opening from a live search query, reset vault category/fav filters so all matches show
+            if (bonusSearchQuery.trim() !== '') {
+               bonusCategory = 'all';
+               bonusOnlyFavorites = false;
+            }
+            const input = document.getElementById('bonusVaultSearchInput');
+            if (input) input.value = bonusSearchQuery;
+            updateBonusTabStyles();
+            renderBonusVault();
+            openModal('bonusModal');
+         }
+
+         function renderBonusVault() {
+            const grid = document.getElementById('bonusVaultGrid');
+            const empty = document.getElementById('bonusVaultEmpty');
+            if (!grid) return;
+
+            const filtered = getFilteredBonusGames();
+            if (filtered.length === 0) {
+               grid.innerHTML = '';
+               empty.classList.remove('hidden');
+               return;
+            }
+            empty.classList.add('hidden');
+            grid.innerHTML = filtered.map(g => buildCompactBonusCardHTML(g)).join('');
+         }
+
+         function updateBonusTabStyles() {
+            const catColors = {
+               brain: 'text-violet-600 hover:bg-violet-50',
+               arcade: 'text-amber-600 hover:bg-amber-50',
+               stem: 'text-sky-600 hover:bg-sky-50',
+               word: 'text-rose-600 hover:bg-rose-50'
+            };
+            ['all', 'brain', 'arcade', 'stem', 'word'].forEach(cat => {
+               const btn = document.getElementById(`btab-${cat}`);
+               if (!btn) return;
+               const active = !bonusOnlyFavorites && bonusCategory === cat;
+               if (cat === 'all') {
+                  btn.className = active
+                     ? 'bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900 text-white transition'
+                     : 'bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200/70 transition';
+               } else {
+                  btn.className = active
+                     ? 'bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900 text-white transition'
+                     : `bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 ${catColors[cat]} transition`;
+               }
+            });
+
+            const favBtn = document.getElementById('btab-fav');
+            if (favBtn) {
+               favBtn.className = bonusOnlyFavorites
+                  ? 'bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-amber-400 text-white transition'
+                  : 'bcat-tab h-9 sm:h-10 px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition';
+            }
+         }
+
+         function setBonusCategory(cat) {
+            playSound('pop');
+            bonusOnlyFavorites = false;
+            bonusCategory = cat;
+            updateBonusTabStyles();
+            renderBonusVault();
+         }
+
+         function toggleBonusFavoriteFilter() {
+            playSound('pop');
+            bonusOnlyFavorites = !bonusOnlyFavorites;
+            updateBonusTabStyles();
+            renderBonusVault();
+         }
+
+         function handleBonusSearch(val) {
+            bonusSearchQuery = val || '';
+            renderBonusVault();
+         }
+
+         function resetBonusFilters() {
+            playSound('pop');
+            bonusCategory = 'all';
+            bonusOnlyFavorites = false;
+            bonusSearchQuery = '';
+            const input = document.getElementById('bonusVaultSearchInput');
+            if (input) input.value = '';
+            updateBonusTabStyles();
+            renderBonusVault();
+         }
+
+         function spinBonusFromVault() {
+            closeModal('bonusModal');
+            spinMode = 'bonus';
+            updateSpinModeUI();
+            openModal('randomModal');
+            const card = document.getElementById('randomModalCard');
+            if (card) {
+               card.classList.remove('modal-enter');
+               void card.offsetWidth;
+               card.classList.add('modal-enter');
+            }
+            startSlotSpin();
+         }
+
+         // Filter Controls (12 Core Games)
          function updateTabStyles() {
-            const tabs = ['all', '1-4', '5-8', '9-12'];
-            tabs.forEach(id => {
+            const tabHoverStyles = {
+               'all': 'hover:bg-slate-100',
+               '1-4': 'hover:bg-sky-50 hover:text-sky-600',
+               '5-8': 'hover:bg-rose-50 hover:text-rose-600',
+               '9-12': 'hover:bg-pink-50 hover:text-pink-600'
+            };
+
+            ['all', '1-4', '5-8', '9-12'].forEach(id => {
                const btn = document.getElementById(`tab-${id}`);
                if (!btn) return;
                const active = !onlyFavorites && currentCategory === id;
                btn.className = active
-                  ? 'cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all bg-slate-900 text-white shadow-xs'
-                  : 'cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 hover:bg-slate-100';
+                  ? 'cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all bg-slate-900 text-white shadow-sm'
+                  : `cat-tab h-full px-2 sm:px-3.5 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-slate-600 ${tabHoverStyles[id]}`;
             });
 
             const favBtn = document.getElementById('tab-fav');
             if (favBtn) {
                favBtn.className = onlyFavorites
-                  ? 'cat-tab h-full px-2 sm:px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all bg-amber-400 text-white shadow-xs'
-                  : 'cat-tab h-full px-2 sm:px-3 rounded-xl font-fredoka font-bold text-xs sm:text-sm flex items-center justify-center transition-all text-slate-400 hover:bg-amber-50 hover:text-amber-500';
+                  ? 'cat-tab h-full px-2 sm:px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all bg-amber-400 text-white shadow-sm'
+                  : 'cat-tab h-full px-2 sm:px-3 rounded-xl font-prompt font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all text-slate-500 hover:bg-amber-50 hover:text-amber-500';
             }
          }
 
@@ -1330,10 +2058,12 @@
             playSound('click');
             const drawer = document.getElementById('mobileSearchDrawer');
             const input = document.getElementById('mobileSearchInput');
+            const toggleBtn = document.getElementById('mobileSearchToggleBtn');
             if (!drawer) return;
             const isHidden = drawer.classList.contains('hidden');
             if (isHidden) {
                drawer.classList.remove('hidden');
+               if (toggleBtn) toggleBtn.classList.add('border-indigo-400', 'text-indigo-600');
                setTimeout(() => input && input.focus(), 50);
             } else {
                clearSearch(true);
@@ -1342,7 +2072,8 @@
 
          function focusSearch() {
             playSound('click');
-            document.getElementById('searchInput').focus();
+            const input = document.getElementById('searchInput');
+            if (input) input.focus();
          }
 
          function handleSearch(val) {
@@ -1355,11 +2086,17 @@
             const pill = document.getElementById('searchPill');
             const clearBtn = document.getElementById('clearSearchBtn');
             if (searchQuery.trim().length > 0) {
-               clearBtn.classList.remove('hidden');
-               pill.classList.add('w-52', 'lg:w-60');
+               if (clearBtn) clearBtn.classList.remove('hidden');
+               if (pill) {
+                  pill.classList.remove('w-12');
+                  pill.classList.add('w-52', 'lg:w-60');
+               }
             } else {
-               clearBtn.classList.add('hidden');
-               pill.classList.remove('w-52', 'lg:w-60');
+               if (clearBtn) clearBtn.classList.add('hidden');
+               if (pill) {
+                  pill.classList.remove('w-52', 'lg:w-60');
+                  pill.classList.add('w-12');
+               }
             }
             renderGames();
          }
@@ -1372,10 +2109,18 @@
             if (desktopInput) desktopInput.value = '';
             if (mobileInput) mobileInput.value = '';
 
-            document.getElementById('clearSearchBtn').classList.add('hidden');
-            document.getElementById('searchPill').classList.remove('w-52', 'lg:w-60');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const pill = document.getElementById('searchPill');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (pill) {
+               pill.classList.remove('w-52', 'lg:w-60');
+               pill.classList.add('w-12');
+            }
             if (hideMobileDrawer) {
-               document.getElementById('mobileSearchDrawer').classList.add('hidden');
+               const drawer = document.getElementById('mobileSearchDrawer');
+               const toggleBtn = document.getElementById('mobileSearchToggleBtn');
+               if (drawer) drawer.classList.add('hidden');
+               if (toggleBtn) toggleBtn.classList.remove('border-indigo-400', 'text-indigo-600');
             }
             renderGames();
          }
@@ -1401,6 +2146,8 @@
             else favorites.push(id);
             safeSetStorage('aim_favorites', JSON.stringify(favorites));
             renderGames();
+            renderBonusVault();
+            updateWinnerFavoriteUI();
          }
 
          function markAsPlayed(id) {
@@ -1410,20 +2157,65 @@
                safeSetStorage('aim_played_games', JSON.stringify(playedGames));
                updatePlayedUI();
                renderGames();
+               renderBonusDock();
+               renderBonusVault();
             }
          }
 
          function updatePlayedUI() {
+            const mainPlayed = GAMES.filter(g => playedGames.includes(g.id)).length;
+            const bonusPlayed = BONUS_GAMES.filter(g => playedGames.includes(g.id)).length;
+
             const el = document.getElementById('playedCountText');
-            if (el) el.innerText = `${playedGames.length}/${GAMES.length}`;
+            if (el) el.innerText = `${mainPlayed}/${GAMES.length}`;
+
+            const pill = document.getElementById('playedCountPill');
+            if (pill) pill.title = `เล่นแล้ว ${mainPlayed}/${GAMES.length} เกม`;
+
+            const vBadge = document.getElementById('vaultPlayedBadge');
+            if (vBadge) vBadge.innerText = `${bonusPlayed}/${BONUS_GAMES.length}`;
+         }
+
+         // Safe 2-step reset confirmation (avoids accidental wipes and forbidden confirm() dialogs)
+         function disarmResetButton() {
+            resetConfirmArmed = false;
+            if (resetConfirmTimer) {
+               clearTimeout(resetConfirmTimer);
+               resetConfirmTimer = null;
+            }
+            const btn = document.getElementById('resetProgressBtn');
+            const label = document.getElementById('resetProgressLabel');
+            if (btn) {
+               btn.className = 'tactile-btn w-full h-11 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-prompt font-bold text-sm flex items-center justify-center gap-2 transition';
+            }
+            if (label) label.innerText = 'ล้างสถิติการเล่น';
+         }
+
+         function handleResetProgressClick() {
+            if (!resetConfirmArmed) {
+               playSound('click');
+               resetConfirmArmed = true;
+               const btn = document.getElementById('resetProgressBtn');
+               const label = document.getElementById('resetProgressLabel');
+               if (btn) {
+                  btn.className = 'tactile-btn w-full h-11 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-prompt font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm';
+               }
+               if (label) label.innerText = 'กดอีกครั้งเพื่อยืนยันการล้าง';
+               resetConfirmTimer = setTimeout(disarmResetButton, 3500);
+               return;
+            }
+            disarmResetButton();
+            resetPlayedProgress();
          }
 
          function resetPlayedProgress() {
-            playSound('click');
+            playSound('pop');
             playedGames = [];
             safeRemoveStorage('aim_played_games');
             updatePlayedUI();
             renderGames();
+            renderBonusDock();
+            renderBonusVault();
             closeModal('settingsModal');
          }
 
@@ -1457,19 +2249,18 @@
             const favBtn = document.getElementById('randomFavBtn');
             if (!favBtn) return;
             if (!currentWinnerGame || isSpinning) {
-               favBtn.className = 'tactile-btn h-12 w-12 sm:w-13 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center shrink-0 opacity-45 pointer-events-none transition-all';
+               favBtn.className = 'tactile-btn h-12 w-12 sm:w-[52px] rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center shrink-0 opacity-45 pointer-events-none transition-all';
                return;
             }
             const isFav = favorites.includes(currentWinnerGame.id);
             favBtn.className = isFav
-               ? 'tactile-btn h-12 w-12 sm:w-13 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 transition-all shadow-2xs'
-               : 'tactile-btn h-12 w-12 sm:w-13 rounded-2xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-400 flex items-center justify-center shrink-0 transition-all';
+               ? 'tactile-btn h-12 w-12 sm:w-[52px] rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 transition-all shadow-sm'
+               : 'tactile-btn h-12 w-12 sm:w-[52px] rounded-2xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-400 flex items-center justify-center shrink-0 transition-all';
          }
 
          function toggleWinnerFavorite() {
             if (!currentWinnerGame || isSpinning) return;
             toggleFavorite(currentWinnerGame.id);
-            updateWinnerFavoriteUI();
          }
 
          function applySpotlightTheme(game, isWinner = false) {
@@ -1480,12 +2271,8 @@
             const pRight = document.getElementById('pointerRight');
             const highlightBox = document.getElementById('reelHighlightBox');
 
-            if (modalCard) {
-               modalCard.style.setProperty('--aura-color', game.theme.aura);
-            }
-            if (diceBadge) {
-               diceBadge.style.background = game.theme.btnGrad;
-            }
+            if (modalCard) modalCard.style.setProperty('--aura-color', game.theme.aura);
+            if (diceBadge) diceBadge.style.background = game.theme.btnGrad;
             if (pLeft) pLeft.style.color = game.theme.primary;
             if (pRight) pRight.style.color = game.theme.primary;
             if (highlightBox) {
@@ -1505,8 +2292,8 @@
                      : 'w-2.5 h-2.5 rounded-full bg-amber-400 transition-all duration-150';
                } else if (i === activeStage) {
                   dot.className = i === 3
-                     ? 'w-4 h-4 rounded-full bg-emerald-500 scale-110 flex items-center justify-center shadow-xs transition-all duration-150'
-                     : 'w-3 h-3 rounded-full bg-rose-500 scale-110 shadow-xs transition-all duration-150';
+                     ? 'w-4 h-4 rounded-full bg-emerald-500 scale-110 flex items-center justify-center shadow-sm transition-all duration-150'
+                     : 'w-3 h-3 rounded-full bg-rose-500 scale-110 shadow-sm transition-all duration-150';
                } else {
                   dot.className = i === 3
                      ? 'w-3.5 h-3.5 rounded-full bg-slate-300 flex items-center justify-center transition-all duration-150'
@@ -1525,6 +2312,9 @@
          }
 
          function getPoolForSpinMode(mode) {
+            if (mode === 'bonus') {
+               return BONUS_GAMES.length > 0 ? BONUS_GAMES : GAMES;
+            }
             if (mode === 'unplayed') {
                const unplayed = GAMES.filter(g => !playedGames.includes(g.id));
                return unplayed.length > 0 ? unplayed : GAMES;
@@ -1540,28 +2330,32 @@
             const unplayedCount = GAMES.filter(g => !playedGames.includes(g.id)).length;
             const filteredCount = getFilteredGames().length;
 
-            // Auto-fallback to 'all' if 'unplayed' pool is exhausted
             if (spinMode === 'unplayed' && unplayedCount === 0) {
+               spinMode = 'all';
+            }
+            if (spinMode === 'filtered' && filteredCount === 0) {
                spinMode = 'all';
             }
 
             const cAll = document.getElementById('spinCount-all');
             const cUnplayed = document.getElementById('spinCount-unplayed');
             const cFiltered = document.getElementById('spinCount-filtered');
+            const cBonus = document.getElementById('spinCount-bonus');
             if (cAll) cAll.innerText = GAMES.length;
             if (cUnplayed) cUnplayed.innerText = unplayedCount;
             if (cFiltered) cFiltered.innerText = filteredCount;
+            if (cBonus) cBonus.innerText = `+${BONUS_GAMES.length}`;
 
-            ['all', 'unplayed', 'filtered'].forEach(m => {
+            ['all', 'unplayed', 'filtered', 'bonus'].forEach(m => {
                const btn = document.getElementById(`spinMode-${m}`);
                if (!btn) return;
                const isDisabled = (m === 'unplayed' && unplayedCount === 0) || (m === 'filtered' && filteredCount === 0);
                if (spinMode === m) {
-                  btn.className = 'py-2 px-2 rounded-xl bg-white text-slate-900 shadow-xs transition flex items-center justify-center gap-1.5 font-extrabold';
+                  btn.className = 'py-2 px-1.5 rounded-xl bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1 font-extrabold';
                } else if (isDisabled) {
-                  btn.className = 'py-2 px-2 rounded-xl text-slate-300 opacity-50 pointer-events-none transition flex items-center justify-center gap-1.5';
+                  btn.className = 'py-2 px-1.5 rounded-xl text-slate-300 opacity-50 pointer-events-none transition flex items-center justify-center gap-1';
                } else {
-                  btn.className = 'py-2 px-2 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1.5';
+                  btn.className = 'py-2 px-1.5 rounded-xl text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1';
                }
             });
          }
@@ -1594,7 +2388,8 @@
          }
 
          function openRandomizer() {
-            if (onlyFavorites || currentCategory !== 'all' || searchQuery.trim() !== '') {
+            const hasActiveFilter = onlyFavorites || currentCategory !== 'all' || searchQuery.trim() !== '';
+            if (hasActiveFilter && getFilteredGames().length > 0) {
                spinMode = 'filtered';
             } else {
                spinMode = 'all';
@@ -1618,20 +2413,24 @@
 
          function buildReelItemHTML(game) {
             const isNew = !playedGames.includes(game.id);
+            const isBonus = game.id.startsWith('E');
+            const displayCode = isBonus ? (game.badgeText || game.id.replace('E', '')) : game.id;
+            const displayTag = isBonus ? (BONUS_CATEGORY_LABELS[game.category] || 'เกมเสริม') : game.badgeText;
+
             return `
                <div class="reel-item w-full h-[176px] sm:h-[192px] px-3.5 py-1 flex flex-col justify-center">
                   <div class="w-full h-full rounded-[22px] bg-white overflow-hidden flex flex-col">
                      <div class="relative w-full h-[122px] sm:h-[134px] bg-slate-100 overflow-hidden shrink-0">
                         ${getGameIllustrationSVG(game.id)}
                         <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                           <span style="background-color: ${game.theme.primary}" class="font-fredoka font-bold text-xs px-2.5 py-0.5 rounded-lg text-white shadow-2xs">${game.id}</span>
-                           <span class="px-2 py-0.5 rounded-lg bg-white/95 text-slate-700 font-bold text-[11px] flex items-center gap-1 shadow-2xs">
+                           <span style="background-color: ${game.theme.primary}" class="font-fredoka font-bold text-xs px-2.5 py-0.5 rounded-lg text-white shadow-sm">${displayCode}</span>
+                           <span class="px-2 py-0.5 rounded-lg bg-white/95 text-slate-700 font-bold text-[11px] flex items-center gap-1 shadow-sm">
                               ${getSubjectIconSVG(game.series)}
-                              <span>${game.badgeText}</span>
+                              <span>${displayTag}</span>
                            </span>
                         </div>
                         ${isNew ? `
-                        <span class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xs" title="ใหม่">
+                        <span class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm" title="ใหม่">
                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2z"/></svg>
                         </span>` : ''}
                      </div>
@@ -1655,7 +2454,6 @@
             const winner = candidates[Math.floor(Math.random() * candidates.length)];
             currentWinnerGame = winner;
 
-            // Animate header & modal dice icons
             ['diceIcon', 'modalDiceIcon'].forEach(id => {
                const el = document.getElementById(id);
                if (el) {
@@ -1670,15 +2468,14 @@
 
             const skipHint = document.getElementById('skipSpinHint');
             const playBtn = document.getElementById('randomModalPlayBtn');
-            const playLabel = document.getElementById('randomPlayBtnLabel');
 
             if (skipHint) skipHint.classList.remove('hidden');
             playBtn.classList.remove('cta-ready');
             playBtn.classList.add('opacity-45', 'pointer-events-none');
             playBtn.style.background = 'linear-gradient(135deg, #CBD5E1, #94A3B8)';
-            playLabel.innerText = '...';
+            playBtn.href = '#';
+            playBtn.onclick = (e) => e.preventDefault();
 
-            // Build a 24-item sequence landing deterministically on TARGET_REEL_INDEX (22)
             const totalItems = TARGET_REEL_INDEX + 2;
             const sequence = [];
             for (let i = 0; i < totalItems; i++) {
@@ -1697,7 +2494,6 @@
             track.innerHTML = sequence.map(g => buildReelItemHTML(g)).join('');
             applySpotlightTheme(sequence[0], false);
 
-            // Wait 1 animation frame so modal layout dimensions are 100% painted & accurate
             spinSetupRafId = requestAnimationFrame(() => {
                spinSetupRafId = null;
                if (!isSpinning) return;
@@ -1706,7 +2502,7 @@
                const startY = centerOffset;
                const finalY = -(TARGET_REEL_INDEX * itemHeight) + centerOffset;
                const distance = finalY - startY;
-               const duration = 2650; // Crisp 2.65s multi-stage suspense curve
+               const duration = 2650;
                const startTime = performance.now();
                let lastTickIndex = 0;
 
@@ -1717,7 +2513,6 @@
                   const elapsed = now - startTime;
                   const t = Math.min(elapsed / duration, 1);
 
-                  // 2-phase easing: brisk spin (0..0.48) -> dramatic heartbeat slowdown (0.48..1)
                   let ease;
                   if (t < 0.48) {
                      ease = 1.54 * t;
@@ -1740,7 +2535,6 @@
                      applySpotlightTheme(activeGame, false);
                      bouncePointers();
 
-                     // Final 3 cards enter Heartbeat Tension Mode
                      if (currentIndex >= TARGET_REEL_INDEX - 3) {
                         updateStageDots(2);
                         playSound('tension', (currentIndex - (TARGET_REEL_INDEX - 3)) / 4);
@@ -1772,11 +2566,11 @@
             const pL = document.getElementById('pointerLeft');
             const pR = document.getElementById('pointerRight');
             if (pL && pR) {
-               pL.classList.remove('pointer-tick');
-               pR.classList.remove('pointer-tick');
+               pL.classList.remove('pointer-tick-left');
+               pR.classList.remove('pointer-tick-right');
                void pL.offsetWidth;
-               pL.classList.add('pointer-tick');
-               pR.classList.add('pointer-tick');
+               pL.classList.add('pointer-tick-left');
+               pR.classList.add('pointer-tick-right');
             }
          }
 
@@ -1819,15 +2613,12 @@
 
             const skipHint = document.getElementById('skipSpinHint');
             const playBtn = document.getElementById('randomModalPlayBtn');
-            const playLabel = document.getElementById('randomPlayBtnLabel');
 
             if (skipHint) skipHint.classList.add('hidden');
 
-            // Activate Play CTA styled with the winning game's signature color
             playBtn.classList.remove('opacity-45', 'pointer-events-none');
             playBtn.classList.add('cta-ready');
             playBtn.style.background = currentWinnerGame.theme.btnGrad;
-            playLabel.innerText = 'เล่นเลย!';
             playBtn.href = encodeURI(currentWinnerGame.filename);
             if (openInNewTab) {
                playBtn.target = '_blank';
@@ -1836,7 +2627,11 @@
                playBtn.removeAttribute('target');
                playBtn.removeAttribute('rel');
             }
-            playBtn.onclick = () => {
+            playBtn.onclick = (e) => {
+               if (isSpinning || !currentWinnerGame) {
+                  e.preventDefault();
+                  return;
+               }
                markAsPlayed(currentWinnerGame.id);
                closeRandomModal();
             };
@@ -1851,6 +2646,7 @@
             const modalCard = document.getElementById('randomModalCard');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             canvas.width = canvas.offsetWidth || (modalCard ? modalCard.clientWidth : 340);
             canvas.height = canvas.offsetHeight || (modalCard ? modalCard.clientHeight : 420);
 
@@ -1903,6 +2699,7 @@
                if (alive) {
                   confettiAnimId = requestAnimationFrame(animateConfetti);
                } else {
+                  confettiAnimId = null;
                   ctx.clearRect(0, 0, canvas.width, canvas.height);
                }
             }
@@ -1914,12 +2711,14 @@
          function syncBodyScrollLock() {
             const settingsOpen = !document.getElementById('settingsModal').classList.contains('hidden');
             const randomOpen = !document.getElementById('randomModal').classList.contains('hidden');
-            document.body.style.overflow = (settingsOpen || randomOpen) ? 'hidden' : '';
+            const bonusOpen = !document.getElementById('bonusModal').classList.contains('hidden');
+            document.body.style.overflow = (settingsOpen || randomOpen || bonusOpen) ? 'hidden' : '';
          }
 
          function openModal(id) {
             const m = document.getElementById(id);
             if (m) {
+               if (id === 'settingsModal') disarmResetButton();
                m.classList.remove('hidden');
                syncBodyScrollLock();
             }
@@ -1929,6 +2728,7 @@
             playSound('click');
             const m = document.getElementById(id);
             if (m) {
+               if (id === 'settingsModal') disarmResetButton();
                m.classList.add('hidden');
                syncBodyScrollLock();
             }
@@ -1938,6 +2738,8 @@
             if (e.key === 'Escape') {
                const settingsM = document.getElementById('settingsModal');
                if (settingsM && !settingsM.classList.contains('hidden')) closeModal('settingsModal');
+               const bonusM = document.getElementById('bonusModal');
+               if (bonusM && !bonusM.classList.contains('hidden')) closeModal('bonusModal');
                const randomM = document.getElementById('randomModal');
                if (randomM && !randomM.classList.contains('hidden')) closeRandomModal();
             }
@@ -1959,6 +2761,8 @@
             openInNewTab = enabled;
             safeSetStorage('aim_new_tab', enabled);
             renderGames();
+            renderBonusDock();
+            renderBonusVault();
          }
       </script>
    </body>

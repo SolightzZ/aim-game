@@ -1,0 +1,2142 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>น้องปุยเมฆ ผจญภัยในป่ามหัศจรรย์ - Simple Learning Adventure</title>
+      <!-- Tailwind CSS for responsive layout & WCAG AAA utility styling -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <!-- Google Font: Mali (Playful, rounded, high-legibility Thai font ideal for children) -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Mali:wght@600;700&display=swap" rel="stylesheet" />
+
+      <style>
+         /* ==========================================================================
+       CUSTOM THEME & ACCESSIBILITY STYLES (WCAG AAA HIGH CONTRAST LIGHT THEME)
+       ========================================================================== */
+         :root {
+            --bg-cream: #fffdf7;
+            --ink-dark: #0f172a; /* > 15:1 contrast against #FFFDF7 (WCAG AAA) */
+            --accent-sky: #0284c7;
+            --accent-mint: #059669;
+            --accent-amber: #d97706;
+            --accent-coral: #e11d48;
+            --accent-purple: #7c3aed;
+         }
+
+         * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+         }
+
+         body,
+         html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Mali', cursive, sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--ink-dark);
+         }
+
+         /* Tactile 3D Button Styling for Children (Clear boundaries & satisfying press) */
+         .tactile-btn {
+            border: 3px solid var(--ink-dark);
+            box-shadow: 0 5px 0 var(--ink-dark);
+            transition:
+               transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1),
+               box-shadow 0.1s ease,
+               background-color 0.15s ease;
+         }
+
+         .tactile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--ink-dark);
+         }
+
+         .tactile-btn:active,
+         .tactile-btn.pressed {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 var(--ink-dark);
+         }
+
+         .tactile-btn:focus-visible {
+            outline: 4px solid #f59e0b;
+            outline-offset: 3px;
+         }
+
+         /* Keycap styling for the Interactive WASD + Spacebar Tutorial */
+         .keycap {
+            border: 3.5px solid var(--ink-dark);
+            box-shadow: 0 6px 0 var(--ink-dark);
+            transition:
+               transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+               box-shadow 0.12s ease;
+         }
+
+         .keycap.active-key {
+            transform: translateY(5px) scale(0.96);
+            box-shadow: 0 1px 0 var(--ink-dark);
+         }
+
+         .keycap.completed-key {
+            ring: 4px solid #10b981;
+         }
+
+         /* Gentle floating animation for cute badges */
+         @keyframes floatSlow {
+            0%,
+            100% {
+               transform: translateY(0px);
+            }
+            50% {
+               transform: translateY(-6px);
+            }
+         }
+
+         .animate-float {
+            animation: floatSlow 2.8s ease-in-out infinite;
+         }
+
+         @keyframes pulseRing {
+            0% {
+               transform: scale(0.95);
+               opacity: 0.9;
+            }
+            70% {
+               transform: scale(1.12);
+               opacity: 0.3;
+            }
+            100% {
+               transform: scale(0.95);
+               opacity: 0.9;
+            }
+         }
+
+         .animate-hint-pulse {
+            animation: pulseRing 1.6s ease-in-out infinite;
+         }
+
+         /* Ensure canvas fills screen cleanly without scrollbars */
+         #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+         }
+      </style>
+   </head>
+   <body class="relative w-screen h-screen overflow-hidden">
+      <!-- ========================================================================
+       MAIN GAME CANVAS (Renders World, Characters, Animations, Ghost Hints)
+       ======================================================================== -->
+      <canvas id="gameCanvas" aria-label="พื้นที่เล่นเกมผจญภัยของน้องปุยเมฆ"></canvas>
+
+      <!-- ========================================================================
+       MINIMALIST FLOATING HUD (NO NAVBAR - ONLY VISUAL STEP CARDS & ICON BUTTONS)
+       ======================================================================== -->
+      <div id="gameHud" class="pointer-events-none fixed inset-0 z-10 flex flex-col justify-between p-3 sm:p-5 hidden">
+         <!-- Top Row: Level Indicator + Visual Step-by-Step Quest Cards (Left) & Assist Buttons (Right) -->
+         <div class="flex flex-wrap items-start justify-between gap-3 w-full">
+            <!-- Visual Quest Tracker (Picture-based, zero long sentences) -->
+            <div
+               class="pointer-events-auto flex items-center gap-2 sm:gap-3 bg-[#FFFDF7]/95 backdrop-blur-sm border-[3px] border-[#0F172A] rounded-3xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-[0_4px_0_#0F172A]">
+               <!-- Current Stage Pill -->
+               <div class="flex flex-col items-center justify-center bg-[#FEF3C7] border-[2.5px] border-[#0F172A] rounded-2xl px-3 py-1.5 min-w-[64px]">
+                  <span class="text-xs font-bold uppercase tracking-wider text-[#0F172A]">ด่าน</span>
+                  <span id="hudLevelNum" class="text-xl sm:text-2xl font-bold leading-none text-[#0F172A]">1/5</span>
+               </div>
+
+               <!-- Live Score Pill -->
+               <div class="flex flex-col items-center justify-center bg-[#DCFCE7] border-[2.5px] border-[#0F172A] rounded-2xl px-3 py-1.5 min-w-[68px]" aria-label="คะแนนสะสม">
+                  <span class="text-xs font-bold text-[#0F172A]">คะแนน</span>
+                  <span id="hudScoreNum" class="text-xl sm:text-2xl font-bold leading-none text-[#0F172A]">0</span>
+               </div>
+
+               <!-- Arrow Separator -->
+               <svg class="w-5 h-5 text-[#0F172A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+               </svg>
+
+               <!-- Step-by-Step Visual Task Slots (Dynamically Populated with Icons) -->
+               <div id="hudStepSlots" class="flex items-center gap-2 sm:gap-2.5" role="list" aria-label="ขั้นตอนภารกิจ">
+                  <!-- Visual Step Cards Injected Here -->
+               </div>
+            </div>
+
+            <!-- Right Assist Controls: Repeat Audio/Visual, Progressive Hint/Example, Interactive Key Guide -->
+            <div class="pointer-events-auto flex items-center gap-2.5 sm:gap-3">
+               <!-- 1. Repeat Instruction Button (ฟังซ้ำ / ดูซ้ำ) -->
+               <button
+                  id="btnRepeat"
+                  type="button"
+                  aria-label="ฟังและดูคำแนะนำซ้ำ"
+                  class="tactile-btn bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0F172A] rounded-2xl p-3 sm:p-3.5 flex flex-col items-center justify-center min-w-[64px] min-h-[64px]">
+                  <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#38BDF8" />
+                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+                  <span class="text-xs font-bold mt-0.5">ฟังซ้ำ</span>
+               </button>
+
+               <!-- 2. Progressive Scaffolding / Ghost Demo Button (ดูตัวอย่าง / ช่วยเหลือ) -->
+               <button
+                  id="btnHint"
+                  type="button"
+                  aria-label="ดูตัวอย่างวิธีเล่นและขอความช่วยเหลือ"
+                  class="tactile-btn bg-[#FEF08A] hover:bg-[#FDE047] text-[#0F172A] rounded-2xl p-3 sm:p-3.5 flex flex-col items-center justify-center min-w-[64px] min-h-[64px] relative">
+                  <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M9 18h6" />
+                     <path d="M10 22h4" />
+                     <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="#FACC15" />
+                  </svg>
+                  <span class="text-xs font-bold mt-0.5">ตัวอย่าง</span>
+                  <!-- Hint Level Dots (1, 2, 3) -->
+                  <div id="hintLevelDots" class="flex gap-1 mt-0.5">
+                     <span class="w-2 h-2 rounded-full border border-[#0F172A] bg-white"></span>
+                     <span class="w-2 h-2 rounded-full border border-[#0F172A] bg-white"></span>
+                     <span class="w-2 h-2 rounded-full border border-[#0F172A] bg-white"></span>
+                  </div>
+               </button>
+
+               <!-- 3. Open Tutorial Screen Button (วิธีบังคับ WASD + Spacebar) -->
+               <button
+                  id="btnOpenTutorial"
+                  type="button"
+                  aria-label="เปิดหน้าจอฝึกกดปุ่ม WASD และ Spacebar"
+                  class="tactile-btn bg-[#F3E8FF] hover:bg-[#E9D5FF] text-[#0F172A] rounded-2xl p-3 sm:p-3.5 flex flex-col items-center justify-center min-w-[64px] min-h-[64px]">
+                  <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     <rect x="2" y="6" width="20" height="12" rx="4" fill="#C084FC" />
+                     <path d="M6 12h4M8 10v4" />
+                     <circle cx="15" cy="11" r="1" fill="#0F172A" />
+                     <circle cx="18" cy="13" r="1" fill="#0F172A" />
+                  </svg>
+                  <span class="text-xs font-bold mt-0.5">ปุ่มกด</span>
+               </button>
+            </div>
+         </div>
+
+         <!-- Bottom Row: Tactile Touch/Mouse On-Screen Controls (Accessibility for Touch & Motor Support) -->
+         <div class="flex items-end justify-between w-full pb-1 sm:pb-2">
+            <!-- Virtual WASD D-Pad (Bottom Left) -->
+            <div class="pointer-events-auto grid grid-cols-3 gap-1.5 sm:gap-2 p-2 bg-[#FFFDF7]/85 backdrop-blur-sm border-[3px] border-[#0F172A] rounded-3xl shadow-[0_4px_0_#0F172A]">
+               <div></div>
+               <button
+                  data-vkey="KeyW"
+                  type="button"
+                  aria-label="เดินขึ้น (W)"
+                  class="tactile-btn bg-[#BAE6FD] active:bg-[#7DD3FC] w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center font-bold text-base">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+                  <span class="text-[11px] leading-none">W</span>
+               </button>
+               <div></div>
+
+               <button
+                  data-vkey="KeyA"
+                  type="button"
+                  aria-label="เดินซ้าย (A)"
+                  class="tactile-btn bg-[#A7F3D0] active:bg-[#6EE7B7] w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center font-bold text-base">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                  <span class="text-[11px] leading-none">A</span>
+               </button>
+               <button
+                  data-vkey="KeyS"
+                  type="button"
+                  aria-label="เดินลง (S)"
+                  class="tactile-btn bg-[#FDE68A] active:bg-[#FCD34D] w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center font-bold text-base">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3"><path d="M12 5v14M19 12l-7 7-7-7" /></svg>
+                  <span class="text-[11px] leading-none">S</span>
+               </button>
+               <button
+                  data-vkey="KeyD"
+                  type="button"
+                  aria-label="เดินขวา (D)"
+                  class="tactile-btn bg-[#FECDD3] active:bg-[#FDA4AF] w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center font-bold text-base">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  <span class="text-[11px] leading-none">D</span>
+               </button>
+            </div>
+
+            <!-- Visual Helper Prompt Pill (Center Bottom - Icon Equation Only) -->
+            <div id="hudVisualEquation" class="hidden md:flex items-center gap-3 bg-[#FFFDF7]/95 border-[3px] border-[#0F172A] rounded-full px-5 py-2.5 shadow-[0_4px_0_#0F172A]">
+               <!-- Dynamically shows e.g. [Character Icon] + [Arrow] + [Target Icon] -->
+            </div>
+
+            <!-- Virtual Spacebar Action/Jump Button (Bottom Right) -->
+            <div class="pointer-events-auto p-2 bg-[#FFFDF7]/85 backdrop-blur-sm border-[3px] border-[#0F172A] rounded-3xl shadow-[0_4px_0_#0F172A]">
+               <button
+                  data-vkey="Space"
+                  type="button"
+                  aria-label="กระโดดหรือเก็บของ (Spacebar)"
+                  class="tactile-btn bg-[#DDD6FE] active:bg-[#C4B5FD] px-5 sm:px-7 h-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center font-bold">
+                  <svg class="w-7 h-7 sm:w-8 sm:h-8 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M12 19V5" />
+                     <path d="M5 12l7-7 7 7" />
+                     <path d="M4 21h16" />
+                  </svg>
+                  <span class="text-xs sm:text-sm tracking-wide">SPACE กระโดด</span>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+       INTERACTIVE TUTORIAL & TITLE OVERLAY (LIGHT THEME + LIVE WASD/SPACE PLAYGROUND)
+       Designed specifically for children with intellectual disabilities:
+       - Minimal text, big colorful illustrated keycaps
+       - Live interactive canvas where Pui-Mek responds immediately to key presses!
+       ======================================================================== -->
+      <div id="tutorialOverlay" class="fixed inset-0 z-30 flex items-center justify-center p-3 sm:p-6 bg-[#FEF9C3]/90 backdrop-blur-md overflow-y-auto">
+         <div class="w-full max-w-4xl bg-[#FFFDF7] border-[4px] border-[#0F172A] rounded-[2rem] shadow-[0_10px_0_#0F172A] p-4 sm:p-7 flex flex-col gap-4 sm:gap-6 my-auto">
+            <!-- Header: Cute Character Emblem & Title (Minimal, joyful) -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-b-[3px] border-dashed border-[#CBD5E1] pb-4">
+               <div class="flex items-center gap-3 sm:gap-4">
+                  <!-- Cute SVG Mascot Emblem -->
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#E0F2FE] border-[3px] border-[#0F172A] flex items-center justify-center shadow-[0_4px_0_#0F172A] animate-float shrink-0">
+                     <svg class="w-12 h-12 sm:w-14 sm:h-14" viewBox="0 0 64 64">
+                        <!-- Bunny/Cloud Ears -->
+                        <ellipse cx="22" cy="16" rx="6" ry="12" fill="#FFFFFF" stroke="#0F172A" stroke-width="3" />
+                        <ellipse cx="42" cy="16" rx="6" ry="12" fill="#FFFFFF" stroke="#0F172A" stroke-width="3" />
+                        <ellipse cx="22" cy="16" rx="3" ry="7" fill="#FBCFE8" />
+                        <ellipse cx="42" cy="16" rx="3" ry="7" fill="#FBCFE8" />
+                        <!-- Fluffy Body -->
+                        <circle cx="32" cy="38" r="20" fill="#FFFFFF" stroke="#0F172A" stroke-width="3" />
+                        <!-- Happy Eyes -->
+                        <circle cx="25" cy="35" r="3" fill="#0F172A" />
+                        <circle cx="39" cy="35" r="3" fill="#0F172A" />
+                        <circle cx="26" cy="34" r="1" fill="#FFFFFF" />
+                        <circle cx="40" cy="34" r="1" fill="#FFFFFF" />
+                        <!-- Rosy Cheeks -->
+                        <ellipse cx="20" cy="40" rx="3.5" ry="2" fill="#FDA4AF" />
+                        <ellipse cx="44" cy="40" rx="3.5" ry="2" fill="#FDA4AF" />
+                        <!-- Cute Smile -->
+                        <path d="M28 41 Q32 45 36 41" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" />
+                     </svg>
+                  </div>
+                  <div>
+                     <h1 class="text-2xl sm:text-3xl font-bold text-[#0F172A] tracking-tight">น้องปุยเมฆ ผจญภัย</h1>
+                     <p class="text-sm sm:text-base font-semibold text-[#334155] flex items-center gap-1.5 mt-0.5">
+                        <span>ลองกดปุ่มด้านล่างดูสิ!</span>
+                        <span class="inline-block px-2.5 py-0.5 bg-[#DCFCE7] border-2 border-[#0F172A] rounded-full text-xs font-bold text-[#0F172A]">กดได้เลย</span>
+                     </p>
+                  </div>
+               </div>
+
+               <!-- Interactive Checkmarks Progress (5 Keys: W, A, S, D, Space) -->
+               <div class="flex items-center gap-1.5 bg-[#F8FAFC] border-[2.5px] border-[#0F172A] rounded-2xl px-3 py-2" aria-label="ความคืบหน้าการทดลองกดปุ่ม">
+                  <span id="badge-KeyW" class="w-8 h-8 rounded-xl border-2 border-[#0F172A] bg-white flex items-center justify-center font-bold text-xs transition-colors">W</span>
+                  <span id="badge-KeyA" class="w-8 h-8 rounded-xl border-2 border-[#0F172A] bg-white flex items-center justify-center font-bold text-xs transition-colors">A</span>
+                  <span id="badge-KeyS" class="w-8 h-8 rounded-xl border-2 border-[#0F172A] bg-white flex items-center justify-center font-bold text-xs transition-colors">S</span>
+                  <span id="badge-KeyD" class="w-8 h-8 rounded-xl border-2 border-[#0F172A] bg-white flex items-center justify-center font-bold text-xs transition-colors">D</span>
+                  <span id="badge-Space" class="px-2.5 h-8 rounded-xl border-2 border-[#0F172A] bg-white flex items-center justify-center font-bold text-xs transition-colors">SPACE</span>
+               </div>
+            </div>
+
+            <!-- Main Interactive Tutorial Area: Left = Illustrated Keycaps | Right = Live Mini-Stage -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center">
+               <!-- Left Column (7 cols): Tactile Illustrated Keycaps (WASD + Spacebar) -->
+               <div class="lg:col-span-7 flex flex-col items-center justify-center gap-4 bg-[#F8FAFC] border-[3px] border-[#0F172A] rounded-3xl p-4 sm:p-5">
+                  <!-- WASD Cluster with Cute Icons -->
+                  <div class="grid grid-cols-3 gap-2.5 sm:gap-3">
+                     <div></div>
+                     <!-- W Key (Up) -->
+                     <button id="tut-KeyW" type="button" class="keycap bg-[#BAE6FD] hover:bg-[#7DD3FC] w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#0F172A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M12 19V5M5 12l7-7 7 7" />
+                        </svg>
+                        <span class="text-xl sm:text-2xl font-bold leading-none mt-0.5">W</span>
+                        <span class="text-xs font-bold text-[#0F172A]">ขึ้น</span>
+                     </button>
+                     <div></div>
+
+                     <!-- A Key (Left) -->
+                     <button id="tut-KeyA" type="button" class="keycap bg-[#A7F3D0] hover:bg-[#6EE7B7] w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#0F172A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        <span class="text-xl sm:text-2xl font-bold leading-none mt-0.5">A</span>
+                        <span class="text-xs font-bold text-[#0F172A]">ซ้าย</span>
+                     </button>
+
+                     <!-- S Key (Down) -->
+                     <button id="tut-KeyS" type="button" class="keycap bg-[#FDE68A] hover:bg-[#FCD34D] w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#0F172A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M12 5v14M19 12l-7 7-7-7" />
+                        </svg>
+                        <span class="text-xl sm:text-2xl font-bold leading-none mt-0.5">S</span>
+                        <span class="text-xs font-bold text-[#0F172A]">ลง</span>
+                     </button>
+
+                     <!-- D Key (Right) -->
+                     <button id="tut-KeyD" type="button" class="keycap bg-[#FECDD3] hover:bg-[#FDA4AF] w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#0F172A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                        <span class="text-xl sm:text-2xl font-bold leading-none mt-0.5">D</span>
+                        <span class="text-xs font-bold text-[#0F172A]">ขวา</span>
+                     </button>
+                  </div>
+
+                  <!-- Wide SPACEBAR Key with Star-Spring Illustration -->
+                  <button
+                     id="tut-Space"
+                     type="button"
+                     class="keycap bg-[#DDD6FE] hover:bg-[#C4B5FD] w-full max-w-[290px] h-16 sm:h-20 rounded-2xl flex items-center justify-center gap-3 px-4 cursor-pointer">
+                     <svg class="w-8 h-8 sm:w-9 sm:h-9 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z" fill="#FACC15" />
+                     </svg>
+                     <div class="flex flex-col items-start">
+                        <span class="text-lg sm:text-xl font-bold leading-tight">SPACEBAR</span>
+                        <span class="text-xs sm:text-sm font-bold text-[#0F172A]">กระโดด / เก็บของ</span>
+                     </div>
+                  </button>
+               </div>
+
+               <!-- Right Column (5 cols): Live Interactive Playground Canvas -->
+               <div class="lg:col-span-5 flex flex-col items-center gap-2">
+                  <div class="relative w-full aspect-square max-w-[280px] bg-[#ECFDF5] border-[3px] border-[#0F172A] rounded-3xl overflow-hidden shadow-[inset_0_4px_10px_rgba(15,23,42,0.08)]">
+                     <canvas id="tutorialCanvas" class="w-full h-full block"></canvas>
+                     <!-- Top mini badge inside playground -->
+                     <div class="absolute top-2.5 left-1/2 -translate-x-1/2 bg-[#FFFDF7]/95 border-2 border-[#0F172A] rounded-full px-3 py-0.5 text-xs font-bold whitespace-nowrap">
+                        ลองบังคับน้องปุยเมฆ!
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Bottom Action Row: Big Green Start Button -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+               <div class="flex items-center gap-2 text-sm font-bold text-[#334155]">
+                  <span class="w-3 h-3 rounded-full bg-[#10B981] border border-[#0F172A]"></span>
+                  <span>ใช้ปุ่มลูกศรหรือแตะหน้าจอก็เล่นได้นะ</span>
+               </div>
+
+               <button
+                  id="btnStartGame"
+                  type="button"
+                  class="tactile-btn w-full sm:w-auto bg-[#4ADE80] hover:bg-[#22C55E] text-[#0F172A] text-xl sm:text-2xl font-bold px-8 py-3.5 sm:py-4 rounded-2xl flex items-center justify-center gap-3 cursor-pointer">
+                  <span>เริ่มผจญภัย!</span>
+                  <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                     <polygon points="5 3 19 12 5 21 5 3" fill="#FFFDF7" />
+                  </svg>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+       STAGE CELEBRATION MODAL (ZERO PUNISHMENT - POSITIVE STAR REWARD OVERLAY)
+       ======================================================================== -->
+      <div id="celebrationOverlay" class="fixed inset-0 z-20 hidden items-center justify-center p-4 bg-[#0F172A]/40 backdrop-blur-sm">
+         <div class="w-full max-w-md bg-[#FFFDF7] border-[4px] border-[#0F172A] rounded-[2rem] shadow-[0_10px_0_#0F172A] p-6 sm:p-8 flex flex-col items-center text-center gap-5">
+            <!-- 3 Big Golden Stars SVG -->
+            <div class="flex items-center justify-center gap-2">
+               <svg class="w-14 h-14 text-[#FACC15] animate-bounce" style="animation-delay: 0s" viewBox="0 0 24 24" fill="currentColor" stroke="#0F172A" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+               </svg>
+               <svg class="w-20 h-20 text-[#FACC15] animate-bounce" style="animation-delay: 0.15s" viewBox="0 0 24 24" fill="currentColor" stroke="#0F172A" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+               </svg>
+               <svg class="w-14 h-14 text-[#FACC15] animate-bounce" style="animation-delay: 0.3s" viewBox="0 0 24 24" fill="currentColor" stroke="#0F172A" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+               </svg>
+            </div>
+
+            <div>
+               <h2 id="celebTitle" class="text-3xl font-bold text-[#0F172A]">เก่งมากเลย!</h2>
+               <p id="celebSubtitle" class="text-lg font-semibold text-[#334155] mt-1">ผ่านด่านเรียบร้อยแล้ว</p>
+            </div>
+
+            <!-- Score Summary Pill (Shows stage & total score clearly) -->
+            <div id="celebScoreBox" class="w-full bg-[#FEF9C3] border-[3px] border-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-center gap-3 shadow-[0_4px_0_#0F172A]">
+               <svg class="w-8 h-8 text-[#D97706] shrink-0" viewBox="0 0 24 24" fill="#FACC15" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                  <path d="M4 22h16" />
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+               </svg>
+               <div class="flex flex-col items-start">
+                  <span id="celebScoreLabel" class="text-xs font-bold text-[#334155]">คะแนนรวมทั้งหมด</span>
+                  <span id="celebScoreValue" class="text-2xl font-bold text-[#0F172A] leading-tight">50 / 250 คะแนน</span>
+               </div>
+            </div>
+
+            <!-- Visual Friend Reward Badge -->
+            <div
+               id="celebFriendBadge"
+               class="min-w-[6rem] h-24 px-4 rounded-3xl bg-[#FEF3C7] border-[3px] border-[#0F172A] flex items-center justify-center text-4xl sm:text-5xl shadow-[0_4px_0_#0F172A]">
+               🐻
+            </div>
+
+            <!-- Action Buttons: Replay / Return Home / Next Stage or Restart -->
+            <div id="celebActionRow" class="flex flex-wrap items-center justify-center gap-3 w-full">
+               <button id="btnReplayStage" type="button" aria-label="เล่นด่านนี้อีกครั้ง" class="tactile-btn bg-[#E0F2FE] hover:bg-[#BAE6FD] p-4 rounded-2xl flex items-center justify-center">
+                  <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                     <path d="M3 3v5h5" />
+                  </svg>
+               </button>
+
+               <!-- Return to Main Screen Button (Shown on Final Stage) -->
+               <button
+                  id="btnHome"
+                  type="button"
+                  aria-label="กลับหน้าหลัก"
+                  class="tactile-btn hidden flex-1 min-w-[140px] bg-[#BAE6FD] hover:bg-[#7DD3FC] text-[#0F172A] text-lg sm:text-xl font-bold py-4 px-4 rounded-2xl items-center justify-center gap-2">
+                  <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M3 10.5L12 3l9 7.5" />
+                     <path d="M5 9.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" />
+                  </svg>
+                  <span>กลับหน้าหลัก</span>
+               </button>
+
+               <button
+                  id="btnNextStage"
+                  type="button"
+                  class="tactile-btn flex-1 min-w-[140px] bg-[#4ADE80] hover:bg-[#22C55E] text-[#0F172A] text-lg sm:text-xl font-bold py-4 px-5 rounded-2xl flex items-center justify-center gap-2">
+                  <span id="btnNextStageText">ด่านต่อไป</span>
+                  <svg id="btnNextStageIcon" class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+       GAME LOGIC, AUDIO SYNTHESIZER, PROGRESSIVE SCAFFOLDING & 5 UNIQUE STAGES
+       ======================================================================== -->
+      <script>
+         /**
+          * ========================================================================
+          * 1. GENTLE MULTI-SENSORY AUDIO ENGINE (Web Audio API + Thai Speech)
+          *    - Zero external audio files required (100% self-contained)
+          *    - Uses soothing C-Major Pentatonic marimba chimes for positive feedback
+          * ========================================================================
+          */
+         class SoundEngine {
+            constructor() {
+               this.ctx = null;
+               this.enabled = true;
+            }
+
+            init() {
+               if (!this.ctx) {
+                  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                  if (AudioCtx) {
+                     this.ctx = new AudioCtx();
+                  }
+               }
+               if (this.ctx && this.ctx.state === 'suspended') {
+                  this.ctx.resume().catch(() => {});
+               }
+            }
+
+            playTone(freq, duration = 0.25, type = 'sine', volume = 0.18, delay = 0) {
+               if (!this.enabled) return;
+               this.init();
+               if (!this.ctx) return;
+
+               try {
+                  const now = this.ctx.currentTime + delay;
+                  const osc = this.ctx.createOscillator();
+                  const gain = this.ctx.createGain();
+
+                  osc.type = type;
+                  osc.frequency.setValueAtTime(freq, now);
+
+                  gain.gain.setValueAtTime(0.001, now);
+                  gain.gain.exponentialRampToValueAtTime(volume, now + 0.02);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                  osc.connect(gain);
+                  gain.connect(this.ctx.destination);
+
+                  osc.start(now);
+                  osc.stop(now + duration + 0.03);
+               } catch (e) {
+                  // Silently ignore audio block errors
+               }
+            }
+
+            playStep() {
+               this.playTone(261.63, 0.08, 'sine', 0.06); // Soft C4
+            }
+
+            playJump() {
+               this.playTone(392.0, 0.14, 'sine', 0.15, 0); // G4
+               this.playTone(523.25, 0.18, 'sine', 0.15, 0.06); // C5
+            }
+
+            playCollect() {
+               this.playTone(523.25, 0.15, 'triangle', 0.2, 0); // C5
+               this.playTone(659.25, 0.15, 'triangle', 0.2, 0.08); // E5
+               this.playTone(783.99, 0.28, 'triangle', 0.2, 0.16); // G5
+            }
+
+            playHint() {
+               this.playTone(587.33, 0.18, 'sine', 0.14, 0); // D5
+               this.playTone(880.0, 0.26, 'sine', 0.14, 0.12); // A5
+            }
+
+            playNoteByColor(colorKey) {
+               const map = {
+                  pink: 523.25, // C5
+                  blue: 659.25, // E5
+                  yellow: 783.99, // G5
+                  green: 1046.5, // C6
+               };
+               this.playTone(map[colorKey] || 523.25, 0.35, 'triangle', 0.22);
+            }
+
+            playVictory() {
+               const notes = [523.25, 659.25, 783.99, 1046.5];
+               notes.forEach((n, i) => {
+                  this.playTone(n, 0.3, 'triangle', 0.22, i * 0.11);
+               });
+            }
+
+            speakThai(text) {
+               try {
+                  if ('speechSynthesis' in window) {
+                     window.speechSynthesis.cancel();
+                     const utter = new SpeechSynthesisUtterance(text);
+                     utter.lang = 'th-TH';
+                     utter.rate = 0.9; // Slightly slower, clearer pace for children
+                     utter.pitch = 1.15; // Friendly warm tone
+                     window.speechSynthesis.speak(utter);
+                  }
+               } catch (e) {
+                  // Graceful fallback if speech synthesis is unsupported
+               }
+            }
+         }
+
+         const sound = new SoundEngine();
+
+         /**
+          * ========================================================================
+          * 2. INPUT MANAGER (Supports WASD, Arrow Keys, Spacebar, Virtual Buttons, & Tap-to-Walk)
+          * ========================================================================
+          */
+         const inputState = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            jumpPressed: false,
+            pointerTarget: null, // { x, y } when child clicks/taps directly on the canvas
+         };
+
+         const tutorialTriedKeys = {
+            KeyW: false,
+            KeyA: false,
+            KeyS: false,
+            KeyD: false,
+            Space: false,
+         };
+
+         function handleKeyTrigger(code, isDown) {
+            if (isDown) sound.init();
+
+            // Map Arrow keys & WASD uniformly so children never get confused
+            if (code === 'KeyW' || code === 'ArrowUp') {
+               inputState.up = isDown;
+               if (isDown) {
+                  inputState.pointerTarget = null;
+                  markTutorialKey('KeyW');
+               }
+            }
+            if (code === 'KeyS' || code === 'ArrowDown') {
+               inputState.down = isDown;
+               if (isDown) {
+                  inputState.pointerTarget = null;
+                  markTutorialKey('KeyS');
+               }
+            }
+            if (code === 'KeyA' || code === 'ArrowLeft') {
+               inputState.left = isDown;
+               if (isDown) {
+                  inputState.pointerTarget = null;
+                  markTutorialKey('KeyA');
+               }
+            }
+            if (code === 'KeyD' || code === 'ArrowRight') {
+               inputState.right = isDown;
+               if (isDown) {
+                  inputState.pointerTarget = null;
+                  markTutorialKey('KeyD');
+               }
+            }
+            if (code === 'Space' || code === 'Enter') {
+               if (isDown && !inputState.jumpPressed) {
+                  inputState.jumpPressed = true;
+                  triggerJumpAction();
+                  markTutorialKey('Space');
+               }
+               if (!isDown) {
+                  inputState.jumpPressed = false;
+               }
+            }
+         }
+
+         window.addEventListener('keydown', (e) => {
+            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+               e.preventDefault();
+            }
+            handleKeyTrigger(e.code, true);
+         });
+
+         window.addEventListener('keyup', (e) => {
+            handleKeyTrigger(e.code, false);
+         });
+
+         // Bind On-Screen Virtual D-Pad & Spacebar Buttons (Mouse + Touch)
+         document.querySelectorAll('[data-vkey]').forEach((btn) => {
+            const code = btn.getAttribute('data-vkey');
+            const press = (e) => {
+               e.preventDefault();
+               btn.classList.add('pressed');
+               handleKeyTrigger(code, true);
+            };
+            const release = (e) => {
+               e.preventDefault();
+               btn.classList.remove('pressed');
+               handleKeyTrigger(code, false);
+            };
+            btn.addEventListener('mousedown', press);
+            btn.addEventListener('mouseup', release);
+            btn.addEventListener('mouseleave', release);
+            btn.addEventListener('touchstart', press, { passive: false });
+            btn.addEventListener('touchend', release, { passive: false });
+         });
+
+         /**
+          * ========================================================================
+          * 3. INTERACTIVE TUTORIAL PLAYGROUND (WASD + SPACEBAR VISUAL DEMO)
+          * ========================================================================
+          */
+         const tutorialOverlay = document.getElementById('tutorialOverlay');
+         const tutorialCanvas = document.getElementById('tutorialCanvas');
+         const tutCtx = tutorialCanvas.getContext('2d');
+
+         const tutPlayer = {
+            x: 0.5,
+            y: 0.54,
+            z: 0, // Jump height
+            vz: 0,
+            scaleX: 1,
+            scaleY: 1,
+            facing: 1,
+         };
+
+         // 4 directional stars + 1 top bell in the tutorial mini-stage
+         let tutTargets = [
+            { id: 'KeyW', x: 0.5, y: 0.24, icon: '⭐', color: '#38BDF8', collected: false, bounce: 0 },
+            { id: 'KeyA', x: 0.22, y: 0.54, icon: '⭐', color: '#34D399', collected: false, bounce: 1 },
+            { id: 'KeyS', x: 0.5, y: 0.82, icon: '⭐', color: '#FBBF24', collected: false, bounce: 2 },
+            { id: 'KeyD', x: 0.78, y: 0.54, icon: '⭐', color: '#FB7185', collected: false, bounce: 3 },
+         ];
+         let tutBell = { x: 0.5, y: 0.36, ringTimer: 0 };
+         let tutParticles = [];
+
+         function markTutorialKey(keyId) {
+            // Visual keycap highlight in the Tutorial UI
+            const keyEl = document.getElementById(`tut-${keyId}`);
+            if (keyEl) {
+               keyEl.classList.add('active-key');
+               setTimeout(() => keyEl.classList.remove('active-key'), 180);
+            }
+
+            if (!tutorialTriedKeys[keyId]) {
+               tutorialTriedKeys[keyId] = true;
+               const badge = document.getElementById(`badge-${keyId}`);
+               if (badge) {
+                  badge.style.backgroundColor = '#86EFAC';
+                  badge.innerHTML = '✓';
+               }
+            }
+         }
+
+         // Allow clicking/tapping the big illustrated keycaps inside the Tutorial UI
+         ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].forEach((code) => {
+            const el = document.getElementById(`tut-${code}`);
+            if (!el) return;
+            const triggerDemo = (e) => {
+               e.preventDefault();
+               sound.init();
+               markTutorialKey(code);
+
+               if (code === 'KeyW') tutPlayer.y = Math.max(0.22, tutPlayer.y - 0.14);
+               if (code === 'KeyS') tutPlayer.y = Math.min(0.84, tutPlayer.y + 0.14);
+               if (code === 'KeyA') {
+                  tutPlayer.x = Math.max(0.2, tutPlayer.x - 0.14);
+                  tutPlayer.facing = -1;
+               }
+               if (code === 'KeyD') {
+                  tutPlayer.x = Math.min(0.8, tutPlayer.x + 0.14);
+                  tutPlayer.facing = 1;
+               }
+               if (code === 'Space') {
+                  tutPlayer.vz = 0.032;
+                  tutPlayer.scaleX = 0.8;
+                  tutPlayer.scaleY = 1.25;
+                  sound.playJump();
+                  tutBell.ringTimer = 1.0;
+                  spawnTutSparkles(tutPlayer.x, tutPlayer.y - 0.12, '#A855F7');
+               } else {
+                  sound.playStep();
+               }
+            };
+            el.addEventListener('click', triggerDemo);
+         });
+
+         function spawnTutSparkles(nx, ny, color) {
+            for (let i = 0; i < 8; i++) {
+               const angle = (Math.PI * 2 * i) / 8;
+               tutParticles.push({
+                  x: nx,
+                  y: ny,
+                  vx: Math.cos(angle) * 0.008,
+                  vy: Math.sin(angle) * 0.008,
+                  life: 1.0,
+                  color,
+               });
+            }
+         }
+
+         function updateAndDrawTutorialCanvas(dt) {
+            if (tutorialOverlay.classList.contains('hidden')) return;
+
+            const rect = tutorialCanvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            if (tutorialCanvas.width !== Math.floor(rect.width * dpr)) {
+               tutorialCanvas.width = Math.floor(rect.width * dpr);
+               tutorialCanvas.height = Math.floor(rect.height * dpr);
+            }
+
+            const w = tutorialCanvas.width;
+            const h = tutorialCanvas.height;
+            tutCtx.clearRect(0, 0, w, h);
+
+            // Update tutorial Pui-Mek movement from live keyboard input
+            const speed = 0.45 * dt;
+            if (inputState.up) tutPlayer.y = Math.max(0.22, tutPlayer.y - speed);
+            if (inputState.down) tutPlayer.y = Math.min(0.84, tutPlayer.y + speed);
+            if (inputState.left) {
+               tutPlayer.x = Math.max(0.2, tutPlayer.x - speed);
+               tutPlayer.facing = -1;
+            }
+            if (inputState.right) {
+               tutPlayer.x = Math.min(0.8, tutPlayer.x + speed);
+               tutPlayer.facing = 1;
+            }
+
+            // Jump physics in tutorial
+            if (tutPlayer.z > 0 || tutPlayer.vz !== 0) {
+               tutPlayer.z += tutPlayer.vz;
+               tutPlayer.vz -= 0.0022;
+               if (tutPlayer.z <= 0) {
+                  tutPlayer.z = 0;
+                  tutPlayer.vz = 0;
+                  tutPlayer.scaleX = 1.2;
+                  tutPlayer.scaleY = 0.82;
+               }
+            }
+            tutPlayer.scaleX += (1 - tutPlayer.scaleX) * 0.18;
+            tutPlayer.scaleY += (1 - tutPlayer.scaleY) * 0.18;
+
+            // Soft decorative grass meadow circles
+            tutCtx.fillStyle = '#D1FAE5';
+            tutCtx.beginPath();
+            tutCtx.arc(w * 0.5, h * 0.55, w * 0.38, 0, Math.PI * 2);
+            tutCtx.fill();
+
+            // Draw directional guide lines from center
+            tutCtx.strokeStyle = '#94A3B8';
+            tutCtx.lineWidth = 2 * dpr;
+            tutCtx.setLineDash([6 * dpr, 6 * dpr]);
+            tutCtx.beginPath();
+            tutCtx.moveTo(w * 0.5, h * 0.24);
+            tutCtx.lineTo(w * 0.5, h * 0.82);
+            tutCtx.moveTo(w * 0.22, h * 0.54);
+            tutCtx.lineTo(w * 0.78, h * 0.54);
+            tutCtx.stroke();
+            tutCtx.setLineDash([]);
+
+            // Draw 4 directional stars
+            const time = performance.now() * 0.004;
+            tutTargets.forEach((t) => {
+               const dist = Math.hypot(tutPlayer.x - t.x, tutPlayer.y - t.y);
+               if (dist < 0.13 && !t.collected) {
+                  t.collected = true;
+                  sound.playCollect();
+                  spawnTutSparkles(t.x, t.y, t.color);
+                  // Respawn star gently after 2 seconds so child can keep playing
+                  setTimeout(() => {
+                     t.collected = false;
+                  }, 2200);
+               }
+
+               const bob = Math.sin(time + t.bounce) * 4 * dpr;
+               const tx = t.x * w;
+               const ty = t.y * h + bob;
+
+               tutCtx.fillStyle = t.collected ? '#E2E8F0' : t.color;
+               tutCtx.strokeStyle = '#0F172A';
+               tutCtx.lineWidth = 2.5 * dpr;
+               tutCtx.beginPath();
+               tutCtx.arc(tx, ty, 16 * dpr, 0, Math.PI * 2);
+               tutCtx.fill();
+               tutCtx.stroke();
+
+               tutCtx.font = `bold ${15 * dpr}px Mali, sans-serif`;
+               tutCtx.textAlign = 'center';
+               tutCtx.textBaseline = 'middle';
+               tutCtx.fillStyle = '#0F172A';
+               tutCtx.fillText(t.collected ? '✓' : '★', tx, ty + 1 * dpr);
+            });
+
+            // Draw Spacebar Golden Bell above center
+            if (tutBell.ringTimer > 0) tutBell.ringTimer = Math.max(0, tutBell.ringTimer - dt * 1.8);
+            const bellAngle = Math.sin(tutBell.ringTimer * 25) * 0.35 * tutBell.ringTimer;
+            tutCtx.save();
+            tutCtx.translate(w * 0.5, h * 0.37);
+            tutCtx.rotate(bellAngle);
+            tutCtx.fillStyle = tutBell.ringTimer > 0 ? '#FDE047' : '#FEF08A';
+            tutCtx.strokeStyle = '#0F172A';
+            tutCtx.lineWidth = 2.5 * dpr;
+            tutCtx.beginPath();
+            tutCtx.arc(0, 0, 15 * dpr, 0, Math.PI * 2);
+            tutCtx.fill();
+            tutCtx.stroke();
+            tutCtx.font = `${16 * dpr}px sans-serif`;
+            tutCtx.textAlign = 'center';
+            tutCtx.textBaseline = 'middle';
+            tutCtx.fillText('🔔', 0, 1 * dpr);
+            tutCtx.restore();
+
+            // Draw Pui-Mek Character in Tutorial Arena
+            drawPuiMek(tutCtx, tutPlayer.x * w, (tutPlayer.y - tutPlayer.z) * h, 24 * dpr, tutPlayer.scaleX, tutPlayer.scaleY, tutPlayer.facing, false);
+
+            // Update & draw tutorial sparkles
+            for (let i = tutParticles.length - 1; i >= 0; i--) {
+               const p = tutParticles[i];
+               p.x += p.vx;
+               p.y += p.vy;
+               p.life -= dt * 1.8;
+               if (p.life <= 0) {
+                  tutParticles.splice(i, 1);
+                  continue;
+               }
+               tutCtx.globalAlpha = p.life;
+               tutCtx.fillStyle = p.color;
+               tutCtx.beginPath();
+               tutCtx.arc(p.x * w, p.y * h, 5 * dpr * p.life, 0, Math.PI * 2);
+               tutCtx.fill();
+               tutCtx.globalAlpha = 1;
+            }
+         }
+
+         /**
+          * ========================================================================
+          * 4. MAIN ADVENTURE GAME STATE & 5 DISTINCT NON-REPETITIVE STAGES
+          * ========================================================================
+          */
+         const canvas = document.getElementById('gameCanvas');
+         const ctx = canvas.getContext('2d');
+
+         const game = {
+            started: false,
+            currentStageIndex: 0,
+            stageScores: [0, 0, 0, 0, 0], // 30 pts from steps + 20 pts completion bonus = 50 pts per stage (250 max)
+            stageComplete: false,
+            idleTimer: 0,
+            hintLevel: 0, // 0 = None, 1 = Target Glow, 2 = Path + Ghost Demo, 3 = Direct Guide/Auto-Assist
+            ghostDemo: {
+               active: false,
+               x: 0.2,
+               y: 0.5,
+               targetX: 0.5,
+               targetY: 0.5,
+               progress: 0,
+            },
+            player: {
+               x: 0.18,
+               y: 0.55,
+               z: 0,
+               vz: 0,
+               radius: 28,
+               scaleX: 1,
+               scaleY: 1,
+               facing: 1,
+               carrying: null, // Object currently carried by Pui-Mek
+               happyTimer: 0,
+               stepSoundTimer: 0,
+            },
+            particles: [],
+            decorations: [],
+            stageData: null,
+         };
+
+         // 5 Distinct Learning Adventure Stages (Non-repetitive mechanics, visual-first)
+         const STAGES = [
+            {
+               id: 1,
+               name: 'สวนผลไม้ของพี่หมี',
+               voicePrompt: 'เก็บผลไม้ไปให้พี่หมีกันเถอะ',
+               bgTop: '#E0F2FE',
+               bgGround: '#ECFDF5',
+               friend: { emoji: '🐻', name: 'พี่หมี', x: 0.82, y: 0.52 },
+               // Step-by-step visual cards shown in HUD
+               steps: [
+                  { id: 'apple', icon: '🍎', label: 'แอปเปิ้ล', done: false },
+                  { id: 'banana', icon: '🍌', label: 'กล้วย', done: false },
+                  { id: 'grape', icon: '🍇', label: 'องุ่น', done: false },
+               ],
+               setup: () => ({
+                  type: 'fruit_harvest',
+                  items: [
+                     { id: 'apple', icon: '🍎', x: 0.36, y: 0.32, collected: false, delivered: false },
+                     { id: 'banana', icon: '🍌', x: 0.52, y: 0.72, collected: false, delivered: false },
+                     { id: 'grape', icon: '🍇', x: 0.66, y: 0.34, collected: false, delivered: false },
+                  ],
+               }),
+            },
+            {
+               id: 2,
+               name: 'สะพานใบบัวข้ามลำธาร',
+               voicePrompt: 'กระโดดข้ามใบบัว หนึ่ง สอง สาม ไปหาน้องกบ',
+               bgTop: '#DBEAFE',
+               bgGround: '#E0F2FE',
+               friend: { emoji: '🐸', name: 'น้องกบ', x: 0.84, y: 0.52 },
+               steps: [
+                  { id: 'pad1', icon: '1️⃣', label: 'ใบบัว 1', done: false },
+                  { id: 'pad2', icon: '2️⃣', label: 'ใบบัว 2', done: false },
+                  { id: 'pad3', icon: '3️⃣', label: 'ใบบัว 3', done: false },
+               ],
+               setup: () => ({
+                  type: 'lilypad_river',
+                  pads: [
+                     { id: 'pad1', num: '1', x: 0.35, y: 0.42, activated: false },
+                     { id: 'pad2', num: '2', x: 0.52, y: 0.62, activated: false },
+                     { id: 'pad3', num: '3', x: 0.69, y: 0.42, activated: false },
+                  ],
+               }),
+            },
+            {
+               id: 3,
+               name: 'ดอกไม้เสียงดนตรี',
+               voicePrompt: 'กระโดดบนดอกไม้ตามสี ชมพู ฟ้า เหลือง',
+               bgTop: '#FCE7F3',
+               bgGround: '#FFFBEB',
+               friend: { emoji: '🦉', name: 'คุณนกฮูก', x: 0.83, y: 0.3 },
+               steps: [
+                  { id: 'pink', icon: '🌸', label: 'ชมพู', done: false },
+                  { id: 'blue', icon: '💠', label: 'ฟ้า', done: false },
+                  { id: 'yellow', icon: '🌻', label: 'เหลือง', done: false },
+               ],
+               setup: () => ({
+                  type: 'musical_flowers',
+                  sequence: ['pink', 'blue', 'yellow'],
+                  currentIndex: 0,
+                  flowers: [
+                     { id: 'pink', icon: '🌸', color: '#F472B6', x: 0.38, y: 0.62, glow: 0 },
+                     { id: 'blue', icon: '💠', color: '#38BDF8', x: 0.54, y: 0.38, glow: 0 },
+                     { id: 'yellow', icon: '🌻', color: '#FACC15', x: 0.7, y: 0.62, glow: 0 },
+                  ],
+               }),
+            },
+            {
+               id: 4,
+               name: 'คริสตัลรูปทรงแสนสนุก',
+               voicePrompt: 'นำคริสตัลไปวางให้ตรงกับรูปทรง',
+               bgTop: '#F3E8FF',
+               bgGround: '#F0FDF4',
+               friend: { emoji: '🐰', name: 'น้องกระต่าย', x: 0.84, y: 0.5 },
+               steps: [
+                  { id: 'circle', icon: '🔴', label: 'วงกลม', done: false },
+                  { id: 'triangle', icon: '🔺', label: 'สามเหลี่ยม', done: false },
+                  { id: 'square', icon: '🟦', label: 'สี่เหลี่ยม', done: false },
+               ],
+               setup: () => ({
+                  type: 'shape_sorting',
+                  crystals: [
+                     { id: 'circle', shape: 'circle', color: '#FB7185', x: 0.32, y: 0.3, placed: false },
+                     { id: 'triangle', shape: 'triangle', color: '#FBBF24', x: 0.32, y: 0.54, placed: false },
+                     { id: 'square', shape: 'square', color: '#60A5FA', x: 0.32, y: 0.76, placed: false },
+                  ],
+                  pedestals: [
+                     { id: 'triangle', shape: 'triangle', x: 0.64, y: 0.32, filled: false },
+                     { id: 'square', shape: 'square', x: 0.64, y: 0.54, filled: false },
+                     { id: 'circle', shape: 'circle', x: 0.64, y: 0.76, filled: false },
+                  ],
+               }),
+            },
+            {
+               id: 5,
+               name: 'งานเลี้ยงโคมไฟดวงดาว',
+               voicePrompt: 'จุดโคมไฟให้สว่าง แล้วตีระฆังฉลองเลย!',
+               bgTop: '#FEF3C7',
+               bgGround: '#ECFDF5',
+               friend: { emoji: '🦊', name: 'เพื่อนๆ ทุกคน', x: 0.82, y: 0.5 },
+               steps: [
+                  { id: 'lamp1', icon: '🏮', label: 'โคม 1', done: false },
+                  { id: 'lamp2', icon: '🏮', label: 'โคม 2', done: false },
+                  { id: 'bell', icon: '🔔', label: 'ตีระฆัง', done: false },
+               ],
+               setup: () => ({
+                  type: 'star_festival',
+                  lanterns: [
+                     { id: 'lamp1', x: 0.4, y: 0.35, lit: false },
+                     { id: 'lamp2', x: 0.4, y: 0.7, lit: false },
+                  ],
+                  bell: { id: 'bell', x: 0.66, y: 0.52, rung: false, ringAnim: 0 },
+               }),
+            },
+         ];
+
+         /**
+          * ========================================================================
+          * 5. STAGE INITIALIZATION & VISUAL HUD RENDERING
+          * ========================================================================
+          */
+         function loadStage(index) {
+            game.currentStageIndex = index % STAGES.length;
+            const stageCfg = STAGES[game.currentStageIndex];
+
+            // Reset score for this stage (and reset all scores if starting a fresh run from Stage 1)
+            if (index === 0) {
+               game.stageScores = [0, 0, 0, 0, 0];
+            } else {
+               game.stageScores[game.currentStageIndex] = 0;
+            }
+
+            // Reset steps
+            stageCfg.steps.forEach((s) => {
+               s.done = false;
+            });
+
+            // Reset player position & state
+            game.player.x = 0.16;
+            game.player.y = 0.54;
+            game.player.z = 0;
+            game.player.vz = 0;
+            game.player.carrying = null;
+            game.player.happyTimer = 0;
+            game.stageComplete = false;
+            game.idleTimer = 0;
+            setHintLevel(0);
+
+            // Build stage entities
+            game.stageData = stageCfg.setup();
+
+            // Generate gentle background wildflowers
+            game.decorations = [];
+            const flowerEmojis = ['🌼', '🌷', '🍀', '🌱'];
+            for (let i = 0; i < 14; i++) {
+               game.decorations.push({
+                  x: 0.08 + Math.random() * 0.84,
+                  y: 0.24 + Math.random() * 0.64,
+                  icon: flowerEmojis[i % flowerEmojis.length],
+                  phase: Math.random() * Math.PI * 2,
+               });
+            }
+
+            // Hide celebration modal if open and refresh HUD/voice prompt
+            const celeb = document.getElementById('celebrationOverlay');
+            celeb.classList.add('hidden');
+            celeb.classList.remove('flex');
+
+            updateHudUI();
+            sound.speakThai(stageCfg.voicePrompt);
+         }
+
+         function getTotalScore() {
+            return game.stageScores.reduce((sum, val) => sum + val, 0);
+         }
+
+         function addStepPoints(points = 10) {
+            game.stageScores[game.currentStageIndex] = Math.min(50, game.stageScores[game.currentStageIndex] + points);
+         }
+
+         function updateHudUI() {
+            const stageCfg = STAGES[game.currentStageIndex];
+            document.getElementById('hudLevelNum').textContent = `${stageCfg.id}/${STAGES.length}`;
+            document.getElementById('hudScoreNum').textContent = `${getTotalScore()}`;
+
+            // Render Visual Step-by-Step Cards
+            const slotsContainer = document.getElementById('hudStepSlots');
+            slotsContainer.innerHTML = '';
+
+            stageCfg.steps.forEach((step, idx) => {
+               const isNext = !step.done && stageCfg.steps.findIndex((s) => !s.done) === idx;
+               const card = document.createElement('div');
+               card.className = `flex flex-col items-center justify-center rounded-2xl border-[2.5px] border-[#0F172A] px-2.5 py-1.5 min-w-[56px] sm:min-w-[66px] transition-all ${
+                  step.done ? 'bg-[#86EFAC] scale-95' : isNext ? 'bg-[#FEF08A] ring-4 ring-[#F59E0B]/50 scale-105' : 'bg-white opacity-80'
+               }`;
+               card.innerHTML = `
+          <span class="text-xl sm:text-2xl leading-none">${step.done ? '✅' : step.icon}</span>
+          <span class="text-[11px] font-bold text-[#0F172A] mt-1 leading-none">${step.label}</span>
+        `;
+               slotsContainer.appendChild(card);
+            });
+
+            // Render Visual Equation Pill at Bottom Center (Picture-based guidance)
+            const eqEl = document.getElementById('hudVisualEquation');
+            const nextStep = stageCfg.steps.find((s) => !s.done);
+            if (nextStep) {
+               eqEl.innerHTML = `
+          <span class="text-2xl">🐰</span>
+          <span class="font-bold text-lg text-[#0F172A]">➔</span>
+          <span class="text-2xl">${nextStep.icon}</span>
+          <span class="px-2.5 py-0.5 bg-[#DDD6FE] border-2 border-[#0F172A] rounded-full text-xs font-bold">กด SPACE</span>
+        `;
+            } else {
+               eqEl.innerHTML = `<span class="text-2xl">🎉</span><span class="font-bold text-base">สำเร็จแล้ว!</span>`;
+            }
+         }
+
+         /**
+          * ========================================================================
+          * 6. PROGRESSIVE SCAFFOLDING SYSTEM (ระบบช่วยเหลือแบบค่อยเป็นค่อยไป 3 ระดับ)
+          *    Level 1: Target pulses with golden ring
+          *    Level 2: Stepping-stone dotted path + Ghost Helper Spirit demonstrates
+          *    Level 3: Strong magnetic assist + automatic step completion nudge
+          * ========================================================================
+          */
+         function setHintLevel(level) {
+            game.hintLevel = Math.min(3, Math.max(0, level));
+
+            // Update 3 indicator dots on the Hint button
+            const dots = document.getElementById('hintLevelDots').children;
+            for (let i = 0; i < dots.length; i++) {
+               dots[i].style.backgroundColor = i < game.hintLevel ? '#0F172A' : '#FFFFFF';
+            }
+
+            if (game.hintLevel >= 2) {
+               startGhostDemonstration();
+            } else {
+               game.ghostDemo.active = false;
+            }
+         }
+
+         function getCurrentObjectiveTarget() {
+            const data = game.stageData;
+            if (!data) return null;
+
+            if (data.type === 'fruit_harvest') {
+               if (game.player.carrying) {
+                  const friend = STAGES[game.currentStageIndex].friend;
+                  return { x: friend.x, y: friend.y, action: 'deliver' };
+               }
+               const nextFruit = data.items.find((f) => !f.delivered);
+               return nextFruit ? { x: nextFruit.x, y: nextFruit.y, action: 'collect' } : null;
+            }
+
+            if (data.type === 'lilypad_river') {
+               const nextPad = data.pads.find((p) => !p.activated);
+               if (nextPad) return { x: nextPad.x, y: nextPad.y, action: 'jump' };
+               const friend = STAGES[game.currentStageIndex].friend;
+               return { x: friend.x, y: friend.y, action: 'finish' };
+            }
+
+            if (data.type === 'musical_flowers') {
+               const targetId = data.sequence[data.currentIndex];
+               const flower = data.flowers.find((f) => f.id === targetId);
+               return flower ? { x: flower.x, y: flower.y, action: 'jump' } : null;
+            }
+
+            if (data.type === 'shape_sorting') {
+               if (game.player.carrying) {
+                  const ped = data.pedestals.find((p) => p.id === game.player.carrying.id);
+                  return ped ? { x: ped.x, y: ped.y, action: 'place' } : null;
+               }
+               const nextCrystal = data.crystals.find((c) => !c.placed);
+               return nextCrystal ? { x: nextCrystal.x, y: nextCrystal.y, action: 'collect' } : null;
+            }
+
+            if (data.type === 'star_festival') {
+               const unlit = data.lanterns.find((l) => !l.lit);
+               if (unlit) return { x: unlit.x, y: unlit.y, action: 'jump' };
+               if (!data.bell.rung) return { x: data.bell.x, y: data.bell.y, action: 'jump' };
+            }
+
+            return null;
+         }
+
+         function startGhostDemonstration() {
+            const target = getCurrentObjectiveTarget();
+            if (!target) return;
+            game.ghostDemo.active = true;
+            game.ghostDemo.x = game.player.x;
+            game.ghostDemo.y = game.player.y;
+            game.ghostDemo.targetX = target.x;
+            game.ghostDemo.targetY = target.y;
+            game.ghostDemo.progress = 0;
+         }
+
+         // Manual Assist Buttons
+         document.getElementById('btnRepeat').addEventListener('click', () => {
+            sound.init();
+            sound.playHint();
+            const stageCfg = STAGES[game.currentStageIndex];
+            sound.speakThai(stageCfg.voicePrompt);
+            setHintLevel(Math.max(1, game.hintLevel));
+         });
+
+         document.getElementById('btnHint').addEventListener('click', () => {
+            sound.init();
+            sound.playHint();
+            const nextHint = game.hintLevel < 3 ? game.hintLevel + 1 : 2;
+            setHintLevel(nextHint);
+            if (nextHint === 2) {
+               sound.speakThai('ดูน้องภูตตัวอย่างเดินนำทางนะ');
+            } else if (nextHint === 3) {
+               sound.speakThai('เดินตามเส้นแสงสีทองได้เลย');
+            }
+         });
+
+         document.getElementById('btnOpenTutorial').addEventListener('click', () => {
+            sound.init();
+            tutorialOverlay.classList.remove('hidden');
+         });
+
+         document.getElementById('btnStartGame').addEventListener('click', () => {
+            sound.init();
+            sound.playCollect();
+            tutorialOverlay.classList.add('hidden');
+            document.getElementById('gameHud').classList.remove('hidden');
+            if (!game.started) {
+               game.started = true;
+               loadStage(0);
+            }
+         });
+
+         document.getElementById('btnReplayStage').addEventListener('click', () => {
+            sound.init();
+            loadStage(game.currentStageIndex);
+         });
+
+         document.getElementById('btnHome').addEventListener('click', () => {
+            sound.init();
+            sound.playStep();
+            // Reset game state and return to the Main / Interactive Tutorial Home Screen
+            game.started = false;
+            game.stageComplete = false;
+            game.currentStageIndex = 0;
+            game.stageScores = [0, 0, 0, 0, 0];
+            document.getElementById('celebrationOverlay').classList.add('hidden');
+            document.getElementById('celebrationOverlay').classList.remove('flex');
+            document.getElementById('gameHud').classList.add('hidden');
+            tutorialOverlay.classList.remove('hidden');
+         });
+
+         document.getElementById('btnNextStage').addEventListener('click', () => {
+            sound.init();
+            const isLast = game.currentStageIndex === STAGES.length - 1;
+            if (isLast) {
+               // Full restart from Stage 1 with reset score
+               loadStage(0);
+            } else {
+               loadStage(game.currentStageIndex + 1);
+            }
+         });
+
+         // Direct Canvas Tap/Click-to-Move & Interact (Crucial for children using tablets/mice)
+         canvas.addEventListener('pointerdown', (e) => {
+            if (!game.started || !tutorialOverlay.classList.contains('hidden') || game.stageComplete) return;
+            sound.init();
+            const rect = canvas.getBoundingClientRect();
+            const nx = (e.clientX - rect.left) / rect.width;
+            const ny = (e.clientY - rect.top) / rect.height;
+
+            // Clamp within playable meadow area
+            inputState.pointerTarget = {
+               x: Math.max(0.08, Math.min(0.92, nx)),
+               y: Math.max(0.22, Math.min(0.86, ny)),
+            };
+            game.idleTimer = 0;
+
+            // If child taps right on top of Pui-Mek, trigger Jump/Action!
+            if (Math.hypot(nx - game.player.x, ny - game.player.y) < 0.08) {
+               triggerJumpAction();
+            }
+         });
+
+         /**
+          * ========================================================================
+          * 7. PLAYER JUMP & INTERACTION MECHANICS (SPACEBAR / TAP)
+          * ========================================================================
+          */
+         function triggerJumpAction() {
+            if (!game.started || !tutorialOverlay.classList.contains('hidden') || game.stageComplete) return;
+
+            // Jump physics
+            if (game.player.z === 0) {
+               game.player.vz = 0.036;
+               game.player.scaleX = 0.78;
+               game.player.scaleY = 1.26;
+               sound.playJump();
+               spawnParticles(game.player.x, game.player.y + 0.03, '#FFFFFF', 6);
+            }
+
+            game.idleTimer = 0;
+            checkStageInteraction(true);
+         }
+
+         function checkStageInteraction(isExplicitAction = false) {
+            if (game.stageComplete || !game.stageData) return;
+
+            const p = game.player;
+            const data = game.stageData;
+            const stageCfg = STAGES[game.currentStageIndex];
+            // Larger forgiveness radius when hintLevel is active (Accessibility boost)
+            const reach = game.hintLevel >= 3 ? 0.14 : 0.095;
+
+            // --- STAGE 1: FRUIT HARVEST ---
+            if (data.type === 'fruit_harvest') {
+               if (!p.carrying) {
+                  for (const item of data.items) {
+                     if (!item.delivered && Math.hypot(p.x - item.x, p.y - item.y) < reach) {
+                        p.carrying = item;
+                        item.collected = true;
+                        sound.playCollect();
+                        sound.speakThai('เก็บได้แล้ว! เอาไปให้พี่หมีเลย');
+                        spawnParticles(item.x, item.y, '#FACC15', 10);
+                        setHintLevel(0);
+                        updateHudUI();
+                        break;
+                     }
+                  }
+               } else {
+                  const friend = stageCfg.friend;
+                  if (Math.hypot(p.x - friend.x, p.y - friend.y) < reach + 0.03) {
+                     p.carrying.delivered = true;
+                     const step = stageCfg.steps.find((s) => s.id === p.carrying.id);
+                     if (step && !step.done) {
+                        step.done = true;
+                        addStepPoints(10);
+                     }
+                     p.carrying = null;
+                     p.happyTimer = 1.0;
+                     sound.playCollect();
+                     sound.speakThai('เก่งมากเลย!');
+                     spawnParticles(friend.x, friend.y - 0.05, '#4ADE80', 14);
+                     setHintLevel(0);
+                     updateHudUI();
+
+                     if (stageCfg.steps.every((s) => s.done)) {
+                        completeCurrentStage();
+                     }
+                  }
+               }
+            }
+
+            // --- STAGE 2: RAINBOW LILYPAD RIVER (1 -> 2 -> 3) ---
+            if (data.type === 'lilypad_river') {
+               const nextPadIndex = data.pads.findIndex((pad) => !pad.activated);
+               if (nextPadIndex !== -1) {
+                  const targetPad = data.pads[nextPadIndex];
+                  if (Math.hypot(p.x - targetPad.x, p.y - targetPad.y) < reach) {
+                     targetPad.activated = true;
+                     if (!stageCfg.steps[nextPadIndex].done) {
+                        stageCfg.steps[nextPadIndex].done = true;
+                        addStepPoints(10);
+                     }
+                     p.happyTimer = 0.8;
+                     sound.playCollect();
+                     sound.speakThai(`เลข ${targetPad.num} เยี่ยมมาก!`);
+                     spawnParticles(targetPad.x, targetPad.y, '#38BDF8', 12);
+                     setHintLevel(0);
+                     updateHudUI();
+                  }
+               } else {
+                  // All 3 pads activated -> reach Frog Friend!
+                  const friend = stageCfg.friend;
+                  if (Math.hypot(p.x - friend.x, p.y - friend.y) < reach + 0.03) {
+                     completeCurrentStage();
+                  }
+               }
+            }
+
+            // --- STAGE 3: MUSICAL FLOWERS (Pink -> Blue -> Yellow) ---
+            if (data.type === 'musical_flowers' && isExplicitAction) {
+               const expectedId = data.sequence[data.currentIndex];
+               for (const flower of data.flowers) {
+                  if (Math.hypot(p.x - flower.x, p.y - flower.y) < reach) {
+                     flower.glow = 1.0;
+                     sound.playNoteByColor(flower.id);
+                     spawnParticles(flower.x, flower.y, flower.color, 10);
+
+                     if (flower.id === expectedId) {
+                        if (!stageCfg.steps[data.currentIndex].done) {
+                           stageCfg.steps[data.currentIndex].done = true;
+                           addStepPoints(10);
+                        }
+                        data.currentIndex++;
+                        p.happyTimer = 0.8;
+                        setHintLevel(0);
+                        updateHudUI();
+
+                        if (data.currentIndex >= data.sequence.length) {
+                           setTimeout(() => completeCurrentStage(), 450);
+                        }
+                     } else {
+                        // Gentle positive guidance without punishment!
+                        sound.speakThai('ลองดูสีที่ช่องด้านบนนะ');
+                        setHintLevel(Math.max(1, game.hintLevel));
+                     }
+                     break;
+                  }
+               }
+            }
+
+            // --- STAGE 4: CRYSTAL SHAPE SORTING ---
+            if (data.type === 'shape_sorting') {
+               if (!p.carrying) {
+                  for (const cr of data.crystals) {
+                     if (!cr.placed && Math.hypot(p.x - cr.x, p.y - cr.y) < reach) {
+                        p.carrying = cr;
+                        sound.playCollect();
+                        spawnParticles(cr.x, cr.y, cr.color, 10);
+                        setHintLevel(0);
+                        break;
+                     }
+                  }
+               } else {
+                  for (const ped of data.pedestals) {
+                     if (!ped.filled && ped.id === p.carrying.id && Math.hypot(p.x - ped.x, p.y - ped.y) < reach + 0.02) {
+                        ped.filled = true;
+                        p.carrying.placed = true;
+                        p.carrying.x = ped.x;
+                        p.carrying.y = ped.y;
+                        const step = stageCfg.steps.find((s) => s.id === ped.id);
+                        if (step && !step.done) {
+                           step.done = true;
+                           addStepPoints(10);
+                        }
+                        p.carrying = null;
+                        p.happyTimer = 0.9;
+                        sound.playCollect();
+                        sound.speakThai('วางได้ตรงเป๊ะเลย!');
+                        spawnParticles(ped.x, ped.y, '#A855F7', 14);
+                        setHintLevel(0);
+                        updateHudUI();
+
+                        if (stageCfg.steps.every((s) => s.done)) {
+                           completeCurrentStage();
+                        }
+                        break;
+                     }
+                  }
+               }
+            }
+
+            // --- STAGE 5: STARLIGHT FESTIVAL ---
+            if (data.type === 'star_festival' && isExplicitAction) {
+               for (const lamp of data.lanterns) {
+                  if (!lamp.lit && Math.hypot(p.x - lamp.x, p.y - lamp.y) < reach) {
+                     lamp.lit = true;
+                     const step = stageCfg.steps.find((s) => s.id === lamp.id);
+                     if (step && !step.done) {
+                        step.done = true;
+                        addStepPoints(10);
+                     }
+                     sound.playCollect();
+                     sound.speakThai('โคมไฟสว่างแล้ว!');
+                     spawnParticles(lamp.x, lamp.y, '#FACC15', 14);
+                     setHintLevel(0);
+                     updateHudUI();
+                  }
+               }
+
+               const allLit = data.lanterns.every((l) => l.lit);
+               if (allLit && !data.bell.rung && Math.hypot(p.x - data.bell.x, p.y - data.bell.y) < reach + 0.02) {
+                  data.bell.rung = true;
+                  data.bell.ringAnim = 1.0;
+                  if (!stageCfg.steps[2].done) {
+                     stageCfg.steps[2].done = true;
+                     addStepPoints(10);
+                  }
+                  updateHudUI();
+                  setTimeout(() => completeCurrentStage(), 450);
+               }
+            }
+         }
+
+         function completeCurrentStage() {
+            if (game.stageComplete) return;
+            game.stageComplete = true;
+            sound.playVictory();
+
+            // Award +20 stage clear bonus (30 step pts + 20 bonus = 50 pts per stage)
+            addStepPoints(20);
+            updateHudUI();
+
+            const totalScore = getTotalScore();
+            const maxScore = STAGES.length * 50;
+            const stageCfg = STAGES[game.currentStageIndex];
+            const isLast = game.currentStageIndex === STAGES.length - 1;
+
+            const btnReplay = document.getElementById('btnReplayStage');
+            const btnHome = document.getElementById('btnHome');
+            const btnNextText = document.getElementById('btnNextStageText');
+            const btnNextIcon = document.getElementById('btnNextStageIcon');
+
+            document.getElementById('celebScoreLabel').textContent = isLast ? 'คะแนนรวมทั้งหมด' : 'คะแนนสะสมตอนนี้';
+            document.getElementById('celebScoreValue').textContent = `${totalScore} / ${maxScore} คะแนน`;
+
+            if (isLast) {
+               document.getElementById('celebTitle').textContent = 'ยอดเยี่ยมที่สุดเลย!';
+               document.getElementById('celebSubtitle').textContent = 'หนูผ่านครบทุกด่านแล้ว!';
+               document.getElementById('celebFriendBadge').textContent = '🐻 🐸 🦉 🐰 🦊';
+
+               // On Final Stage: Offer clear "เริ่มใหม่" (Restart) or "กลับหน้าหลัก" (Home) choices
+               btnReplay.classList.add('hidden');
+               btnHome.classList.remove('hidden');
+               btnHome.classList.add('flex');
+               btnNextText.textContent = 'เริ่มใหม่';
+               btnNextIcon.innerHTML = '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>';
+
+               sound.speakThai(`ยินดีด้วย! หนูได้ ${totalScore} คะแนน เลือกเริ่มใหม่ หรือกลับหน้าหลักได้เลยนะ`);
+            } else {
+               document.getElementById('celebTitle').textContent = 'เก่งมากเลย!';
+               document.getElementById('celebSubtitle').textContent = `ผ่าน${stageCfg.name}แล้ว`;
+               document.getElementById('celebFriendBadge').textContent = stageCfg.friend.emoji;
+
+               btnReplay.classList.remove('hidden');
+               btnHome.classList.add('hidden');
+               btnHome.classList.remove('flex');
+               btnNextText.textContent = 'ด่านต่อไป';
+               btnNextIcon.innerHTML = '<path d="M5 12h14M13 5l7 7-7 7"/>';
+
+               sound.speakThai('เก่งมากเลย! ไปด่านต่อไปกันเถอะ');
+            }
+
+            const overlay = document.getElementById('celebrationOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+         }
+
+         /**
+          * ========================================================================
+          * 8. PARTICLE & CUTE CHARACTER RENDERERS (CANVAS 2D VECTOR ART)
+          * ========================================================================
+          */
+         function spawnParticles(nx, ny, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+               const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+               const speed = 0.003 + Math.random() * 0.005;
+               game.particles.push({
+                  x: nx,
+                  y: ny,
+                  vx: Math.cos(angle) * speed,
+                  vy: Math.sin(angle) * speed - 0.002,
+                  life: 1.0,
+                  size: 5 + Math.random() * 5,
+                  color,
+               });
+            }
+         }
+
+         /**
+          * Draws our main adorable mascot "น้องปุยเมฆ" (Pui-Mek)
+          * Supports squash-and-stretch, floppy ears, carrying items, and translucent Ghost Mode
+          */
+         function drawPuiMek(c, cx, cy, r, sx, sy, facing, isGhost = false, happy = false) {
+            c.save();
+            c.translate(cx, cy);
+
+            if (isGhost) {
+               c.globalAlpha = 0.55;
+            }
+
+            // Soft ground shadow
+            c.fillStyle = 'rgba(15, 23, 42, 0.14)';
+            c.beginPath();
+            c.ellipse(0, r * 0.95, r * 0.85, r * 0.28, 0, 0, Math.PI * 2);
+            c.fill();
+
+            c.scale(sx, sy);
+
+            // Floppy Bunny-Cloud Ears
+            const earTilt = facing * 0.15;
+            [-0.42, 0.42].forEach((offsetX) => {
+               c.save();
+               c.translate(r * offsetX, -r * 0.78);
+               c.rotate(earTilt);
+               c.fillStyle = isGhost ? '#E0F2FE' : '#FFFFFF';
+               c.strokeStyle = '#0F172A';
+               c.lineWidth = Math.max(2.5, r * 0.1);
+               c.beginPath();
+               c.ellipse(0, -r * 0.35, r * 0.24, r * 0.52, 0, 0, Math.PI * 2);
+               c.fill();
+               c.stroke();
+
+               // Inner pastel pink ear
+               c.fillStyle = '#FBCFE8';
+               c.beginPath();
+               c.ellipse(0, -r * 0.35, r * 0.11, r * 0.32, 0, 0, Math.PI * 2);
+               c.fill();
+               c.restore();
+            });
+
+            // Fluffy Round Body
+            c.fillStyle = isGhost ? '#BAE6FD' : '#FFFFFF';
+            c.strokeStyle = '#0F172A';
+            c.lineWidth = Math.max(2.8, r * 0.11);
+            c.beginPath();
+            c.arc(0, 0, r, 0, Math.PI * 2);
+            c.fill();
+            c.stroke();
+
+            // Cute Little Feet
+            c.fillStyle = '#FDE68A';
+            c.beginPath();
+            c.ellipse(-r * 0.38, r * 0.88, r * 0.26, r * 0.16, 0, 0, Math.PI * 2);
+            c.ellipse(r * 0.38, r * 0.88, r * 0.26, r * 0.16, 0, 0, Math.PI * 2);
+            c.fill();
+            c.stroke();
+
+            // Face shifted slightly toward movement direction
+            const faceX = facing * r * 0.12;
+
+            // Rosy Cheeks
+            c.fillStyle = '#FDA4AF';
+            c.beginPath();
+            c.ellipse(faceX - r * 0.46, r * 0.14, r * 0.16, r * 0.1, 0, 0, Math.PI * 2);
+            c.ellipse(faceX + r * 0.46, r * 0.14, r * 0.16, r * 0.1, 0, 0, Math.PI * 2);
+            c.fill();
+
+            // Eyes (Happy ^ ^ arcs when celebrating, big shiny dots normally)
+            c.strokeStyle = '#0F172A';
+            c.fillStyle = '#0F172A';
+            c.lineWidth = Math.max(2.5, r * 0.09);
+            c.lineCap = 'round';
+
+            if (happy) {
+               c.beginPath();
+               c.arc(faceX - r * 0.28, -r * 0.05, r * 0.13, Math.PI, 0);
+               c.stroke();
+               c.beginPath();
+               c.arc(faceX + r * 0.28, -r * 0.05, r * 0.13, Math.PI, 0);
+               c.stroke();
+            } else {
+               c.beginPath();
+               c.arc(faceX - r * 0.28, -r * 0.06, r * 0.11, 0, Math.PI * 2);
+               c.arc(faceX + r * 0.28, -r * 0.06, r * 0.11, 0, Math.PI * 2);
+               c.fill();
+
+               // Eye sparkles
+               c.fillStyle = '#FFFFFF';
+               c.beginPath();
+               c.arc(faceX - r * 0.25, -r * 0.09, r * 0.04, 0, Math.PI * 2);
+               c.arc(faceX + r * 0.31, -r * 0.09, r * 0.04, 0, Math.PI * 2);
+               c.fill();
+            }
+
+            // Cute Smile
+            c.beginPath();
+            c.arc(faceX, r * 0.12, r * 0.16, 0.15 * Math.PI, 0.85 * Math.PI);
+            c.stroke();
+
+            c.restore();
+         }
+
+         function drawGeometricShape(c, shape, x, y, size, fillColor, isOutlineOnly = false) {
+            c.save();
+            c.translate(x, y);
+            c.lineWidth = 3.5;
+            c.strokeStyle = '#0F172A';
+            c.fillStyle = fillColor;
+
+            if (isOutlineOnly) {
+               c.setLineDash([6, 5]);
+               c.fillStyle = 'rgba(255, 255, 255, 0.65)';
+            }
+
+            c.beginPath();
+            if (shape === 'circle') {
+               c.arc(0, 0, size, 0, Math.PI * 2);
+            } else if (shape === 'square') {
+               c.rect(-size * 0.88, -size * 0.88, size * 1.76, size * 1.76);
+            } else if (shape === 'triangle') {
+               c.moveTo(0, -size * 1.05);
+               c.lineTo(size * 0.98, size * 0.82);
+               c.lineTo(-size * 0.98, size * 0.82);
+               c.closePath();
+            }
+            c.fill();
+            c.stroke();
+            c.restore();
+         }
+
+         /**
+          * ========================================================================
+          * 9. MAIN SIMULATION & RENDER LOOP (60 FPS RESPONSIVE CANVAS)
+          * ========================================================================
+          */
+         let lastTime = performance.now();
+
+         function updateGame(dt) {
+            if (!game.started || !tutorialOverlay.classList.contains('hidden') || game.stageComplete) return;
+
+            const p = game.player;
+            let moveX = 0;
+            let moveY = 0;
+
+            if (inputState.left) moveX -= 1;
+            if (inputState.right) moveX += 1;
+            if (inputState.up) moveY -= 1;
+            if (inputState.down) moveY += 1;
+
+            // Handle Tap/Click-to-Walk smooth movement
+            if (moveX === 0 && moveY === 0 && inputState.pointerTarget) {
+               const dx = inputState.pointerTarget.x - p.x;
+               const dy = inputState.pointerTarget.y - p.y;
+               const dist = Math.hypot(dx, dy);
+               if (dist > 0.015) {
+                  moveX = dx / dist;
+                  moveY = dy / dist;
+               } else {
+                  inputState.pointerTarget = null;
+                  checkStageInteraction(true);
+               }
+            }
+
+            // Normalize diagonal movement
+            const mag = Math.hypot(moveX, moveY);
+            if (mag > 0) {
+               moveX /= mag;
+               moveY /= mag;
+
+               const baseSpeed = 0.28;
+               p.x = Math.max(0.07, Math.min(0.93, p.x + moveX * baseSpeed * dt));
+               p.y = Math.max(0.22, Math.min(0.88, p.y + moveY * baseSpeed * dt));
+
+               if (moveX < -0.1) p.facing = -1;
+               if (moveX > 0.1) p.facing = 1;
+
+               // Gentle walking bounce & soft step audio
+               p.scaleY = 1 + Math.sin(performance.now() * 0.02) * 0.06;
+               p.stepSoundTimer -= dt;
+               if (p.stepSoundTimer <= 0 && p.z === 0) {
+                  sound.playStep();
+                  p.stepSoundTimer = 0.28;
+               }
+
+               game.idleTimer = 0;
+               checkStageInteraction(false);
+            } else {
+               p.scaleY += (1 - p.scaleY) * 0.15;
+               // Automatic Progressive Scaffolding if child pauses/thinks for a while
+               game.idleTimer += dt;
+               if (game.idleTimer > 5 && game.hintLevel === 0) {
+                  setHintLevel(1);
+               } else if (game.idleTimer > 11 && game.hintLevel === 1) {
+                  setHintLevel(2);
+                  sound.playHint();
+               }
+            }
+
+            // Jump Physics
+            if (p.z > 0 || p.vz !== 0) {
+               p.z += p.vz;
+               p.vz -= 0.0022;
+               if (p.z <= 0) {
+                  p.z = 0;
+                  p.vz = 0;
+                  p.scaleX = 1.22;
+                  p.scaleY = 0.8;
+               }
+            }
+            p.scaleX += (1 - p.scaleX) * 0.16;
+
+            if (p.happyTimer > 0) p.happyTimer = Math.max(0, p.happyTimer - dt);
+
+            // Update Ghost Helper Spirit animation (Hint Level >= 2)
+            if (game.ghostDemo.active) {
+               const target = getCurrentObjectiveTarget();
+               if (target) {
+                  game.ghostDemo.targetX = target.x;
+                  game.ghostDemo.targetY = target.y;
+                  game.ghostDemo.progress += dt * 0.55;
+                  if (game.ghostDemo.progress > 1.25) {
+                     game.ghostDemo.progress = 0;
+                  }
+                  const t = Math.min(1, game.ghostDemo.progress);
+                  game.ghostDemo.x = p.x + (target.x - p.x) * t;
+                  game.ghostDemo.y = p.y + (target.y - p.y) * t;
+               }
+            }
+
+            // Update particles
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+               const pt = game.particles[i];
+               pt.x += pt.vx;
+               pt.y += pt.vy;
+               pt.life -= dt * 1.4;
+               if (pt.life <= 0) game.particles.splice(i, 1);
+            }
+         }
+
+         function renderGame() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+               canvas.width = Math.floor(rect.width * dpr);
+               canvas.height = Math.floor(rect.height * dpr);
+            }
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const stageCfg = STAGES[game.currentStageIndex];
+
+            // 1. Sky & Meadow Background
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+            skyGrad.addColorStop(0, stageCfg.bgTop);
+            skyGrad.addColorStop(0.28, stageCfg.bgGround);
+            skyGrad.addColorStop(1, '#FFFDF7');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Soft rolling hills in background
+            ctx.fillStyle = 'rgba(167, 243, 208, 0.35)';
+            ctx.beginPath();
+            ctx.ellipse(w * 0.25, h * 0.22, w * 0.35, h * 0.12, 0, 0, Math.PI * 2);
+            ctx.ellipse(w * 0.78, h * 0.24, w * 0.38, h * 0.13, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Gentle wildflowers
+            const now = performance.now() * 0.002;
+            ctx.font = `${20 * dpr}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            game.decorations.forEach((dec) => {
+               const sway = Math.sin(now + dec.phase) * 3 * dpr;
+               ctx.fillText(dec.icon, dec.x * w + sway, dec.y * h);
+            });
+
+            if (!game.stageData) return;
+
+            // 2. Render Stage-Specific World Elements
+            const data = game.stageData;
+
+            // Stage 2 River Water Stream
+            if (data.type === 'lilypad_river') {
+               ctx.fillStyle = '#7DD3FC';
+               ctx.strokeStyle = '#0284C7';
+               ctx.lineWidth = 4 * dpr;
+               ctx.beginPath();
+               ctx.roundRect(w * 0.26, h * 0.22, w * 0.5, h * 0.64, 32 * dpr);
+               ctx.fill();
+               ctx.stroke();
+
+               // Draw Lilypads
+               data.pads.forEach((pad) => {
+                  const px = pad.x * w;
+                  const py = pad.y * h;
+                  ctx.fillStyle = pad.activated ? '#4ADE80' : '#BBF7D0';
+                  ctx.strokeStyle = '#0F172A';
+                  ctx.lineWidth = 3.5 * dpr;
+                  ctx.beginPath();
+                  ctx.arc(px, py, 34 * dpr, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+
+                  ctx.fillStyle = '#0F172A';
+                  ctx.font = `bold ${24 * dpr}px Mali, sans-serif`;
+                  ctx.fillText(pad.activated ? '★' : pad.num, px, py + 2 * dpr);
+               });
+            }
+
+            // Stage 1 Fruits
+            if (data.type === 'fruit_harvest') {
+               data.items.forEach((item) => {
+                  if (item.delivered || item === game.player.carrying) return;
+                  const bob = Math.sin(now * 2 + item.x * 10) * 5 * dpr;
+                  drawItemPedestal(ctx, item.x * w, item.y * h, 30 * dpr, '#FEF9C3');
+                  ctx.font = `${34 * dpr}px sans-serif`;
+                  ctx.fillText(item.icon, item.x * w, item.y * h + bob);
+               });
+            }
+
+            // Stage 3 Musical Flowers
+            if (data.type === 'musical_flowers') {
+               data.flowers.forEach((fl) => {
+                  if (fl.glow > 0) fl.glow = Math.max(0, fl.glow - 0.03);
+                  const radius = (34 + fl.glow * 10) * dpr;
+                  drawItemPedestal(ctx, fl.x * w, fl.y * h, radius, fl.glow > 0 ? fl.color : '#FFFFFF');
+                  ctx.font = `${36 * dpr}px sans-serif`;
+                  ctx.fillText(fl.icon, fl.x * w, fl.y * h);
+               });
+            }
+
+            // Stage 4 Shape Sorting Pedestals & Crystals
+            if (data.type === 'shape_sorting') {
+               data.pedestals.forEach((ped) => {
+                  drawGeometricShape(ctx, ped.shape, ped.x * w, ped.y * h, 28 * dpr, '#FFFFFF', !ped.filled);
+               });
+               data.crystals.forEach((cr) => {
+                  if (cr === game.player.carrying) return;
+                  drawGeometricShape(ctx, cr.shape, cr.x * w, cr.y * h, 26 * dpr, cr.color, false);
+               });
+            }
+
+            // Stage 5 Starlight Lanterns & Celebration Bell
+            if (data.type === 'star_festival') {
+               data.lanterns.forEach((lamp) => {
+                  const lx = lamp.x * w;
+                  const ly = lamp.y * h;
+                  if (lamp.lit) {
+                     ctx.fillStyle = 'rgba(250, 204, 21, 0.35)';
+                     ctx.beginPath();
+                     ctx.arc(lx, ly, 48 * dpr, 0, Math.PI * 2);
+                     ctx.fill();
+                  }
+                  drawItemPedestal(ctx, lx, ly, 32 * dpr, lamp.lit ? '#FEF08A' : '#E2E8F0');
+                  ctx.font = `${36 * dpr}px sans-serif`;
+                  ctx.fillText(lamp.lit ? '🏮' : '🕯️', lx, ly);
+               });
+
+               const bell = data.bell;
+               drawItemPedestal(ctx, bell.x * w, bell.y * h, 36 * dpr, bell.rung ? '#FDE047' : '#F3E8FF');
+               ctx.font = `${40 * dpr}px sans-serif`;
+               ctx.fillText('🔔', bell.x * w, bell.y * h);
+            }
+
+            // 3. Draw Animal Friend Waiting at Goal
+            const friend = stageCfg.friend;
+            const fx = friend.x * w;
+            const fy = friend.y * h;
+            const friendBob = Math.sin(now * 1.8) * 4 * dpr;
+
+            ctx.fillStyle = '#FFFDF7';
+            ctx.strokeStyle = '#0F172A';
+            ctx.lineWidth = 3.5 * dpr;
+            ctx.beginPath();
+            ctx.arc(fx, fy, 38 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.font = `${42 * dpr}px sans-serif`;
+            ctx.fillText(friend.emoji, fx, fy + friendBob);
+
+            // 4. Progressive Scaffolding Visuals (Hint Levels 1, 2, 3)
+            const target = getCurrentObjectiveTarget();
+            if (target && game.hintLevel >= 1) {
+               const tx = target.x * w;
+               const ty = target.y * h;
+               const pulseRadius = (42 + Math.sin(now * 4) * 10) * dpr;
+
+               // Level 1+: Expanding golden spotlight ring on target
+               ctx.strokeStyle = '#F59E0B';
+               ctx.lineWidth = 4 * dpr;
+               ctx.beginPath();
+               ctx.arc(tx, ty, pulseRadius, 0, Math.PI * 2);
+               ctx.stroke();
+
+               // Level 2+: Dotted golden path + Ghost Helper Spirit
+               if (game.hintLevel >= 2) {
+                  ctx.strokeStyle = '#D97706';
+                  ctx.lineWidth = 4 * dpr;
+                  ctx.setLineDash([10 * dpr, 10 * dpr]);
+                  ctx.beginPath();
+                  ctx.moveTo(game.player.x * w, game.player.y * h);
+                  ctx.lineTo(tx, ty);
+                  ctx.stroke();
+                  ctx.setLineDash([]);
+
+                  if (game.ghostDemo.active) {
+                     drawPuiMek(ctx, game.ghostDemo.x * w, game.ghostDemo.y * h - 10 * dpr, 22 * dpr, 1, 1, game.ghostDemo.targetX >= game.ghostDemo.x ? 1 : -1, true, true);
+                  }
+               }
+            }
+
+            // Tap-to-walk destination ring indicator
+            if (inputState.pointerTarget) {
+               ctx.strokeStyle = '#0284C7';
+               ctx.lineWidth = 3 * dpr;
+               ctx.beginPath();
+               ctx.arc(inputState.pointerTarget.x * w, inputState.pointerTarget.y * h, 16 * dpr, 0, Math.PI * 2);
+               ctx.stroke();
+            }
+
+            // 5. Draw Main Character "น้องปุยเมฆ" (Pui-Mek)
+            const p = game.player;
+            const px = p.x * w;
+            const py = (p.y - p.z) * h;
+            drawPuiMek(ctx, px, py, 28 * dpr, p.scaleX, p.scaleY, p.facing, false, p.happyTimer > 0);
+
+            // Draw Carried Item floating cutely above Pui-Mek's head
+            if (p.carrying) {
+               const carryY = py - 52 * dpr;
+               if (p.carrying.icon) {
+                  ctx.font = `${32 * dpr}px sans-serif`;
+                  ctx.fillText(p.carrying.icon, px, carryY);
+               } else if (p.carrying.shape) {
+                  drawGeometricShape(ctx, p.carrying.shape, px, carryY, 18 * dpr, p.carrying.color, false);
+               }
+            }
+
+            // 6. Draw Celebration Sparkle Particles
+            game.particles.forEach((pt) => {
+               ctx.globalAlpha = Math.max(0, pt.life);
+               ctx.fillStyle = pt.color;
+               ctx.strokeStyle = '#0F172A';
+               ctx.lineWidth = 1.5 * dpr;
+               ctx.beginPath();
+               ctx.arc(pt.x * w, pt.y * h, pt.size * dpr, 0, Math.PI * 2);
+               ctx.fill();
+               ctx.stroke();
+               ctx.globalAlpha = 1;
+            });
+         }
+
+         function drawItemPedestal(c, x, y, r, fill) {
+            c.fillStyle = fill;
+            c.strokeStyle = '#0F172A';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.arc(x, y, r, 0, Math.PI * 2);
+            c.fill();
+            c.stroke();
+         }
+
+         function mainLoop(now) {
+            const dt = Math.min(0.05, (now - lastTime) / 1000);
+            lastTime = now;
+
+            updateAndDrawTutorialCanvas(dt);
+            updateGame(dt);
+            renderGame();
+
+            requestAnimationFrame(mainLoop);
+         }
+
+         // Start the loop once the DOM is ready. Waiting for window 'load' left the
+         // canvas frozen whenever a CDN asset was slow or blocked.
+         let gameBooted = false;
+
+         function bootGame() {
+            if (gameBooted) return;
+            gameBooted = true;
+            requestAnimationFrame(mainLoop);
+         }
+
+         if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootGame, { once: true });
+         } else {
+            bootGame();
+         }
+      </script>
+   </body>
+</html>

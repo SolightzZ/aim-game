@@ -1,0 +1,1975 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>ร้านขายของ ทอนเงินแสนสนุก — Kawaii Pastel Cashier</title>
+      <!-- Tailwind CSS -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <!-- Distinctive Typography: Fredoka (Chunky Numbers/Headings) + Mitr (Friendly Rounded Thai) -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Mitr:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+      <script>
+         tailwind.config = {
+            theme: {
+               extend: {
+                  fontFamily: {
+                     sans: ['Mitr', 'Fredoka', 'sans-serif'],
+                     display: ['Fredoka', 'Mitr', 'sans-serif'],
+                  },
+                  colors: {
+                     cocoa: '#4A323A',
+                     'cocoa-light': '#7D5E68',
+                     cream: '#FFF9F2',
+                     'cream-dark': '#F5E6D8',
+                     strawberry: '#FF7096',
+                     'strawberry-deep': '#D93B68',
+                     'strawberry-soft': '#FFE5EC',
+                     mint: '#38C98A',
+                     'mint-deep': '#158A58',
+                     'mint-soft': '#E3FCEF',
+                     sky: '#4DA8FF',
+                     'sky-deep': '#1E6EC4',
+                     'sky-soft': '#E6F4FF',
+                     butter: '#FFD147',
+                     'butter-deep': '#C98A00',
+                     'butter-soft': '#FFF6D6',
+                  },
+               },
+            },
+         };
+      </script>
+
+      <style>
+         :root {
+            --font-scale: 1;
+         }
+
+         body.large-text {
+            --font-scale: 1.12;
+         }
+
+         * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+         }
+
+         html,
+         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Mitr', 'Fredoka', sans-serif;
+            font-size: calc(16px * var(--font-scale));
+            color: #4a323a;
+            background-color: #dff2ff;
+            overflow: hidden;
+         }
+
+         button {
+            cursor: pointer;
+            transition:
+               transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+               filter 0.15s ease,
+               box-shadow 0.12s ease;
+         }
+
+         button:focus-visible {
+            outline: 4px solid #ff9f1c;
+            outline-offset: 2px;
+         }
+
+         button:active:not(:disabled) {
+            transform: translateY(3px) scale(0.98);
+         }
+
+         /* Tactile 3D Button Shadows */
+         .btn-tactile-cream {
+            box-shadow: 0 4px 0 #e2cbb8, 0 6px 14px rgba(74, 50, 58, 0.1);
+         }
+         .btn-tactile-cream:active:not(:disabled) {
+            box-shadow: 0 1px 0 #e2cbb8;
+         }
+
+         .btn-tactile-pink {
+            box-shadow: 0 5px 0 #b82952, 0 8px 18px rgba(217, 59, 104, 0.28);
+         }
+         .btn-tactile-pink:active:not(:disabled) {
+            box-shadow: 0 2px 0 #b82952;
+         }
+
+         /* Signature "ทอนเงิน" Cash Register Button */
+         .btn-give-change {
+            background: linear-gradient(180deg, #52e3a4 0%, #24b878 65%, #199c63 100%);
+            border: 3.5px solid #4a323a;
+            box-shadow:
+               inset 0 4px 0 rgba(255, 255, 255, 0.45),
+               0 6px 0 #4a323a,
+               0 10px 20px rgba(25, 156, 99, 0.28);
+            position: relative;
+            overflow: hidden;
+         }
+         .btn-give-change::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 10%;
+            right: 10%;
+            height: 28%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
+         }
+         .btn-give-change:hover {
+            filter: brightness(1.04);
+            transform: translateY(-2px);
+         }
+         .btn-give-change:active {
+            transform: translateY(4px);
+            box-shadow:
+               inset 0 2px 0 rgba(255, 255, 255, 0.3),
+               0 2px 0 #4a323a;
+         }
+
+         /* Lively Scenery & Character Animations */
+         @keyframes cloudFloat {
+            0%,
+            100% {
+               transform: translateX(0px);
+            }
+            50% {
+               transform: translateX(18px);
+            }
+         }
+         .cloud-drift-slow {
+            animation: cloudFloat 9s ease-in-out infinite;
+         }
+         .cloud-drift-fast {
+            animation: cloudFloat 6.5s ease-in-out infinite reverse;
+         }
+
+         @keyframes mascotBob {
+            0%,
+            100% {
+               transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+               transform: translateY(-4px) rotate(1.5deg);
+            }
+         }
+         .mascot-idle {
+            animation: mascotBob 2.8s ease-in-out infinite;
+            transform-origin: bottom center;
+         }
+
+         @keyframes happyJump {
+            0% {
+               transform: translateY(0) scale(1);
+            }
+            100% {
+               transform: translateY(-14px) scale(1.04);
+            }
+         }
+         .happy-jump {
+            animation: happyJump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate;
+         }
+
+         @keyframes dropIn {
+            0% {
+               transform: scale(0.5) translateY(-14px);
+               opacity: 0;
+            }
+            100% {
+               transform: scale(1) translateY(0);
+               opacity: 1;
+            }
+         }
+         .chip-drop {
+            animation: dropIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         @keyframes bubblePop {
+            0% {
+               transform: scale(0.92);
+            }
+            55% {
+               transform: scale(1.05);
+            }
+            100% {
+               transform: scale(1);
+            }
+         }
+         .bubble-pop {
+            animation: bubblePop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         body.reduced-motion .cloud-drift-slow,
+         body.reduced-motion .cloud-drift-fast,
+         body.reduced-motion .mascot-idle,
+         body.reduced-motion .happy-jump,
+         body.reduced-motion .bubble-pop {
+            animation: none !important;
+         }
+
+         .customer-wrapper {
+            transition:
+               transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+               opacity 0.32s ease;
+         }
+         .customer-wrapper.entering {
+            transform: translateX(-140px);
+            opacity: 0;
+         }
+         .customer-wrapper.leaving {
+            transform: translateX(180px);
+            opacity: 0;
+         }
+
+         /* Toggle Switch */
+         .toggle-switch {
+            min-width: 60px;
+            height: 34px;
+            border-radius: 999px;
+            background: #e2d3c5;
+            position: relative;
+            border: 2.5px solid #4a323a;
+            transition: background 0.2s;
+            shrink: 0;
+         }
+         .toggle-switch.on {
+            background: #38c98a;
+         }
+         .toggle-switch::after {
+            content: '';
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #4a323a;
+            position: absolute;
+            top: 2.5px;
+            left: 3px;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+         .toggle-switch.on::after {
+            transform: translateX(25px);
+         }
+
+         /* Cozy Shop Counter Stripes & Wooden Till Textures */
+         .shop-counter-body {
+            background-color: #ffe8ef;
+            background-image: repeating-linear-gradient(
+               90deg,
+               #ffe8ef 0px,
+               #ffe8ef 36px,
+               #ffd6e3 36px,
+               #ffd6e3 72px
+            );
+         }
+
+         .wood-counter-ledge {
+            background: linear-gradient(180deg, #f9d2a7 0%, #eab680 100%);
+         }
+
+         .cash-till-casing {
+            background: linear-gradient(180deg, #e8b888 0%, #d69e68 100%);
+         }
+
+         /* Compact Drawer Scaling for Small Mobile Screens */
+         @media (max-width: 480px) {
+            .drawer-note-btn svg {
+               width: 88px;
+               height: 44px;
+            }
+            .drawer-coin-btn svg {
+               width: 44px;
+               height: 44px;
+            }
+         }
+      </style>
+   </head>
+
+   <body class="bg-sky-soft text-cocoa">
+      <div id="app" class="relative w-screen h-[100dvh] flex flex-col overflow-hidden bg-[#FFF6EC]">
+         <!-- Confetti Particle Layer -->
+         <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-40"></canvas>
+
+         <!-- Cozy Full-Bleed Pastel Shop Interior, Window & Display Shelves SVG -->
+         <svg class="absolute top-0 left-0 w-full h-[68%] z-0 pointer-events-none" viewBox="0 0 1440 440" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <defs>
+               <pattern id="wallStripes" width="48" height="48" patternUnits="userSpaceOnUse">
+                  <rect width="24" height="48" fill="#FFF9F0" />
+                  <rect x="24" width="24" height="48" fill="#FFF1E0" />
+               </pattern>
+            </defs>
+
+            <!-- Warm Striped Shop Wallpaper -->
+            <rect x="0" y="0" width="1440" height="440" fill="url(#wallStripes)" />
+
+            <!-- Honey-Wood Wainscoting Lower Shop Wall -->
+            <rect x="0" y="295" width="1440" height="145" fill="#F2C89B" stroke="#4A323A" stroke-width="4" />
+            <g stroke="#D9A36C" stroke-width="2.5">
+               <line x1="120" y1="297" x2="120" y2="440" />
+               <line x1="240" y1="297" x2="240" y2="440" />
+               <line x1="360" y1="297" x2="360" y2="440" />
+               <line x1="480" y1="297" x2="480" y2="440" />
+               <line x1="600" y1="297" x2="600" y2="440" />
+               <line x1="720" y1="297" x2="720" y2="440" />
+               <line x1="840" y1="297" x2="840" y2="440" />
+               <line x1="960" y1="297" x2="960" y2="440" />
+               <line x1="1080" y1="297" x2="1080" y2="440" />
+               <line x1="1200" y1="297" x2="1200" y2="440" />
+               <line x1="1320" y1="297" x2="1320" y2="440" />
+            </g>
+
+            <!-- Large Center Shopfront Picture Window (View to Pastel Town Outside) -->
+            <g transform="translate(410, 74)">
+               <rect x="0" y="0" width="620" height="218" rx="26" fill="#D6EEFF" />
+               <path d="M0 165 Q160 120 320 160 T620 148 L620 218 L0 218 Z" fill="#BCECD0" />
+               <g class="cloud-drift-slow" fill="#FFFFFF">
+                  <circle cx="95" cy="54" r="18" />
+                  <circle cx="118" cy="46" r="24" />
+                  <circle cx="144" cy="55" r="16" />
+               </g>
+               <g class="cloud-drift-fast" fill="#FFFFFF">
+                  <circle cx="485" cy="48" r="16" />
+                  <circle cx="508" cy="40" r="22" />
+                  <circle cx="532" cy="50" r="15" />
+               </g>
+               <rect x="44" y="102" width="84" height="90" rx="10" fill="#FFE6EE" stroke="#E5A9BC" stroke-width="3" />
+               <path d="M38 104 L134 104 L140 120 L32 120 Z" fill="#FF8FA3" />
+               <rect x="492" y="96" width="88" height="96" rx="10" fill="#E6F4FF" stroke="#9CC9F0" stroke-width="3" />
+               <path d="M486 98 L586 98 L592 114 L480 114 Z" fill="#7CC0FF" />
+
+               <rect x="0" y="0" width="620" height="218" rx="26" fill="none" stroke="#4A323A" stroke-width="5" />
+               <line x1="206" y1="0" x2="206" y2="218" stroke="#4A323A" stroke-width="4" />
+               <line x1="414" y1="0" x2="414" y2="218" stroke="#4A323A" stroke-width="4" />
+               <rect x="-14" y="210" width="648" height="16" rx="8" fill="#E8B88A" stroke="#4A323A" stroke-width="3.5" />
+
+               <!-- Hanging Shop Signboard in Center Window -->
+               <g transform="translate(226, 16)">
+                  <line x1="36" y1="-16" x2="36" y2="10" stroke="#4A323A" stroke-width="3" />
+                  <line x1="132" y1="-16" x2="132" y2="10" stroke="#4A323A" stroke-width="3" />
+                  <rect x="0" y="6" width="168" height="44" rx="14" fill="#FFFDF9" stroke="#4A323A" stroke-width="3.5" />
+                  <rect x="6" y="11" width="156" height="34" rx="10" fill="#FFE5EC" />
+                  <text x="84" y="34" text-anchor="middle" font-family="Mitr, sans-serif" font-weight="700" font-size="16" fill="#D93B68">ร้านน้องปังปอนด์</text>
+               </g>
+            </g>
+
+            <!-- Left Bakery Display Shelves -->
+            <g transform="translate(56, 98)">
+               <rect x="0" y="54" width="300" height="14" rx="7" fill="#E8B88A" stroke="#4A323A" stroke-width="3.5" />
+               <rect x="34" y="46" width="44" height="8" rx="4" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.5" />
+               <rect x="26" y="22" width="60" height="24" rx="6" fill="#FFB3C6" stroke="#4A323A" stroke-width="2.8" />
+               <path d="M26 30 Q41 37 56 30 Q71 37 86 30" fill="none" stroke="#FFFDF9" stroke-width="3" />
+               <circle cx="56" cy="16" r="6" fill="#FF4D6D" stroke="#4A323A" stroke-width="2.2" />
+
+               <rect x="114" y="14" width="36" height="40" rx="10" fill="#E3FCEF" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="120" y="7" width="24" height="8" rx="4" fill="#38C98A" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="127" cy="34" r="5" fill="#F4A261" />
+               <circle cx="138" cy="40" r="5" fill="#F4A261" />
+
+               <rect x="164" y="18" width="36" height="36" rx="10" fill="#FFF6D6" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="170" y="11" width="24" height="8" rx="4" fill="#FFD147" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="177" cy="36" r="4.5" fill="#FF7096" />
+               <circle cx="188" cy="34" r="4.5" fill="#4DA8FF" />
+
+               <polygon points="228,32 258,32 252,54 234,54" fill="#F4A261" stroke="#4A323A" stroke-width="2.8" />
+               <path d="M243 32 Q230 14 222 22 Q232 30 243 32 Z" fill="#38C98A" stroke="#4A323A" stroke-width="2.4" />
+               <path d="M243 32 Q256 12 264 20 Q254 30 243 32 Z" fill="#38C98A" stroke="#4A323A" stroke-width="2.4" />
+
+               <rect x="0" y="146" width="300" height="14" rx="7" fill="#E8B88A" stroke="#4A323A" stroke-width="3.5" />
+               <path d="M24 124 L88 124 L80 146 L32 146 Z" fill="#D99B66" stroke="#4A323A" stroke-width="2.8" />
+               <ellipse cx="44" cy="120" rx="14" ry="10" fill="#F6BD60" stroke="#4A323A" stroke-width="2.5" />
+               <ellipse cx="68" cy="120" rx="14" ry="10" fill="#F6BD60" stroke="#4A323A" stroke-width="2.5" />
+               <rect x="114" y="108" width="28" height="38" rx="4" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.6" />
+               <rect x="114" y="120" width="28" height="12" fill="#9DD4FF" />
+               <rect x="152" y="108" width="28" height="38" rx="4" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.6" />
+               <rect x="152" y="120" width="28" height="12" fill="#FFB3C6" />
+               <polygon points="206,130 232,130 228,146 210,146" fill="#9DD4FF" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="219" cy="124" r="12" fill="#FF8FA3" stroke="#4A323A" stroke-width="2.4" />
+               <polygon points="246,130 272,130 268,146 250,146" fill="#FFD147" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="259" cy="124" r="12" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.4" />
+            </g>
+
+            <!-- Right Shop Shelves & Wall Clock -->
+            <g transform="translate(1084, 98)">
+               <rect x="0" y="54" width="300" height="14" rx="7" fill="#E8B88A" stroke="#4A323A" stroke-width="3.5" />
+               <circle cx="54" cy="24" r="24" fill="#FFFDF9" stroke="#4A323A" stroke-width="3.2" />
+               <circle cx="54" cy="24" r="18" fill="#FFF6D6" />
+               <path d="M54 12 L54 24 L63 24" stroke="#4A323A" stroke-width="3" stroke-linecap="round" />
+
+               <rect x="104" y="16" width="42" height="38" rx="7" fill="#FFB3C6" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="121" y="16" width="8" height="38" fill="#FFD147" />
+               <rect x="162" y="22" width="38" height="32" rx="7" fill="#9DD4FF" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="177" y="22" width="8" height="32" fill="#FFFDF9" />
+               <circle cx="242" cy="36" r="16" fill="#E0A97B" stroke="#4A323A" stroke-width="2.8" />
+               <circle cx="230" cy="23" r="6" fill="#D49A6A" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="254" cy="23" r="6" fill="#D49A6A" stroke="#4A323A" stroke-width="2.4" />
+
+               <rect x="0" y="146" width="300" height="14" rx="7" fill="#E8B88A" stroke="#4A323A" stroke-width="3.5" />
+               <rect x="28" y="108" width="34" height="38" rx="8" fill="#9CE8C2" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="74" y="108" width="34" height="38" rx="8" fill="#FFB3C6" stroke="#4A323A" stroke-width="2.8" />
+               <rect x="120" y="108" width="34" height="38" rx="8" fill="#FFD147" stroke="#4A323A" stroke-width="2.8" />
+               <path d="M184 124 L264 124 L254 146 L194 146 Z" fill="#D99B66" stroke="#4A323A" stroke-width="2.8" />
+               <circle cx="206" cy="118" r="11" fill="#FF5964" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="226" cy="116" r="11" fill="#FF5964" stroke="#4A323A" stroke-width="2.4" />
+               <circle cx="244" cy="119" r="11" fill="#38C98A" stroke="#4A323A" stroke-width="2.4" />
+            </g>
+
+            <!-- Top Ceiling Scalloped Awning & Hanging Pendant Lamps -->
+            <g>
+               <line x1="340" y1="24" x2="340" y2="72" stroke="#4A323A" stroke-width="3.5" />
+               <path d="M316 92 C316 72 364 72 364 92 Z" fill="#FFD147" stroke="#4A323A" stroke-width="3.2" />
+               <circle cx="340" cy="94" r="7" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.4" />
+
+               <line x1="1100" y1="24" x2="1100" y2="72" stroke="#4A323A" stroke-width="3.5" />
+               <path d="M1076 92 C1076 72 1124 72 1124 92 Z" fill="#FFD147" stroke="#4A323A" stroke-width="3.2" />
+               <circle cx="1100" cy="94" r="7" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.4" />
+
+               <rect x="-10" y="-8" width="1460" height="36" fill="#FF8FA3" stroke="#4A323A" stroke-width="4" />
+               <g fill="#FFFDF9">
+                  <rect x="60" y="0" width="60" height="26" />
+                  <rect x="180" y="0" width="60" height="26" />
+                  <rect x="300" y="0" width="60" height="26" />
+                  <rect x="420" y="0" width="60" height="26" />
+                  <rect x="540" y="0" width="60" height="26" />
+                  <rect x="660" y="0" width="60" height="26" />
+                  <rect x="780" y="0" width="60" height="26" />
+                  <rect x="900" y="0" width="60" height="26" />
+                  <rect x="1020" y="0" width="60" height="26" />
+                  <rect x="1140" y="0" width="60" height="26" />
+                  <rect x="1260" y="0" width="60" height="26" />
+                  <rect x="1380" y="0" width="60" height="26" />
+               </g>
+               <line x1="0" y1="28" x2="1440" y2="28" stroke="#4A323A" stroke-width="4" />
+            </g>
+         </svg>
+
+         <!-- Top Floating HUD -->
+         <header class="relative z-20 flex flex-wrap lg:flex-nowrap items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-5 pt-2 pb-1 shrink-0">
+            <!-- Left Floating Controls: Home + Star Score -->
+            <div class="flex items-center gap-1.5 sm:gap-2 order-1">
+               <button id="btnHome" title="หน้าหลัก" aria-label="หน้าหลัก" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cream border-[3px] border-cocoa text-cocoa flex items-center justify-center btn-tactile-cream">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
+                  </svg>
+               </button>
+
+               <div aria-live="polite" class="h-10 sm:h-11 px-3 sm:px-3.5 rounded-2xl bg-butter border-[3px] border-cocoa flex items-center gap-1.5 shadow-[0_4px_0_#4A323A]">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true">
+                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <span id="scoreDisplay" class="font-display font-bold text-base sm:text-lg text-cocoa">0</span>
+               </div>
+            </div>
+
+            <!-- Center Floating Order Tickets -->
+            <div aria-label="ใบเสร็จรายการสินค้า" class="w-full lg:w-auto lg:flex-1 max-w-[660px] grid grid-cols-3 gap-1.5 sm:gap-2 order-3 lg:order-2">
+               <!-- Ticket 1: Product Price -->
+               <div class="bg-cream border-[3px] border-cocoa rounded-2xl px-2 sm:px-3.5 py-1 sm:py-1.5 shadow-[0_4px_0_#4A323A] flex flex-col justify-between">
+                  <div class="flex items-center justify-between gap-1 text-[11px] font-bold text-cocoa-light">
+                     <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-strawberry inline-block"></span>
+                        <span>ราคา</span>
+                     </span>
+                     <span id="customerQueueText" class="px-1.5 py-0.5 rounded-full bg-strawberry-soft border border-strawberry text-strawberry-deep font-display text-[10px] sm:text-[11px]">1/8</span>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-1 mt-0.5">
+                     <span id="itemNameText" class="font-semibold text-xs sm:text-sm text-cocoa truncate">ไอศกรีม</span>
+                     <span id="itemPriceText" class="font-display font-bold text-sm sm:text-xl text-strawberry-deep shrink-0">15 ฿</span>
+                  </div>
+               </div>
+
+               <!-- Ticket 2: Customer Paid -->
+               <div class="bg-cream border-[3px] border-cocoa rounded-2xl px-2 sm:px-3.5 py-1 sm:py-1.5 shadow-[0_4px_0_#4A323A] flex flex-col justify-between">
+                  <div class="flex items-center justify-between gap-1 text-[11px] font-bold text-cocoa-light">
+                     <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-sky inline-block"></span>
+                        <span>รับมา</span>
+                     </span>
+                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E6EC4" stroke-width="2.4" aria-hidden="true">
+                        <rect x="2" y="6" width="20" height="12" rx="2" />
+                        <circle cx="12" cy="12" r="2.5" />
+                     </svg>
+                  </div>
+                  <div class="flex items-baseline justify-end mt-0.5">
+                     <span id="paidAmountText" class="font-display font-bold text-sm sm:text-xl text-sky-deep">20 ฿</span>
+                  </div>
+               </div>
+
+               <!-- Ticket 3: Change to Return -->
+               <div class="bg-cream border-[3px] border-cocoa rounded-2xl px-2 sm:px-3.5 py-1 sm:py-1.5 shadow-[0_4px_0_#4A323A] flex flex-col justify-between">
+                  <div class="flex items-center justify-between gap-1 text-[11px] font-bold text-cocoa-light">
+                     <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-mint inline-block"></span>
+                        <span>ทอน</span>
+                     </span>
+                     <span class="px-1.5 py-0.5 rounded-full bg-mint-soft border border-mint text-mint-deep font-display text-[10px] sm:text-[11px]">➔ <b id="targetStopText">20</b></span>
+                  </div>
+                  <div class="flex items-baseline justify-end mt-0.5">
+                     <span id="targetChangeText" class="font-display font-bold text-sm sm:text-xl text-mint-deep">? ฿</span>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Right Floating Controls: Audio Repeat + Tutorial + Settings -->
+            <div class="flex items-center gap-1.5 sm:gap-2 order-2 lg:order-3">
+               <button id="btnSpeakPrompt" title="ฟังเสียงโจทย์" aria-label="ฟังเสียงโจทย์" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cream border-[3px] border-cocoa text-cocoa flex items-center justify-center btn-tactile-cream">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+               </button>
+
+               <button id="btnTutorial" title="วิธีเล่น" aria-label="วิธีเล่น" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cream border-[3px] border-cocoa font-display font-bold text-lg sm:text-xl text-strawberry-deep flex items-center justify-center btn-tactile-cream">?</button>
+
+               <button id="btnSettings" title="ตั้งค่า" aria-label="ตั้งค่า" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cream border-[3px] border-cocoa text-cocoa flex items-center justify-center btn-tactile-cream">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <circle cx="12" cy="12" r="3" />
+                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  </svg>
+               </button>
+            </div>
+         </header>
+
+         <!-- Center Stage: Signature Shopkeeper Mascot + Customer + Cashier Counter -->
+         <main class="relative z-10 flex-1 flex flex-col justify-between overflow-hidden min-h-0">
+            <!-- Characters Zone -->
+            <div class="relative flex-1 flex items-end justify-center px-2.5 sm:px-6 min-h-0">
+               <div class="w-full max-w-[1020px] flex items-end justify-between sm:justify-center gap-3 sm:gap-8">
+                  <!-- Main Game Mascot: น้องปังปอนด์ + Cute Pastel Cash Register on Counter -->
+                  <div class="hidden md:flex items-end gap-2 shrink-0" id="shopkeeperMascotZone" title="น้องปังปอนด์ แคชเชียร์ประจำร้าน">
+                     <div id="shopkeeperAvatar" class="mascot-idle"></div>
+                     <!-- Cute Mini Pastel Cash Register Prop -->
+                     <svg width="76" height="72" viewBox="0 0 84 78" class="mb-0.5 shrink-0" aria-hidden="true">
+                        <rect x="38" y="4" width="34" height="20" rx="5" fill="#FFFDF9" stroke="#4A323A" stroke-width="3" />
+                        <rect x="43" y="8" width="24" height="12" rx="3" fill="#E3FCEF" />
+                        <text x="55" y="18" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="10" fill="#158A58">OPEN</text>
+                        <rect x="51" y="24" width="8" height="8" fill="#E8B88A" stroke="#4A323A" stroke-width="2.5" />
+                        <path d="M10 46 L20 30 L68 30 L76 46 L76 62 L10 62 Z" fill="#FFB3C6" stroke="#4A323A" stroke-width="3.2" stroke-linejoin="round" />
+                        <rect x="22" y="36" width="8" height="6" rx="2" fill="#FFFDF9" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="34" y="36" width="8" height="6" rx="2" fill="#FFFDF9" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="46" y="36" width="8" height="6" rx="2" fill="#FFD147" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="20" y="46" width="8" height="6" rx="2" fill="#FFFDF9" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="32" y="46" width="8" height="6" rx="2" fill="#FFFDF9" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="44" y="46" width="12" height="6" rx="2" fill="#38C98A" stroke="#4A323A" stroke-width="1.8" />
+                        <rect x="6" y="60" width="72" height="14" rx="5" fill="#E8B88A" stroke="#4A323A" stroke-width="3.2" />
+                        <circle cx="42" cy="67" r="3.5" fill="#FFD147" stroke="#4A323A" stroke-width="2" />
+                     </svg>
+                  </div>
+
+                  <!-- Customer & Icon-First Speech Bubble -->
+                  <div id="customerWrapper" class="customer-wrapper flex items-center gap-2 sm:gap-4 mx-auto md:mx-0">
+                     <div id="customerAvatarContainer" class="shrink-0 w-[68px] h-[78px] sm:w-[96px] sm:h-[108px] flex items-end justify-center" aria-hidden="true"></div>
+
+                     <!-- Compact Visual Speech Bubble -->
+                     <div id="speechBubble" role="status" aria-live="polite" class="relative bg-cream border-[3px] border-cocoa rounded-3xl px-3 sm:px-4 py-1.5 sm:py-2.5 shadow-[0_5px_0_#4A323A] flex flex-col gap-1 max-w-[270px] sm:max-w-[340px]">
+                        <div class="hidden sm:block absolute -left-3 top-1/2 -translate-y-1/2 w-0 h-0 border-y-[9px] border-y-transparent border-r-[12px] border-r-cocoa"></div>
+                        <div id="bubbleVisualContent" class="flex items-center gap-2 sm:gap-2.5 font-semibold text-sm sm:text-lg text-cocoa">
+                           <!-- Populated dynamically -->
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Warm Wooden Cashier Countertop & Pastel Striped Shop Front -->
+            <div class="relative z-20 w-full shop-counter-body flex flex-col items-center shrink-0">
+               <!-- Thick Honey-Oak Wooden Counter Slab -->
+               <div class="w-full h-2.5 sm:h-3.5 wood-counter-ledge border-t-[4px] border-b-[3.5px] border-cocoa"></div>
+
+               <div class="w-full max-w-[1040px] pt-2 pb-2 px-2.5 sm:px-6 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <div class="w-full grid grid-cols-[74px_1fr_74px] sm:grid-cols-[124px_1fr_124px] items-center gap-1.5 sm:gap-3.5">
+                     <!-- Left Slot: Shop Product Plate -->
+                     <div class="bg-cream border-[3px] border-cocoa rounded-2xl p-1 sm:p-1.5 flex flex-col items-center justify-center min-h-[72px] sm:min-h-[86px] shadow-[0_4px_0_#4A323A] relative">
+                        <span class="absolute -top-2.5 px-2 py-0.5 rounded-full bg-strawberry text-white font-sans font-bold text-[10px] border-2 border-cocoa leading-none">สินค้า</span>
+                        <div id="productSvgSlot" class="mt-1"></div>
+                        <span id="slotProductLabel" class="mt-0.5 px-2 py-0.5 rounded-full bg-strawberry-soft text-strawberry-deep font-display font-bold text-xs sm:text-sm leading-none">35 ฿</span>
+                     </div>
+
+                     <!-- Center Slot: Cashier Counting-On Mat -->
+                     <div class="bg-cream border-[3.5px] border-cocoa rounded-2xl px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[76px] sm:min-h-[92px] flex flex-col items-center justify-between shadow-[0_4px_0_#4A323A,inset_0_3px_0_#F2E2D4]">
+                        <div class="flex items-center justify-center gap-2">
+                           <span class="px-2 sm:px-2.5 py-0.5 rounded-full bg-strawberry-soft border border-strawberry text-strawberry-deep text-[11px] sm:text-xs font-bold">ถาดนับทอน</span>
+                           <span id="countingValueDisplay" class="font-display font-bold text-xl sm:text-3xl text-strawberry-deep transition-transform duration-150">35 ฿</span>
+                        </div>
+
+                        <div id="trayItemsArea" class="w-full min-h-[34px] sm:min-h-[42px] flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 pt-0.5">
+                           <!-- Placed coins/notes interactive chips -->
+                        </div>
+                     </div>
+
+                     <!-- Right Slot: Customer Payment Dish -->
+                     <div class="bg-cream border-[3px] border-cocoa rounded-2xl p-1 sm:p-1.5 flex flex-col items-center justify-center min-h-[72px] sm:min-h-[86px] shadow-[0_4px_0_#4A323A] relative">
+                        <span class="absolute -top-2.5 px-2 py-0.5 rounded-full bg-sky text-white font-sans font-bold text-[10px] border-2 border-cocoa leading-none">เงินลูกค้า</span>
+                        <div id="paidMoneySvgSlot" class="mt-1"></div>
+                        <span id="slotPaidLabel" class="mt-0.5 px-2 py-0.5 rounded-full bg-sky-soft text-sky-deep font-display font-bold text-xs sm:text-sm leading-none">50 ฿</span>
+                     </div>
+                  </div>
+
+                  <!-- Visual Number Line + Compact Undo & Clear Buttons -->
+                  <div class="w-full bg-cream border-[3px] border-cocoa rounded-2xl px-2 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2.5 shadow-[0_4px_0_#4A323A]">
+                     <div class="flex items-center gap-1 shrink-0">
+                        <button id="btnUndo" disabled title="คืนชิ้นล่าสุด (Backspace)" aria-label="คืนชิ้นล่าสุด" class="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-strawberry-soft border-2 border-cocoa text-strawberry-deep font-bold text-xs sm:text-sm inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M9 14L4 9l5-5" />
+                              <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+                           </svg>
+                           <span class="hidden sm:inline">คืน</span>
+                        </button>
+
+                        <button id="btnClearTray" disabled title="ล้างถาดทั้งหมด" aria-label="ล้างถาดทั้งหมด" class="hidden h-9 sm:h-10 px-2.5 rounded-xl bg-cream-dark border-2 border-cocoa text-cocoa font-bold text-xs sm:text-sm items-center gap-1 disabled:opacity-40">
+                           <span>ล้าง</span>
+                        </button>
+                     </div>
+
+                     <div class="flex-1 flex flex-col gap-0.5 sm:gap-1">
+                        <div class="flex items-center justify-between text-xs sm:text-sm font-display font-bold">
+                           <span id="nlStartLabel" class="text-strawberry-deep">35 ฿</span>
+                           <span id="nlMidLabel" class="px-2 py-0.5 rounded-full bg-butter-soft border border-butter-deep text-cocoa text-[11px] sm:text-xs font-sans font-semibold leading-none">+ 15 ฿</span>
+                           <span id="nlEndLabel" class="text-sky-deep">50 ฿</span>
+                        </div>
+                        <div id="nlProgressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="h-3 sm:h-3.5 bg-cream-dark rounded-full overflow-hidden border-2 border-cocoa p-0.5">
+                           <div id="nlFill" class="h-full w-0 rounded-full bg-gradient-to-r from-strawberry to-mint transition-all duration-200"></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </main>
+
+         <!-- Bottom Open Wooden Cash Register Till -->
+         <footer class="relative z-20 w-full cash-till-casing border-t-[4px] border-cocoa px-2.5 sm:px-6 py-2 sm:py-3 flex justify-center shrink-0">
+            <div class="w-full max-w-[1040px] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-4 items-center">
+               <!-- Recessed Cash Register Tray (Banknotes + Coins Compartments) -->
+               <div class="bg-[#FFF5EA] border-[3px] border-cocoa rounded-2xl sm:rounded-3xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-[inset_0_4px_0_#E6CEB5] flex flex-col gap-1.5 sm:gap-2">
+                  <div id="banknotesRow" class="flex items-center justify-center gap-2 sm:gap-4 flex-wrap"></div>
+                  <div class="w-full h-[2px] bg-[#E6CEB5] rounded-full"></div>
+                  <div id="coinsRow" class="flex items-center justify-center gap-2.5 sm:gap-5 flex-wrap"></div>
+               </div>
+
+               <!-- Signature "ทอนเงิน" Register Button -->
+               <button id="btnConfirmChange" aria-label="ทอนเงิน" class="btn-give-change rounded-2xl sm:rounded-3xl px-4 sm:px-5 py-2 sm:py-3 sm:min-w-[138px] md:min-w-[148px] sm:min-h-[118px] flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1.5 text-white shrink-0">
+                  <svg width="36" height="36" viewBox="0 0 56 56" class="sm:w-[42px] sm:h-[42px] shrink-0 drop-shadow-[0_2px_0_#4A323A] pointer-events-none" aria-hidden="true">
+                     <path d="M12 10 L13.5 14.5 L18 16 L13.5 17.5 L12 22 L10.5 17.5 L6 16 L10.5 14.5 Z" fill="#FFF6D6" />
+                     <circle cx="44" cy="12" r="2.5" fill="#FFF6D6" />
+                     <circle cx="29" cy="20" r="13" fill="#FFD147" stroke="#4A323A" stroke-width="3" />
+                     <circle cx="29" cy="20" r="8.5" fill="#FFE680" stroke="#C98A00" stroke-width="1.5" />
+                     <text x="29" y="25" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="14" fill="#4A323A">฿</text>
+                     <path d="M12 38 C16 34 24 34 31 36 L42 33 C45 32 47 35 45 38 L35 45 C29 48 21 48 14 45 L10 43 Z" fill="#FFFDF9" stroke="#4A323A" stroke-width="3" stroke-linejoin="round" />
+                  </svg>
+                  <span class="font-sans font-bold text-xl sm:text-2xl md:text-[26px] tracking-wide drop-shadow-[0_2px_0_#4A323A]">ทอนเงิน</span>
+               </button>
+            </div>
+         </footer>
+
+         <!-- Start / Level Select Modal -->
+         <div id="startModal" role="dialog" aria-modal="true" aria-labelledby="startModalTitle" class="fixed inset-0 z-50 bg-[#4A323A]/55 flex items-center justify-center p-4">
+            <div class="bg-cream border-[4px] border-cocoa rounded-[30px] max-w-[620px] w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-[0_12px_0_#4A323A] text-center">
+               <div class="flex justify-center mb-1" id="welcomeMascot"></div>
+               <div class="inline-block px-3.5 py-1 rounded-full bg-butter-soft border-2 border-cocoa text-xs font-bold text-cocoa mb-1">ร้านค้าพาสเทลของน้องปังปอนด์</div>
+               <h1 id="startModalTitle" class="font-sans font-bold text-2xl sm:text-3xl text-strawberry-deep mb-4">ร้านขายของ ทอนเงินแสนสนุก</h1>
+
+               <!-- Visual Level Cards -->
+               <div id="levelSelectGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
+                  <button data-level="0" class="level-card-btn bg-white border-[3px] border-cocoa rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-[0_4px_0_#4A323A]">
+                     <div class="w-11 h-11 rounded-2xl bg-strawberry-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-xl text-strawberry-deep">1</div>
+                     <strong class="text-base text-cocoa">ร้านชานม</strong>
+                     <span class="px-2.5 py-0.5 rounded-full bg-mint-soft text-mint-deep font-display font-bold text-xs">ลงท้าย 0, 5</span>
+                     <span id="bestLvl0" class="level-best text-xs font-semibold text-cocoa-light mt-0.5">★ 0</span>
+                  </button>
+
+                  <button data-level="1" class="level-card-btn bg-white border-[3px] border-cocoa rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-[0_4px_0_#4A323A]">
+                     <div class="w-11 h-11 rounded-2xl bg-sky-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-xl text-sky-deep">2</div>
+                     <strong class="text-base text-cocoa">เบเกอรี่</strong>
+                     <span class="px-2.5 py-0.5 rounded-full bg-sky-soft text-sky-deep font-display font-bold text-xs">เลข 1 - 9</span>
+                     <span id="bestLvl1" class="level-best text-xs font-semibold text-cocoa-light mt-0.5">★ 0</span>
+                  </button>
+
+                  <button data-level="2" class="level-card-btn bg-white border-[3px] border-cocoa rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-[0_4px_0_#4A323A]">
+                     <div class="w-11 h-11 rounded-2xl bg-butter-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-xl text-butter-deep">3</div>
+                     <strong class="text-base text-cocoa">ซูเปอร์มาร์เก็ต</strong>
+                     <span class="px-2.5 py-0.5 rounded-full bg-butter-soft text-butter-deep font-display font-bold text-xs">ทอนแบงก์ 100</span>
+                     <span id="bestLvl2" class="level-best text-xs font-semibold text-cocoa-light mt-0.5">★ 0</span>
+                  </button>
+               </div>
+
+               <div class="flex items-center justify-center gap-3 flex-wrap mt-5">
+                  <button id="btnStartGame" class="px-8 py-3.5 rounded-2xl bg-strawberry border-[3px] border-cocoa text-white font-bold text-xl btn-tactile-pink inline-flex items-center gap-2">
+                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="6 4 20 12 6 20 6 4" />
+                     </svg>
+                     <span>เปิดร้าน!</span>
+                  </button>
+
+                  <button id="btnOpenTutFromStart" class="px-5 py-3.5 rounded-2xl bg-white border-[3px] border-cocoa text-cocoa font-bold text-base btn-tactile-cream inline-flex items-center gap-1.5">
+                     <span class="w-6 h-6 rounded-full bg-butter border-2 border-cocoa inline-flex items-center justify-center font-display text-sm">?</span>
+                     <span>วิธีทอน</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- Visual Tutorial Modal -->
+         <div id="tutorialModal" role="dialog" aria-modal="true" aria-labelledby="tutTitle" class="hidden fixed inset-0 z-[60] bg-[#4A323A]/55 flex items-center justify-center p-4">
+            <div class="modal-card bg-cream border-[4px] border-cocoa rounded-[30px] max-w-[540px] w-full p-6 shadow-[0_12px_0_#4A323A] text-center">
+               <h2 id="tutTitle" class="font-bold text-2xl text-strawberry-deep mb-4">วิธีทอนเงินแบบ "นับต่อ"</h2>
+
+               <div class="flex flex-col gap-3 my-4 text-left">
+                  <div class="bg-white border-[2.5px] border-cocoa rounded-2xl p-3.5 flex items-center gap-3.5">
+                     <div class="w-10 h-10 rounded-xl bg-strawberry-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-lg text-strawberry-deep shrink-0">1</div>
+                     <div class="font-semibold text-base">
+                        ราคา <span class="text-strawberry-deep font-display font-bold text-lg">35 ฿</span> ➔ ลูกค้าจ่าย <span class="text-sky-deep font-display font-bold text-lg">50 ฿</span>
+                     </div>
+                  </div>
+
+                  <div class="bg-white border-[2.5px] border-cocoa rounded-2xl p-3.5 flex items-center gap-3.5">
+                     <div class="w-10 h-10 rounded-xl bg-butter-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-lg text-butter-deep shrink-0">2</div>
+                     <div class="font-semibold text-base">
+                        เริ่ม <span class="font-display font-bold">35</span> ➔ หยิบ <span class="px-2 py-0.5 rounded-lg bg-cream-dark font-display font-bold">5฿</span> (ได้ 40) ➔ หยิบ <span class="px-2 py-0.5 rounded-lg bg-butter-soft font-display font-bold">10฿</span> (ครบ 50!)
+                     </div>
+                  </div>
+
+                  <div class="bg-white border-[2.5px] border-cocoa rounded-2xl p-3.5 flex items-center gap-3.5">
+                     <div class="w-10 h-10 rounded-xl bg-mint-soft border-2 border-cocoa flex items-center justify-center font-display font-bold text-lg text-mint-deep shrink-0">3</div>
+                     <div class="font-semibold text-base">
+                        ครบ <span class="text-sky-deep font-display font-bold text-lg">50 ฿</span> แล้วกดปุ่ม <span class="px-2.5 py-0.5 rounded-lg bg-mint text-white font-bold">ทอนเงิน</span> (แตะที่เหรียญในถาดเพื่อเอาออกได้)
+                     </div>
+                  </div>
+               </div>
+
+               <button id="btnCloseTutorial" class="mt-2 px-8 py-3 rounded-2xl bg-mint border-[3px] border-cocoa text-white font-bold text-lg shadow-[0_4px_0_#4A323A]">เข้าใจแล้ว!</button>
+            </div>
+         </div>
+
+         <!-- Clean Light-Theme Settings Modal -->
+         <div id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="setTitle" class="hidden fixed inset-0 z-[60] bg-[#4A323A]/55 flex items-center justify-center p-4">
+            <div class="modal-card bg-cream border-[4px] border-cocoa rounded-[30px] max-w-[500px] w-full max-h-[90vh] overflow-y-auto p-6 shadow-[0_12px_0_#4A323A] text-center">
+               <h2 id="setTitle" class="font-bold text-2xl text-cocoa mb-4">ตั้งค่า</h2>
+
+               <div class="flex flex-col gap-2.5 text-left my-3">
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">เสียงพูดนับเลข</strong>
+                     <button id="toggleVoice" class="toggle-switch on" role="switch" aria-checked="true"></button>
+                  </div>
+
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">เสียงเหรียญและกระดิ่ง</strong>
+                     <button id="toggleSfx" class="toggle-switch on" role="switch" aria-checked="true"></button>
+                  </div>
+
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">แสดงเฉลยยอดทอน</strong>
+                     <button id="toggleShowTarget" class="toggle-switch" role="switch" aria-checked="false"></button>
+                  </div>
+
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">ซ่อนตัวเลขช่วยนับ</strong>
+                     <button id="toggleChallenge" class="toggle-switch" role="switch" aria-checked="false"></button>
+                  </div>
+
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">ตัวอักษรใหญ่</strong>
+                     <button id="toggleLargeText" class="toggle-switch" role="switch" aria-checked="false"></button>
+                  </div>
+
+                  <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+                     <strong class="text-base">ลดภาพเคลื่อนไหว</strong>
+                     <button id="toggleReducedMotion" class="toggle-switch" role="switch" aria-checked="false"></button>
+                  </div>
+               </div>
+
+               <button id="btnCloseSettings" class="mt-3 px-8 py-3 rounded-2xl bg-strawberry border-[3px] border-cocoa text-white font-bold text-lg btn-tactile-pink">ตกลง</button>
+            </div>
+         </div>
+
+         <!-- End of Level Summary Modal -->
+         <div id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="sumTitle" class="hidden fixed inset-0 z-50 bg-[#4A323A]/55 flex items-center justify-center p-4">
+            <div class="bg-cream border-[4px] border-cocoa rounded-[30px] max-w-[480px] w-full p-6 shadow-[0_12px_0_#4A323A] text-center">
+               <div class="flex justify-center mb-2" id="trophySvgContainer"></div>
+               <h2 id="sumTitle" class="font-bold text-2xl sm:text-3xl text-strawberry-deep">ปิดร้านสำเร็จ!</h2>
+
+               <div class="bg-white border-[3px] border-cocoa rounded-2xl p-4 my-4 flex flex-col gap-1">
+                  <div id="sumScoreText" class="font-display font-bold text-3xl text-mint-deep">★ 800</div>
+                  <div id="sumBonusText" class="text-sm font-semibold text-cocoa-light">ทอนน้อยชิ้น: 5 / 8</div>
+               </div>
+
+               <div class="flex items-center justify-center gap-3 flex-wrap mt-4">
+                  <button id="btnNextLevel" class="px-7 py-3 rounded-2xl bg-mint border-[3px] border-cocoa text-white font-bold text-lg shadow-[0_4px_0_#4A323A]">ด่านถัดไป ➔</button>
+                  <button id="btnReplayLevel" class="px-5 py-3 rounded-2xl bg-white border-[3px] border-cocoa text-cocoa font-bold text-base btn-tactile-cream">เล่นซ้ำ</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * ร้านขายของ ทอนเงินแสนสนุก — Kawaii Pastel Cashier Game
+          * Pure Light Theme • Icon-First Visuals • Signature Mascot "น้องปังปอนด์"
+          */
+         (function () {
+            'use strict';
+
+            // --- 1. LEVEL & CUSTOMER DATA ---
+            const LEVELS = [
+               {
+                  id: 0,
+                  shortName: 'ด่าน 1',
+                  customers: [
+                     { item: 'ไอศกรีม', itemType: 'icecream', price: 15, paid: 20, animal: 'bunny' },
+                     { item: 'ชานมไข่มุก', itemType: 'boba', price: 35, paid: 50, animal: 'bear' },
+                     { item: 'น้ำส้ม', itemType: 'juice', price: 25, paid: 50, animal: 'cat' },
+                     { item: 'พุดดิ้ง', itemType: 'pudding', price: 10, paid: 20, animal: 'chick' },
+                     { item: 'เค้กสตรอว์เบอร์รี', itemType: 'cake', price: 40, paid: 100, animal: 'shiba' },
+                     { item: 'คุกกี้', itemType: 'cookie', price: 30, paid: 50, animal: 'bear' },
+                     { item: 'น้ำแดงโซดา', itemType: 'juice', price: 15, paid: 50, animal: 'cat' },
+                     { item: 'แพนเค้ก', itemType: 'cake', price: 45, paid: 100, animal: 'bunny' },
+                  ],
+               },
+               {
+                  id: 1,
+                  shortName: 'ด่าน 2',
+                  customers: [
+                     { item: 'โดนัท', itemType: 'donut', price: 18, paid: 20, animal: 'cat' },
+                     { item: 'นมสตรอว์เบอร์รี', itemType: 'milk', price: 14, paid: 20, animal: 'bunny' },
+                     { item: 'ขนมปังเนย', itemType: 'bread', price: 27, paid: 50, animal: 'bear' },
+                     { item: 'แอปเปิล', itemType: 'apple', price: 32, paid: 50, animal: 'chick' },
+                     { item: 'ครัวซองต์', itemType: 'bread', price: 16, paid: 20, animal: 'shiba' },
+                     { item: 'คัพเค้ก', itemType: 'cake', price: 23, paid: 50, animal: 'cat' },
+                     { item: 'พุดดิ้งคาราเมล', itemType: 'pudding', price: 19, paid: 50, animal: 'bear' },
+                     { item: 'แซนด์วิช', itemType: 'bread', price: 38, paid: 50, animal: 'bunny' },
+                  ],
+               },
+               {
+                  id: 2,
+                  shortName: 'ด่าน 3',
+                  customers: [
+                     { item: 'กล่องสีไม้', itemType: 'stationery', price: 81, paid: 100, animal: 'bear' },
+                     { item: 'ชุดอาหารเช้า', itemType: 'bento', price: 63, paid: 100, animal: 'bunny' },
+                     { item: 'ตุ๊กตาหมี', itemType: 'teddy', price: 46, paid: 100, animal: 'chick' },
+                     { item: 'สมุดวาดภาพ', itemType: 'stationery', price: 54, paid: 100, animal: 'shiba' },
+                     { item: 'เค้กวันเกิด', itemType: 'cake', price: 72, paid: 100, animal: 'cat' },
+                     { item: 'ชุดแอปเปิล', itemType: 'apple', price: 39, paid: 100, animal: 'bear' },
+                     { item: 'กระติกน้ำ', itemType: 'boba', price: 67, paid: 100, animal: 'bunny' },
+                     { item: 'กล่องของขวัญ', itemType: 'gift', price: 24, paid: 100, animal: 'chick' },
+                  ],
+               },
+            ];
+
+            const BANKNOTES = [
+               { value: 20, label: '20 บาท', key: '1', bg: '#9CE8C2', stripe: '#68D39E', accent: '#126E45' },
+               { value: 50, label: '50 บาท', key: '2', bg: '#9DD4FF', stripe: '#6BB8FF', accent: '#145599' },
+               { value: 100, label: '100 บาท', key: '3', bg: '#FFB3C6', stripe: '#FF85A3', accent: '#991F42' },
+            ];
+
+            const COINS = [
+               { value: 1, label: '1 บาท', key: '4', size: 54, outer: '#E2E8F0', inner: '#F8FAFC', rim: '#94A3B8' },
+               { value: 2, label: '2 บาท', key: '5', size: 58, outer: '#FDE68A', inner: '#FEF3C7', rim: '#D97706' },
+               { value: 5, label: '5 บาท', key: '6', size: 62, outer: '#CBD5E1', inner: '#F1F5F9', rim: '#64748B' },
+               { value: 10, label: '10 บาท', key: '7', size: 68, outer: '#CBD5E1', inner: '#FFD147', rim: '#B45309' },
+            ];
+
+            const MAX_TRAY_PIECES = 24;
+
+            // --- 2. STATE & PERSISTENCE ---
+            const state = {
+               levelIndex: 0,
+               customerIndex: 0,
+               tray: [],
+               score: 0,
+               optimalCount: 0,
+               firstTryCorrect: true,
+               isTransitioning: false,
+               sessionToken: 0,
+               pendingTimers: [],
+               progress: {
+                  bestScores: [0, 0, 0],
+                  completed: [false, false, false],
+               },
+               settings: {
+                  voice: true,
+                  sfx: true,
+                  showTarget: false,
+                  challengeMode: false,
+                  largeText: false,
+                  reducedMotion: false,
+               },
+            };
+
+            function clearAllPendingTimers() {
+               while (state.pendingTimers.length > 0) {
+                  clearTimeout(state.pendingTimers.pop());
+               }
+               state.isTransitioning = false;
+            }
+
+            function scheduleSafeTimeout(fn, delay) {
+               const token = state.sessionToken;
+               const id = setTimeout(() => {
+                  state.pendingTimers = state.pendingTimers.filter((t) => t !== id);
+                  if (state.sessionToken === token) {
+                     fn();
+                  }
+               }, delay);
+               state.pendingTimers.push(id);
+               return id;
+            }
+
+            function loadStorage() {
+               try {
+                  const saved = localStorage.getItem('pastel_cashier_save_v2');
+                  if (saved) {
+                     const parsed = JSON.parse(saved);
+                     if (parsed.progress) state.progress = { ...state.progress, ...parsed.progress };
+                     if (parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
+                  }
+               } catch (e) {}
+            }
+
+            function saveStorage() {
+               try {
+                  localStorage.setItem(
+                     'pastel_cashier_save_v2',
+                     JSON.stringify({
+                        progress: state.progress,
+                        settings: state.settings,
+                     }),
+                  );
+               } catch (e) {}
+            }
+
+            // --- 3. SIGNATURE MASCOT & LIVELY SVG ILLUSTRATIONS ---
+            function getMainMascotSVG(width = 112, height = 122) {
+               return `<svg width="${width}" height="${height}" viewBox="0 0 120 130" aria-hidden="true">
+                  <!-- Soft Drop Shadow -->
+                  <ellipse cx="60" cy="124" rx="38" ry="5" fill="#4A323A" opacity="0.14"/>
+                  <!-- Cute Ears -->
+                  <path d="M26 56 L22 22 L48 40 Z" fill="#FFFDF9" stroke="#4A323A" stroke-width="3.5" stroke-linejoin="round"/>
+                  <path d="M29 49 L27 29 L43 41 Z" fill="#FFB3C6"/>
+                  <path d="M94 56 L98 22 L72 40 Z" fill="#FFFDF9" stroke="#4A323A" stroke-width="3.5" stroke-linejoin="round"/>
+                  <path d="M91 49 L93 29 L77 41 Z" fill="#FFB3C6"/>
+
+                  <!-- Shopkeeper Apron Body -->
+                  <path d="M26 122 C26 92 94 92 94 122 Z" fill="#FF8FA3" stroke="#4A323A" stroke-width="3.5" stroke-linejoin="round"/>
+                  <path d="M38 122 L42 98 L78 98 L82 122 Z" fill="#FFFDF9" stroke="#4A323A" stroke-width="3"/>
+                  <!-- Mint Pocket -->
+                  <rect x="50" y="106" width="20" height="12" rx="4" fill="#9CE8C2" stroke="#4A323A" stroke-width="2.2"/>
+
+                  <!-- Head Fill -->
+                  <circle cx="60" cy="68" r="34" fill="#FFFDF9"/>
+                  <!-- Caramel Patch on Right Ear/Forehead -->
+                  <path d="M72 37 A34 34 0 0 1 92 58 Q80 56 72 37 Z" fill="#F6BD60"/>
+                  <!-- Crisp Head Outline on Top -->
+                  <circle cx="60" cy="68" r="34" fill="none" stroke="#4A323A" stroke-width="3.5"/>
+
+                  <!-- Expressive Sparkly Eyes -->
+                  <circle cx="46" cy="66" r="5" fill="#4A323A"/>
+                  <circle cx="44.5" cy="64" r="2" fill="#FFFFFF"/>
+                  <circle cx="74" cy="66" r="5" fill="#4A323A"/>
+                  <circle cx="72.5" cy="64" r="2" fill="#FFFFFF"/>
+
+                  <!-- Rosy Cheeks -->
+                  <ellipse cx="36" cy="75" rx="6.5" ry="3.8" fill="#FFB3C6"/>
+                  <ellipse cx="84" cy="75" rx="6.5" ry="3.8" fill="#FFB3C6"/>
+
+                  <!-- Whiskers -->
+                  <line x1="16" y1="68" x2="28" y2="70" stroke="#4A323A" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="16" y1="76" x2="28" y2="75" stroke="#4A323A" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="104" y1="68" x2="92" y2="70" stroke="#4A323A" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="104" y1="76" x2="92" y2="75" stroke="#4A323A" stroke-width="2.5" stroke-linecap="round"/>
+
+                  <!-- Cute Nose & Smile -->
+                  <polygon points="57,72 63,72 60,76" fill="#FF7096"/>
+                  <path d="M52 79 Q56 85 60 79 Q64 85 68 79" fill="none" stroke="#4A323A" stroke-width="2.8" stroke-linecap="round"/>
+
+                  <!-- Golden Bell Collar -->
+                  <rect x="40" y="95" width="40" height="7" rx="3.5" fill="#FF7096" stroke="#4A323A" stroke-width="2.5"/>
+                  <circle cx="60" cy="101" r="6" fill="#FFD147" stroke="#4A323A" stroke-width="2.5"/>
+                  <circle cx="60" cy="102" r="1.6" fill="#4A323A"/>
+
+                  <!-- Signature Pastel Baker Beret Hat -->
+                  <g transform="translate(36, 12) rotate(-8)">
+                     <ellipse cx="24" cy="16" rx="24" ry="12" fill="#38C98A" stroke="#4A323A" stroke-width="3.2"/>
+                     <rect x="6" y="21" width="36" height="7" rx="3.5" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="24" cy="4" r="4.5" fill="#FFD147" stroke="#4A323A" stroke-width="2.5"/>
+                  </g>
+               </svg>`;
+            }
+
+            function getCustomerAnimalSVG(type) {
+               if (type === 'bunny') {
+                  return `<svg class="w-full h-full" viewBox="0 0 100 112" aria-hidden="true">
+                     <rect x="26" y="6" width="16" height="42" rx="8" fill="#FFE5EC" stroke="#4A323A" stroke-width="3.2"/>
+                     <rect x="30" y="12" width="8" height="30" rx="4" fill="#FF8FA3"/>
+                     <rect x="58" y="6" width="16" height="42" rx="8" fill="#FFE5EC" stroke="#4A323A" stroke-width="3.2"/>
+                     <rect x="62" y="12" width="8" height="30" rx="4" fill="#FF8FA3"/>
+                     <path d="M22 108 C22 82 78 82 78 108 Z" fill="#FF8FA3" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="50" cy="64" r="31" fill="#FFF5F8" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="38" cy="60" r="4.5" fill="#4A323A"/><circle cx="36.5" cy="58.5" r="1.6" fill="#FFF"/>
+                     <circle cx="62" cy="60" r="4.5" fill="#4A323A"/><circle cx="60.5" cy="58.5" r="1.6" fill="#FFF"/>
+                     <ellipse cx="30" cy="68" rx="5.5" ry="3.2" fill="#FFB3C6"/>
+                     <ellipse cx="70" cy="68" rx="5.5" ry="3.2" fill="#FFB3C6"/>
+                     <polygon points="47,66 53,66 50,70" fill="#FF7096"/>
+                     <path d="M44 73 Q50 79 56 73" fill="none" stroke="#4A323A" stroke-width="2.6" stroke-linecap="round"/>
+                  </svg>`;
+               }
+               if (type === 'bear') {
+                  return `<svg class="w-full h-full" viewBox="0 0 100 112" aria-hidden="true">
+                     <circle cx="25" cy="36" r="13" fill="#D49A6A" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="25" cy="36" r="6" fill="#F7E1D7"/>
+                     <circle cx="75" cy="36" r="13" fill="#D49A6A" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="75" cy="36" r="6" fill="#F7E1D7"/>
+                     <path d="M20 108 C20 80 80 80 80 108 Z" fill="#7CC0FF" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="50" cy="62" r="32" fill="#E0A97B" stroke="#4A323A" stroke-width="3.2"/>
+                     <ellipse cx="50" cy="70" rx="14" ry="10.5" fill="#FFF5EE"/>
+                     <circle cx="38" cy="57" r="4.5" fill="#4A323A"/><circle cx="36.5" cy="55.5" r="1.6" fill="#FFF"/>
+                     <circle cx="62" cy="57" r="4.5" fill="#4A323A"/><circle cx="60.5" cy="55.5" r="1.6" fill="#FFF"/>
+                     <ellipse cx="50" cy="66" rx="5" ry="3.5" fill="#4A323A"/>
+                     <path d="M44 73 Q50 79 56 73" fill="none" stroke="#4A323A" stroke-width="2.6" stroke-linecap="round"/>
+                  </svg>`;
+               }
+               if (type === 'shiba') {
+                  return `<svg class="w-full h-full" viewBox="0 0 100 112" aria-hidden="true">
+                     <polygon points="20,48 25,18 46,36" fill="#F4A261" stroke="#4A323A" stroke-width="3.2" stroke-linejoin="round"/>
+                     <polygon points="80,48 75,18 54,36" fill="#F4A261" stroke="#4A323A" stroke-width="3.2" stroke-linejoin="round"/>
+                     <path d="M22 108 C22 82 78 82 78 108 Z" fill="#FFD147" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="50" cy="63" r="31" fill="#F6BD60"/>
+                     <path d="M22 65 Q50 56 78 65 A31 31 0 0 1 22 65 Z" fill="#FFFDF9"/>
+                     <circle cx="50" cy="63" r="31" fill="none" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="38" cy="57" r="4.5" fill="#4A323A"/><circle cx="36.5" cy="55.5" r="1.6" fill="#FFF"/>
+                     <circle cx="62" cy="57" r="4.5" fill="#4A323A"/><circle cx="60.5" cy="55.5" r="1.6" fill="#FFF"/>
+                     <ellipse cx="38" cy="49" rx="3.5" ry="2" fill="#FFFDF9"/>
+                     <ellipse cx="62" cy="49" rx="3.5" ry="2" fill="#FFFDF9"/>
+                     <ellipse cx="50" cy="66" rx="4.5" ry="3.2" fill="#4A323A"/>
+                     <path d="M44 73 Q50 78 56 73" fill="none" stroke="#4A323A" stroke-width="2.6" stroke-linecap="round"/>
+                  </svg>`;
+               }
+               if (type === 'cat') {
+                  return `<svg class="w-full h-full" viewBox="0 0 100 112" aria-hidden="true">
+                     <polygon points="22,48 26,18 46,36" fill="#FFD166" stroke="#4A323A" stroke-width="3.2" stroke-linejoin="round"/>
+                     <polygon points="78,48 74,18 54,36" fill="#FFD166" stroke="#4A323A" stroke-width="3.2" stroke-linejoin="round"/>
+                     <path d="M22 108 C22 82 78 82 78 108 Z" fill="#9CE8C2" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="50" cy="63" r="31" fill="#FFE08A" stroke="#4A323A" stroke-width="3.2"/>
+                     <circle cx="38" cy="59" r="4.5" fill="#4A323A"/><circle cx="36.5" cy="57.5" r="1.6" fill="#FFF"/>
+                     <circle cx="62" cy="59" r="4.5" fill="#4A323A"/><circle cx="60.5" cy="57.5" r="1.6" fill="#FFF"/>
+                     <polygon points="47,65 53,65 50,69" fill="#FF7096"/>
+                     <path d="M43 72 Q47 77 50 72 Q53 77 57 72" fill="none" stroke="#4A323A" stroke-width="2.6" stroke-linecap="round"/>
+                  </svg>`;
+               }
+               // chick
+               return `<svg class="w-full h-full" viewBox="0 0 100 112" aria-hidden="true">
+                  <path d="M44 30 Q50 15 56 30" fill="none" stroke="#4A323A" stroke-width="3.5" stroke-linecap="round"/>
+                  <path d="M22 108 C22 82 78 82 78 108 Z" fill="#FFB3C6" stroke="#4A323A" stroke-width="3.2"/>
+                  <circle cx="50" cy="63" r="31" fill="#FFF08A" stroke="#4A323A" stroke-width="3.2"/>
+                  <circle cx="38" cy="59" r="4.5" fill="#4A323A"/><circle cx="36.5" cy="57.5" r="1.6" fill="#FFF"/>
+                  <circle cx="62" cy="59" r="4.5" fill="#4A323A"/><circle cx="60.5" cy="57.5" r="1.6" fill="#FFF"/>
+                  <ellipse cx="50" cy="68" rx="7.5" ry="4.8" fill="#FF9F1C" stroke="#4A323A" stroke-width="2.4"/>
+                  <ellipse cx="30" cy="66" rx="5" ry="3" fill="#FFB3C6"/>
+                  <ellipse cx="70" cy="66" rx="5" ry="3" fill="#FFB3C6"/>
+               </svg>`;
+            }
+
+            function getProductSVG(type, size = 52) {
+               const map = {
+                  boba: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <rect x="33" y="4" width="6" height="16" rx="2" transform="rotate(15 33 4)" fill="#FF7096" stroke="#4A323A" stroke-width="2"/>
+                     <polygon points="16,18 44,18 40,54 20,54" fill="#E8B88A" stroke="#4A323A" stroke-width="2.8" stroke-linejoin="round"/>
+                     <ellipse cx="30" cy="18" rx="15" ry="4.5" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.4"/>
+                     <circle cx="24" cy="47" r="3" fill="#4A323A"/><circle cx="31" cy="48" r="3" fill="#4A323A"/><circle cx="36" cy="45" r="3" fill="#4A323A"/>
+                  </svg>`,
+                  icecream: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <polygon points="20,28 40,28 30,55" fill="#F4A261" stroke="#4A323A" stroke-width="2.8" stroke-linejoin="round"/>
+                     <circle cx="30" cy="22" r="13.5" fill="#FFB3C6" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="25" cy="17" r="3" fill="#FFFDF9" opacity="0.7"/>
+                     <circle cx="30" cy="9" r="4" fill="#FF4D6D" stroke="#4A323A" stroke-width="2"/>
+                  </svg>`,
+                  cake: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <rect x="11" y="25" width="38" height="25" rx="6" fill="#FFE5EC" stroke="#4A323A" stroke-width="2.8"/>
+                     <path d="M11 34 Q20 40 30 34 Q40 40 49 34" fill="none" stroke="#FF7096" stroke-width="3.2"/>
+                     <circle cx="30" cy="19" r="5.5" fill="#FF4D6D" stroke="#4A323A" stroke-width="2.2"/>
+                  </svg>`,
+                  donut: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <circle cx="30" cy="30" r="20" fill="#F6BD60" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="30" cy="30" r="16.5" fill="#FF8FA3"/>
+                     <circle cx="30" cy="30" r="7" fill="#FFF9F2" stroke="#4A323A" stroke-width="2.5"/>
+                     <circle cx="20" cy="22" r="2" fill="#FFD147"/><circle cx="40" cy="24" r="2" fill="#38C98A"/><circle cx="36" cy="40" r="2" fill="#FFF"/>
+                  </svg>`,
+                  apple: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <path d="M30 16 C16 14 12 30 18 44 C22 52 38 52 42 44 C48 30 44 14 30 16 Z" fill="#FF5964" stroke="#4A323A" stroke-width="2.8"/>
+                     <ellipse cx="22" cy="26" rx="3" ry="5" transform="rotate(-20 22 26)" fill="#FFF" opacity="0.6"/>
+                     <path d="M30 16 Q35 7 43 10 Q38 18 30 16 Z" fill="#38C98A" stroke="#4A323A" stroke-width="2.2"/>
+                  </svg>`,
+                  milk: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <polygon points="18,19 30,8 42,19" fill="#9DD4FF" stroke="#4A323A" stroke-width="2.6" stroke-linejoin="round"/>
+                     <rect x="18" y="19" width="24" height="33" rx="4" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.6"/>
+                     <rect x="18" y="29" width="24" height="12" fill="#FFB3C6"/>
+                  </svg>`,
+                  bread: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <path d="M13 27 C9 14 51 14 47 27 L45 48 L15 48 Z" fill="#F6BD60" stroke="#4A323A" stroke-width="2.8" stroke-linejoin="round"/>
+                     <path d="M22 24 L26 32 M34 24 L38 32" stroke="#C98A00" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>`,
+                  teddy: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <circle cx="19" cy="18" r="7" fill="#D49A6A" stroke="#4A323A" stroke-width="2.4"/>
+                     <circle cx="41" cy="18" r="7" fill="#D49A6A" stroke="#4A323A" stroke-width="2.4"/>
+                     <circle cx="30" cy="32" r="16" fill="#E0A97B" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="25" cy="29" r="2.3" fill="#4A323A"/><circle cx="35" cy="29" r="2.3" fill="#4A323A"/>
+                     <ellipse cx="30" cy="36" rx="6.5" ry="4.8" fill="#FFF5EE"/>
+                  </svg>`,
+                  juice: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <path d="M34 6 L40 6 L35 20" fill="none" stroke="#FF7096" stroke-width="3" stroke-linecap="round"/>
+                     <rect x="17" y="18" width="26" height="34" rx="5" fill="#FFD147" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="30" cy="35" r="7" fill="#FF9F1C"/>
+                  </svg>`,
+                  pudding: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <path d="M14 46 L20 22 L40 22 L46 46 Z" fill="#FFF08A" stroke="#4A323A" stroke-width="2.8" stroke-linejoin="round"/>
+                     <path d="M19 25 Q30 31 41 25 L40 22 L20 22 Z" fill="#C98A00"/>
+                     <ellipse cx="30" cy="48" rx="22" ry="4.5" fill="#FFFDF9" stroke="#4A323A" stroke-width="2.4"/>
+                  </svg>`,
+                  cookie: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <circle cx="30" cy="30" r="19" fill="#E8B88A" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="23" cy="24" r="3" fill="#4A323A"/><circle cx="36" cy="23" r="2.6" fill="#4A323A"/>
+                     <circle cx="26" cy="36" r="2.8" fill="#4A323A"/><circle cx="37" cy="35" r="3" fill="#4A323A"/>
+                  </svg>`,
+                  stationery: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <rect x="14" y="14" width="32" height="36" rx="5" fill="#9DD4FF" stroke="#4A323A" stroke-width="2.8"/>
+                     <rect x="20" y="21" width="20" height="10" rx="2" fill="#FFFDF9"/>
+                     <circle cx="30" cy="40" r="4" fill="#FFD147"/>
+                  </svg>`,
+                  bento: `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <rect x="11" y="18" width="38" height="28" rx="7" fill="#FFB3C6" stroke="#4A323A" stroke-width="2.8"/>
+                     <circle cx="23" cy="32" r="6" fill="#FFFDF9"/>
+                     <circle cx="38" cy="32" r="6" fill="#9CE8C2"/>
+                  </svg>`,
+               };
+               return (
+                  map[type] ||
+                  `<svg width="${size}" height="${size}" viewBox="0 0 60 60" aria-hidden="true">
+                     <rect x="12" y="20" width="36" height="30" rx="6" fill="#FFD147" stroke="#4A323A" stroke-width="2.8"/>
+                     <rect x="26" y="20" width="8" height="30" fill="#FF7096"/>
+                     <path d="M30 20 C20 10 16 18 30 20 C44 18 40 10 30 20 Z" fill="#FF7096" stroke="#4A323A" stroke-width="2.2"/>
+                  </svg>`
+               );
+            }
+
+            function getBanknoteSVG(note, small = false) {
+               const w = small ? 60 : 114;
+               const h = small ? 32 : 56;
+               return `<svg width="${w}" height="${h}" viewBox="0 0 120 60" class="pointer-events-none" aria-hidden="true">
+                  <rect x="2" y="4" width="116" height="54" rx="10" fill="#4A323A"/>
+                  <rect x="2" y="2" width="116" height="52" rx="10" fill="${note.bg}" stroke="#4A323A" stroke-width="3.2"/>
+                  <rect x="9" y="8" width="102" height="40" rx="6" fill="none" stroke="${note.stripe}" stroke-width="2" stroke-dasharray="5 3"/>
+                  <circle cx="30" cy="28" r="13" fill="#FFFDF9" stroke="${note.stripe}" stroke-width="2"/>
+                  <text x="72" y="37" text-anchor="middle" font-family="Fredoka, Mitr, sans-serif" font-weight="700" font-size="25" fill="${note.accent}">${note.value}฿</text>
+               </svg>`;
+            }
+
+            function getCoinSVG(coin, customSize = null) {
+               const s = customSize || coin.size;
+               return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" class="pointer-events-none" aria-hidden="true">
+                  <circle cx="32" cy="35" r="27" fill="#4A323A"/>
+                  <circle cx="32" cy="30" r="27" fill="${coin.outer}" stroke="#4A323A" stroke-width="3.2"/>
+                  <circle cx="32" cy="30" r="19" fill="${coin.inner}" stroke="${coin.rim}" stroke-width="1.8" stroke-dasharray="3 2"/>
+                  <text x="32" y="38" text-anchor="middle" font-family="Fredoka, Mitr, sans-serif" font-weight="700" font-size="24" fill="#4A323A">${coin.value}</text>
+               </svg>`;
+            }
+
+            // --- 4. SOUND EFFECTS & VOICE ---
+            let audioCtx = null;
+            let speechTimer = null;
+
+            function initAudio() {
+               if (!audioCtx) {
+                  const AudioContext = window.AudioContext || window.webkitAudioContext;
+                  if (AudioContext) audioCtx = new AudioContext();
+               }
+               if (audioCtx && audioCtx.state === 'suspended') {
+                  audioCtx.resume();
+               }
+            }
+
+            function stopSpeech() {
+               if (speechTimer) {
+                  clearTimeout(speechTimer);
+                  speechTimer = null;
+               }
+               if ('speechSynthesis' in window) {
+                  try {
+                     window.speechSynthesis.cancel();
+                  } catch (e) {}
+               }
+            }
+
+            function playTone(type) {
+               if (!state.settings.sfx) return;
+               initAudio();
+               if (!audioCtx) return;
+
+               const now = audioCtx.currentTime;
+               const osc = audioCtx.createOscillator();
+               const gain = audioCtx.createGain();
+               osc.connect(gain);
+               gain.connect(audioCtx.destination);
+
+               if (type === 'coin') {
+                  osc.type = 'sine';
+                  osc.frequency.setValueAtTime(1320, now);
+                  osc.frequency.exponentialRampToValueAtTime(1980, now + 0.08);
+                  gain.gain.setValueAtTime(0.18, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                  osc.start(now);
+                  osc.stop(now + 0.16);
+               } else if (type === 'note') {
+                  osc.type = 'triangle';
+                  osc.frequency.setValueAtTime(340, now);
+                  osc.frequency.exponentialRampToValueAtTime(520, now + 0.09);
+                  gain.gain.setValueAtTime(0.16, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                  osc.start(now);
+                  osc.stop(now + 0.12);
+               } else if (type === 'undo') {
+                  osc.type = 'sine';
+                  osc.frequency.setValueAtTime(480, now);
+                  osc.frequency.exponentialRampToValueAtTime(280, now + 0.12);
+                  gain.gain.setValueAtTime(0.14, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+                  osc.start(now);
+                  osc.stop(now + 0.13);
+               } else if (type === 'success') {
+                  const notes = [523.25, 659.25, 783.99, 1046.5];
+                  notes.forEach((freq, idx) => {
+                     const o = audioCtx.createOscillator();
+                     const g = audioCtx.createGain();
+                     o.type = 'triangle';
+                     o.frequency.setValueAtTime(freq, now + idx * 0.07);
+                     g.gain.setValueAtTime(0.18, now + idx * 0.07);
+                     g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.28);
+                     o.connect(g);
+                     g.connect(audioCtx.destination);
+                     o.start(now + idx * 0.07);
+                     o.stop(now + idx * 0.07 + 0.28);
+                  });
+               } else if (type === 'gentle_error') {
+                  osc.type = 'sine';
+                  osc.frequency.setValueAtTime(310, now);
+                  osc.frequency.linearRampToValueAtTime(250, now + 0.22);
+                  gain.gain.setValueAtTime(0.15, now);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+                  osc.start(now);
+                  osc.stop(now + 0.24);
+               }
+            }
+
+            function speakThai(text) {
+               if (!state.settings.voice) return;
+               if (!('speechSynthesis' in window)) return;
+               stopSpeech();
+               speechTimer = setTimeout(() => {
+                  try {
+                     const utter = new SpeechSynthesisUtterance(text);
+                     utter.lang = 'th-TH';
+                     const voices = window.speechSynthesis.getVoices();
+                     const thaiVoice = voices.find((v) => v.lang && v.lang.toLowerCase().includes('th'));
+                     if (thaiVoice) utter.voice = thaiVoice;
+                     utter.rate = 0.98;
+                     utter.pitch = 1.08;
+                     window.speechSynthesis.speak(utter);
+                  } catch (e) {}
+               }, 45);
+            }
+
+            // --- 5. CONFETTI PARTICLE SYSTEM ---
+            const confettiCanvas = document.getElementById('confettiCanvas');
+            const cCtx = confettiCanvas.getContext('2d');
+            let particles = [];
+            let confettiRafId = null;
+
+            function resizeConfetti() {
+               confettiCanvas.width = window.innerWidth;
+               confettiCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeConfetti);
+
+            function clearConfetti() {
+               particles = [];
+               if (confettiRafId) {
+                  cancelAnimationFrame(confettiRafId);
+                  confettiRafId = null;
+               }
+               cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
+
+            function spawnConfetti() {
+               if (state.settings.reducedMotion) return;
+               resizeConfetti();
+               const colors = ['#FF7096', '#38C98A', '#4DA8FF', '#FFD147', '#C792EA'];
+               for (let i = 0; i < 45; i++) {
+                  particles.push({
+                     x: confettiCanvas.width * (0.3 + Math.random() * 0.4),
+                     y: confettiCanvas.height * 0.45,
+                     vx: (Math.random() - 0.5) * 11,
+                     vy: -Math.random() * 10 - 3,
+                     size: Math.random() * 8 + 5,
+                     color: colors[i % colors.length],
+                     rot: Math.random() * 360,
+                     vrot: (Math.random() - 0.5) * 12,
+                     life: 65,
+                  });
+               }
+               if (!confettiRafId) {
+                  confettiRafId = requestAnimationFrame(animateConfetti);
+               }
+            }
+
+            function animateConfetti() {
+               cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+               for (let i = particles.length - 1; i >= 0; i--) {
+                  const p = particles[i];
+                  p.x += p.vx;
+                  p.y += p.vy;
+                  p.vy += 0.35;
+                  p.rot += p.vrot;
+                  p.life--;
+
+                  cCtx.save();
+                  cCtx.translate(p.x, p.y);
+                  cCtx.rotate((p.rot * Math.PI) / 180);
+                  cCtx.fillStyle = p.color;
+                  cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+                  cCtx.restore();
+
+                  if (p.life <= 0) particles.splice(i, 1);
+               }
+
+               if (particles.length > 0) {
+                  confettiRafId = requestAnimationFrame(animateConfetti);
+               } else {
+                  confettiRafId = null;
+               }
+            }
+
+            // --- 6. CORE GAME LOGIC & ICON-FIRST UI ---
+            function getCurrentLevel() {
+               return LEVELS[state.levelIndex];
+            }
+
+            function getCurrentCustomer() {
+               return getCurrentLevel().customers[state.customerIndex];
+            }
+
+            function getOptimalPieceCount(changeAmount) {
+               const denoms = [100, 50, 20, 10, 5, 2, 1];
+               let rem = changeAmount;
+               let count = 0;
+               for (const d of denoms) {
+                  while (rem >= d) {
+                     rem -= d;
+                     count++;
+                  }
+               }
+               return count;
+            }
+
+            function renderDrawerButtons() {
+               const banknotesRow = document.getElementById('banknotesRow');
+               const coinsRow = document.getElementById('coinsRow');
+
+               banknotesRow.innerHTML = BANKNOTES.map(
+                  (note) => `
+                  <button class="drawer-note-btn rounded-xl p-0.5 hover:-translate-y-1" data-add-money="${note.value}" aria-label="ธนบัตร ${note.label}">
+                     ${getBanknoteSVG(note)}
+                  </button>
+               `,
+               ).join('');
+
+               coinsRow.innerHTML = COINS.map(
+                  (coin) => `
+                  <button class="drawer-coin-btn rounded-full p-0.5 hover:-translate-y-1" data-add-money="${coin.value}" aria-label="เหรียญ ${coin.label}">
+                     ${getCoinSVG(coin)}
+                  </button>
+               `,
+               ).join('');
+
+               document.querySelectorAll('[data-add-money]').forEach((btn) => {
+                  btn.addEventListener('click', () => {
+                     const val = Number(btn.getAttribute('data-add-money'));
+                     addMoneyToTray(val);
+                  });
+               });
+            }
+
+            function renderVisualSpeechBubble(cust, mode = 'order', extraVal = 0) {
+               const bubble = document.getElementById('speechBubble');
+               const content = document.getElementById('bubbleVisualContent');
+
+               bubble.classList.remove('bg-butter-soft', 'bg-mint-soft', 'bubble-pop');
+               bubble.classList.add('bg-cream');
+               void bubble.offsetWidth;
+               bubble.classList.add('bubble-pop');
+
+               if (mode === 'order') {
+                  content.innerHTML = `
+                     <span class="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-2xl bg-strawberry-soft border-2 border-cocoa">
+                        ${getProductSVG(cust.itemType, 26)}
+                        <span class="font-display font-bold text-strawberry-deep">${cust.price}฿</span>
+                     </span>
+                     <span class="text-cocoa-light font-bold">➔</span>
+                     <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-2xl bg-sky-soft border-2 border-cocoa font-display font-bold text-sky-deep">
+                        <span>จ่าย ${cust.paid}฿</span>
+                     </span>
+                  `;
+               } else if (mode === 'success') {
+                  bubble.classList.remove('bg-cream');
+                  bubble.classList.add('bg-mint-soft');
+                  content.innerHTML = `
+                     <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-mint border-2 border-cocoa text-white inline-flex items-center justify-center font-bold">✓</span>
+                     <span class="font-bold text-mint-deep">ทอน ${extraVal}฿ ถูกต้อง!</span>
+                     <span class="px-2 py-0.5 rounded-full bg-butter border-2 border-cocoa font-display text-xs sm:text-sm text-cocoa">+${cust.earned}★</span>
+                  `;
+               } else if (mode === 'short') {
+                  bubble.classList.remove('bg-cream');
+                  bubble.classList.add('bg-butter-soft');
+                  content.innerHTML = `
+                     <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-butter border-2 border-cocoa text-cocoa inline-flex items-center justify-center font-display font-bold">!</span>
+                     <span class="font-bold text-cocoa">ขาดอีก <span class="font-display text-strawberry-deep text-lg sm:text-xl">${extraVal}฿</span></span>
+                  `;
+               } else if (mode === 'over') {
+                  bubble.classList.remove('bg-cream');
+                  bubble.classList.add('bg-butter-soft');
+                  content.innerHTML = `
+                     <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-strawberry border-2 border-cocoa text-white inline-flex items-center justify-center font-display font-bold">!</span>
+                     <span class="font-bold text-cocoa">เกินมา <span class="font-display text-strawberry-deep text-lg sm:text-xl">${extraVal}฿</span></span>
+                  `;
+               }
+            }
+
+            function loadCustomer(speak = true) {
+               const lvl = getCurrentLevel();
+               const cust = getCurrentCustomer();
+               state.tray = [];
+               state.firstTryCorrect = true;
+               state.isTransitioning = false;
+
+               const targetChange = cust.paid - cust.price;
+
+               document.getElementById('customerQueueText').textContent = `${state.customerIndex + 1}/${lvl.customers.length}`;
+               document.getElementById('itemNameText').textContent = cust.item;
+               document.getElementById('itemPriceText').textContent = `${cust.price} ฿`;
+               document.getElementById('paidAmountText').textContent = `${cust.paid} ฿`;
+               document.getElementById('targetStopText').textContent = `${cust.paid}`;
+               document.getElementById('targetChangeText').textContent = state.settings.showTarget ? `${targetChange} ฿` : '? ฿';
+
+               const wrapper = document.getElementById('customerWrapper');
+               wrapper.classList.remove('leaving', 'happy-jump');
+               wrapper.classList.add('entering');
+               document.getElementById('customerAvatarContainer').innerHTML = getCustomerAnimalSVG(cust.animal);
+
+               renderVisualSpeechBubble(cust, 'order');
+
+               requestAnimationFrame(() => {
+                  wrapper.classList.remove('entering');
+               });
+
+               document.getElementById('productSvgSlot').innerHTML = getProductSVG(cust.itemType, 42);
+               document.getElementById('slotProductLabel').textContent = `${cust.price} ฿`;
+
+               const paidNoteObj = BANKNOTES.find((n) => n.value === cust.paid) || BANKNOTES[2];
+               document.getElementById('paidMoneySvgSlot').innerHTML = getBanknoteSVG(paidNoteObj, true);
+               document.getElementById('slotPaidLabel').textContent = `${cust.paid} ฿`;
+
+               updateCountingUI(false);
+
+               if (speak) {
+                  speakThai(`ซื้อ${cust.item} ${cust.price} บาท จ่าย ${cust.paid} บาท`);
+               }
+            }
+
+            function addMoneyToTray(value) {
+               if (state.isTransitioning) return;
+               if (state.tray.length >= MAX_TRAY_PIECES) {
+                  playTone('gentle_error');
+                  return;
+               }
+
+               const cust = getCurrentCustomer();
+               const prevSum = state.tray.reduce((a, b) => a + b, 0);
+               const prevCountOn = cust.price + prevSum;
+
+               state.tray.push(value);
+               const newCountOn = prevCountOn + value;
+
+               if (value >= 20) playTone('note');
+               else playTone('coin');
+
+               updateCountingUI(true);
+
+               if (state.settings.challengeMode) {
+                  speakThai(`${value} บาท`);
+               } else {
+                  speakThai(`${newCountOn} บาท`);
+               }
+            }
+
+            function removeOneDenomination(value) {
+               if (state.isTransitioning) return;
+               const idx = state.tray.lastIndexOf(value);
+               if (idx === -1) return;
+
+               state.tray.splice(idx, 1);
+               playTone('undo');
+               updateCountingUI(true);
+
+               const cust = getCurrentCustomer();
+               const currentTotal = cust.price + state.tray.reduce((a, b) => a + b, 0);
+               if (state.settings.challengeMode) {
+                  speakThai(`เอา ${value} บาทออก`);
+               } else {
+                  speakThai(`เหลือ ${currentTotal} บาท`);
+               }
+            }
+
+            function undoLastMoney() {
+               if (state.isTransitioning || state.tray.length === 0) return;
+               const removed = state.tray.pop();
+               playTone('undo');
+               updateCountingUI(true);
+
+               const cust = getCurrentCustomer();
+               const currentTotal = cust.price + state.tray.reduce((a, b) => a + b, 0);
+               if (state.settings.challengeMode) {
+                  speakThai(`คืน ${removed} บาท`);
+               } else {
+                  speakThai(`เหลือ ${currentTotal} บาท`);
+               }
+            }
+
+            function clearTray() {
+               if (state.isTransitioning || state.tray.length === 0) return;
+               state.tray = [];
+               playTone('undo');
+               updateCountingUI(true);
+
+               const cust = getCurrentCustomer();
+               if (!state.settings.challengeMode) {
+                  speakThai(`เริ่มนับใหม่ ${cust.price} บาท`);
+               }
+            }
+
+            function updateCountingUI(animatePop = false) {
+               const cust = getCurrentCustomer();
+               const changeInTray = state.tray.reduce((a, b) => a + b, 0);
+               const currentCountOn = cust.price + changeInTray;
+               const targetChange = cust.paid - cust.price;
+
+               const numEl = document.getElementById('countingValueDisplay');
+               if (state.settings.challengeMode) {
+                  numEl.textContent = `${state.tray.length} ชิ้น`;
+               } else {
+                  numEl.textContent = `${currentCountOn} ฿`;
+               }
+
+               if (animatePop) {
+                  numEl.classList.add('scale-125');
+                  setTimeout(() => numEl.classList.remove('scale-125'), 160);
+               }
+
+               const trayArea = document.getElementById('trayItemsArea');
+               if (state.tray.length === 0) {
+                  trayArea.innerHTML = `<span class="text-[11px] sm:text-sm font-medium text-cocoa-light">หยิบเงินด้านล่างเพื่อนับต่อ ➔ ${cust.paid} ฿</span>`;
+               } else {
+                  const counts = {};
+                  state.tray.forEach((v) => {
+                     counts[v] = (counts[v] || 0) + 1;
+                  });
+                  const orderedVals = [100, 50, 20, 10, 5, 2, 1].filter((v) => counts[v]);
+
+                  trayArea.innerHTML = orderedVals
+                     .map((val) => {
+                        const isNote = val >= 20;
+                        const badgeBg = isNote
+                           ? val === 20
+                              ? 'bg-[#9CE8C2]'
+                              : val === 50
+                                ? 'bg-[#9DD4FF]'
+                                : 'bg-[#FFB3C6]'
+                           : val === 10 || val === 2
+                             ? 'bg-[#FDE68A]'
+                             : 'bg-[#E2E8F0]';
+                        return `<button type="button" data-remove-val="${val}" title="แตะเพื่อเอา ${val} บาทออก 1 ชิ้น" aria-label="เอา ${val} บาทออก 1 ชิ้น" class="chip-drop inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full ${badgeBg} border-2 border-cocoa font-display font-bold text-xs sm:text-sm text-cocoa hover:brightness-95">
+                           <span>${val}฿</span>
+                           <span class="text-xs opacity-80">×${counts[val]}</span>
+                           <span class="text-[10px] opacity-60 ml-0.5">✕</span>
+                        </button>`;
+                     })
+                     .join('');
+
+                  trayArea.querySelectorAll('[data-remove-val]').forEach((chipBtn) => {
+                     chipBtn.addEventListener('click', () => {
+                        removeOneDenomination(Number(chipBtn.getAttribute('data-remove-val')));
+                     });
+                  });
+               }
+
+               document.getElementById('btnUndo').disabled = state.tray.length === 0;
+               const btnClear = document.getElementById('btnClearTray');
+               if (state.tray.length >= 2) {
+                  btnClear.disabled = false;
+                  btnClear.classList.remove('hidden');
+                  btnClear.classList.add('inline-flex');
+               } else {
+                  btnClear.disabled = true;
+                  btnClear.classList.add('hidden');
+                  btnClear.classList.remove('inline-flex');
+               }
+
+               document.getElementById('nlStartLabel').textContent = `${cust.price} ฿`;
+               document.getElementById('nlEndLabel').textContent = `${cust.paid} ฿`;
+
+               const remaining = targetChange - changeInTray;
+               const midLabel = document.getElementById('nlMidLabel');
+               if (state.settings.challengeMode) {
+                  midLabel.textContent = `${state.tray.length} ชิ้น`;
+               } else if (remaining > 0) {
+                  midLabel.textContent = `+ ${remaining} ฿`;
+               } else if (remaining === 0) {
+                  midLabel.textContent = `ครบ ${cust.paid} ฿ ✓`;
+               } else {
+                  midLabel.textContent = `เกิน ${Math.abs(remaining)} ฿`;
+               }
+
+               const pct = Math.min(100, Math.max(0, (changeInTray / targetChange) * 100));
+               const fillEl = document.getElementById('nlFill');
+               fillEl.style.width = `${pct}%`;
+               if (changeInTray > targetChange) {
+                  fillEl.className = 'h-full rounded-full bg-strawberry transition-all duration-200';
+               } else {
+                  fillEl.className = 'h-full rounded-full bg-gradient-to-r from-strawberry to-mint transition-all duration-200';
+               }
+               document.getElementById('nlProgressBar').setAttribute('aria-valuenow', Math.round(pct));
+            }
+
+            function handleConfirmChange() {
+               if (state.isTransitioning) return;
+               const cust = getCurrentCustomer();
+               const changeInTray = state.tray.reduce((a, b) => a + b, 0);
+               const currentCountOn = cust.price + changeInTray;
+               const targetChange = cust.paid - cust.price;
+
+               if (currentCountOn === cust.paid) {
+                  state.isTransitioning = true;
+                  playTone('success');
+                  spawnConfetti();
+
+                  const optimalPieces = getOptimalPieceCount(targetChange);
+                  const isOptimal = state.tray.length === optimalPieces;
+                  let earned = state.firstTryCorrect ? 100 : 70;
+                  if (isOptimal) {
+                     earned += 25;
+                     state.optimalCount++;
+                  }
+                  state.score += earned;
+                  document.getElementById('scoreDisplay').textContent = `${state.score}`;
+
+                  renderVisualSpeechBubble({ ...cust, earned }, 'success', targetChange);
+                  speakThai(`ถูกต้องครับ ทอน ${targetChange} บาท`);
+
+                  const wrapper = document.getElementById('customerWrapper');
+                  wrapper.classList.add('happy-jump');
+
+                  scheduleSafeTimeout(() => {
+                     wrapper.classList.remove('happy-jump');
+                     wrapper.classList.add('leaving');
+                     scheduleSafeTimeout(() => advanceCustomer(), 400);
+                  }, 1250);
+               } else {
+                  state.firstTryCorrect = false;
+                  playTone('gentle_error');
+
+                  if (currentCountOn < cust.paid) {
+                     const diff = cust.paid - currentCountOn;
+                     renderVisualSpeechBubble(cust, 'short', diff);
+                     speakThai(`ยังขาดอีก ${diff} บาท`);
+                  } else {
+                     const over = currentCountOn - cust.paid;
+                     renderVisualSpeechBubble(cust, 'over', over);
+                     speakThai(`เกินมา ${over} บาท`);
+                  }
+               }
+            }
+
+            function advanceCustomer() {
+               const lvl = getCurrentLevel();
+               if (state.customerIndex + 1 < lvl.customers.length) {
+                  state.customerIndex++;
+                  loadCustomer(true);
+               } else {
+                  finishLevel();
+               }
+            }
+
+            function finishLevel() {
+               state.isTransitioning = false;
+               const lvlIdx = state.levelIndex;
+               const totalCustomers = LEVELS[lvlIdx].customers.length;
+               state.progress.completed[lvlIdx] = true;
+               if (state.score > state.progress.bestScores[lvlIdx]) {
+                  state.progress.bestScores[lvlIdx] = state.score;
+               }
+               saveStorage();
+               updateLevelSelectCards();
+
+               document.getElementById('sumTitle').textContent = `สำเร็จ ${LEVELS[lvlIdx].shortName}!`;
+               document.getElementById('sumScoreText').textContent = `★ ${state.score}`;
+               document.getElementById('sumBonusText').textContent = `ทอนประหยัดชิ้น: ${state.optimalCount} / ${totalCustomers}`;
+
+               const nextBtn = document.getElementById('btnNextLevel');
+               if (lvlIdx < LEVELS.length - 1) {
+                  nextBtn.style.display = 'inline-flex';
+               } else {
+                  nextBtn.style.display = 'none';
+               }
+
+               document.getElementById('summaryModal').classList.remove('hidden');
+               speakThai(`สำเร็จแล้ว ได้ ${state.score} คะแนน`);
+            }
+
+            function startLevel(lvlIndex) {
+               state.sessionToken++;
+               clearAllPendingTimers();
+               clearConfetti();
+               stopSpeech();
+
+               state.levelIndex = lvlIndex;
+               state.customerIndex = 0;
+               state.score = 0;
+               state.optimalCount = 0;
+               document.getElementById('scoreDisplay').textContent = '0';
+               document.getElementById('startModal').classList.add('hidden');
+               document.getElementById('summaryModal').classList.add('hidden');
+               loadCustomer(true);
+            }
+
+            // --- 7. SETTINGS SYNC ---
+            function applySettingsToDOM() {
+               const s = state.settings;
+               document.body.classList.toggle('large-text', s.largeText);
+               document.body.classList.toggle('reduced-motion', s.reducedMotion);
+
+               if (!s.voice) {
+                  stopSpeech();
+               }
+
+               const syncToggle = (id, val) => {
+                  const el = document.getElementById(id);
+                  if (!el) return;
+                  el.classList.toggle('on', val);
+                  el.setAttribute('aria-checked', String(val));
+               };
+
+               syncToggle('toggleVoice', s.voice);
+               syncToggle('toggleSfx', s.sfx);
+               syncToggle('toggleShowTarget', s.showTarget);
+               syncToggle('toggleChallenge', s.challengeMode);
+               syncToggle('toggleLargeText', s.largeText);
+               syncToggle('toggleReducedMotion', s.reducedMotion);
+
+               const cust = getCurrentCustomer();
+               if (cust) {
+                  const targetChange = cust.paid - cust.price;
+                  document.getElementById('targetChangeText').textContent = s.showTarget ? `${targetChange} ฿` : '? ฿';
+                  updateCountingUI(false);
+               }
+            }
+
+            function updateLevelSelectCards() {
+               document.querySelectorAll('.level-card-btn').forEach((btn) => {
+                  const idx = Number(btn.getAttribute('data-level'));
+                  const isSelected = idx === state.levelIndex;
+                  btn.classList.toggle('bg-butter-soft', isSelected);
+                  btn.classList.toggle('ring-4', isSelected);
+                  btn.classList.toggle('ring-butter', isSelected);
+                  btn.classList.toggle('bg-white', !isSelected);
+
+                  const bestEl = document.getElementById(`bestLvl${idx}`);
+                  if (state.progress.completed[idx]) {
+                     bestEl.textContent = `★ ${state.progress.bestScores[idx]}`;
+                     bestEl.className = 'level-best text-xs font-display font-bold text-mint-deep mt-0.5';
+                  } else {
+                     bestEl.textContent = '★ 0';
+                     bestEl.className = 'level-best text-xs font-display font-semibold text-cocoa-light mt-0.5';
+                  }
+               });
+            }
+
+            // --- 8. EVENT LISTENERS ---
+            function bindEvents() {
+               document.querySelectorAll('.level-card-btn').forEach((btn) => {
+                  btn.addEventListener('click', () => {
+                     state.levelIndex = Number(btn.getAttribute('data-level'));
+                     updateLevelSelectCards();
+                     playTone('coin');
+                  });
+               });
+
+               document.getElementById('btnStartGame').addEventListener('click', () => {
+                  initAudio();
+                  startLevel(state.levelIndex);
+               });
+
+               document.getElementById('btnHome').addEventListener('click', () => {
+                  state.sessionToken++;
+                  clearAllPendingTimers();
+                  clearConfetti();
+                  stopSpeech();
+                  updateLevelSelectCards();
+                  document.getElementById('summaryModal').classList.add('hidden');
+                  document.getElementById('startModal').classList.remove('hidden');
+               });
+
+               document.getElementById('btnSpeakPrompt').addEventListener('click', () => {
+                  const cust = getCurrentCustomer();
+                  if (cust) {
+                     speakThai(`ซื้อ${cust.item}ราคา ${cust.price} บาท ลูกค้าจ่ายเงินมา ${cust.paid} บาท`);
+                  }
+               });
+
+               document.getElementById('btnUndo').addEventListener('click', undoLastMoney);
+               document.getElementById('btnClearTray').addEventListener('click', clearTray);
+               document.getElementById('btnConfirmChange').addEventListener('click', handleConfirmChange);
+
+               // Tutorial Modal
+               const tutModal = document.getElementById('tutorialModal');
+               document.getElementById('btnTutorial').addEventListener('click', () => {
+                  tutModal.classList.remove('hidden');
+               });
+               document.getElementById('btnOpenTutFromStart').addEventListener('click', () => {
+                  tutModal.classList.remove('hidden');
+               });
+               document.getElementById('btnCloseTutorial').addEventListener('click', () => {
+                  tutModal.classList.add('hidden');
+               });
+               tutModal.addEventListener('click', (e) => {
+                  if (e.target === tutModal) tutModal.classList.add('hidden');
+               });
+
+               // Settings Modal
+               const setModal = document.getElementById('settingsModal');
+               document.getElementById('btnSettings').addEventListener('click', () => {
+                  setModal.classList.remove('hidden');
+               });
+               document.getElementById('btnCloseSettings').addEventListener('click', () => {
+                  setModal.classList.add('hidden');
+                  saveStorage();
+               });
+               setModal.addEventListener('click', (e) => {
+                  if (e.target === setModal) {
+                     setModal.classList.add('hidden');
+                     saveStorage();
+                  }
+               });
+
+               const toggleMap = [
+                  ['toggleVoice', 'voice'],
+                  ['toggleSfx', 'sfx'],
+                  ['toggleShowTarget', 'showTarget'],
+                  ['toggleChallenge', 'challengeMode'],
+                  ['toggleLargeText', 'largeText'],
+                  ['toggleReducedMotion', 'reducedMotion'],
+               ];
+
+               toggleMap.forEach(([elId, key]) => {
+                  const el = document.getElementById(elId);
+                  if (el) {
+                     el.addEventListener('click', () => {
+                        state.settings[key] = !state.settings[key];
+                        applySettingsToDOM();
+                        saveStorage();
+                     });
+                  }
+               });
+
+               // Summary Modal Actions
+               document.getElementById('btnNextLevel').addEventListener('click', () => {
+                  if (state.levelIndex + 1 < LEVELS.length) {
+                     startLevel(state.levelIndex + 1);
+                  }
+               });
+               document.getElementById('btnReplayLevel').addEventListener('click', () => {
+                  startLevel(state.levelIndex);
+               });
+
+               // Keyboard Accessibility
+               window.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape') {
+                     if (!tutModal.classList.contains('hidden')) {
+                        tutModal.classList.add('hidden');
+                        return;
+                     }
+                     if (!setModal.classList.contains('hidden')) {
+                        setModal.classList.add('hidden');
+                        saveStorage();
+                        return;
+                     }
+                  }
+
+                  const anyModalOpen =
+                     !document.getElementById('startModal').classList.contains('hidden') ||
+                     !tutModal.classList.contains('hidden') ||
+                     !setModal.classList.contains('hidden') ||
+                     !document.getElementById('summaryModal').classList.contains('hidden');
+                  if (anyModalOpen) return;
+
+                  const keyMap = {
+                     1: 20,
+                     2: 50,
+                     3: 100,
+                     4: 1,
+                     5: 2,
+                     6: 5,
+                     7: 10,
+                  };
+
+                  if (keyMap[e.key] !== undefined) {
+                     e.preventDefault();
+                     addMoneyToTray(keyMap[e.key]);
+                  } else if (e.key === 'Backspace') {
+                     e.preventDefault();
+                     undoLastMoney();
+                  } else if (e.key === 'Enter') {
+                     e.preventDefault();
+                     handleConfirmChange();
+                  }
+               });
+            }
+
+            // --- 9. INITIALIZATION ---
+            window.onload = function () {
+               loadStorage();
+               if ('speechSynthesis' in window) {
+                  window.speechSynthesis.getVoices();
+               }
+
+               document.getElementById('welcomeMascot').innerHTML = getMainMascotSVG(112, 122);
+               document.getElementById('shopkeeperAvatar').innerHTML = getMainMascotSVG(98, 108);
+               document.getElementById('trophySvgContainer').innerHTML = `<svg width="72" height="72" viewBox="0 0 80 80" aria-hidden="true">
+                  <path d="M22 16 H58 V36 C58 50 48 56 40 56 C32 56 22 50 22 36 Z" fill="#FFD147" stroke="#4A323A" stroke-width="3.5"/>
+                  <rect x="35" y="56" width="10" height="12" fill="#F4A261" stroke="#4A323A" stroke-width="2.5"/>
+                  <rect x="24" y="66" width="32" height="8" rx="4" fill="#E8B88A" stroke="#4A323A" stroke-width="2.5"/>
+                  <polygon points="40,24 43,32 51,32 45,37 47,45 40,40 33,45 35,37 29,32 37,32" fill="#FFFDF9"/>
+               </svg>`;
+
+               renderDrawerButtons();
+               applySettingsToDOM();
+               updateLevelSelectCards();
+               loadCustomer(false);
+               bindEvents();
+            };
+         })();
+      </script>
+   </body>
+</html>

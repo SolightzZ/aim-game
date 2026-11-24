@@ -1,0 +1,2835 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>ทอยเต๋าบันไดงู นับต่อ 3D — Count-On Snakes &amp; Ladders</title>
+
+      <!-- Load Tailwind CSS CDN -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <!-- Configure Tailwind Custom Theme Tokens for Snakes & Ladders Palette -->
+      <script>
+         tailwind.config = {
+            theme: {
+               extend: {
+                  fontFamily: {
+                     sans: ['Noto Sans Thai', 'Sarabun', 'Inter', 'Nunito', 'Segoe UI', 'system-ui', 'sans-serif'],
+                  },
+                  colors: {
+                     ivory: {
+                        DEFAULT: '#faf7f0',
+                        soft: '#f5f1e6',
+                        deep: '#efe9dc',
+                     },
+                     emeraldBoard: {
+                        DEFAULT: '#2e8b63',
+                        dark: '#1f6848',
+                        soft: '#e6f4ed',
+                     },
+                     goldBoard: {
+                        DEFAULT: '#eab308',
+                        dark: '#a16207',
+                        soft: '#fef9c3',
+                     },
+                     crimsonBoard: {
+                        DEFAULT: '#c53b2e',
+                        dark: '#99271d',
+                        soft: '#fee2e2',
+                     },
+                     ink: {
+                        primary: '#18222f',
+                        secondary: '#4e5d6c',
+                        muted: '#7c8b99',
+                     },
+                  },
+                  boxShadow: {
+                     float: '0 10px 30px rgba(24, 34, 47, 0.08), 0 2px 6px rgba(24, 34, 47, 0.04)',
+                     cta: '0 6px 0 #1f6848, 0 14px 24px rgba(46, 139, 99, 0.25)',
+                     ctaConfirm: '0 5px 0 #a16207, 0 10px 20px rgba(234, 179, 8, 0.28)',
+                  },
+               },
+            },
+         };
+      </script>
+
+      <!-- Load Three.js r128 for 3D Tabletop Board, Characters, Dice & Camera Tracking -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+      <!-- Minimal Custom CSS for Dynamic Accessibility Scales, Canvas, & Switch Knob -->
+      <style>
+         :root {
+            --ui-scale: 1;
+         }
+         html,
+         body {
+            font-size: calc(15px * var(--ui-scale));
+            -webkit-tap-highlight-color: transparent;
+         }
+         body.text-large {
+            --ui-scale: 1.1;
+         }
+         body.text-xlarge {
+            --ui-scale: 1.2;
+         }
+         body.high-contrast {
+            background: #ffffff !important;
+            color: #000000 !important;
+         }
+         body.high-contrast .hc-surface {
+            background: #ffffff !important;
+            border-color: #000000 !important;
+            box-shadow: 0 0 0 2px #000000 !important;
+            color: #000000 !important;
+         }
+         #board-3d-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+         }
+         /* Toggle Switch Sliding Knob */
+         .switch-btn::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+         .switch-btn[aria-pressed='true'] {
+            background-color: #2e8b63;
+         }
+         .switch-btn[aria-pressed='true']::after {
+            transform: translateX(24px);
+         }
+         body.reduce-motion *,
+         body.reduce-motion *::before,
+         body.reduce-motion *::after {
+            transition-duration: 0.01ms !important;
+         }
+      </style>
+   </head>
+
+   <body class="m-0 p-0 w-screen h-[100dvh] overflow-hidden select-none font-sans text-ink-primary bg-[radial-gradient(circle_at_50%_42%,#ffffff_0%,#faf7f0_70%,#efe9dc_100%)]">
+      <!-- Screen Reader Live Region -->
+      <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+      <!-- Fullscreen Game Container -->
+      <main id="app" class="relative w-full h-full overflow-hidden" aria-label="เกมทอยเต๋าบันไดงู นับต่อ 3D">
+         <!-- FULLSCREEN 3D WEBGL BOARD STAGE -->
+         <section class="fixed inset-0 z-[1] w-full h-full" aria-label="กระดานเกมบันไดงู 3 มิติ">
+            <div
+               id="board-3d-wrapper"
+               class="relative w-full h-full cursor-grab active:cursor-grabbing touch-none"
+               role="application"
+               aria-label="กระดานเกม 3 มิติ ลากเพื่อหมุนมุมมอง หรือแตะช่องตัวเลขเพื่อนับต่อ"></div>
+         </section>
+
+         <!-- FLOATING TOP-LEFT STATUS PILLS -->
+         <div class="fixed top-3 left-3 sm:top-4 sm:left-5 z-20 flex items-center gap-2 pointer-events-none">
+            <div
+               id="hud-stage"
+               title="ด่านปัจจุบัน"
+               class="hc-surface pointer-events-auto inline-flex items-center gap-1.5 h-[42px] px-3.5 rounded-full bg-emeraldBoard-soft/90 border border-emeraldBoard/35 backdrop-blur-md shadow-float font-extrabold text-sm text-emeraldBoard-dark whitespace-nowrap">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 21V4M5 4H18L15 9L18 14H5" stroke="#1F6848" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="#FACC15" />
+               </svg>
+               <span id="hud-stage-text">ด่าน 3</span>
+            </div>
+
+            <div
+               id="hud-turn"
+               title="รอบการเดิน"
+               class="hc-surface pointer-events-auto inline-flex items-center gap-1.5 h-[42px] px-3.5 rounded-full bg-white/90 border border-ink-primary/10 backdrop-blur-md shadow-float font-extrabold text-sm text-ink-primary whitespace-nowrap">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" stroke="#C53B2E" stroke-width="2.2" fill="#FEE2E2" />
+                  <path d="M12 7.5V12L15 14" stroke="#99271D" stroke-width="2.2" stroke-linecap="round" />
+               </svg>
+               <span id="hud-turn-text">ตา 1/16</span>
+            </div>
+
+            <!-- Compact Visual Race Track (Hidden on small mobile) -->
+            <div
+               id="race-track-wrap"
+               aria-label="แถบระยะทางแข่งขัน"
+               class="hc-surface pointer-events-auto hidden sm:inline-flex items-center gap-2 h-[42px] w-36 md:w-48 px-3 rounded-full bg-white/90 border border-ink-primary/10 backdrop-blur-md shadow-float">
+               <div class="relative flex-1 h-2 bg-ink-primary/10 rounded-full overflow-visible">
+                  <div
+                     id="race-fill"
+                     style="width: 2%"
+                     class="absolute top-0 left-0 h-full bg-gradient-to-r from-goldBoard to-emeraldBoard rounded-full transition-all duration-500"></div>
+                  <div
+                     id="race-rabbit-marker"
+                     style="left: 2%"
+                     title="ตำแหน่งกระต่าย"
+                     class="absolute top-[32%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 transition-all duration-500 drop-shadow pointer-events-none">
+                     <svg viewBox="0 0 36 36" width="22" height="22" aria-hidden="true">
+                        <ellipse cx="14" cy="8" rx="3" ry="7" fill="#FFFFFF" stroke="#374151" stroke-width="2" />
+                        <ellipse cx="22" cy="8" rx="3" ry="7" fill="#FFFFFF" stroke="#374151" stroke-width="2" />
+                        <circle cx="18" cy="21" r="10" fill="#FFFFFF" stroke="#374151" stroke-width="2" />
+                        <circle cx="15" cy="19" r="1.6" fill="#1F2937" />
+                        <circle cx="21" cy="19" r="1.6" fill="#1F2937" />
+                        <ellipse cx="18" cy="22.5" rx="2" ry="1.3" fill="#F472B6" />
+                     </svg>
+                  </div>
+                  <div
+                     id="race-chick-marker"
+                     style="left: 2%"
+                     title="ตำแหน่งลูกเจี๊ยบ"
+                     class="absolute top-[62%] z-[2] -translate-x-1/2 -translate-y-1/2 w-6 h-6 transition-all duration-500 drop-shadow pointer-events-none">
+                     <svg viewBox="0 0 36 36" width="24" height="24" aria-hidden="true">
+                        <circle cx="18" cy="20" r="11" fill="#FDE047" stroke="#A16207" stroke-width="2" />
+                        <circle cx="14.5" cy="18" r="1.8" fill="#1F2937" />
+                        <circle cx="21.5" cy="18" r="1.8" fill="#1F2937" />
+                        <polygon points="15,21 21,21 18,25" fill="#F97316" />
+                     </svg>
+                  </div>
+               </div>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 21V4M5 4H19L16 9L19 14H5" fill="#2E8B63" stroke="#1F6848" stroke-width="2" stroke-linejoin="round" />
+               </svg>
+            </div>
+         </div>
+
+         <!-- FLOATING TOP-RIGHT SCORE & ICON ACTIONS -->
+         <div class="fixed top-3 right-3 sm:top-4 sm:right-5 z-20 flex items-center gap-2 pointer-events-none">
+            <div
+               title="คะแนนดาวและคอมโบ"
+               class="hc-surface pointer-events-auto inline-flex items-center gap-1.5 h-[42px] px-3.5 rounded-full bg-white/90 border border-ink-primary/10 backdrop-blur-md shadow-float font-extrabold text-sm text-ink-primary whitespace-nowrap">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 2L14.9 8.6L22 9.3L16.6 14L18.2 21L12 17.3L5.8 21L7.4 14L2 9.3L9.1 8.6L12 2Z" fill="#FACC15" stroke="#A16207" stroke-width="1.8" />
+               </svg>
+               <span id="hud-score">0</span>
+               <span class="opacity-25">|</span>
+               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                     d="M12 2C12 2 18 7.5 18 13.5C18 17.6 15.3 21 12 21C8.7 21 6 17.6 6 13.5C6 11 7.2 8.8 8.5 7.5C8.5 9.5 10 10.5 10 10.5C9.5 7.5 12 2 12 2Z"
+                     fill="#F97316"
+                     stroke="#9A3412"
+                     stroke-width="1.8" />
+               </svg>
+               <span id="hud-combo">0</span>
+            </div>
+
+            <button
+               type="button"
+               id="btn-mute-quick"
+               aria-label="เปิดหรือปิดเสียง"
+               title="เปิด/ปิดเสียง"
+               class="hc-surface pointer-events-auto inline-flex items-center justify-center w-[42px] h-[42px] rounded-full border border-ink-primary/10 bg-white/90 backdrop-blur-md shadow-float hover:bg-white hover:border-emeraldBoard hover:-translate-y-0.5 active:scale-95 transition">
+               <svg id="icon-sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M11 5L6 9H3V15H6L11 19V5Z" fill="#E6F4ED" stroke="#1F6848" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M15.5 8.5C16.8 9.8 16.8 14.2 15.5 15.5M18.5 5.5C21.2 8.2 21.2 15.8 18.5 18.5" stroke="#2E8B63" stroke-width="2.2" stroke-linecap="round" />
+               </svg>
+               <svg id="icon-sound-off" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M11 5L6 9H3V15H6L11 19V5Z" fill="#F3F4F6" stroke="#4B5563" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M16 9L21 15M21 9L16 15" stroke="#C53B2E" stroke-width="2.4" stroke-linecap="round" />
+               </svg>
+            </button>
+
+            <button
+               type="button"
+               id="btn-settings"
+               aria-label="ตั้งค่า"
+               title="ตั้งค่า"
+               class="hc-surface pointer-events-auto inline-flex items-center justify-center w-[42px] h-[42px] rounded-full border border-ink-primary/10 bg-white/90 backdrop-blur-md shadow-float hover:bg-white hover:border-emeraldBoard hover:-translate-y-0.5 active:scale-95 transition">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3.2" fill="#FEF9C3" stroke="#18222F" stroke-width="2" />
+                  <path
+                     d="M12 2.5V5M12 19V21.5M4.9 4.9L6.8 6.8M17.2 17.2L19.1 19.1M2.5 12H5M19 12H21.5M4.9 19.1L6.8 17.2M17.2 6.8L19.1 4.9"
+                     stroke="#18222F"
+                     stroke-width="2.1"
+                     stroke-linecap="round" />
+               </svg>
+            </button>
+
+            <button
+               type="button"
+               id="btn-pause"
+               aria-label="พักการเล่น"
+               title="พักการเล่น (Esc)"
+               class="hc-surface pointer-events-auto inline-flex items-center justify-center w-[42px] h-[42px] rounded-full border border-ink-primary/10 bg-white/90 backdrop-blur-md shadow-float hover:bg-white hover:border-emeraldBoard hover:-translate-y-0.5 active:scale-95 transition">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="6" y="5" width="4" height="14" rx="1.6" fill="#18222F" />
+                  <rect x="14" y="5" width="4" height="14" rx="1.6" fill="#18222F" />
+               </svg>
+            </button>
+         </div>
+
+         <!-- FLOATING EQUATION & COUNT-ON PILL -->
+         <section
+            class="fixed top-[60px] sm:top-[68px] left-1/2 -translate-x-1/2 z-[14] w-[min(92vw,620px)] flex flex-col items-center gap-1 pointer-events-none"
+            aria-label="โจทย์การบวกเลข">
+            <div id="feedback-cheer" aria-live="polite" class="text-sm sm:text-base font-black text-crimsonBoard min-h-[20px] text-center drop-shadow-[0_1px_6px_rgba(255,255,255,0.95)]"></div>
+
+            <div
+               id="equation-card"
+               class="hc-surface pointer-events-auto w-full bg-white/90 border-2 border-emeraldBoard/25 backdrop-blur-md rounded-2xl sm:rounded-full px-3 py-1.5 flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-2.5 shadow-float transition-colors duration-200">
+               <button
+                  type="button"
+                  id="btn-speak-prompt"
+                  aria-label="ฟังเสียงโจทย์ซ้ำ (R)"
+                  title="ฟังเสียงโจทย์ (R)"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-ink-primary/10 bg-white hover:border-emeraldBoard active:scale-95 transition shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M11 5L6 9H3V15H6L11 19V5Z" fill="#FEF9C3" stroke="#A16207" stroke-width="2" stroke-linejoin="round" />
+                     <path d="M15.5 8.5C16.8 9.8 16.8 14.2 15.5 15.5" stroke="#A16207" stroke-width="2.2" stroke-linecap="round" />
+                  </svg>
+               </button>
+
+               <div id="equation-math" class="flex items-center gap-1.5 text-lg sm:text-xl font-black text-ink-primary whitespace-nowrap">
+                  <span id="eq-start" class="inline-flex items-center justify-center min-w-[36px] px-2.5 py-0.5 rounded-xl bg-goldBoard-soft border border-goldBoard text-goldBoard-dark">1</span>
+                  <span>+</span>
+                  <span id="eq-roll" class="inline-flex items-center justify-center min-w-[36px] px-2.5 py-0.5 rounded-xl bg-crimsonBoard-soft border border-crimsonBoard text-crimsonBoard-dark">?</span>
+                  <span>=</span>
+                  <span id="eq-target" class="inline-flex items-center justify-center min-w-[36px] px-2.5 py-0.5 rounded-xl bg-emeraldBoard-soft border border-emeraldBoard text-emeraldBoard-dark">?</span>
+               </div>
+
+               <div id="equation-prompt" class="flex-1 basis-full sm:basis-auto order-3 sm:order-none text-center text-xs sm:text-sm font-bold text-ink-secondary leading-snug">
+                  กดปุ่ม <strong>ทอยลูกเต๋า</strong> เพื่อเริ่มเดิน!
+               </div>
+            </div>
+         </section>
+
+         <!-- FLOATING PLACE VALUE CALLOUT -->
+         <div
+            id="place-value-banner"
+            role="status"
+            class="fixed top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2 scale-90 opacity-0 pointer-events-none z-20 inline-flex items-center gap-2.5 bg-white/95 border-2 border-emeraldBoard rounded-full px-5 py-2 text-base sm:text-lg font-black text-emeraldBoard-dark shadow-xl whitespace-nowrap transition-all duration-300">
+            <span id="pv-delta">+10</span>
+            <span id="pv-arrow" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emeraldBoard text-white text-sm">↑</span>
+            <span id="pv-text">2 สิบ → 3 สิบ</span>
+         </div>
+
+         <!-- FLOATING CAMERA RESET BUTTON -->
+         <button
+            type="button"
+            id="btn-reset-camera"
+            aria-label="รีเซ็ตมุมกล้อง 3D"
+            title="รีเซ็ตมุมกล้อง 3D"
+            class="hc-surface fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-20 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/90 border border-ink-primary/10 text-ink-primary backdrop-blur-md shadow-float hover:border-emeraldBoard hover:-translate-y-0.5 active:scale-95 transition">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+               <path d="M3 12A9 9 0 1 0 6 5.3L3 8" stroke="#18222F" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+               <path d="M3 3V8H8" stroke="#18222F" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+         </button>
+
+         <!-- FLOATING BOTTOM ACTION DOCK -->
+         <footer class="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 max-w-[92vw]" aria-label="แผงควบคุมการเล่น">
+            <div class="flex items-center justify-center flex-wrap gap-2">
+               <button
+                  type="button"
+                  id="btn-main-action"
+                  class="inline-flex items-center justify-center gap-2.5 min-h-[50px] px-6 py-2.5 rounded-full border-2 border-emeraldBoard-dark bg-gradient-to-b from-[#359d70] to-emeraldBoard text-white text-base sm:text-lg font-black shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0.5 disabled:opacity-45 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <rect x="3" y="3" width="18" height="18" rx="4.5" fill="#FFFFFF" stroke="#1F6848" stroke-width="2" />
+                     <circle cx="8.5" cy="8.5" r="1.7" fill="#C53B2E" />
+                     <circle cx="15.5" cy="8.5" r="1.7" fill="#18222F" />
+                     <circle cx="12" cy="12" r="1.7" fill="#2E8B63" />
+                     <circle cx="8.5" cy="15.5" r="1.7" fill="#18222F" />
+                     <circle cx="15.5" cy="15.5" r="1.7" fill="#C53B2E" />
+                  </svg>
+                  <span id="btn-main-label">ทอยลูกเต๋า</span>
+               </button>
+
+               <!-- Golden Choice Nudge Pills (+1, +2, +3) -->
+               <div
+                  id="golden-nudge-group"
+                  title="ลูกเต๋าทอง: เลือกจำนวนก้าวเองได้เมื่อมีคอมโบ"
+                  class="inline-flex items-center gap-1.5 h-[46px] bg-goldBoard-soft/95 border border-goldBoard rounded-full px-2.5 shadow-float transition-opacity">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#EAB308" stroke="#A16207" stroke-width="1.6" />
+                  </svg>
+                  <button
+                     type="button"
+                     data-nudge="1"
+                     class="nudge-pill min-w-[38px] h-[34px] rounded-full border border-goldBoard-dark bg-white text-[#713f12] font-black text-sm hover:bg-yellow-300 hover:-translate-y-0.5 disabled:opacity-45 disabled:cursor-not-allowed transition">
+                     +1
+                  </button>
+                  <button
+                     type="button"
+                     data-nudge="2"
+                     class="nudge-pill min-w-[38px] h-[34px] rounded-full border border-goldBoard-dark bg-white text-[#713f12] font-black text-sm hover:bg-yellow-300 hover:-translate-y-0.5 disabled:opacity-45 disabled:cursor-not-allowed transition">
+                     +2
+                  </button>
+                  <button
+                     type="button"
+                     data-nudge="3"
+                     class="nudge-pill min-w-[38px] h-[34px] rounded-full border border-goldBoard-dark bg-white text-[#713f12] font-black text-sm hover:bg-yellow-300 hover:-translate-y-0.5 disabled:opacity-45 disabled:cursor-not-allowed transition">
+                     +3
+                  </button>
+               </div>
+
+               <button
+                  type="button"
+                  id="btn-hint"
+                  title="นับให้ดูทีละช่อง"
+                  class="hidden items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-full border border-ink-primary/20 bg-white/90 text-ink-primary backdrop-blur-md text-sm font-extrabold shadow-float hover:bg-white hover:-translate-y-0.5 disabled:opacity-45 transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M9 18H15M10 21H14M12 3A6 6 0 0 0 8 13.5C8.6 14.2 9 15 9 16H15C15 15 15.4 14.2 16 13.5A6 6 0 0 0 12 3Z" stroke="#A16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#FEF9C3" />
+                  </svg>
+                  <span>ช่วยนับ</span>
+               </button>
+            </div>
+
+            <div
+               id="caption-strip"
+               class="text-xs font-bold text-ink-secondary bg-white/80 border border-ink-primary/10 rounded-full px-3.5 py-1 max-w-[88vw] whitespace-nowrap overflow-hidden text-ellipsis backdrop-blur-sm">
+               ลากเพื่อหมุนมุมมอง 3D • กด Space เพื่อทอยลูกเต๋า
+            </div>
+         </footer>
+      </main>
+
+      <!-- ========================================================================
+           PAGE 1: FULLSCREEN MINIMAL & CLEAN START SCREEN
+           ======================================================================== -->
+      <div
+         id="screen-start"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="start-title"
+         class="fixed inset-0 z-50 bg-[radial-gradient(circle_at_20%_15%,#e6f4ed_0%,#faf7f0_48%,#fef9e7_100%)] flex flex-col items-center justify-center p-4 sm:p-8 overflow-y-auto transition-opacity">
+         <!-- Direct Settings Icon Trigger -->
+         <button
+            type="button"
+            id="btn-start-settings"
+            aria-label="ตั้งค่า"
+            title="ตั้งค่า"
+            class="hc-surface fixed top-4 right-4 sm:top-6 sm:right-7 z-[55] inline-flex items-center justify-center w-[42px] h-[42px] rounded-full border border-ink-primary/10 bg-white/90 backdrop-blur-md shadow-float hover:bg-white hover:border-emeraldBoard hover:-translate-y-0.5 transition">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+               <circle cx="12" cy="12" r="3.2" fill="#FEF9C3" stroke="#18222F" stroke-width="2" />
+               <path
+                  d="M12 2.5V5M12 19V21.5M4.9 4.9L6.8 6.8M17.2 17.2L19.1 19.1M2.5 12H5M19 12H21.5M4.9 19.1L6.8 17.2M17.2 6.8L19.1 4.9"
+                  stroke="#18222F"
+                  stroke-width="2.1"
+                  stroke-linecap="round" />
+            </svg>
+         </button>
+
+         <div class="w-full max-w-[680px] flex flex-col items-center gap-4 sm:gap-5 text-center">
+            <!-- Bespoke Atmospheric Snakes & Ladders SVG Illustration -->
+            <div
+               class="relative w-full max-w-[360px] aspect-[16/9] flex items-center justify-center rounded-[28px] bg-gradient-to-br from-white to-ivory-soft border-2 border-emeraldBoard/15 shadow-[0_18px_40px_rgba(46,139,99,0.1)] overflow-hidden p-2.5"
+               aria-hidden="true">
+               <svg viewBox="0 0 360 190" width="100%" height="100%" fill="none">
+                  <rect x="28" y="24" width="304" height="142" rx="20" fill="#C53B2E" />
+                  <rect x="36" y="32" width="288" height="126" rx="14" fill="#F6F1E3" />
+                  <g opacity="0.92">
+                     <rect x="36" y="32" width="48" height="42" rx="4" fill="#3D9A6D" />
+                     <rect x="132" y="32" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="228" y="32" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="84" y="74" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="180" y="74" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="276" y="74" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="36" y="116" width="48" height="42" rx="4" fill="#3D9A6D" />
+                     <rect x="132" y="116" width="48" height="42" fill="#3D9A6D" />
+                     <rect x="228" y="116" width="48" height="42" fill="#3D9A6D" />
+                  </g>
+                  <g transform="rotate(-24 115 100)">
+                     <line x1="95" y1="30" x2="95" y2="165" stroke="#A16207" stroke-width="8" stroke-linecap="round" />
+                     <line x1="95" y1="30" x2="95" y2="165" stroke="#FACC15" stroke-width="4.5" stroke-linecap="round" />
+                     <line x1="123" y1="30" x2="123" y2="165" stroke="#A16207" stroke-width="8" stroke-linecap="round" />
+                     <line x1="123" y1="30" x2="123" y2="165" stroke="#FACC15" stroke-width="4.5" stroke-linecap="round" />
+                     <line x1="95" y1="52" x2="123" y2="52" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" />
+                     <line x1="95" y1="78" x2="123" y2="78" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" />
+                     <line x1="95" y1="104" x2="123" y2="104" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" />
+                     <line x1="95" y1="130" x2="123" y2="130" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" />
+                  </g>
+                  <path d="M242 48 C275 68, 210 92, 248 118 C272 135, 232 148, 215 148" stroke="#6B4217" stroke-width="14" stroke-linecap="round" />
+                  <path d="M242 48 C275 68, 210 92, 248 118 C272 135, 232 148, 215 148" stroke="#D9A83E" stroke-width="9.5" stroke-linecap="round" />
+                  <circle cx="240" cy="48" r="11" fill="#D9A83E" stroke="#6B4217" stroke-width="2.5" />
+                  <circle cx="236" cy="45" r="2.6" fill="#FFFFFF" />
+                  <circle cx="236" cy="45" r="1.3" fill="#18222F" />
+                  <circle cx="244" cy="45" r="2.6" fill="#FFFFFF" />
+                  <circle cx="244" cy="45" r="1.3" fill="#18222F" />
+                  <g transform="translate(56, 98)">
+                     <ellipse cx="26" cy="52" rx="18" ry="5" fill="#18222F" opacity="0.16" />
+                     <circle cx="26" cy="30" r="21" fill="#FDE047" stroke="#A16207" stroke-width="2.8" />
+                     <path d="M23 9C23 4 29 4 29 9" stroke="#F97316" stroke-width="3" stroke-linecap="round" />
+                     <circle cx="19" cy="27" r="2.8" fill="#18222F" />
+                     <circle cx="33" cy="27" r="2.8" fill="#18222F" />
+                     <polygon points="22,31 30,31 26,37" fill="#F97316" />
+                  </g>
+                  <g transform="translate(262, 86)">
+                     <ellipse cx="24" cy="64" rx="17" ry="5" fill="#18222F" opacity="0.16" />
+                     <ellipse cx="17" cy="15" rx="5" ry="13" fill="#FFFFFF" stroke="#374151" stroke-width="2.4" />
+                     <ellipse cx="31" cy="15" rx="5" ry="13" fill="#FFFFFF" stroke="#374151" stroke-width="2.4" />
+                     <ellipse cx="17" cy="16" rx="2.2" ry="8" fill="#FBCFE8" />
+                     <ellipse cx="31" cy="16" rx="2.2" ry="8" fill="#FBCFE8" />
+                     <circle cx="24" cy="40" r="19" fill="#FFFFFF" stroke="#374151" stroke-width="2.6" />
+                     <circle cx="18" cy="37" r="2.6" fill="#18222F" />
+                     <circle cx="30" cy="37" r="2.6" fill="#18222F" />
+                     <ellipse cx="24" cy="42" rx="3" ry="2" fill="#F472B6" />
+                  </g>
+                  <g transform="translate(158, 70) rotate(-10 22 22)">
+                     <rect x="0" y="0" width="44" height="44" rx="10" fill="#FFFFFF" stroke="#C53B2E" stroke-width="3" />
+                     <circle cx="13" cy="13" r="3.6" fill="#C53B2E" />
+                     <circle cx="31" cy="13" r="3.6" fill="#18222F" />
+                     <circle cx="22" cy="22" r="3.6" fill="#2E8B63" />
+                     <circle cx="13" cy="31" r="3.6" fill="#18222F" />
+                     <circle cx="31" cy="31" r="3.6" fill="#C53B2E" />
+                  </g>
+               </svg>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <div>
+               <h1 id="start-title" class="m-0 text-3xl sm:text-4xl font-black tracking-tight text-ink-primary leading-tight">
+                  ทอยเต๋าบันไดงู <span class="text-emeraldBoard">นับต่อ 3D</span>
+               </h1>
+               <p class="mt-1.5 max-w-[520px] text-sm sm:text-base font-semibold text-ink-secondary leading-relaxed">
+                  ฝึกทักษะการนับต่อ (Count-On) แข่งกับเจ้ากระต่ายบนกระดานบันไดงูคลาสสิกในโลก 3 มิติ
+               </p>
+            </div>
+
+            <!-- Minimal Visual Stage Selector -->
+            <div class="w-full grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label="เลือกขนาดกระดาน">
+               <button
+                  type="button"
+                  data-stage="1"
+                  class="stage-card flex flex-col items-center justify-center gap-2 p-3 sm:p-4 rounded-[20px] border-2 border-ink-primary/10 bg-white/90 text-ink-primary shadow-sm hover:-translate-y-1 hover:border-emeraldBoard/45 transition">
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                     <rect x="4" y="8" width="28" height="20" rx="5" fill="#E6F4ED" stroke="#2E8B63" stroke-width="2" />
+                     <line x1="18" y1="8" x2="18" y2="28" stroke="#2E8B63" stroke-width="1.6" />
+                     <line x1="4" y1="18" x2="32" y2="18" stroke="#2E8B63" stroke-width="1.6" />
+                  </svg>
+                  <span class="text-base sm:text-lg font-black">1 – 50</span>
+                  <span class="stage-pill inline-flex items-center px-2.5 py-0.5 rounded-full bg-ivory-soft text-ink-secondary text-xs font-extrabold">ด่าน 1</span>
+               </button>
+
+               <button
+                  type="button"
+                  data-stage="2"
+                  class="stage-card flex flex-col items-center justify-center gap-2 p-3 sm:p-4 rounded-[20px] border-2 border-ink-primary/10 bg-white/90 text-ink-primary shadow-sm hover:-translate-y-1 hover:border-emeraldBoard/45 transition">
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                     <rect x="4" y="5" width="28" height="26" rx="5" fill="#FEF9C3" stroke="#A16207" stroke-width="2" />
+                     <line x1="13" y1="5" x2="13" y2="31" stroke="#A16207" stroke-width="1.5" />
+                     <line x1="23" y1="5" x2="23" y2="31" stroke="#A16207" stroke-width="1.5" />
+                     <line x1="4" y1="14" x2="32" y2="14" stroke="#A16207" stroke-width="1.5" />
+                     <line x1="4" y1="22" x2="32" y2="22" stroke="#A16207" stroke-width="1.5" />
+                  </svg>
+                  <span class="text-base sm:text-lg font-black">1 – 90</span>
+                  <span class="stage-pill inline-flex items-center px-2.5 py-0.5 rounded-full bg-ivory-soft text-ink-secondary text-xs font-extrabold">ด่าน 2</span>
+               </button>
+
+               <button
+                  type="button"
+                  data-stage="3"
+                  class="stage-card flex flex-col items-center justify-center gap-2 p-3 sm:p-4 rounded-[20px] border-2 border-emeraldBoard bg-white text-ink-primary shadow-[0_12px_26px_rgba(46,139,99,0.16)] hover:-translate-y-1 transition">
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                     <rect x="4" y="4" width="28" height="28" rx="5" fill="#FEE2E2" stroke="#C53B2E" stroke-width="2" />
+                     <rect x="6" y="6" width="12" height="12" rx="2" fill="#3D9A6D" />
+                     <rect x="18" y="18" width="12" height="12" rx="2" fill="#3D9A6D" />
+                     <path d="M12 28L24 8" stroke="#EAB308" stroke-width="3" stroke-linecap="round" />
+                  </svg>
+                  <span class="text-base sm:text-lg font-black">1 – 100</span>
+                  <span class="stage-pill inline-flex items-center px-2.5 py-0.5 rounded-full bg-emeraldBoard-soft text-emeraldBoard-dark text-xs font-extrabold">คลาสสิก</span>
+               </button>
+            </div>
+
+            <!-- Primary Start CTA -->
+            <button
+               type="button"
+               id="btn-start-game"
+               class="inline-flex items-center justify-center gap-2.5 w-full max-w-[300px] min-h-[54px] px-6 py-3 rounded-full border-2 border-emeraldBoard-dark bg-gradient-to-b from-[#359d70] to-emeraldBoard text-white text-lg font-black shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0.5 transition">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <polygon points="6,4 20,12 6,20" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round" />
+               </svg>
+               <span>เริ่มเล่น</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+           PAGE 2: MINIMAL & CLEAN SETTINGS MODAL
+           ======================================================================== -->
+      <div
+         id="screen-settings"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="settings-title"
+         class="hidden fixed inset-0 z-50 bg-ink-primary/35 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+         <div class="hc-surface w-full max-w-[520px] bg-white border border-ink-primary/10 rounded-[28px] p-5 sm:p-7 shadow-2xl flex flex-col items-center gap-4 max-h-[90dvh] overflow-y-auto">
+            <div class="w-full flex items-center justify-between gap-3 pb-3 border-b border-ink-primary/10">
+               <div class="flex items-center gap-2.5">
+                  <span class="w-9 h-9 rounded-xl bg-emeraldBoard-soft border border-emeraldBoard/30 inline-flex items-center justify-center shrink-0">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3.2" fill="#FFFFFF" stroke="#1F6848" stroke-width="2" />
+                        <path
+                           d="M12 2.5V5M12 19V21.5M4.9 4.9L6.8 6.8M17.2 17.2L19.1 19.1M2.5 12H5M19 12H21.5M4.9 19.1L6.8 17.2M17.2 6.8L19.1 4.9"
+                           stroke="#1F6848"
+                           stroke-width="2.1"
+                           stroke-linecap="round" />
+                     </svg>
+                  </span>
+                  <h2 id="settings-title" class="m-0 text-xl font-black text-ink-primary">ตั้งค่า</h2>
+               </div>
+               <button
+                  type="button"
+                  id="btn-close-settings"
+                  aria-label="ปิดหน้าตั้งค่า"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-ink-primary/10 bg-white hover:border-emeraldBoard active:scale-95 transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M6 6L18 18M18 6L6 18" stroke="#18222F" stroke-width="2.4" stroke-linecap="round" />
+                  </svg>
+               </button>
+            </div>
+
+            <div class="w-full flex flex-col gap-2.5">
+               <!-- Sound Effects -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M11 5L6 9H3V15H6L11 19V5Z" fill="#E6F4ED" stroke="#1F6848" stroke-width="2" stroke-linejoin="round" />
+                           <path d="M15.5 8.5C17 10 17 14 15.5 15.5" stroke="#2E8B63" stroke-width="2.2" stroke-linecap="round" />
+                        </svg>
+                     </span>
+                     <span>เสียงเอฟเฟกต์</span>
+                  </div>
+                  <button type="button" id="toggle-sound" role="switch" aria-pressed="true" aria-label="เปิดหรือปิดเสียงเอฟเฟกต์" class="switch-btn relative w-[54px] h-[30px] rounded-full bg-slate-300 cursor-pointer transition-colors shrink-0"></button>
+               </div>
+
+               <!-- Thai Voice Narration -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M4 12V10A8 8 0 0 1 20 10V12" stroke="#A16207" stroke-width="2" stroke-linecap="round" />
+                           <rect x="3" y="12" width="4" height="7" rx="2" fill="#FEF9C3" stroke="#A16207" stroke-width="1.8" />
+                           <rect x="17" y="12" width="4" height="7" rx="2" fill="#FEF9C3" stroke="#A16207" stroke-width="1.8" />
+                        </svg>
+                     </span>
+                     <span>เสียงอ่านโจทย์</span>
+                  </div>
+                  <button type="button" id="toggle-tts" role="switch" aria-pressed="true" aria-label="เปิดหรือปิดเสียงอ่านโจทย์" class="switch-btn relative w-[54px] h-[30px] rounded-full bg-slate-300 cursor-pointer transition-colors shrink-0"></button>
+               </div>
+
+               <!-- 3D Camera Follow -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <rect x="3" y="7" width="13" height="10" rx="2.5" fill="#E6F4ED" stroke="#1F6848" stroke-width="2" />
+                           <path d="M16 10L21 7.5V16.5L16 14" stroke="#1F6848" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
+                     </span>
+                     <span>กล้อง 3D ตามตัวละคร</span>
+                  </div>
+                  <button type="button" id="toggle-camera-follow" role="switch" aria-pressed="true" aria-label="เปิดหรือปิดกล้องตามตัวละคร" class="switch-btn relative w-[54px] h-[30px] rounded-full bg-slate-300 cursor-pointer transition-colors shrink-0"></button>
+               </div>
+
+               <!-- Text Size -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M4 18L9 6L14 18M6 14H12M16 18V10M13.5 12.5H18.5" stroke="#18222F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                     </span>
+                     <span>ขนาดอักษร</span>
+                  </div>
+                  <div class="inline-flex bg-ink-primary/10 rounded-full p-0.5 gap-0.5" role="group" aria-label="ขนาดตัวอักษร">
+                     <button type="button" data-textsize="normal" class="seg-btn rounded-full px-3 min-h-[32px] font-extrabold text-xs bg-white text-emeraldBoard-dark shadow-sm transition">S</button>
+                     <button type="button" data-textsize="large" class="seg-btn rounded-full px-3 min-h-[32px] font-extrabold text-xs text-ink-secondary transition">M</button>
+                     <button type="button" data-textsize="xlarge" class="seg-btn rounded-full px-3 min-h-[32px] font-extrabold text-xs text-ink-secondary transition">L</button>
+                  </div>
+               </div>
+
+               <!-- High Contrast -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <circle cx="12" cy="12" r="8" stroke="#18222F" stroke-width="2" />
+                           <path d="M12 4A8 8 0 0 1 12 20V4Z" fill="#18222F" />
+                        </svg>
+                     </span>
+                     <span>คอนทราสต์สูง</span>
+                  </div>
+                  <button type="button" id="toggle-contrast" role="switch" aria-pressed="false" aria-label="เปิดหรือปิดโหมดคอนทราสต์สูง" class="switch-btn relative w-[54px] h-[30px] rounded-full bg-slate-300 cursor-pointer transition-colors shrink-0"></button>
+               </div>
+
+               <!-- Reduce Motion -->
+               <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-ivory border border-transparent hover:border-ink-primary/10 transition">
+                  <div class="flex items-center gap-3 font-extrabold text-sm text-ink-primary">
+                     <span class="w-9 h-9 rounded-xl bg-white border border-ink-primary/10 inline-flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M4 12C6.5 8 9.5 8 12 12C14.5 16 17.5 16 20 12" stroke="#C53B2E" stroke-width="2.2" stroke-linecap="round" />
+                        </svg>
+                     </span>
+                     <span>ลดการเคลื่อนไหว</span>
+                  </div>
+                  <button type="button" id="toggle-motion" role="switch" aria-pressed="false" aria-label="เปิดหรือปิดโหมดลดการเคลื่อนไหว" class="switch-btn relative w-[54px] h-[30px] rounded-full bg-slate-300 cursor-pointer transition-colors shrink-0"></button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+           OVERLAY 3: MINIMAL PAUSE MODAL
+           ======================================================================== -->
+      <div
+         id="screen-pause"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="pause-title"
+         class="hidden fixed inset-0 z-50 bg-ink-primary/35 backdrop-blur-sm flex items-center justify-center p-4">
+         <div class="hc-surface w-full max-w-[380px] bg-white border border-ink-primary/10 rounded-[28px] p-6 shadow-2xl flex flex-col items-center gap-3.5">
+            <span class="w-13 h-13 p-3 rounded-2xl bg-emeraldBoard-soft border border-emeraldBoard/20 inline-flex items-center justify-center">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="6" y="5" width="4" height="14" rx="1.6" fill="#1F6848" />
+                  <rect x="14" y="5" width="4" height="14" rx="1.6" fill="#1F6848" />
+               </svg>
+            </span>
+            <h2 id="pause-title" class="m-0 text-2xl font-black text-ink-primary">พักชั่วคราว</h2>
+
+            <button
+               type="button"
+               id="btn-resume"
+               class="w-full inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full border-2 border-emeraldBoard-dark bg-gradient-to-b from-[#359d70] to-emeraldBoard text-white font-black shadow-cta hover:brightness-105 transition">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <polygon points="6,4 20,12 6,20" fill="#FFFFFF" />
+               </svg>
+               <span>เล่นต่อ</span>
+            </button>
+
+            <button
+               type="button"
+               id="btn-restart-stage"
+               class="w-full inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-full border border-ink-primary/20 bg-white text-ink-primary font-extrabold shadow-sm hover:bg-ivory transition">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 12A9 9 0 1 0 6 5.3L3 8M3 3V8H8" stroke="#18222F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+               </svg>
+               <span>เริ่มด่านนี้ใหม่</span>
+            </button>
+
+            <button
+               type="button"
+               id="btn-back-menu"
+               class="w-full inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-full border border-ink-primary/20 bg-white text-ink-primary font-extrabold shadow-sm hover:bg-ivory transition">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 11L12 3L21 11V20H15V14H9V20H3V11Z" stroke="#18222F" stroke-width="2" stroke-linejoin="round" />
+               </svg>
+               <span>หน้าหลัก</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+           OVERLAY 4: STAGE SUMMARY & EQUATION REVIEW MODAL
+           ======================================================================== -->
+      <div
+         id="screen-summary"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="summary-title"
+         class="hidden fixed inset-0 z-50 bg-ink-primary/35 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+         <div class="hc-surface w-full max-w-[520px] bg-white border border-ink-primary/10 rounded-[28px] p-6 shadow-2xl flex flex-col items-center gap-4 text-center max-h-[90dvh] overflow-y-auto">
+            <div id="summary-trophy" class="text-5xl">🏆</div>
+            <h2 id="summary-title" class="m-0 text-2xl font-black text-ink-primary">ยอดเยี่ยมมาก! จบด่านแล้ว</h2>
+            <p id="summary-subtitle" class="m-0 text-sm sm:text-base font-semibold text-ink-secondary">ลูกเจี๊ยบเข้าเส้นชัยก่อนเจ้ากระต่าย!</p>
+
+            <div class="flex gap-2.5 flex-wrap justify-center">
+               <div class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-emeraldBoard-soft border border-emeraldBoard/35 font-extrabold text-sm text-emeraldBoard-dark">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M12 2L14.9 8.6L22 9.3L16.6 14L18.2 21L12 17.3L5.8 21L7.4 14L2 9.3L9.1 8.6L12 2Z" fill="#FACC15" stroke="#A16207" stroke-width="1.8" />
+                  </svg>
+                  <span id="sum-score">0</span>
+               </div>
+               <div class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-ivory border border-ink-primary/10 font-extrabold text-sm text-ink-primary">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                     <path d="M12 2C12 2 18 7.5 18 13.5C18 17.6 15.3 21 12 21C8.7 21 6 17.6 6 13.5C6 11 7.2 8.8 8.5 7.5C8.5 9.5 10 10.5 10 10.5C9.5 7.5 12 2 12 2Z" fill="#F97316" stroke="#9A3412" stroke-width="1.8" />
+                  </svg>
+                  <span id="sum-combo">0</span>
+               </div>
+            </div>
+
+            <div id="summary-equations" class="w-full max-h-[190px] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+
+            <div class="flex gap-2.5 flex-wrap justify-center w-full pt-1">
+               <button
+                  type="button"
+                  id="btn-next-stage"
+                  class="inline-flex items-center justify-center min-h-[48px] px-6 py-2.5 rounded-full border-2 border-emeraldBoard-dark bg-gradient-to-b from-[#359d70] to-emeraldBoard text-white font-black shadow-cta hover:brightness-105 transition">
+                  ด่านถัดไป
+               </button>
+               <button
+                  type="button"
+                  id="btn-replay-stage"
+                  class="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 rounded-full border border-ink-primary/20 bg-white text-ink-primary font-extrabold shadow-sm hover:bg-ivory transition">
+                  เล่นอีกครั้ง
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- ========================================================================
+           OPTIMIZED OBJECT-ORIENTED GAME ENGINE & CONTROLLER
+           ======================================================================== -->
+      <script>
+         'use strict';
+
+         /**
+          * Utility helpers for async delays and math clamping.
+          */
+         const Utils = {
+            delay: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+            clamp: (val, min, max) => Math.max(min, Math.min(max, val)),
+            easeInOutQuad: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+         };
+
+         /**
+          * 1. GameConfig
+          * Frozen static configuration holding vintage Snakes & Ladders stage layouts
+          * and snake palette styles.
+          */
+         class GameConfig {
+            static STAGES = Object.freeze({
+               1: Object.freeze({
+                  id: 1,
+                  name: 'ด่าน 1',
+                  cols: 10,
+                  rows: 5,
+                  maxTile: 50,
+                  maxDie: 4,
+                  maxTurns: 10,
+                  ladders: Object.freeze({ 1: 38, 4: 14, 9: 31, 21: 42, 36: 44 }),
+                  snakes: Object.freeze({ 16: 6, 47: 26, 49: 11 }),
+               }),
+               2: Object.freeze({
+                  id: 2,
+                  name: 'ด่าน 2',
+                  cols: 10,
+                  rows: 9,
+                  maxTile: 90,
+                  maxDie: 6,
+                  maxTurns: 14,
+                  ladders: Object.freeze({ 1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67 }),
+                  snakes: Object.freeze({ 16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24 }),
+               }),
+               3: Object.freeze({
+                  id: 3,
+                  name: 'ด่าน 3',
+                  cols: 10,
+                  rows: 10,
+                  maxTile: 100,
+                  maxDie: 6,
+                  maxTurns: 16,
+                  ladders: Object.freeze({ 1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100 }),
+                  snakes: Object.freeze({ 16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78 }),
+               }),
+            });
+
+            static VINTAGE_SNAKE_STYLES = Object.freeze({
+               16: { body: 0xc99638, spot: 0x6b4217 },
+               47: { body: 0x8ea4b0, spot: 0x3b505e },
+               49: { body: 0xc8993b, spot: 0x5c3a14 },
+               56: { body: 0x94aab6, spot: 0x3f5666 },
+               62: { body: 0x84b56d, spot: 0x2e5e27 },
+               64: { body: 0xb67b42, spot: 0x5c3412 },
+               87: { body: 0xdcb43c, spot: 0x6b4d12 },
+               93: { body: 0xd2a44c, spot: 0x6c4619 },
+               95: { body: 0x97adb8, spot: 0x415663 },
+               98: { body: 0xcfa03e, spot: 0x634014 },
+            });
+
+            static getStage(stageId) {
+               return this.STAGES[stageId] || this.STAGES[3];
+            }
+         }
+
+         /**
+          * 2. GameState
+          * Encapsulates all mutable gameplay state and accessibility preferences.
+          * Uses a Set for O(1) stepped-tile lookups.
+          */
+         class GameState {
+            constructor() {
+               this.stageId = 3;
+               this.turn = 1;
+               this.chickPos = 1;
+               this.rabbitPos = 1;
+               this.score = 0;
+               this.combo = 0;
+               this.maxCombo = 0;
+               this.phase = 'IDLE'; // IDLE | ROLLING | COUNTING | ANIMATING_CHICK | ANIMATING_RABBIT | SUMMARY
+               this.currentRoll = 0;
+               this.expectedTarget = 1;
+               this.selectedTile = null;
+               this.steppedTiles = new Set();
+               this.equationsHistory = [];
+               this.settings = {
+                  muted: false,
+                  tts: true,
+                  cameraFollow: true,
+                  reduceMotion: false,
+                  highContrast: false,
+                  textSize: 'normal',
+               };
+            }
+
+            getCurrentStage() {
+               return GameConfig.getStage(this.stageId);
+            }
+
+            resetForStage(stageId) {
+               this.stageId = stageId;
+               this.turn = 1;
+               this.chickPos = 1;
+               this.rabbitPos = 1;
+               this.phase = 'IDLE';
+               this.currentRoll = 0;
+               this.expectedTarget = 1;
+               this.selectedTile = null;
+               this.steppedTiles.clear();
+               this.equationsHistory = [];
+            }
+
+            canUseNudge() {
+               return this.phase === 'IDLE' && this.combo >= 2;
+            }
+         }
+
+         /**
+          * 3. SoundEngine
+          * Procedural Web Audio API synthesizer + Thai Web Speech API narrator.
+          * Safely disconnects audio nodes after playback to avoid memory retention.
+          */
+         class SoundEngine {
+            constructor(gameState) {
+               this.state = gameState;
+               this.ctx = null;
+               this.hopScale = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+            }
+
+            ensureContext() {
+               try {
+                  if (!this.ctx) {
+                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                     if (AudioCtx) this.ctx = new AudioCtx();
+                  }
+                  if (this.ctx && this.ctx.state === 'suspended') {
+                     this.ctx.resume().catch(() => {});
+                  }
+               } catch (_) {
+                  // Gracefully ignore blocked or unsupported AudioContext
+               }
+            }
+
+            playTone(freq, duration = 0.14, type = 'sine', gainVal = 0.18, delay = 0) {
+               if (this.state.settings.muted) return;
+               this.ensureContext();
+               if (!this.ctx) return;
+
+               const now = this.ctx.currentTime + delay;
+               const osc = this.ctx.createOscillator();
+               const gain = this.ctx.createGain();
+               osc.type = type;
+               osc.frequency.setValueAtTime(freq, now);
+
+               gain.gain.setValueAtTime(0.001, now);
+               gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.015);
+               gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+               osc.connect(gain);
+               gain.connect(this.ctx.destination);
+               osc.onended = () => {
+                  osc.disconnect();
+                  gain.disconnect();
+               };
+               osc.start(now);
+               osc.stop(now + duration + 0.02);
+            }
+
+            playDiceRoll() {
+               for (let i = 0; i < 6; i++) {
+                  this.playTone(260 + Math.random() * 220, 0.06, 'triangle', 0.12, i * 0.065);
+               }
+            }
+
+            playHop(stepIndex = 0) {
+               this.playTone(this.hopScale[stepIndex % this.hopScale.length], 0.14, 'sine', 0.2);
+            }
+
+            playLadderClimb() {
+               [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, idx) => {
+                  this.playTone(f, 0.18, 'triangle', 0.2, idx * 0.09);
+               });
+            }
+
+            playSnakeSlide() {
+               if (this.state.settings.muted) return;
+               this.ensureContext();
+               if (!this.ctx) return;
+               const now = this.ctx.currentTime;
+               const osc = this.ctx.createOscillator();
+               const gain = this.ctx.createGain();
+               osc.type = 'sawtooth';
+               osc.frequency.setValueAtTime(520, now);
+               osc.frequency.exponentialRampToValueAtTime(160, now + 0.55);
+               gain.gain.setValueAtTime(0.11, now);
+               gain.gain.exponentialRampToValueAtTime(0.001, now + 0.58);
+               osc.connect(gain);
+               gain.connect(this.ctx.destination);
+               osc.onended = () => {
+                  osc.disconnect();
+                  gain.disconnect();
+               };
+               osc.start(now);
+               osc.stop(now + 0.6);
+            }
+
+            playGentleHint() {
+               this.playTone(330, 0.16, 'sine', 0.14, 0);
+               this.playTone(293.66, 0.22, 'sine', 0.14, 0.14);
+            }
+
+            playVictory() {
+               [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((f, i) => {
+                  this.playTone(f, 0.22, 'triangle', 0.22, i * 0.12);
+               });
+            }
+
+            speak(text) {
+               if (this.state.settings.muted || !this.state.settings.tts) return;
+               if (!('speechSynthesis' in window)) return;
+               try {
+                  window.speechSynthesis.cancel();
+                  const utter = new SpeechSynthesisUtterance(text);
+                  utter.lang = 'th-TH';
+                  utter.rate = 1.05;
+                  utter.pitch = 1.15;
+                  window.speechSynthesis.speak(utter);
+               } catch (_) {
+                  // Ignore TTS errors cleanly
+               }
+            }
+         }
+
+         /**
+          * 4. Board3DEngine
+          * Optimized Three.js engine with:
+          * - Shared reusable geometries and materials (reduced draw-state churn & GPU allocations)
+          * - In-place tile canvas redrawing (zero texture/canvas thrashing during counting)
+          * - Frame-rate independent camera smoothing & particle physics (delta-time normalized)
+          * - Zero per-frame Vector3 allocations in the render loop
+          * - Cached tile mesh array for fast raycasting
+          */
+         class Board3DEngine {
+            constructor(container, gameState, soundEngine, onTileSelect) {
+               this.container = container;
+               this.state = gameState;
+               this.sound = soundEngine;
+               this.onTileSelect = onTileSelect;
+               this.webglReady = false;
+
+               // Tile geometry constants
+               this.TILE_W = 1.05;
+               this.TILE_D = 0.92;
+               this.TILE_H = 0.08;
+
+               try {
+                  this.scene = new THREE.Scene();
+                  const aspect = container.clientWidth / Math.max(1, container.clientHeight);
+                  this.camera = new THREE.PerspectiveCamera(38, aspect, 0.1, 120);
+
+                  this.renderer = new THREE.WebGLRenderer({
+                     antialias: true,
+                     alpha: true,
+                     powerPreference: 'high-performance',
+                  });
+                  this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+                  this.renderer.setSize(container.clientWidth, container.clientHeight);
+                  this.renderer.shadowMap.enabled = true;
+                  this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                  this.maxAnisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
+                  container.insertBefore(this.renderer.domElement, container.firstChild);
+
+                  this.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+                     e.preventDefault();
+                  });
+                  this.webglReady = true;
+               } catch (err) {
+                  console.error('WebGL initialization failed:', err);
+                  container.innerHTML =
+                     '<div class="flex h-full items-center justify-center p-6 text-center font-bold text-ink-secondary">เบราว์เซอร์ไม่รองรับ WebGL 3D กรุณาเปิดใช้งานการเร่งความเร็วกราฟิก</div>';
+                  return;
+               }
+
+               this.raycaster = new THREE.Raycaster();
+               this.pointer = new THREE.Vector2();
+
+               this.boardGroup = new THREE.Group();
+               this.propsGroup = new THREE.Group();
+               this.particlesGroup = new THREE.Group();
+               this.scene.add(this.boardGroup, this.propsGroup, this.particlesGroup);
+
+               // Lookup caches
+               this.tileMeshes = {};
+               this.tileMeshList = [];
+               this.tileCoords = {};
+               this.particles = [];
+
+               // Pre-allocated scratch vectors to avoid GC in render loop
+               this._desiredCamPos = new THREE.Vector3();
+               this._midPoint = new THREE.Vector3();
+
+               // Smooth camera lerp state
+               this.defaultCamPos = new THREE.Vector3(0, 12.2, 9.8);
+               this.defaultCamLook = new THREE.Vector3(0, 0, 0.35);
+               this.targetCamPos = this.defaultCamPos.clone();
+               this.targetCamLook = this.defaultCamLook.clone();
+               this.currentCamLook = this.defaultCamLook.clone();
+               this.isCameraTracking = false;
+
+               // Pointer orbit state
+               this.userOrbitYaw = 0;
+               this.userOrbitPitch = 0;
+               this.isDragging = false;
+               this.dragMoved = false;
+               this.dragStart = { x: 0, y: 0 };
+
+               // Character & Dice animation flags
+               this.chickAnim = { hopping: false, climbing: false };
+               this.rabbitAnim = { hopping: false, climbing: false };
+               this.diceAnim = { active: false, rolling: false, targetQuat: new THREE.Quaternion() };
+
+               this.initSharedAssets();
+               this.setupLights();
+               this.createCharacters();
+               this.create3DDice();
+               this.bindPointerEvents();
+            }
+
+            /**
+             * Pre-create geometries & materials shared across tiles, ladders, snakes, and particles.
+             * Marked with userData.shared = true so clearGroupWithDispose preserves them.
+             */
+            initSharedAssets() {
+               const markShared = (obj) => {
+                  obj.userData = obj.userData || {};
+                  obj.userData.shared = true;
+                  return obj;
+               };
+
+               this.shared = {
+                  // Tile & particle geometries
+                  tileGeo: markShared(new THREE.BoxGeometry(this.TILE_W, this.TILE_H, this.TILE_D)),
+                  sparkleGeo: markShared(new THREE.SphereGeometry(0.055, 8, 8)),
+
+                  // Ladder materials
+                  ladderRailMat: markShared(new THREE.MeshStandardMaterial({ color: 0xf4d03f, roughness: 0.42, metalness: 0.05 })),
+                  ladderRungMat: markShared(new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.48 })),
+
+                  // Snake shared geometries & materials
+                  snakeHeadGeo: markShared(new THREE.SphereGeometry(0.125, 14, 14)),
+                  snakeTongueGeo: markShared(new THREE.BoxGeometry(0.025, 0.012, 0.11)),
+                  snakeEyeWhiteGeo: markShared(new THREE.SphereGeometry(0.036, 8, 8)),
+                  snakeEyeBlackGeo: markShared(new THREE.SphereGeometry(0.019, 8, 8)),
+                  snakeSpotGeo: markShared(new THREE.SphereGeometry(0.038, 8, 8)),
+                  snakeTongueMat: markShared(new THREE.MeshBasicMaterial({ color: 0xdc2626 })),
+                  eyeWhiteMat: markShared(new THREE.MeshBasicMaterial({ color: 0xffffff })),
+                  eyeBlackMat: markShared(new THREE.MeshBasicMaterial({ color: 0x111827 })),
+
+                  // Board static materials
+                  matPaperMat: markShared(new THREE.MeshStandardMaterial({ color: 0xf4eee0, roughness: 0.8 })),
+                  creaseMat: markShared(new THREE.MeshStandardMaterial({ color: 0xb5986e, roughness: 0.9 })),
+               };
+            }
+
+            setupLights() {
+               const hemi = new THREE.HemisphereLight(0xfffdf8, 0xe7dfd1, 0.85);
+               hemi.position.set(0, 15, 0);
+               this.scene.add(hemi);
+
+               const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+               dirLight.position.set(6, 16, 8);
+               dirLight.castShadow = true;
+               dirLight.shadow.mapSize.width = 1024;
+               dirLight.shadow.mapSize.height = 1024;
+               dirLight.shadow.camera.near = 2;
+               dirLight.shadow.camera.far = 35;
+               const d = 9;
+               dirLight.shadow.camera.left = -d;
+               dirLight.shadow.camera.right = d;
+               dirLight.shadow.camera.top = d;
+               dirLight.shadow.camera.bottom = -d;
+               dirLight.shadow.bias = -0.001;
+               this.scene.add(dirLight);
+            }
+
+            createCharacters() {
+               // === 3D CHICK ===
+               this.chickGroup = new THREE.Group();
+               const shadowGeo = new THREE.CircleGeometry(0.36, 24);
+               shadowGeo.rotateX(-Math.PI / 2);
+               const shadowMat = new THREE.MeshBasicMaterial({
+                  color: 0x1f2937,
+                  transparent: true,
+                  opacity: 0.24,
+                  depthWrite: false,
+               });
+               this.chickShadow = new THREE.Mesh(shadowGeo, shadowMat);
+               this.chickShadow.position.y = 0.02;
+               this.chickGroup.add(this.chickShadow);
+
+               this.chickBody = new THREE.Group();
+               this.chickGroup.add(this.chickBody);
+
+               const chickYellowMat = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.45, metalness: 0.05 });
+               const chickOrangeMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.4 });
+               const darkEyeMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.2 });
+
+               const bodyMesh = new THREE.Mesh(new THREE.SphereGeometry(0.34, 24, 20), chickYellowMat);
+               bodyMesh.scale.set(1.02, 1.08, 0.96);
+               bodyMesh.position.y = 0.42;
+               bodyMesh.castShadow = true;
+               this.chickBody.add(bodyMesh);
+
+               const tuftMesh = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 12), chickOrangeMat);
+               tuftMesh.position.set(0, 0.8, 0);
+               tuftMesh.rotation.z = -0.2;
+               this.chickBody.add(tuftMesh);
+
+               const wingGeo = new THREE.SphereGeometry(0.14, 16, 12);
+               wingGeo.scale(0.55, 1.35, 0.85);
+               this.chickLeftWing = new THREE.Mesh(wingGeo, chickYellowMat);
+               this.chickLeftWing.position.set(-0.33, 0.42, 0.02);
+               this.chickLeftWing.rotation.z = 0.45;
+               this.chickRightWing = new THREE.Mesh(wingGeo, chickYellowMat);
+               this.chickRightWing.position.set(0.33, 0.42, 0.02);
+               this.chickRightWing.rotation.z = -0.45;
+               this.chickBody.add(this.chickLeftWing, this.chickRightWing);
+
+               const eyeGeo = new THREE.SphereGeometry(0.042, 12, 12);
+               const leftEye = new THREE.Mesh(eyeGeo, darkEyeMat);
+               leftEye.position.set(-0.11, 0.52, 0.31);
+               const rightEye = new THREE.Mesh(eyeGeo, darkEyeMat);
+               rightEye.position.set(0.11, 0.52, 0.31);
+               this.chickBody.add(leftEye, rightEye);
+
+               const beakMesh = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.14, 12), chickOrangeMat);
+               beakMesh.rotation.x = Math.PI / 2;
+               beakMesh.position.set(0, 0.43, 0.36);
+               this.chickBody.add(beakMesh);
+
+               const footGeo = new THREE.BoxGeometry(0.1, 0.05, 0.16);
+               this.chickLeftFoot = new THREE.Mesh(footGeo, chickOrangeMat);
+               this.chickLeftFoot.position.set(-0.12, 0.06, 0.04);
+               this.chickRightFoot = new THREE.Mesh(footGeo, chickOrangeMat);
+               this.chickRightFoot.position.set(0.12, 0.06, 0.04);
+               this.chickBody.add(this.chickLeftFoot, this.chickRightFoot);
+               this.scene.add(this.chickGroup);
+
+               // === 3D RABBIT ===
+               this.rabbitGroup = new THREE.Group();
+               this.rabbitShadow = new THREE.Mesh(shadowGeo, shadowMat.clone());
+               this.rabbitShadow.position.y = 0.02;
+               this.rabbitGroup.add(this.rabbitShadow);
+
+               this.rabbitBody = new THREE.Group();
+               this.rabbitGroup.add(this.rabbitBody);
+
+               const rabbitWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45 });
+               const rabbitGrayMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.5 });
+               const rabbitPinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 });
+
+               const rTorso = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 16), rabbitGrayMat);
+               rTorso.scale.set(0.95, 1.05, 0.95);
+               rTorso.position.y = 0.32;
+               rTorso.castShadow = true;
+               this.rabbitBody.add(rTorso);
+
+               const rHead = new THREE.Mesh(new THREE.SphereGeometry(0.26, 20, 16), rabbitWhiteMat);
+               rHead.position.set(0, 0.62, 0.04);
+               rHead.castShadow = true;
+               this.rabbitBody.add(rHead);
+
+               const earGeo = new THREE.SphereGeometry(0.068, 14, 14);
+               earGeo.scale(0.9, 2.7, 0.55);
+               const innerEarGeo = new THREE.SphereGeometry(0.042, 12, 12);
+               innerEarGeo.scale(0.85, 2.3, 0.5);
+
+               this.rabbitLeftEar = new THREE.Group();
+               const leftInnerEar = new THREE.Mesh(innerEarGeo, rabbitPinkMat);
+               leftInnerEar.position.set(0, -0.01, 0.022);
+               this.rabbitLeftEar.add(new THREE.Mesh(earGeo, rabbitWhiteMat), leftInnerEar);
+               this.rabbitLeftEar.position.set(-0.1, 0.96, 0.02);
+               this.rabbitLeftEar.rotation.z = 0.14;
+
+               this.rabbitRightEar = new THREE.Group();
+               const rightInnerEar = new THREE.Mesh(innerEarGeo, rabbitPinkMat);
+               rightInnerEar.position.set(0, -0.01, 0.022);
+               this.rabbitRightEar.add(new THREE.Mesh(earGeo, rabbitWhiteMat), rightInnerEar);
+               this.rabbitRightEar.position.set(0.1, 0.96, 0.02);
+               this.rabbitRightEar.rotation.z = -0.14;
+               this.rabbitBody.add(this.rabbitLeftEar, this.rabbitRightEar);
+
+               const rLeftEye = new THREE.Mesh(eyeGeo, darkEyeMat);
+               rLeftEye.position.set(-0.09, 0.65, 0.27);
+               const rRightEye = new THREE.Mesh(eyeGeo, darkEyeMat);
+               rRightEye.position.set(0.09, 0.65, 0.27);
+               const rNose = new THREE.Mesh(new THREE.SphereGeometry(0.036, 10, 10), rabbitPinkMat);
+               rNose.position.set(0, 0.58, 0.29);
+               this.rabbitBody.add(rLeftEye, rRightEye, rNose);
+
+               const rFootGeo = new THREE.BoxGeometry(0.1, 0.05, 0.18);
+               this.rabbitLeftFoot = new THREE.Mesh(rFootGeo, rabbitWhiteMat);
+               this.rabbitLeftFoot.position.set(-0.11, 0.05, 0.06);
+               this.rabbitRightFoot = new THREE.Mesh(rFootGeo, rabbitWhiteMat);
+               this.rabbitRightFoot.position.set(0.11, 0.05, 0.06);
+               this.rabbitBody.add(this.rabbitLeftFoot, this.rabbitRightFoot);
+               this.scene.add(this.rabbitGroup);
+            }
+
+            create3DDice() {
+               const pipLayouts = {
+                  1: [[0.5, 0.5]],
+                  2: [
+                     [0.28, 0.28],
+                     [0.72, 0.72],
+                  ],
+                  3: [
+                     [0.26, 0.26],
+                     [0.5, 0.5],
+                     [0.74, 0.74],
+                  ],
+                  4: [
+                     [0.28, 0.28],
+                     [0.72, 0.28],
+                     [0.28, 0.72],
+                     [0.72, 0.72],
+                  ],
+                  5: [
+                     [0.26, 0.26],
+                     [0.74, 0.26],
+                     [0.5, 0.5],
+                     [0.26, 0.74],
+                     [0.74, 0.74],
+                  ],
+                  6: [
+                     [0.28, 0.24],
+                     [0.72, 0.24],
+                     [0.28, 0.5],
+                     [0.72, 0.5],
+                     [0.28, 0.76],
+                     [0.72, 0.76],
+                  ],
+               };
+
+               const faceOrder = [3, 4, 1, 6, 2, 5];
+               const materials = faceOrder.map((num) => {
+                  const c = document.createElement('canvas');
+                  c.width = 256;
+                  c.height = 256;
+                  const ctx = c.getContext('2d');
+                  ctx.fillStyle = '#FFFDF9';
+                  ctx.fillRect(0, 0, 256, 256);
+                  ctx.strokeStyle = '#DB2777';
+                  ctx.lineWidth = 18;
+                  ctx.strokeRect(9, 9, 238, 238);
+                  pipLayouts[num].forEach(([px, py]) => {
+                     ctx.beginPath();
+                     ctx.arc(px * 256, py * 256, num === 1 ? 34 : 24, 0, Math.PI * 2);
+                     ctx.fillStyle = num === 1 || num === 6 ? '#DB2777' : '#1F2937';
+                     ctx.fill();
+                  });
+                  return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.25 });
+               });
+
+               this.diceMesh = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.15, 1.15), materials);
+               this.diceMesh.castShadow = true;
+               this.diceMesh.visible = false;
+               this.diceMesh.position.set(0, 3.2, 0.5);
+               this.scene.add(this.diceMesh);
+            }
+
+            getDieTargetQuaternion(value) {
+               const euler = new THREE.Euler(0.45, 0, 0, 'XYZ');
+               const map = {
+                  1: [0.45, 0, 0],
+                  6: [Math.PI + 0.45, 0, 0],
+                  2: [-Math.PI / 2 + 0.45, 0, 0],
+                  5: [Math.PI / 2 + 0.45, 0, 0],
+                  3: [0.45, 0, Math.PI / 2],
+                  4: [0.45, 0, -Math.PI / 2],
+               };
+               const rot = map[value] || map[1];
+               euler.set(rot[0], rot[1], rot[2]);
+               return new THREE.Quaternion().setFromEuler(euler);
+            }
+
+            /**
+             * Safely disposes non-shared geometries, materials, and textures in a group.
+             */
+            clearGroupWithDispose(group) {
+               while (group.children.length > 0) {
+                  const child = group.children[0];
+                  child.traverse((obj) => {
+                     if (obj.geometry && !obj.geometry.userData?.shared) {
+                        obj.geometry.dispose();
+                     }
+                     if (obj.material) {
+                        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+                        mats.forEach((m) => {
+                           if (m.map) m.map.dispose();
+                           if (!m.userData?.shared) m.dispose();
+                        });
+                     }
+                  });
+                  group.remove(child);
+               }
+            }
+
+            buildBoard(stageCfg) {
+               if (!this.webglReady) return;
+               this.clearGroupWithDispose(this.boardGroup);
+               this.clearGroupWithDispose(this.propsGroup);
+               this.tileMeshes = {};
+               this.tileMeshList = [];
+               this.tileCoords = {};
+
+               const { cols, rows, ladders, snakes } = stageCfg;
+               const gap = 0.05;
+               const stepX = this.TILE_W + gap;
+               const stepZ = this.TILE_D + gap;
+               const boardWidth = cols * stepX + 0.45;
+               const boardDepth = rows * stepZ + 0.45;
+
+               const zoomScale = rows <= 5 ? 0.72 : rows === 9 ? 1.0 : 1.08;
+               this.defaultCamPos.set(0, 11.8 * zoomScale, 9.2 * zoomScale);
+               this.defaultCamLook.set(0, 0, 0.35);
+               if (!this.isCameraTracking) {
+                  this.targetCamPos.copy(this.defaultCamPos);
+                  this.targetCamLook.copy(this.defaultCamLook);
+               }
+
+               // Classic Red Outer Frame
+               const baseMesh = new THREE.Mesh(
+                  new THREE.BoxGeometry(boardWidth + 0.35, 0.32, boardDepth + 0.35),
+                  new THREE.MeshStandardMaterial({
+                     color: this.state.settings.highContrast ? 0x111827 : 0xc53b2e,
+                     roughness: 0.65,
+                  }),
+               );
+               baseMesh.position.y = -0.17;
+               baseMesh.receiveShadow = true;
+               this.boardGroup.add(baseMesh);
+
+               // Inner Warm Paper Mat (reuses shared material)
+               const matMesh = new THREE.Mesh(new THREE.BoxGeometry(boardWidth - 0.1, 0.04, boardDepth - 0.1), this.shared.matPaperMat);
+               matMesh.position.y = -0.01;
+               matMesh.receiveShadow = true;
+               this.boardGroup.add(matMesh);
+
+               // Vintage Folding Crease
+               if (!this.state.settings.highContrast) {
+                  const creaseMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, boardDepth + 0.2), this.shared.creaseMat);
+                  creaseMesh.position.set(0, 0.005, 0);
+                  this.boardGroup.add(creaseMesh);
+               }
+
+               // Boustrophedon Tile Grid (all tiles reuse shared BoxGeometry)
+               const tileNumberAt = (row, col) => row * cols + (row % 2 === 0 ? col + 1 : cols - col);
+               for (let r = 0; r < rows; r++) {
+                  for (let c = 0; c < cols; c++) {
+                     const num = tileNumberAt(r, c);
+                     const x = (c - (cols - 1) / 2) * stepX;
+                     const z = ((rows - 1) / 2 - r) * stepZ;
+
+                     this.tileCoords[num] = new THREE.Vector3(x, 0, z);
+                     const canvas = document.createElement('canvas');
+                     canvas.width = 256;
+                     canvas.height = 224;
+                     this.drawTileCanvas(canvas, num, r, c, stageCfg, 'normal');
+
+                     const tex = new THREE.CanvasTexture(canvas);
+                     tex.anisotropy = this.maxAnisotropy;
+
+                     const mesh = new THREE.Mesh(
+                        this.shared.tileGeo,
+                        new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55 }),
+                     );
+                     mesh.position.set(x, 0, z);
+                     mesh.receiveShadow = true;
+                     mesh.userData = { tileNum: num, row: r, col: c, highlightMode: 'normal', canvas };
+                     this.boardGroup.add(mesh);
+                     this.tileMeshes[num] = mesh;
+                     this.tileMeshList.push(mesh);
+                  }
+               }
+
+               // 3D Ladders
+               Object.entries(ladders).forEach(([fromStr, toNum]) => {
+                  const p1 = this.tileCoords[Number(fromStr)];
+                  const p2 = this.tileCoords[toNum];
+                  if (p1 && p2) this.build3DLadder(p1, p2);
+               });
+
+               // 3D Snakes
+               Object.entries(snakes).forEach(([fromStr, toNum]) => {
+                  const fromNum = Number(fromStr);
+                  const p1 = this.tileCoords[fromNum];
+                  const p2 = this.tileCoords[toNum];
+                  const style = GameConfig.VINTAGE_SNAKE_STYLES[fromNum] || { body: 0xc99638, spot: 0x6b4217 };
+                  if (p1 && p2) this.build3DSnake(p1, p2, style);
+               });
+
+               this.placeCharacterAtTile('chick', this.state.chickPos);
+               this.placeCharacterAtTile('rabbit', this.state.rabbitPos);
+            }
+
+            /**
+             * Draws directly onto a tile's existing canvas so highlight updates
+             * do not allocate new canvases or WebGL textures.
+             */
+            drawTileCanvas(canvas, num, row, col, stageCfg, highlightState = 'normal') {
+               const ctx = canvas.getContext('2d');
+
+               const isGreenTile = (row + col) % 2 === 0;
+               let bg = isGreenTile ? '#3D9A6D' : '#F6F1E3';
+               let border = '#2A6D4D';
+               let lineWidth = 4;
+
+               if (this.state.settings.highContrast) {
+                  bg = isGreenTile ? '#E5E7EB' : '#FFFFFF';
+                  border = '#111827';
+                  lineWidth = 6;
+               }
+
+               if (highlightState === 'start') {
+                  bg = '#FEF08A';
+                  border = '#D97706';
+                  lineWidth = 14;
+               } else if (highlightState === 'selected') {
+                  bg = '#FCE7F3';
+                  border = '#DB2777';
+                  lineWidth = 16;
+               } else if (highlightState === 'stepped') {
+                  bg = '#DBEAFE';
+                  border = '#2563EB';
+                  lineWidth = 12;
+               } else if (num === stageCfg.maxTile) {
+                  bg = '#FDE68A';
+                  border = '#C53B2E';
+                  lineWidth = 12;
+               }
+
+               ctx.fillStyle = bg;
+               ctx.fillRect(0, 0, 256, 224);
+               ctx.strokeStyle = border;
+               ctx.lineWidth = lineWidth;
+               ctx.strokeRect(lineWidth / 2, lineWidth / 2, 256 - lineWidth, 224 - lineWidth);
+
+               const ladderTo = stageCfg.ladders[num];
+               const snakeTo = stageCfg.snakes[num];
+               const hasBadge = Boolean(ladderTo || snakeTo);
+               ctx.fillStyle =
+                  this.state.settings.highContrast || !isGreenTile || highlightState !== 'normal' || num === stageCfg.maxTile
+                     ? '#1B2430'
+                     : '#0D261B';
+               ctx.font = '900 78px "Georgia", "Nunito", "Segoe UI", serif';
+               ctx.textAlign = 'center';
+               ctx.textBaseline = 'middle';
+               ctx.fillText(String(num), 128, hasBadge ? 84 : 112);
+
+               if (ladderTo) {
+                  this.drawPillBadge(ctx, 128, 174, `+${ladderTo - num}`, '#FEF3C7', '#B45309', '#78350F');
+               } else if (snakeTo) {
+                  this.drawPillBadge(ctx, 128, 174, `${snakeTo - num}`, '#FECDD3', '#BE123C', '#881337');
+               }
+            }
+
+            drawPillBadge(ctx, cx, cy, label, fill, stroke, textCol) {
+               const w = 118;
+               const h = 48;
+               const r = 24;
+               const x = cx - w / 2;
+               const y = cy - h / 2;
+
+               ctx.beginPath();
+               ctx.moveTo(x + r, y);
+               ctx.lineTo(x + w - r, y);
+               ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+               ctx.lineTo(x + w, y + h - r);
+               ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+               ctx.lineTo(x + r, y + h);
+               ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+               ctx.lineTo(x, y + r);
+               ctx.quadraticCurveTo(x, y, x + r, y);
+               ctx.closePath();
+
+               ctx.fillStyle = fill;
+               ctx.fill();
+               ctx.lineWidth = 5;
+               ctx.strokeStyle = stroke;
+               ctx.stroke();
+
+               ctx.fillStyle = textCol;
+               ctx.font = '900 32px "Nunito", sans-serif';
+               ctx.fillText(label, cx, cy + 2);
+            }
+
+            /**
+             * Redraws only the tiles whose highlight state actually changed, in-place.
+             */
+            updateTileHighlights() {
+               if (!this.webglReady) return;
+               const cfg = this.state.getCurrentStage();
+               const isCounting = this.state.phase === 'COUNTING';
+
+               for (let i = 0; i < this.tileMeshList.length; i++) {
+                  const mesh = this.tileMeshList[i];
+                  const { tileNum: num, row, col, highlightMode, canvas } = mesh.userData;
+                  let mode = 'normal';
+                  if (isCounting) {
+                     if (num === this.state.chickPos) mode = 'start';
+                     else if (num === this.state.selectedTile) mode = 'selected';
+                     else if (this.state.steppedTiles.has(num)) mode = 'stepped';
+                  }
+                  if (highlightMode !== mode) {
+                     mesh.userData.highlightMode = mode;
+                     this.drawTileCanvas(canvas, num, row, col, cfg, mode);
+                     mesh.material.map.needsUpdate = true;
+                  }
+               }
+            }
+
+            build3DLadder(pStart, pEnd) {
+               const group = new THREE.Group();
+
+               const startAnchor = new THREE.Vector3(pStart.x, 0.075, pStart.z - 0.14);
+               const endAnchor = new THREE.Vector3(pEnd.x, 0.085, pEnd.z + 0.14);
+               const dir = new THREE.Vector3().subVectors(endAnchor, startAnchor);
+               dir.y = 0;
+               const dist = dir.length();
+               if (dist < 0.001) dir.set(0, 0, -1);
+               else dir.normalize();
+
+               const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+               const halfWidth = 0.18;
+               const midCenter = new THREE.Vector3().addVectors(startAnchor, endAnchor).multiplyScalar(0.5);
+               const liftY = Math.min(0.24, 0.12 + dist * 0.015);
+
+               const makeRail = (sign) => {
+                  const s = startAnchor.clone().addScaledVector(perp, sign * halfWidth);
+                  const m = midCenter.clone().addScaledVector(perp, sign * halfWidth);
+                  m.y = liftY;
+                  const e = endAnchor.clone().addScaledVector(perp, sign * halfWidth);
+                  return new THREE.CatmullRomCurve3([s, m, e]);
+               };
+
+               const segments = Math.max(12, Math.round(dist * 5));
+               const leftCurve = makeRail(-1);
+               const rightCurve = makeRail(1);
+
+               [leftCurve, rightCurve].forEach((curve) => {
+                  const rail = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, 0.036, 8, false), this.shared.ladderRailMat);
+                  rail.castShadow = true;
+                  group.add(rail);
+               });
+
+               const rungCount = Math.max(4, Math.min(18, Math.round(dist * 2.2)));
+               for (let i = 1; i <= rungCount; i++) {
+                  const t = i / (rungCount + 1);
+                  const rungCurve = new THREE.LineCurve3(leftCurve.getPoint(t), rightCurve.getPoint(t));
+                  group.add(new THREE.Mesh(new THREE.TubeGeometry(rungCurve, 2, 0.026, 6, false), this.shared.ladderRungMat));
+               }
+               this.propsGroup.add(group);
+            }
+
+            build3DSnake(pHead, pTail, style = { body: 0xc99638, spot: 0x6b4217 }) {
+               const group = new THREE.Group();
+               const snakeMat = new THREE.MeshStandardMaterial({ color: style.body, roughness: 0.48 });
+               const spotMat = new THREE.MeshStandardMaterial({ color: style.spot, roughness: 0.55 });
+
+               const cornerSign = pTail.x >= pHead.x ? -1 : 1;
+               const headAnchor = new THREE.Vector3(pHead.x + cornerSign * 0.22, 0.11, pHead.z - 0.2);
+               const tailAnchor = new THREE.Vector3(pTail.x - cornerSign * 0.18, 0.065, pTail.z + 0.18);
+
+               const diff = new THREE.Vector3().subVectors(tailAnchor, headAnchor);
+               diff.y = 0;
+               const dist = Math.max(0.5, diff.length());
+               const dir = diff.clone().normalize();
+               const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+
+               const waveCount = Math.max(1.5, Math.min(3.5, dist * 0.45));
+               const amplitude = Math.min(0.42, 0.22 + dist * 0.025);
+               const ctrlPoints = [];
+               const steps = Math.max(6, Math.round(dist * 2.5));
+               for (let i = 0; i <= steps; i++) {
+                  const t = i / steps;
+                  const pt = new THREE.Vector3().lerpVectors(headAnchor, tailAnchor, t);
+                  const sway = Math.sin(t * Math.PI * waveCount) * amplitude * Math.sin(t * Math.PI);
+                  pt.addScaledVector(perp, sway * cornerSign);
+                  pt.y = 0.07 + Math.sin(t * Math.PI) * 0.08 + (1 - t) * 0.03;
+                  ctrlPoints.push(pt);
+               }
+
+               const curve = new THREE.CatmullRomCurve3(ctrlPoints);
+               const tubeSegs = Math.max(20, Math.round(dist * 9));
+               const bodyTube = new THREE.Mesh(new THREE.TubeGeometry(curve, tubeSegs, 0.066, 10, false), snakeMat);
+               bodyTube.castShadow = true;
+               group.add(bodyTube);
+
+               const headPos = curve.getPoint(0);
+               const headMesh = new THREE.Mesh(this.shared.snakeHeadGeo, snakeMat);
+               headMesh.scale.set(1.0, 0.85, 1.25);
+               headMesh.position.copy(headPos);
+               headMesh.position.y += 0.04;
+               group.add(headMesh);
+
+               const tongue = new THREE.Mesh(this.shared.snakeTongueGeo, this.shared.snakeTongueMat);
+               tongue.position.set(headPos.x, headPos.y + 0.02, headPos.z + 0.16);
+               group.add(tongue);
+
+               [-0.055, 0.055].forEach((ox) => {
+                  const ew = new THREE.Mesh(this.shared.snakeEyeWhiteGeo, this.shared.eyeWhiteMat);
+                  ew.position.set(headPos.x + ox, headPos.y + 0.1, headPos.z + 0.055);
+                  const eb = new THREE.Mesh(this.shared.snakeEyeBlackGeo, this.shared.eyeBlackMat);
+                  eb.position.set(headPos.x + ox, headPos.y + 0.11, headPos.z + 0.075);
+                  group.add(ew, eb);
+               });
+
+               const spotCount = Math.max(3, Math.min(10, Math.round(dist * 1.4)));
+               for (let i = 1; i <= spotCount; i++) {
+                  const pt = curve.getPoint(i / (spotCount + 1));
+                  const spot = new THREE.Mesh(this.shared.snakeSpotGeo, spotMat);
+                  spot.position.set(pt.x, pt.y + 0.045, pt.z);
+                  group.add(spot);
+               }
+               this.propsGroup.add(group);
+            }
+
+            spawnSparkles(worldPos, colorHex = 0xfde047, count = 18) {
+               if (!this.webglReady || this.state.settings.reduceMotion) return;
+               const colors = [colorHex, 0xf472b6, 0x34d399, 0x60a5fa, 0xfbbf24];
+               for (let i = 0; i < count; i++) {
+                  const mat = new THREE.MeshBasicMaterial({
+                     color: colors[i % colors.length],
+                     transparent: true,
+                     opacity: 1,
+                  });
+                  // Reuse shared particle sphere geometry
+                  const p = new THREE.Mesh(this.shared.sparkleGeo, mat);
+                  p.position.copy(worldPos);
+                  p.position.y += 0.45;
+                  const angle = Math.random() * Math.PI * 2;
+                  const speed = 1.8 + Math.random() * 3.3; // Units per second
+                  p.userData = {
+                     vx: Math.cos(angle) * speed,
+                     vy: 3.6 + Math.random() * 4.8,
+                     vz: Math.sin(angle) * speed,
+                     life: 1.0,
+                  };
+                  this.particlesGroup.add(p);
+                  this.particles.push(p);
+               }
+            }
+
+            placeCharacterAtTile(who, tileNum) {
+               if (!this.webglReady) return;
+               const coord = this.tileCoords[tileNum] || new THREE.Vector3(0, 0, 0);
+               const sameTile = this.state.chickPos === this.state.rabbitPos;
+               const offsetX = sameTile ? (who === 'chick' ? 0.22 : -0.22) : 0;
+               const group = who === 'chick' ? this.chickGroup : this.rabbitGroup;
+               const body = who === 'chick' ? this.chickBody : this.rabbitBody;
+               const shadow = who === 'chick' ? this.chickShadow : this.rabbitShadow;
+
+               group.position.set(coord.x + offsetX, 0.04, coord.z + 0.06);
+               body.position.set(0, 0, 0);
+               body.scale.set(1, 1, 1);
+               body.rotation.set(0, 0, 0);
+               shadow.scale.set(1, 1, 1);
+               shadow.material.opacity = 0.24;
+            }
+
+            focusCameraOnTile(tileNum, zoomHeight = 5.4, zoomBack = 4.6) {
+               const coord = this.tileCoords[tileNum];
+               if (coord) this.focusCameraOnPoint(coord, zoomHeight, zoomBack);
+            }
+
+            focusCameraOnPoint(coord, zoomHeight = 5.4, zoomBack = 4.6) {
+               if (!this.webglReady || !this.state.settings.cameraFollow || this.state.settings.reduceMotion) return;
+               this.isCameraTracking = true;
+               this.targetCamLook.set(coord.x * 0.85, 0.25, coord.z * 0.85);
+               this.targetCamPos.set(coord.x * 0.72, zoomHeight, coord.z + zoomBack);
+            }
+
+            resetCameraOverview() {
+               if (!this.webglReady) return;
+               this.isCameraTracking = false;
+               this.targetCamPos.copy(this.defaultCamPos);
+               this.targetCamLook.copy(this.defaultCamLook);
+            }
+
+            animateDiceRoll(rolledValue) {
+               if (!this.webglReady) return Utils.delay(350);
+               return new Promise((resolve) => {
+                  this.resetCameraOverview();
+
+                  this.diceMesh.visible = true;
+                  this.diceMesh.position.set(0, 3.6, 0.6);
+                  this.diceAnim.active = true;
+                  this.diceAnim.rolling = true;
+                  this.diceAnim.targetQuat = this.getDieTargetQuaternion(rolledValue);
+
+                  const duration = this.state.settings.reduceMotion ? 320 : 760;
+                  const start = performance.now();
+                  let lastNow = start;
+
+                  const tick = (now) => {
+                     const frameScale = Math.min(2.5, (now - lastNow) / 16.67);
+                     lastNow = now;
+                     const t = Math.min(1, (now - start) / duration);
+
+                     if (t < 0.75) {
+                        this.diceMesh.rotation.x += 0.28 * frameScale;
+                        this.diceMesh.rotation.y += 0.34 * frameScale;
+                        this.diceMesh.rotation.z += 0.21 * frameScale;
+                        this.diceMesh.position.y = 3.2 + Math.abs(Math.sin(t * Math.PI * 3)) * 1.1;
+                     } else {
+                        this.diceAnim.rolling = false;
+                        this.diceMesh.quaternion.slerp(this.diceAnim.targetQuat, Math.min(1, 0.32 * frameScale));
+                        this.diceMesh.position.y = 3.0 + Math.sin((1 - t) * Math.PI) * 0.35;
+                     }
+
+                     if (t < 1) {
+                        requestAnimationFrame(tick);
+                     } else {
+                        this.diceMesh.quaternion.copy(this.diceAnim.targetQuat);
+                        setTimeout(() => {
+                           this.diceMesh.visible = false;
+                           this.diceAnim.active = false;
+                           resolve();
+                        }, 420);
+                     }
+                  };
+                  requestAnimationFrame(tick);
+               });
+            }
+
+            async animateCharacterWalk(who, fromTile, toTile, isCancelled) {
+               if (!this.webglReady) return;
+               const animObj = who === 'chick' ? this.chickAnim : this.rabbitAnim;
+               animObj.hopping = true;
+               for (let step = fromTile + 1; step <= toTile; step++) {
+                  if (isCancelled && isCancelled()) break;
+                  this.focusCameraOnTile(step, 5.8, 4.9);
+                  this.sound.playHop(step - fromTile - 1);
+                  await this.hopSingleStep(who, step - 1, step);
+               }
+               animObj.hopping = false;
+               if (!isCancelled || !isCancelled()) {
+                  this.placeCharacterAtTile(who, toTile);
+               }
+            }
+
+            hopSingleStep(who, startTile, endTile) {
+               return new Promise((resolve) => {
+                  const p1 = this.tileCoords[startTile] || new THREE.Vector3();
+                  const p2 = this.tileCoords[endTile] || p1;
+                  const group = who === 'chick' ? this.chickGroup : this.rabbitGroup;
+                  const body = who === 'chick' ? this.chickBody : this.rabbitBody;
+                  const shadow = who === 'chick' ? this.chickShadow : this.rabbitShadow;
+
+                  const dx = p2.x - p1.x;
+                  const dz = p2.z - p1.z;
+                  if (Math.abs(dx) > 0.05 || Math.abs(dz) > 0.05) {
+                     body.rotation.y = Math.atan2(dx, dz) * 0.45;
+                  }
+
+                  const duration = this.state.settings.reduceMotion ? 160 : 320;
+                  const jumpHeight = this.state.settings.reduceMotion ? 0.25 : 0.78;
+                  const start = performance.now();
+
+                  const stepFrame = (now) => {
+                     const t = Math.min(1, (now - start) / duration);
+                     const ease = Utils.easeInOutQuad(t);
+
+                     group.position.x = p1.x + (p2.x - p1.x) * ease;
+                     group.position.z = p1.z + (p2.z - p1.z) * ease + 0.06;
+
+                     const arc = Math.sin(t * Math.PI) * jumpHeight;
+                     body.position.y = arc;
+
+                     const stretch = 1 + Math.sin(t * Math.PI) * 0.16;
+                     const squash = 1 / Math.sqrt(stretch);
+                     body.scale.set(squash, stretch, squash);
+
+                     const shadowScale = Math.max(0.55, 1 - arc * 0.45);
+                     shadow.scale.set(shadowScale, shadowScale, shadowScale);
+                     shadow.material.opacity = 0.24 * shadowScale;
+
+                     if (t < 1) {
+                        requestAnimationFrame(stepFrame);
+                     } else {
+                        body.position.y = 0;
+                        body.scale.set(1, 1, 1);
+                        body.rotation.y = 0;
+                        shadow.scale.set(1, 1, 1);
+                        shadow.material.opacity = 0.24;
+                        resolve();
+                     }
+                  };
+                  requestAnimationFrame(stepFrame);
+               });
+            }
+
+            animateLadderClimb(who, fromTile, toTile) {
+               if (!this.webglReady) return Promise.resolve();
+               return new Promise((resolve) => {
+                  const p1 = this.tileCoords[fromTile];
+                  const p2 = this.tileCoords[toTile];
+                  if (!p1 || !p2) return resolve();
+
+                  const group = who === 'chick' ? this.chickGroup : this.rabbitGroup;
+                  const body = who === 'chick' ? this.chickBody : this.rabbitBody;
+                  const shadow = who === 'chick' ? this.chickShadow : this.rabbitShadow;
+                  const animObj = who === 'chick' ? this.chickAnim : this.rabbitAnim;
+
+                  animObj.climbing = true;
+                  this.sound.playLadderClimb();
+                  this.spawnSparkles(p1, 0x34d399, 22);
+                  this._midPoint.lerpVectors(p1, p2, 0.5);
+                  this.focusCameraOnPoint(this._midPoint, 4.8, 4.1);
+
+                  const duration = this.state.settings.reduceMotion ? 450 : 1250;
+                  const start = performance.now();
+
+                  const climbFrame = (now) => {
+                     const t = Math.min(1, (now - start) / duration);
+                     const ease = Utils.easeInOutQuad(t);
+
+                     group.position.x = p1.x + (p2.x - p1.x) * ease;
+                     group.position.z = p1.z + (p2.z - p1.z) * ease + 0.06;
+
+                     const heightArc = Math.sin(t * Math.PI) * (this.state.settings.reduceMotion ? 0.35 : 1.55);
+                     body.position.y = heightArc;
+                     body.rotation.z = Math.sin(t * Math.PI * 6) * 0.14;
+
+                     const shadowScale = Math.max(0.42, 1 - heightArc * 0.35);
+                     shadow.scale.set(shadowScale, shadowScale, shadowScale);
+                     shadow.material.opacity = 0.25 * shadowScale;
+
+                     if (t < 1) {
+                        requestAnimationFrame(climbFrame);
+                     } else {
+                        animObj.climbing = false;
+                        this.spawnSparkles(p2, 0xfde047, 24);
+                        this.placeCharacterAtTile(who, toTile);
+                        resolve();
+                     }
+                  };
+                  requestAnimationFrame(climbFrame);
+               });
+            }
+
+            animateSnakeSlide(who, fromTile, toTile) {
+               if (!this.webglReady) return Promise.resolve();
+               return new Promise((resolve) => {
+                  const p1 = this.tileCoords[fromTile];
+                  const p2 = this.tileCoords[toTile];
+                  if (!p1 || !p2) return resolve();
+
+                  const group = who === 'chick' ? this.chickGroup : this.rabbitGroup;
+                  const body = who === 'chick' ? this.chickBody : this.rabbitBody;
+
+                  this.sound.playSnakeSlide();
+                  this._midPoint.lerpVectors(p1, p2, 0.5);
+                  this.focusCameraOnPoint(this._midPoint, 5.0, 4.3);
+
+                  const duration = this.state.settings.reduceMotion ? 420 : 1050;
+                  const start = performance.now();
+
+                  const slideFrame = (now) => {
+                     const t = Math.min(1, (now - start) / duration);
+                     const ease = t * (2 - t);
+                     const slitherX = Math.sin(t * Math.PI * 3) * 0.22 * (1 - t);
+
+                     group.position.x = p1.x + (p2.x - p1.x) * ease + slitherX;
+                     group.position.z = p1.z + (p2.z - p1.z) * ease + 0.06;
+                     body.position.y = Math.sin(t * Math.PI) * 0.22;
+                     body.rotation.z = Math.sin(t * Math.PI * 4) * 0.25;
+
+                     if (t < 1) {
+                        requestAnimationFrame(slideFrame);
+                     } else {
+                        this.placeCharacterAtTile(who, toTile);
+                        resolve();
+                     }
+                  };
+                  requestAnimationFrame(slideFrame);
+               });
+            }
+
+            /**
+             * Frame-rate independent update loop (uses clamped delta time `dt`).
+             */
+            update(elapsed, dt) {
+               if (!this.webglReady) return;
+
+               // Chick idle/active animation
+               if (this.chickBody) {
+                  if (this.chickAnim.climbing || this.chickAnim.hopping) {
+                     const flap = Math.sin(elapsed * 26) * 0.55;
+                     this.chickLeftWing.rotation.z = 0.65 + flap;
+                     this.chickRightWing.rotation.z = -0.65 - flap;
+                     this.chickLeftFoot.position.y = 0.06 + Math.max(0, Math.sin(elapsed * 22)) * 0.08;
+                     this.chickRightFoot.position.y = 0.06 + Math.max(0, -Math.sin(elapsed * 22)) * 0.08;
+                  } else if (!this.state.settings.reduceMotion) {
+                     this.chickBody.position.y = Math.max(0, Math.sin(elapsed * 3.2) * 0.03);
+                     this.chickLeftWing.rotation.z = 0.42 + Math.sin(elapsed * 3.2) * 0.08;
+                     this.chickRightWing.rotation.z = -0.42 - Math.sin(elapsed * 3.2) * 0.08;
+                  }
+               }
+
+               // Rabbit idle/active animation
+               if (this.rabbitBody) {
+                  if (this.rabbitAnim.hopping || this.rabbitAnim.climbing) {
+                     this.rabbitLeftEar.rotation.x = Math.sin(elapsed * 20) * 0.25;
+                     this.rabbitRightEar.rotation.x = -Math.sin(elapsed * 20) * 0.25;
+                  } else if (!this.state.settings.reduceMotion) {
+                     this.rabbitBody.position.y = Math.max(0, Math.sin(elapsed * 2.8 + 1.2) * 0.025);
+                     this.rabbitLeftEar.rotation.z = 0.14 + Math.sin(elapsed * 4) * 0.05;
+                     this.rabbitRightEar.rotation.z = -0.14 - Math.cos(elapsed * 3.5) * 0.05;
+                  }
+               }
+
+               // Delta-time normalized sparkle particles
+               for (let i = this.particles.length - 1; i >= 0; i--) {
+                  const p = this.particles[i];
+                  const d = p.userData;
+                  p.position.x += d.vx * dt;
+                  p.position.y += d.vy * dt;
+                  p.position.z += d.vz * dt;
+                  d.vy -= 12.6 * dt;
+                  d.life -= 1.45 * dt;
+                  p.material.opacity = Math.max(0, d.life);
+                  if (d.life <= 0) {
+                     this.particlesGroup.remove(p);
+                     // Note: p.geometry is shared (this.shared.sparkleGeo) and must NOT be disposed
+                     p.material.dispose();
+                     this.particles.splice(i, 1);
+                  }
+               }
+
+               // Frame-rate independent exponential smoothing for camera
+               const camAlpha = 1 - Math.exp(-5.3 * dt);
+               const lookAlpha = 1 - Math.exp(-6.3 * dt);
+
+               this._desiredCamPos.copy(this.targetCamPos);
+               if (!this.isCameraTracking) {
+                  this._desiredCamPos.x += Math.sin(this.userOrbitYaw) * 4.5;
+                  this._desiredCamPos.y = Math.max(5.5, this._desiredCamPos.y + this.userOrbitPitch * 3.5);
+               }
+               this.camera.position.lerp(this._desiredCamPos, camAlpha);
+               this.currentCamLook.lerp(this.targetCamLook, lookAlpha);
+               this.camera.lookAt(this.currentCamLook);
+
+               this.renderer.render(this.scene, this.camera);
+            }
+
+            bindPointerEvents() {
+               const dom = this.renderer.domElement;
+
+               const onDown = (x, y) => {
+                  this.isDragging = true;
+                  this.dragMoved = false;
+                  this.dragStart.x = x;
+                  this.dragStart.y = y;
+               };
+
+               const onMove = (x, y) => {
+                  if (!this.isDragging) return;
+                  const dx = x - this.dragStart.x;
+                  const dy = y - this.dragStart.y;
+                  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this.dragMoved = true;
+                  this.userOrbitYaw = Utils.clamp(this.userOrbitYaw - dx * 0.0045, -0.65, 0.65);
+                  this.userOrbitPitch = Utils.clamp(this.userOrbitPitch + dy * 0.0045, -0.45, 0.55);
+                  this.dragStart.x = x;
+                  this.dragStart.y = y;
+               };
+
+               const onUp = (x, y) => {
+                  const wasClick = this.isDragging && !this.dragMoved;
+                  this.isDragging = false;
+                  if (wasClick && x !== undefined && y !== undefined) {
+                     this.handleTileTap(x, y);
+                  }
+               };
+
+               dom.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
+               window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+               window.addEventListener('mouseup', (e) => onUp(e.clientX, e.clientY));
+
+               dom.addEventListener(
+                  'touchstart',
+                  (e) => {
+                     if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY);
+                  },
+                  { passive: true },
+               );
+               dom.addEventListener(
+                  'touchmove',
+                  (e) => {
+                     if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY);
+                  },
+                  { passive: true },
+               );
+               dom.addEventListener('touchend', (e) => {
+                  const touch = e.changedTouches && e.changedTouches[0];
+                  onUp(touch ? touch.clientX : undefined, touch ? touch.clientY : undefined);
+               });
+            }
+
+            handleTileTap(clientX, clientY) {
+               if (!this.webglReady || this.state.phase !== 'COUNTING') return;
+               const rect = this.renderer.domElement.getBoundingClientRect();
+               this.pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+               this.pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+               this.raycaster.setFromCamera(this.pointer, this.camera);
+               const hits = this.raycaster.intersectObjects(this.tileMeshList, false);
+               if (hits.length > 0 && this.onTileSelect) {
+                  this.onTileSelect(hits[0].object.userData.tileNum);
+               }
+            }
+
+            onResize() {
+               if (!this.webglReady || !this.container) return;
+               const w = this.container.clientWidth;
+               const h = Math.max(1, this.container.clientHeight);
+               this.camera.aspect = w / h;
+               this.camera.updateProjectionMatrix();
+               this.renderer.setSize(w, h);
+            }
+         }
+
+         /**
+          * 5. UIManager
+          * Encapsulates all DOM queries, Tailwind class state updates, modals, HUD,
+          * equation card modes, and accessibility announcements.
+          */
+         class UIManager {
+            constructor(gameState, soundEngine) {
+               this.state = gameState;
+               this.sound = soundEngine;
+
+               this.el = {
+                  hudStageText: document.getElementById('hud-stage-text'),
+                  hudTurnText: document.getElementById('hud-turn-text'),
+                  hudScore: document.getElementById('hud-score'),
+                  hudCombo: document.getElementById('hud-combo'),
+                  raceFill: document.getElementById('race-fill'),
+                  raceChick: document.getElementById('race-chick-marker'),
+                  raceRabbit: document.getElementById('race-rabbit-marker'),
+                  cheer: document.getElementById('feedback-cheer'),
+                  eqCard: document.getElementById('equation-card'),
+                  eqStart: document.getElementById('eq-start'),
+                  eqRoll: document.getElementById('eq-roll'),
+                  eqTarget: document.getElementById('eq-target'),
+                  eqPrompt: document.getElementById('equation-prompt'),
+                  pvBanner: document.getElementById('place-value-banner'),
+                  pvDelta: document.getElementById('pv-delta'),
+                  pvArrow: document.getElementById('pv-arrow'),
+                  pvText: document.getElementById('pv-text'),
+                  btnMain: document.getElementById('btn-main-action'),
+                  btnMainLabel: document.getElementById('btn-main-label'),
+                  btnHint: document.getElementById('btn-hint'),
+                  nudgeGroup: document.getElementById('golden-nudge-group'),
+                  nudgePills: Array.from(document.querySelectorAll('#golden-nudge-group .nudge-pill')),
+                  stageCards: Array.from(document.querySelectorAll('.stage-card')),
+                  textSizeBtns: Array.from(document.querySelectorAll('[data-textsize]')),
+                  caption: document.getElementById('caption-strip'),
+                  srLive: document.getElementById('sr-live'),
+                  screenStart: document.getElementById('screen-start'),
+                  screenSettings: document.getElementById('screen-settings'),
+                  screenPause: document.getElementById('screen-pause'),
+                  screenSummary: document.getElementById('screen-summary'),
+                  iconSoundOn: document.getElementById('icon-sound-on'),
+                  iconSoundOff: document.getElementById('icon-sound-off'),
+                  toggleSound: document.getElementById('toggle-sound'),
+                  summaryTrophy: document.getElementById('summary-trophy'),
+                  summaryTitle: document.getElementById('summary-title'),
+                  summarySubtitle: document.getElementById('summary-subtitle'),
+                  sumScore: document.getElementById('sum-score'),
+                  sumCombo: document.getElementById('sum-combo'),
+                  summaryEquations: document.getElementById('summary-equations'),
+               };
+            }
+
+            isAnyModalOpen() {
+               return (
+                  !this.el.screenStart.classList.contains('hidden') ||
+                  !this.el.screenSettings.classList.contains('hidden') ||
+                  !this.el.screenPause.classList.contains('hidden') ||
+                  !this.el.screenSummary.classList.contains('hidden')
+               );
+            }
+
+            announce(text, speakToo = false) {
+               this.el.caption.textContent = text;
+               this.el.srLive.textContent = text;
+               if (speakToo) this.sound.speak(text);
+            }
+
+            showCheer(text, color = '#c53b2e') {
+               this.el.cheer.textContent = text;
+               this.el.cheer.style.color = color;
+            }
+
+            setEquationMode(mode = 'default') {
+               const base =
+                  'hc-surface pointer-events-auto w-full backdrop-blur-md rounded-2xl sm:rounded-full px-3 py-1.5 flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-2.5 shadow-float transition-colors duration-200 border-2';
+               const themes = {
+                  default: 'bg-white/90 border-emeraldBoard/25',
+                  ladder: 'bg-emeraldBoard-soft/95 border-emeraldBoard',
+                  snake: 'bg-crimsonBoard-soft/95 border-crimsonBoard',
+                  rabbit: 'bg-gray-50/95 border-ink-primary/20',
+               };
+               this.el.eqCard.className = `${base} ${themes[mode] || themes.default}`;
+            }
+
+            setEquation(start, roll, target, promptHtml) {
+               this.el.eqStart.textContent = String(start);
+               this.el.eqRoll.textContent = String(roll);
+               this.el.eqTarget.textContent = String(target);
+               if (promptHtml !== undefined) this.el.eqPrompt.innerHTML = promptHtml;
+            }
+
+            setMainButtonMode(isConfirm, label, disabled = false) {
+               this.el.btnMainLabel.textContent = label;
+               this.el.btnMain.disabled = disabled;
+
+               const emeraldClasses = ['border-emeraldBoard-dark', 'from-[#359d70]', 'to-emeraldBoard', 'text-white', 'shadow-cta'];
+               const goldClasses = ['border-goldBoard-dark', 'from-yellow-400', 'to-goldBoard', 'text-[#422006]', 'shadow-ctaConfirm'];
+
+               if (isConfirm) {
+                  this.el.btnMain.classList.remove(...emeraldClasses);
+                  this.el.btnMain.classList.add(...goldClasses);
+               } else {
+                  this.el.btnMain.classList.remove(...goldClasses);
+                  this.el.btnMain.classList.add(...emeraldClasses);
+               }
+            }
+
+            setHintVisible(visible) {
+               this.el.btnHint.classList.toggle('hidden', !visible);
+               this.el.btnHint.classList.toggle('inline-flex', visible);
+            }
+
+            showPlaceValueCard(delta, fromTile, toTile) {
+               const isUp = delta > 0;
+               const tensFrom = Math.floor(fromTile / 10);
+               const tensTo = Math.floor(toTile / 10);
+
+               this.el.pvDelta.textContent = isUp ? `+${delta}` : `${delta}`;
+               this.el.pvArrow.textContent = isUp ? '↑' : '↓';
+               this.el.pvText.textContent = `${tensFrom} สิบ → ${tensTo} สิบ`;
+
+               this.el.pvBanner.classList.remove(
+                  'opacity-0',
+                  'scale-90',
+                  'border-emeraldBoard',
+                  'text-emeraldBoard-dark',
+                  'bg-white/95',
+                  'border-crimsonBoard',
+                  'text-crimsonBoard-dark',
+                  'bg-[#fff5f5]',
+               );
+               this.el.pvBanner.classList.add('opacity-100', 'scale-100');
+
+               if (isUp) {
+                  this.el.pvBanner.classList.add('border-emeraldBoard', 'text-emeraldBoard-dark', 'bg-white/95');
+                  this.el.pvArrow.classList.remove('bg-crimsonBoard');
+                  this.el.pvArrow.classList.add('bg-emeraldBoard');
+               } else {
+                  this.el.pvBanner.classList.add('border-crimsonBoard', 'text-crimsonBoard-dark', 'bg-[#fff5f5]');
+                  this.el.pvArrow.classList.remove('bg-emeraldBoard');
+                  this.el.pvArrow.classList.add('bg-crimsonBoard');
+               }
+            }
+
+            hidePlaceValueCard() {
+               this.el.pvBanner.classList.remove('opacity-100', 'scale-100');
+               this.el.pvBanner.classList.add('opacity-0', 'scale-90');
+            }
+
+            updateHUD() {
+               const cfg = this.state.getCurrentStage();
+               this.el.hudStageText.textContent = cfg.name;
+               this.el.hudTurnText.textContent = `ตา ${this.state.turn}/${cfg.maxTurns}`;
+               this.el.hudScore.textContent = String(this.state.score);
+               this.el.hudCombo.textContent = String(this.state.combo);
+
+               const chickPct = Utils.clamp((this.state.chickPos / cfg.maxTile) * 100, 2, 100);
+               const rabbitPct = Utils.clamp((this.state.rabbitPos / cfg.maxTile) * 100, 2, 100);
+               this.el.raceFill.style.width = `${chickPct}%`;
+               this.el.raceChick.style.left = `${chickPct}%`;
+               this.el.raceRabbit.style.left = `${rabbitPct}%`;
+
+               const canNudge = this.state.canUseNudge();
+               this.el.nudgeGroup.style.opacity = canNudge ? '1' : '0.55';
+               this.el.nudgePills.forEach((btn) => {
+                  btn.disabled = !canNudge;
+               });
+            }
+
+            updateStageCardSelection(stageId) {
+               this.el.stageCards.forEach((card) => {
+                  const active = Number(card.dataset.stage) === stageId;
+                  const pill = card.querySelector('.stage-pill');
+
+                  card.classList.toggle('border-emeraldBoard', active);
+                  card.classList.toggle('bg-white', active);
+                  card.classList.toggle('shadow-[0_12px_26px_rgba(46,139,99,0.16)]', active);
+                  card.classList.toggle('border-ink-primary/10', !active);
+                  card.classList.toggle('bg-white/90', !active);
+
+                  if (pill) {
+                     pill.classList.toggle('bg-emeraldBoard-soft', active);
+                     pill.classList.toggle('text-emeraldBoard-dark', active);
+                     pill.classList.toggle('bg-ivory-soft', !active);
+                     pill.classList.toggle('text-ink-secondary', !active);
+                  }
+               });
+            }
+
+            syncSoundUI() {
+               const isOn = !this.state.settings.muted;
+               this.el.iconSoundOn.classList.toggle('hidden', !isOn);
+               this.el.iconSoundOff.classList.toggle('hidden', isOn);
+               if (this.el.toggleSound) {
+                  this.el.toggleSound.setAttribute('aria-pressed', String(isOn));
+               }
+            }
+
+            showSummaryModal(chickWon) {
+               this.el.summaryTrophy.textContent = chickWon ? '🏆' : '🌟';
+               this.el.summaryTitle.textContent = chickWon ? 'ยอดเยี่ยมมาก! ลูกเจี๊ยบชนะแล้ว!' : 'เก่งมาก! ฝึกนับต่อครบตาแล้ว!';
+               this.el.summarySubtitle.textContent = `ลูกเจี๊ยบอยู่ที่ช่อง ${this.state.chickPos} • กระต่ายอยู่ที่ช่อง ${this.state.rabbitPos}`;
+               this.el.sumScore.textContent = String(this.state.score);
+               this.el.sumCombo.textContent = String(this.state.maxCombo);
+
+               const typeStyles = {
+                  normal: 'bg-ivory border-ink-primary/10 text-ink-primary',
+                  ladder: 'bg-emeraldBoard-soft border-emeraldBoard/35 text-emeraldBoard-dark',
+                  snake: 'bg-crimsonBoard-soft border-crimsonBoard/35 text-crimsonBoard-dark',
+               };
+
+               // Batch DOM inserts using a DocumentFragment
+               const frag = document.createDocumentFragment();
+               this.state.equationsHistory.forEach((item) => {
+                  const div = document.createElement('div');
+                  div.className = `flex items-center justify-center px-2.5 py-2 rounded-xl border font-extrabold text-sm ${typeStyles[item.type] || typeStyles.normal}`;
+                  div.textContent = item.text;
+                  frag.appendChild(div);
+               });
+
+               this.el.summaryEquations.innerHTML = '';
+               this.el.summaryEquations.appendChild(frag);
+               this.el.screenSummary.classList.remove('hidden');
+            }
+         }
+
+         /**
+          * 6. SnakesLaddersGame (Main Application Controller)
+          * Orchestrates GameState, SoundEngine, Board3DEngine, UIManager,
+          * turn-based logic with cancellation tokens, and visibility-aware render loop.
+          */
+         class SnakesLaddersGame {
+            constructor() {
+               this.state = new GameState();
+               this.sound = new SoundEngine(this.state);
+               this.ui = new UIManager(this.state, this.sound);
+
+               const wrapper = document.getElementById('board-3d-wrapper');
+               this.board3D = new Board3DEngine(wrapper, this.state, this.sound, (tileNum) => this.onBoardTileSelected(tileNum));
+
+               this.clock = new THREE.Clock();
+               this.elapsedTime = 0;
+               this.sessionToken = 0; // Prevents race conditions when restarting mid-turn
+               this.contrastDirty = false; // Tracks whether highContrast changed in settings
+               this.resizeRaf = null;
+
+               this.init();
+            }
+
+            init() {
+               this.board3D.buildBoard(this.state.getCurrentStage());
+               this.bindEvents();
+               this.startRenderLoop();
+            }
+
+            startRenderLoop() {
+               const loop = () => {
+                  requestAnimationFrame(loop);
+                  // Skip WebGL rendering while tab is hidden to save GPU/battery
+                  if (document.hidden) {
+                     this.clock.getDelta();
+                     return;
+                  }
+                  const dt = Math.min(0.05, this.clock.getDelta());
+                  this.elapsedTime += dt;
+                  this.board3D.update(this.elapsedTime, dt);
+               };
+               loop();
+            }
+
+            startStage(stageId) {
+               this.sessionToken += 1;
+               this.state.resetForStage(stageId);
+               const cfg = this.state.getCurrentStage();
+
+               this.ui.hidePlaceValueCard();
+               this.ui.showCheer('');
+               this.ui.setEquationMode('default');
+               this.ui.setEquation(1, '?', '?', 'กดปุ่ม <strong>ทอยลูกเต๋า</strong> เพื่อเริ่มเดิน!');
+               this.ui.setMainButtonMode(false, 'ทอยลูกเต๋า', false);
+               this.ui.setHintVisible(false);
+
+               this.board3D.buildBoard(cfg);
+               this.board3D.resetCameraOverview();
+               this.ui.updateHUD();
+               this.ui.announce(`เริ่ม${cfg.name} ช่อง 1 ถึง ${cfg.maxTile} กดทอยลูกเต๋าได้เลย!`, true);
+            }
+
+            async handleRollDie(forcedRoll = null) {
+               if (this.state.phase !== 'IDLE') return;
+               const token = this.sessionToken;
+               const cfg = this.state.getCurrentStage();
+
+               this.state.phase = 'ROLLING';
+               this.ui.el.btnMain.disabled = true;
+               this.ui.hidePlaceValueCard();
+               this.ui.showCheer('');
+               this.board3D.resetCameraOverview();
+
+               if (forcedRoll !== null) {
+                  this.state.combo = Math.max(0, this.state.combo - 2);
+               }
+               this.ui.updateHUD();
+
+               const maxAllowed = Math.min(cfg.maxDie, cfg.maxTile - this.state.chickPos);
+               const rolled =
+                  forcedRoll !== null
+                     ? Math.min(forcedRoll, maxAllowed)
+                     : Math.max(1, Math.floor(Math.random() * Math.max(1, maxAllowed)) + 1);
+
+               this.state.currentRoll = rolled;
+               this.state.expectedTarget = Math.min(cfg.maxTile, this.state.chickPos + rolled);
+               this.state.selectedTile = null;
+               this.state.steppedTiles.clear();
+
+               this.ui.el.eqPrompt.textContent = 'กำลังทอยลูกเต๋า 3D...';
+               this.sound.playDiceRoll();
+               await this.board3D.animateDiceRoll(rolled);
+               if (token !== this.sessionToken) return;
+
+               this.state.phase = 'COUNTING';
+               this.ui.setEquation(
+                  this.state.chickPos,
+                  rolled,
+                  '?',
+                  `เริ่มจาก <strong>${this.state.chickPos}</strong> นับต่อไปอีก <strong>${rolled}</strong> ช่อง แล้วแตะช่องคำตอบ!`,
+               );
+               this.ui.setMainButtonMode(true, 'ยืนยันคำตอบ', true);
+               this.ui.setHintVisible(true);
+
+               this.board3D.updateTileHighlights();
+               this.ui.announce(`ทอยได้ ${rolled} เริ่มจาก ${this.state.chickPos} นับต่อไปอีก ${rolled} ช่อง`, true);
+            }
+
+            onBoardTileSelected(tileNum) {
+               if (this.state.phase !== 'COUNTING') return;
+
+               if (this.state.selectedTile === tileNum) {
+                  this.confirmCountAnswer();
+                  return;
+               }
+
+               this.state.selectedTile = tileNum;
+               this.ui.el.eqTarget.textContent = String(tileNum);
+
+               if (tileNum > this.state.chickPos && tileNum <= this.state.expectedTarget) {
+                  this.state.steppedTiles.add(tileNum);
+                  this.sound.playHop(tileNum - this.state.chickPos - 1);
+               } else {
+                  this.sound.playTone(440, 0.08, 'sine', 0.12);
+               }
+
+               this.board3D.updateTileHighlights();
+               this.ui.el.btnMain.disabled = false;
+               this.ui.announce(`เลือกช่อง ${tileNum} กดปุ่ม ยืนยันคำตอบ หรือแตะซ้ำเพื่อเดิน`);
+            }
+
+            async playGuidedCountHint() {
+               if (this.state.phase !== 'COUNTING') return;
+               const token = this.sessionToken;
+               this.ui.el.btnHint.disabled = true;
+               this.state.steppedTiles.clear();
+
+               for (let t = this.state.chickPos + 1; t <= this.state.expectedTarget; t++) {
+                  if (token !== this.sessionToken || this.state.phase !== 'COUNTING') break;
+                  this.state.steppedTiles.add(t);
+                  this.state.selectedTile = t;
+                  this.ui.el.eqTarget.textContent = String(t);
+                  this.sound.playHop(t - this.state.chickPos - 1);
+                  this.board3D.updateTileHighlights();
+                  this.ui.announce(`นับต่อ... ${t}`, true);
+                  await Utils.delay(420);
+               }
+
+               if (token !== this.sessionToken) return;
+               this.ui.el.btnMain.disabled = false;
+               this.ui.el.btnHint.disabled = false;
+            }
+
+            async confirmCountAnswer() {
+               if (this.state.phase !== 'COUNTING' || this.state.selectedTile === null) return;
+
+               if (this.state.selectedTile !== this.state.expectedTarget) {
+                  this.sound.playGentleHint();
+                  this.ui.showCheer(`ลองนับต่อจาก ${this.state.chickPos} ไปอีก ${this.state.currentRoll} ช่องนะ!`, '#d97706');
+                  this.ui.announce(
+                     `ยังไม่ใช่ช่อง ${this.state.selectedTile} ลองนับต่อจาก ${this.state.chickPos} ไปอีก ${this.state.currentRoll} ช่อง`,
+                     true,
+                  );
+                  this.state.selectedTile = null;
+                  this.ui.el.eqTarget.textContent = '?';
+                  this.ui.el.btnMain.disabled = true;
+                  this.board3D.updateTileHighlights();
+                  return;
+               }
+
+               const token = this.sessionToken;
+               const isCancelled = () => token !== this.sessionToken;
+
+               this.state.phase = 'ANIMATING_CHICK';
+               this.ui.el.btnMain.disabled = true;
+               this.ui.setHintVisible(false);
+
+               const cfg = this.state.getCurrentStage();
+               const prevPos = this.state.chickPos;
+               const landedPos = this.state.expectedTarget;
+
+               this.state.combo += 1;
+               this.state.maxCombo = Math.max(this.state.maxCombo, this.state.combo);
+               this.state.score += 100 + this.state.combo * 25;
+               this.state.equationsHistory.push({
+                  text: `${prevPos} + ${this.state.currentRoll} = ${landedPos}`,
+                  type: 'normal',
+               });
+
+               this.ui.showCheer('ใช่เลย! 🎉', '#c53b2e');
+               this.ui.el.eqPrompt.innerHTML = `<strong>${prevPos} + ${this.state.currentRoll} = ${landedPos}</strong> ลูกเจี๊ยบกำลังเดิน!`;
+               this.board3D.updateTileHighlights();
+               this.ui.updateHUD();
+               this.ui.announce(`ใช่เลย! ${prevPos} บวก ${this.state.currentRoll} เท่ากับ ${landedPos}`, true);
+
+               await this.board3D.animateCharacterWalk('chick', prevPos, landedPos, isCancelled);
+               if (isCancelled()) return;
+               this.state.chickPos = landedPos;
+               this.ui.updateHUD();
+
+               // Check Ladder or Snake
+               if (cfg.ladders[landedPos]) {
+                  const topTile = cfg.ladders[landedPos];
+                  const delta = topTile - landedPos;
+                  this.ui.setEquationMode('ladder');
+                  this.ui.setEquation(landedPos, `+${delta}`, topTile, `🪜 เจอบันได! <strong>${landedPos} + ${delta} = ${topTile}</strong> ลูกเจี๊ยบปีนขึ้นเลย!`);
+                  this.ui.showPlaceValueCard(delta, landedPos, topTile);
+                  this.ui.announce(`ลูกเจี๊ยบเจอบันไดขึ้นไปช่อง ${topTile}`, true);
+
+                  await this.board3D.animateLadderClimb('chick', landedPos, topTile);
+                  if (isCancelled()) return;
+                  this.state.chickPos = topTile;
+                  this.state.score += 50;
+                  this.state.equationsHistory.push({ text: `${landedPos} + ${delta} = ${topTile} 🪜`, type: 'ladder' });
+                  this.ui.updateHUD();
+               } else if (cfg.snakes[landedPos]) {
+                  const tailTile = cfg.snakes[landedPos];
+                  const delta = tailTile - landedPos;
+                  this.ui.setEquationMode('snake');
+                  this.ui.setEquation(landedPos, delta, tailTile, `🐍 เจองูน้อย! <strong>${landedPos} - ${Math.abs(delta)} = ${tailTile}</strong> ไถลลงมา`);
+                  this.ui.showPlaceValueCard(delta, landedPos, tailTile);
+                  this.ui.announce(`เจองู ลดลง ${Math.abs(delta)} เหลือช่อง ${tailTile}`, true);
+
+                  await this.board3D.animateSnakeSlide('chick', landedPos, tailTile);
+                  if (isCancelled()) return;
+                  this.state.chickPos = tailTile;
+                  this.state.equationsHistory.push({ text: `${landedPos} - ${Math.abs(delta)} = ${tailTile} 🐍`, type: 'snake' });
+                  this.ui.updateHUD();
+               }
+
+               if (this.state.chickPos >= cfg.maxTile) {
+                  this.board3D.resetCameraOverview();
+                  this.finishStage(true);
+                  return;
+               }
+
+               this.board3D.resetCameraOverview();
+               await Utils.delay(450);
+               if (isCancelled()) return;
+               await this.runRabbitOpponentTurn(token);
+            }
+
+            async runRabbitOpponentTurn(token) {
+               const isCancelled = () => token !== this.sessionToken;
+               this.state.phase = 'ANIMATING_RABBIT';
+               const cfg = this.state.getCurrentStage();
+
+               this.board3D.resetCameraOverview();
+               this.ui.hidePlaceValueCard();
+               this.ui.showCheer('');
+               this.ui.setEquationMode('rabbit');
+
+               const maxAllowed = Math.min(cfg.maxDie, cfg.maxTile - this.state.rabbitPos);
+               const rabbitRoll = Math.max(1, Math.floor(Math.random() * Math.max(1, maxAllowed)) + 1);
+               const rPrev = this.state.rabbitPos;
+               const rNext = Math.min(cfg.maxTile, rPrev + rabbitRoll);
+
+               this.ui.setEquation(`🐰 ${rPrev}`, rabbitRoll, rNext, `🐰 <strong>กระต่ายทอยได้ ${rabbitRoll}</strong> กำลังกระโดด!`);
+               this.ui.announce(`ตากระต่าย กระต่ายทอยได้ ${rabbitRoll}`, true);
+
+               this.sound.playDiceRoll();
+               await this.board3D.animateDiceRoll(rabbitRoll);
+               if (isCancelled()) return;
+
+               await this.board3D.animateCharacterWalk('rabbit', rPrev, rNext, isCancelled);
+               if (isCancelled()) return;
+               this.state.rabbitPos = rNext;
+               this.ui.updateHUD();
+
+               if (cfg.ladders[rNext]) {
+                  const rTop = cfg.ladders[rNext];
+                  const rDelta = rTop - rNext;
+                  this.ui.el.eqPrompt.innerHTML = `🐰 กระต่ายเจอบันได +${rDelta} ขึ้นไปช่อง <strong>${rTop}</strong>!`;
+                  this.ui.showPlaceValueCard(rDelta, rNext, rTop);
+                  await this.board3D.animateLadderClimb('rabbit', rNext, rTop);
+                  if (isCancelled()) return;
+                  this.state.rabbitPos = rTop;
+                  this.ui.updateHUD();
+               } else if (cfg.snakes[rNext]) {
+                  const rTail = cfg.snakes[rNext];
+                  const rDelta = rTail - rNext;
+                  this.ui.el.eqPrompt.innerHTML = `🐰 กระต่ายเจองู ${rDelta} ลงมาช่อง <strong>${rTail}</strong>!`;
+                  this.ui.showPlaceValueCard(rDelta, rNext, rTail);
+                  await this.board3D.animateSnakeSlide('rabbit', rNext, rTail);
+                  if (isCancelled()) return;
+                  this.state.rabbitPos = rTail;
+                  this.ui.updateHUD();
+               }
+
+               this.board3D.resetCameraOverview();
+               await Utils.delay(450);
+               if (isCancelled()) return;
+               this.ui.hidePlaceValueCard();
+
+               if (this.state.rabbitPos >= cfg.maxTile || this.state.turn >= cfg.maxTurns) {
+                  this.finishStage(this.state.chickPos >= this.state.rabbitPos);
+                  return;
+               }
+
+               this.state.turn += 1;
+               this.state.phase = 'IDLE';
+               this.ui.setEquationMode('default');
+               this.ui.setEquation(this.state.chickPos, '?', '?', 'ตาคุณแล้ว! กดปุ่ม <strong>ทอยลูกเต๋า</strong>');
+               this.ui.setMainButtonMode(false, 'ทอยลูกเต๋า', false);
+               this.ui.updateHUD();
+               this.ui.announce(`ตาที่ ${this.state.turn} กดทอยลูกเต๋าได้เลย!`);
+            }
+
+            finishStage(chickWon) {
+               this.state.phase = 'SUMMARY';
+               this.sound.playVictory();
+               this.board3D.spawnSparkles(this.board3D.tileCoords[this.state.chickPos] || new THREE.Vector3(), 0xfbbf24, 32);
+               this.ui.showSummaryModal(chickWon);
+               this.ui.announce('จบด่านแล้ว! มาดูสรุปสมการคณิตศาสตร์กัน', true);
+            }
+
+            bindEvents() {
+               // Stage selection cards
+               this.ui.el.stageCards.forEach((card) => {
+                  card.addEventListener('click', () => {
+                     this.state.stageId = Number(card.dataset.stage);
+                     this.ui.updateStageCardSelection(this.state.stageId);
+                  });
+               });
+
+               // Start game button
+               document.getElementById('btn-start-game').addEventListener('click', () => {
+                  this.ui.el.screenStart.classList.add('hidden');
+                  this.startStage(this.state.stageId);
+               });
+
+               // Main Roll / Confirm action
+               this.ui.el.btnMain.addEventListener('click', () => {
+                  if (this.state.phase === 'IDLE') this.handleRollDie();
+                  else if (this.state.phase === 'COUNTING') this.confirmCountAnswer();
+               });
+
+               // Golden nudge buttons (+1, +2, +3)
+               this.ui.el.nudgePills.forEach((btn) => {
+                  btn.addEventListener('click', () => this.handleRollDie(Number(btn.dataset.nudge)));
+               });
+
+               // Guided hint button
+               this.ui.el.btnHint.addEventListener('click', () => this.playGuidedCountHint());
+
+               // Reset camera button
+               document.getElementById('btn-reset-camera').addEventListener('click', () => {
+                  this.board3D.userOrbitYaw = 0;
+                  this.board3D.userOrbitPitch = 0;
+                  this.board3D.resetCameraOverview();
+               });
+
+               // Speak prompt button
+               document.getElementById('btn-speak-prompt').addEventListener('click', () => {
+                  this.sound.speak(this.ui.el.eqPrompt.textContent);
+               });
+
+               // Sound mute toggle
+               const toggleMute = () => {
+                  this.state.settings.muted = !this.state.settings.muted;
+                  this.ui.syncSoundUI();
+               };
+               document.getElementById('btn-mute-quick').addEventListener('click', toggleMute);
+               document.getElementById('toggle-sound').addEventListener('click', toggleMute);
+
+               // Settings modal triggers (rebuilds 3D board ONLY if highContrast changed)
+               const openSettings = () => {
+                  this.contrastDirty = false;
+                  this.ui.el.screenSettings.classList.remove('hidden');
+               };
+               const closeSettings = () => {
+                  this.ui.el.screenSettings.classList.add('hidden');
+                  if (this.contrastDirty) {
+                     this.contrastDirty = false;
+                     this.board3D.buildBoard(this.state.getCurrentStage());
+                     this.board3D.updateTileHighlights();
+                  }
+               };
+               document.getElementById('btn-settings').addEventListener('click', openSettings);
+               document.getElementById('btn-start-settings').addEventListener('click', openSettings);
+               document.getElementById('btn-close-settings').addEventListener('click', closeSettings);
+
+               // Text size segmented control
+               this.ui.el.textSizeBtns.forEach((btn) => {
+                  btn.addEventListener('click', () => {
+                     this.ui.el.textSizeBtns.forEach((b) => {
+                        b.classList.remove('bg-white', 'text-emeraldBoard-dark', 'shadow-sm');
+                        b.classList.add('text-ink-secondary');
+                     });
+                     btn.classList.add('bg-white', 'text-emeraldBoard-dark', 'shadow-sm');
+                     btn.classList.remove('text-ink-secondary');
+
+                     document.body.classList.remove('text-large', 'text-xlarge');
+                     if (btn.dataset.textsize === 'large') document.body.classList.add('text-large');
+                     if (btn.dataset.textsize === 'xlarge') document.body.classList.add('text-xlarge');
+                  });
+               });
+
+               // Generic settings switches
+               const bindToggle = (id, key, onChange) => {
+                  const btn = document.getElementById(id);
+                  if (!btn) return;
+                  btn.addEventListener('click', () => {
+                     this.state.settings[key] = !this.state.settings[key];
+                     btn.setAttribute('aria-pressed', String(this.state.settings[key]));
+                     if (onChange) onChange(this.state.settings[key]);
+                  });
+               };
+
+               bindToggle('toggle-contrast', 'highContrast', (v) => {
+                  document.body.classList.toggle('high-contrast', v);
+                  this.contrastDirty = true;
+               });
+               bindToggle('toggle-camera-follow', 'cameraFollow', (v) => {
+                  if (!v) this.board3D.resetCameraOverview();
+               });
+               bindToggle('toggle-motion', 'reduceMotion', (v) => document.body.classList.toggle('reduce-motion', v));
+               bindToggle('toggle-tts', 'tts');
+
+               // Pause modal controls
+               document.getElementById('btn-pause').addEventListener('click', () => this.ui.el.screenPause.classList.remove('hidden'));
+               document.getElementById('btn-resume').addEventListener('click', () => this.ui.el.screenPause.classList.add('hidden'));
+               document.getElementById('btn-restart-stage').addEventListener('click', () => {
+                  this.ui.el.screenPause.classList.add('hidden');
+                  this.startStage(this.state.stageId);
+               });
+               document.getElementById('btn-back-menu').addEventListener('click', () => {
+                  this.sessionToken += 1; // Cancel any active animation coroutine
+                  this.ui.el.screenPause.classList.add('hidden');
+                  this.ui.updateStageCardSelection(this.state.stageId);
+                  this.ui.el.screenStart.classList.remove('hidden');
+               });
+
+               // Summary modal controls
+               document.getElementById('btn-next-stage').addEventListener('click', () => {
+                  this.ui.el.screenSummary.classList.add('hidden');
+                  this.startStage(this.state.stageId < 3 ? this.state.stageId + 1 : 1);
+               });
+               document.getElementById('btn-replay-stage').addEventListener('click', () => {
+                  this.ui.el.screenSummary.classList.add('hidden');
+                  this.startStage(this.state.stageId);
+               });
+
+               // Modal-safe keyboard controls
+               window.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape') {
+                     if (!this.ui.el.screenSettings.classList.contains('hidden')) {
+                        closeSettings();
+                     } else if (
+                        this.ui.el.screenStart.classList.contains('hidden') &&
+                        this.ui.el.screenSummary.classList.contains('hidden')
+                     ) {
+                        this.ui.el.screenPause.classList.toggle('hidden');
+                     }
+                     return;
+                  }
+
+                  // Ignore gameplay keys when any modal is open
+                  if (this.ui.isAnyModalOpen()) return;
+
+                  if (e.key === ' ' || e.key === 'Enter') {
+                     e.preventDefault();
+                     if (this.state.phase === 'IDLE') this.handleRollDie();
+                     else if (this.state.phase === 'COUNTING' && this.state.selectedTile !== null) this.confirmCountAnswer();
+                  } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                     if (this.state.phase === 'COUNTING') {
+                        const cfg = this.state.getCurrentStage();
+                        this.onBoardTileSelected(Math.min(cfg.maxTile, (this.state.selectedTile || this.state.chickPos) + 1));
+                     }
+                  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                     if (this.state.phase === 'COUNTING') {
+                        this.onBoardTileSelected(Math.max(1, (this.state.selectedTile || this.state.chickPos) - 1));
+                     }
+                  } else if (e.key.toLowerCase() === 'r') {
+                     this.sound.speak(this.ui.el.eqPrompt.textContent);
+                  }
+               });
+
+               // RAF-throttled responsive canvas resize
+               window.addEventListener('resize', () => {
+                  if (this.resizeRaf) return;
+                  this.resizeRaf = requestAnimationFrame(() => {
+                     this.resizeRaf = null;
+                     this.board3D.onResize();
+                  });
+               });
+            }
+         }
+
+         // Bootstrap Application on Window Load
+         window.addEventListener('load', () => {
+            window.game = new SnakesLaddersGame();
+         });
+      </script>
+   </body>
+</html>

@@ -1,0 +1,2921 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>Phonics Car Path: Connect & Blend | รถแข่งโฟนิกส์ลากเส้นผสมคำ</title>
+      <!-- Load Google Fonts: Fredoka (Friendly for kids & Dyslexia-friendly spacing) & Kanit (Thai UI) -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <style>
+         :root {
+            --grass-bg: #79d257;
+            --grass-light: #8ae068;
+            --grass-dark: #5cb33c;
+            --panel-blue: #cbeeff;
+            --panel-border: #72b9e8;
+            --slot-bg: #fff5f8;
+            --slot-border: #d4b8e8;
+            --path-purple: #8b3dff;
+            --path-glow: rgba(139, 61, 255, 0.35);
+            --consonant-blue: #1e40af;
+            --vowel-red: #dc2626;
+            --btn-green: #22c55e;
+            --btn-green-dark: #15803d;
+            --btn-purple: #9333ea;
+            --btn-blue: #3b82f6;
+            --text-main: #1e293b;
+            --card-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+         }
+
+         /* High Contrast Accessibility Mode */
+         body.high-contrast {
+            --grass-bg: #1e3a1e;
+            --grass-light: #274b27;
+            --grass-dark: #ffffff;
+            --panel-blue: #ffffff;
+            --panel-border: #000000;
+            --slot-bg: #fef08a;
+            --slot-border: #000000;
+            --path-purple: #facc15;
+            --path-glow: rgba(250, 204, 21, 0.55);
+            --consonant-blue: #001f80;
+            --vowel-red: #b30000;
+            --text-main: #000000;
+         }
+
+         * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+         }
+
+         body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            background-color: var(--grass-bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+         }
+
+         /* Garden Decorative Frame */
+         #garden-frame {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            border: clamp(6px, 1.5vw, 14px) solid #4ca630;
+            box-shadow: inset 0 0 30px rgba(34, 90, 18, 0.35);
+         }
+         body.high-contrast #garden-frame {
+            border-color: #facc15;
+            box-shadow: none;
+         }
+
+         /* Top HUD Bar */
+         #top-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 18px) 2px;
+            gap: 8px;
+            pointer-events: none;
+         }
+
+         .hud-btn-group {
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 1.2vw, 10px);
+            pointer-events: auto;
+         }
+
+         .circle-btn {
+            width: clamp(44px, 6vw, 54px);
+            height: clamp(44px, 6vw, 54px);
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow:
+               0 4px 0 rgba(0, 0, 0, 0.2),
+               0 6px 12px rgba(0, 0, 0, 0.15);
+            transition:
+               transform 0.12s ease,
+               box-shadow 0.12s ease,
+               filter 0.15s ease;
+            background: #ffffff;
+            color: #1e293b;
+            flex-shrink: 0;
+         }
+         .circle-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+         }
+         .circle-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+         }
+         .circle-btn:focus-visible,
+         .pill-btn:focus-visible {
+            outline: 4px solid #facc15;
+            outline-offset: 2px;
+         }
+
+         .btn-home {
+            background: linear-gradient(180deg, #60a5fa, #2563eb);
+            color: #fff;
+         }
+         .btn-a11y {
+            background: linear-gradient(180deg, #c084fc, #7e22ce);
+            color: #fff;
+         }
+         .btn-speaker-big {
+            width: clamp(48px, 7vw, 62px);
+            height: clamp(48px, 7vw, 62px);
+            background: linear-gradient(180deg, #fde047, #22c55e);
+            color: #14532d;
+            border: 4px solid #ffffff;
+         }
+         .btn-slow {
+            width: clamp(44px, 5.5vw, 48px);
+            height: clamp(44px, 5.5vw, 48px);
+            background: linear-gradient(180deg, #fed7aa, #f97316);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+         }
+
+         /* Top Center Word Card Banner */
+         #word-banner {
+            pointer-events: auto;
+            background: var(--panel-blue);
+            border: 4px solid var(--panel-border);
+            border-radius: 24px;
+            padding: clamp(6px, 1vh, 8px) clamp(10px, 1.8vw, 14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 1.5vw, 12px);
+            box-shadow:
+               0 6px 0 rgba(59, 130, 246, 0.25),
+               var(--card-shadow);
+            max-width: 100%;
+         }
+
+         #picture-box {
+            position: relative;
+            width: clamp(58px, 9vw, 82px);
+            height: clamp(58px, 9vw, 82px);
+            background: #ffffff;
+            border: 3px solid #93c5fd;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+         }
+         #picture-box svg {
+            width: 78%;
+            height: 78%;
+         }
+         #picture-box:hover {
+            transform: scale(1.04);
+         }
+         #mini-speaker-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+         }
+
+         #letter-slots {
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 1.2vw, 10px);
+         }
+
+         .word-slot {
+            width: clamp(48px, 7.5vw, 68px);
+            height: clamp(56px, 8.5vw, 78px);
+            background: var(--slot-bg);
+            border: 3px dashed var(--slot-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(30px, 5vw, 44px);
+            font-weight: 700;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+         }
+         .word-slot.filled {
+            border-style: solid;
+            background: #ffffff;
+            border-color: #a855f7;
+            box-shadow: 0 4px 10px rgba(168, 85, 247, 0.2);
+            transform: scale(1.03);
+         }
+         .word-slot.pulse-phonics {
+            transform: scale(1.22);
+            background: #fef08a;
+            border-color: #eab308;
+            z-index: 5;
+         }
+         .word-slot.consonant {
+            color: var(--consonant-blue);
+         }
+         .word-slot.vowel {
+            color: var(--vowel-red);
+         }
+         body.no-montessori .word-slot.consonant,
+         body.no-montessori .word-slot.vowel {
+            color: #1e293b;
+         }
+
+         /* Visual Phonics Sound Pill (Minimal Symbol & Phoneme) */
+         #phonics-feedback-bar {
+            position: relative;
+            z-index: 15;
+            align-self: center;
+            background: rgba(255, 255, 255, 0.92);
+            border: 3px solid #93c5fd;
+            border-radius: 999px;
+            padding: 3px 16px;
+            margin: 2px 12px;
+            font-size: clamp(16px, 2.4vw, 20px);
+            font-weight: 700;
+            color: #6d28d9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 32px;
+            letter-spacing: 1px;
+         }
+         #phonics-feedback-bar.hidden-bar {
+            display: none;
+         }
+
+         /* Main Canvas Arena */
+         #arena-wrapper {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 2px 12px;
+         }
+
+         #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+            cursor: pointer;
+         }
+
+         /* Bottom HUD */
+         #bottom-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px clamp(12px, 2vw, 20px) clamp(10px, 2vh, 16px);
+            gap: 8px;
+            pointer-events: none;
+         }
+
+         #progress-pill {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #4ade80;
+            border-radius: 999px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(14px, 2vw, 18px);
+            font-weight: 700;
+            color: #166534;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+         }
+
+         .stage-badge {
+            background: #22c55e;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: clamp(13px, 1.8vw, 15px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+         }
+
+         #action-toolbar {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 1.4vw, 12px);
+         }
+
+         /* Main Canvas Arena */
+         #arena-wrapper {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 4px 16px;
+         }
+
+         #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+            cursor: pointer;
+         }
+
+         /* Bottom HUD */
+         #bottom-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 20px 16px;
+            pointer-events: none;
+         }
+
+         #progress-pill {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #4ade80;
+            border-radius: 999px;
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #166534;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+         }
+
+         .stage-badge {
+            background: #22c55e;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 14px;
+         }
+
+         #action-toolbar {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+         }
+
+         .tool-hint {
+            background: linear-gradient(180deg, #c084fc, #9333ea);
+            color: #fff;
+         }
+         .tool-undo {
+            background: linear-gradient(180deg, #60a5fa, #2563eb);
+            color: #fff;
+         }
+         .tool-reset {
+            background: linear-gradient(180deg, #34d399, #059669);
+            color: #fff;
+         }
+
+         .pill-btn {
+            height: clamp(46px, 6.5vw, 58px);
+            padding: 0 clamp(18px, 3vw, 26px);
+            border-radius: 999px;
+            border: 4px solid #ffffff;
+            background: linear-gradient(180deg, #4ade80, #16a34a);
+            color: #ffffff;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            font-size: clamp(19px, 2.8vw, 24px);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow:
+               0 5px 0 #14532d,
+               0 8px 16px rgba(0, 0, 0, 0.22);
+            transition:
+               transform 0.15s ease,
+               filter 0.15s ease,
+               opacity 0.2s ease;
+         }
+         .pill-btn:disabled {
+            background: linear-gradient(180deg, #94a3b8, #64748b);
+            box-shadow: 0 5px 0 #334155;
+            opacity: 0.75;
+            cursor: not-allowed;
+         }
+         .pill-btn.ready-pulse {
+            animation: goPulse 1.1s infinite ease-in-out;
+         }
+         @keyframes goPulse {
+            0%,
+            100% {
+               transform: scale(1);
+            }
+            50% {
+               transform: scale(1.07);
+            }
+         }
+         body.sensory-calm .pill-btn.ready-pulse {
+            animation: none;
+         }
+
+         /* Modals & Overlays */
+         .overlay-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+         }
+         .overlay-screen.hidden {
+            display: none;
+         }
+
+         /* Fullscreen Game Start Screen (Light Theme Game Scene) */
+         #startModal {
+            background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 42%, #86efac 42.5%, #4ade80 100%);
+            backdrop-filter: none;
+            padding: 16px;
+         }
+
+         .game-start-stage {
+            width: 100%;
+            max-width: 780px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(12px, 2.2vh, 20px);
+            position: relative;
+            z-index: 2;
+         }
+
+         /* Animated Game Title Logo Emblem */
+         .game-logo-banner {
+            background: #ffffff;
+            border: 6px solid #8b5cf6;
+            border-radius: 36px;
+            padding: clamp(12px, 2vh, 18px) clamp(20px, 4vw, 36px);
+            box-shadow:
+               0 10px 0 #6d28d9,
+               0 18px 30px rgba(0, 0, 0, 0.22);
+            text-align: center;
+            position: relative;
+            transform: rotate(-1deg);
+         }
+
+         .game-logo-title {
+            font-size: clamp(28px, 5.2vw, 48px);
+            font-weight: 700;
+            line-height: 1.05;
+            margin: 0;
+            background: linear-gradient(180deg, #9333ea 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.08));
+         }
+
+         .logo-letter-badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+         }
+         .logo-tile {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: 0 4px 0 #94a3b8;
+         }
+
+         /* Visual Track Demo Scene on Start Screen */
+         .visual-demo-track {
+            background: rgba(255, 255, 255, 0.92);
+            border: 5px solid #ffffff;
+            border-radius: 28px;
+            padding: 12px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 2vw, 18px);
+            box-shadow:
+               0 8px 0 rgba(22, 101, 52, 0.25),
+               0 12px 24px rgba(0, 0, 0, 0.15);
+            animation: floatTrack 2.6s infinite ease-in-out;
+         }
+         @keyframes floatTrack {
+            0%,
+            100% {
+               transform: translateY(0);
+            }
+            50% {
+               transform: translateY(-5px);
+            }
+         }
+         body.sensory-calm .visual-demo-track {
+            animation: none;
+         }
+
+         .modal-card {
+            background: #ffffff;
+            border: 5px solid #72b9e8;
+            border-radius: 32px;
+            padding: 22px 24px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 92dvh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            position: relative;
+         }
+
+         .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(10px, 2vw, 16px);
+            width: 100%;
+         }
+
+         .stage-card {
+            background: #ffffff;
+            border: 4px solid #cbd5e1;
+            border-radius: 24px;
+            padding: 12px 10px;
+            cursor: pointer;
+            transition:
+               transform 0.15s ease,
+               border-color 0.15s ease,
+               box-shadow 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 0 #94a3b8;
+         }
+         .stage-card:hover {
+            transform: translateY(-4px);
+         }
+         .stage-card.active {
+            border-color: #8b5cf6;
+            background: #faf5ff;
+            box-shadow:
+               0 6px 0 #6d28d9,
+               0 10px 20px rgba(139, 92, 246, 0.28);
+            transform: translateY(-3px);
+         }
+
+         .stage-num-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+         .stage-card.active .stage-num-badge {
+            background: #8b5cf6;
+            color: #ffffff;
+         }
+
+         .vowel-pills {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+         }
+         .v-pill {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #fca5a5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .start-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+         }
+
+         .btn-primary-large {
+            background: linear-gradient(180deg, #4ade80, #16a34a);
+            color: #fff;
+            border: 5px solid #fff;
+            border-radius: 999px;
+            padding: 14px 40px;
+            font-size: clamp(22px, 3.5vw, 28px);
+            font-weight: 700;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow:
+               0 7px 0 #14532d,
+               0 14px 24px rgba(0, 0, 0, 0.25);
+            transition: transform 0.12s ease;
+         }
+         .btn-primary-large:hover {
+            transform: translateY(-2px) scale(1.03);
+         }
+         .btn-primary-large:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #14532d;
+         }
+
+         .btn-secondary-large {
+            background: linear-gradient(180deg, #a78bfa, #7c3aed);
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 999px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 0 #4c1d95;
+            transition: transform 0.12s ease;
+         }
+         .btn-secondary-large:hover {
+            transform: translateY(-2px);
+         }
+
+         /* Accessibility Settings Rows */
+         .a11y-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            text-align: left;
+            gap: 12px;
+         }
+         .a11y-visual-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+         }
+         .a11y-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: #ede9fe;
+            color: #6d28d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+         }
+         .overlay-screen.hidden {
+            display: none;
+         }
+
+         .modal-card {
+            background: #ffffff;
+            border: 5px solid #72b9e8;
+            border-radius: 32px;
+            padding: 24px 28px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+         }
+
+         .game-title {
+            font-size: clamp(26px, 4vw, 38px);
+            font-weight: 700;
+            color: #6d28d9;
+            margin: 6px 0 4px;
+            line-height: 1.15;
+         }
+         .game-subtitle {
+            font-size: 17px;
+            color: #475569;
+            margin-bottom: 18px;
+         }
+
+         .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin: 16px 0 20px;
+         }
+
+         .stage-card {
+            background: #f0f9ff;
+            border: 3px solid #7dd3fc;
+            border-radius: 22px;
+            padding: 14px;
+            cursor: pointer;
+            transition:
+               transform 0.15s ease,
+               border-color 0.15s ease,
+               background 0.15s ease;
+            text-align: center;
+         }
+         .stage-card:hover {
+            transform: translateY(-4px);
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+         }
+         .stage-card.active {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            box-shadow: 0 6px 15px rgba(34, 197, 94, 0.2);
+         }
+
+         .vowel-pills {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+         }
+         .v-pill {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 14px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+         }
+
+         .start-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+         }
+
+         .btn-primary-large {
+            background: linear-gradient(180deg, #4ade80, #16a34a);
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 999px;
+            padding: 14px 36px;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            cursor: pointer;
+            box-shadow:
+               0 6px 0 #14532d,
+               0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.12s ease;
+         }
+         .btn-primary-large:hover {
+            transform: translateY(-2px);
+         }
+
+         .btn-secondary-large {
+            background: linear-gradient(180deg, #a78bfa, #7c3aed);
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 999px;
+            padding: 14px 26px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Fredoka', 'Kanit', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #4c1d95;
+         }
+
+         /* Accessibility Settings Rows */
+         .a11y-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            text-align: left;
+            gap: 12px;
+         }
+         .a11y-label strong {
+            display: block;
+            font-size: 16px;
+            color: #0f172a;
+         }
+         .a11y-label span {
+            font-size: 13px;
+            color: #475569;
+         }
+
+         .toggle-switch {
+            width: 58px;
+            height: 32px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            border: none;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s ease;
+         }
+         .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+         }
+         .toggle-switch[aria-checked='true'] {
+            background: #22c55e;
+         }
+         .toggle-switch[aria-checked='true']::after {
+            transform: translateX(26px);
+         }
+
+         /* Phonics Word Wall Grid in Complete Modal */
+         .word-wall-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 16px 0 20px;
+         }
+         .wall-card {
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition:
+               transform 0.15s ease,
+               border-color 0.15s ease;
+         }
+         .wall-card:hover {
+            transform: translateY(-3px);
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+         }
+         .wall-word {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 4px 0 2px;
+            letter-spacing: 1px;
+         }
+
+         /* Mobile Portrait & Narrow Screen Adaptive Layout */
+         @media (max-width: 640px) {
+            #top-hud {
+               flex-wrap: wrap;
+               justify-content: space-between;
+               padding-top: 8px;
+            }
+            #word-banner {
+               order: 3;
+               width: 100%;
+               margin-top: 2px;
+            }
+            #bottom-hud {
+               justify-content: center;
+            }
+            #progress-pill {
+               order: 2;
+               width: 100%;
+               justify-content: center;
+               padding: 4px 12px;
+            }
+            #action-toolbar {
+               order: 1;
+               width: 100%;
+               justify-content: space-between;
+            }
+            .modal-card {
+               padding: 18px 16px;
+               border-radius: 24px;
+            }
+            .stage-grid {
+               grid-template-columns: repeat(3, 1fr);
+               gap: 8px;
+            }
+            .stage-card {
+               padding: 10px 6px;
+            }
+         }
+
+         /* Landscape Mobile / Short Height Adaptive Layout */
+         @media (max-height: 500px) {
+            #top-hud {
+               padding-top: 4px;
+            }
+            #picture-box {
+               width: 48px;
+               height: 48px;
+            }
+            .word-slot {
+               width: 42px;
+               height: 48px;
+               font-size: 26px;
+            }
+            #phonics-feedback-bar {
+               min-height: 24px;
+               font-size: 14px;
+               padding: 2px 12px;
+            }
+            #bottom-hud {
+               padding-bottom: 6px;
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <!-- Garden Border Frame -->
+      <div id="garden-frame" aria-hidden="true"></div>
+
+      <!-- Top Floating HUD (No Navbar) -->
+      <header id="top-hud">
+         <div class="hud-btn-group">
+            <button id="btnHome" class="circle-btn btn-home" aria-label="หน้าหลัก">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+               </svg>
+            </button>
+            <button id="btnA11y" class="circle-btn btn-a11y" aria-label="ตั้งค่าการช่วยเล่น">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="5" r="2"></circle>
+                  <path d="M5 9h14"></path>
+                  <path d="M12 9v6"></path>
+                  <path d="M9 21l3-6 3 6"></path>
+               </svg>
+            </button>
+         </div>
+
+         <!-- Top Center Word Card Banner -->
+         <div id="word-banner">
+            <div id="picture-box" role="button" tabindex="0" aria-label="ฟังเสียงคำศัพท์">
+               <div id="picture-svg-container"></div>
+               <div id="mini-speaker-badge" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                     <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                  </svg>
+               </div>
+            </div>
+
+            <div id="letter-slots" aria-label="ช่องตัวอักษรผสมคำ">
+               <div class="word-slot" id="slot-0"></div>
+               <div class="word-slot" id="slot-1"></div>
+               <div class="word-slot" id="slot-2"></div>
+            </div>
+         </div>
+
+         <!-- Top Right Speaker Buttons -->
+         <div class="hud-btn-group">
+            <button id="btnSpeakSlow" class="circle-btn btn-slow" aria-label="ฟังเสียงช้าทีละตัว">
+               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 16h14a4 4 0 000-8H9a4 4 0 00-4 4v4"></path>
+                  <circle cx="11" cy="12" r="2"></circle>
+                  <path d="M19 8l2-2M20 11l2-1"></path>
+               </svg>
+            </button>
+            <button id="btnSpeakWord" class="circle-btn btn-speaker-big" aria-label="ฟังเสียงคำศัพท์ซ้ำ">
+               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                  <path d="M15.54 8.46a5 5 0 010 7.07" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path>
+                  <path d="M19.07 4.93a10 10 0 010 14.14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path>
+               </svg>
+            </button>
+         </div>
+      </header>
+
+      <!-- Live Visual Phonics Strip (Compact Phoneme Symbols Only) -->
+      <div id="phonics-feedback-bar" role="status" aria-live="polite">
+         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+            <path d="M15.54 8.46a5 5 0 010 7.07" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+         </svg>
+         <span id="feedback-text">C - V - C</span>
+      </div>
+
+      <!-- Main Canvas Arena -->
+      <main id="arena-wrapper">
+         <canvas id="gameCanvas" aria-label="สนามตารางรถแข่งโฟนิกส์"></canvas>
+      </main>
+
+      <!-- Bottom HUD -->
+      <footer id="bottom-hud">
+         <div id="progress-pill">
+            <span class="stage-badge" id="stage-label">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15" stroke="currentColor" stroke-width="2.5"></line>
+               </svg>
+               <span id="stage-num-text">1</span>
+            </span>
+            <span id="card-progress-text">1 / 6</span>
+         </div>
+
+         <div id="action-toolbar">
+            <button id="btnHint" class="circle-btn tool-hint" aria-label="คำใบ้">
+               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+                  <circle cx="12" cy="17" r="1" fill="currentColor"></circle>
+               </svg>
+            </button>
+            <button id="btnUndo" class="circle-btn tool-undo" aria-label="ย้อนกลับ">
+               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 14L4 9l5-5"></path>
+                  <path d="M4 9h10.5a5.5 5.5 0 010 11H11"></path>
+               </svg>
+            </button>
+            <button id="btnReset" class="circle-btn tool-reset" aria-label="เริ่มใหม่">
+               <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a9 9 0 11-3-6.7L21 8"></path>
+                  <path d="M21 3v5h-5"></path>
+               </svg>
+            </button>
+            <button id="btnGo" class="pill-btn" disabled aria-label="ออกรถ">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5,3 19,12 5,21"></polygon>
+               </svg>
+               <span>GO</span>
+            </button>
+         </div>
+      </footer>
+
+      <!-- Fullscreen Game Start Screen (Visual & Icon-Driven) -->
+      <div id="startModal" class="overlay-screen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+         <!-- Top Right Floating A11y Button on Start Screen -->
+         <button id="btnStartA11y" class="circle-btn btn-a11y" style="position: fixed; top: 16px; right: 16px; z-index: 110" aria-label="ตั้งค่าการเข้าถึง">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+               <circle cx="12" cy="5" r="2"></circle>
+               <path d="M5 9h14"></path>
+               <path d="M12 9v6"></path>
+               <path d="M9 21l3-6 3 6"></path>
+            </svg>
+         </button>
+
+         <div class="game-start-stage">
+            <!-- Game Title Logo -->
+            <div class="game-logo-banner">
+               <h1 id="startTitle" class="game-logo-title">PHONICS CAR PATH</h1>
+               <div class="logo-letter-badges" aria-hidden="true">
+                  <div class="logo-tile" style="color: #1e40af">c</div>
+                  <div class="logo-tile" style="color: #dc2626">a</div>
+                  <div class="logo-tile" style="color: #1e40af">t</div>
+               </div>
+            </div>
+
+            <!-- Visual How-To-Play Track Strip (No Text Needed!) -->
+            <div class="visual-demo-track" aria-hidden="true">
+               <div id="hero-car-preview"></div>
+               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b3dff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+               <div style="display: flex; gap: 6px">
+                  <span class="logo-tile" style="color: #1e40af; border-color: #8b3dff">n</span>
+                  <span class="logo-tile" style="color: #dc2626; border-color: #8b3dff">e</span>
+                  <span class="logo-tile" style="color: #1e40af; border-color: #8b3dff">t</span>
+               </div>
+               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b3dff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+               <!-- Checkered Flag Icon -->
+               <svg width="46" height="46" viewBox="0 0 48 48">
+                  <rect x="4" y="4" width="40" height="40" rx="10" fill="#ffffff" stroke="#7e22ce" stroke-width="4" />
+                  <rect x="10" y="10" width="7" height="7" fill="#7e22ce" />
+                  <rect x="24" y="10" width="7" height="7" fill="#7e22ce" />
+                  <rect x="17" y="17" width="7" height="7" fill="#7e22ce" />
+                  <rect x="31" y="17" width="7" height="7" fill="#7e22ce" />
+                  <rect x="10" y="24" width="7" height="7" fill="#7e22ce" />
+                  <rect x="24" y="24" width="7" height="7" fill="#7e22ce" />
+                  <rect x="17" y="31" width="7" height="7" fill="#7e22ce" />
+                  <rect x="31" y="31" width="7" height="7" fill="#7e22ce" />
+               </svg>
+            </div>
+
+            <!-- Visual Stage Selector Cards (Icons + Vowel Tiles) -->
+            <div class="stage-grid" id="stageSelectGrid">
+               <div class="stage-card active" data-stage="0" tabindex="0" role="button" aria-label="ด่าน 1 สระ e และ a">
+                  <div class="stage-num-badge">1</div>
+                  <div>
+                     <svg width="44" height="44" viewBox="0 0 64 64">
+                        <circle cx="32" cy="36" r="18" fill="#fdba74" stroke="#9a3412" stroke-width="3" />
+                        <polygon points="16,26 20,10 30,22" fill="#fb923c" stroke="#9a3412" stroke-width="3" />
+                        <polygon points="48,26 44,10 34,22" fill="#fb923c" stroke="#9a3412" stroke-width="3" />
+                        <circle cx="26" cy="34" r="3" fill="#1e293b" />
+                        <circle cx="38" cy="34" r="3" fill="#1e293b" />
+                     </svg>
+                  </div>
+                  <div class="vowel-pills">
+                     <span class="v-pill">e</span>
+                     <span class="v-pill">a</span>
+                  </div>
+               </div>
+
+               <div class="stage-card" data-stage="1" tabindex="0" role="button" aria-label="ด่าน 2 สระ i และ o">
+                  <div class="stage-num-badge">2</div>
+                  <div>
+                     <svg width="44" height="44" viewBox="0 0 64 64">
+                        <circle cx="32" cy="34" r="18" fill="#f9a8d4" stroke="#be185d" stroke-width="3" />
+                        <ellipse cx="32" cy="38" rx="8" ry="6" fill="#f472b6" stroke="#be185d" stroke-width="2.5" />
+                        <circle cx="25" cy="29" r="3" fill="#1e293b" />
+                        <circle cx="39" cy="29" r="3" fill="#1e293b" />
+                     </svg>
+                  </div>
+                  <div class="vowel-pills">
+                     <span class="v-pill">i</span>
+                     <span class="v-pill">o</span>
+                  </div>
+               </div>
+
+               <div class="stage-card" data-stage="2" tabindex="0" role="button" aria-label="ด่าน 3 สระ u และรวมทุกสระ">
+                  <div class="stage-num-badge">3</div>
+                  <div>
+                     <svg width="44" height="44" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="14" fill="#facc15" stroke="#ca8a04" stroke-width="3" />
+                        <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round">
+                           <line x1="32" y1="8" x2="32" y2="14" />
+                           <line x1="32" y1="50" x2="32" y2="56" />
+                           <line x1="8" y1="32" x2="14" y2="32" />
+                           <line x1="50" y1="32" x2="56" y2="32" />
+                        </g>
+                     </svg>
+                  </div>
+                  <div class="vowel-pills">
+                     <span class="v-pill">u</span>
+                     <span class="v-pill" style="background: #fef08a; color: #854d0e; border-color: #fde047">★</span>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Big Game Action Buttons -->
+            <div class="start-actions">
+               <button id="btnStartTutorial" class="btn-secondary-large" aria-label="โหมดฝึกเล่น">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+                     <circle cx="12" cy="17" r="1" fill="currentColor"></circle>
+                  </svg>
+                  <span>ฝึกเล่น</span>
+               </button>
+               <button id="btnStartGame" class="btn-primary-large" aria-label="เริ่มเล่นเกม">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                     <polygon points="5,3 19,12 5,21"></polygon>
+                  </svg>
+                  <span>PLAY</span>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Accessibility Settings Modal (Icon + Short Label) -->
+      <div id="a11yModal" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="a11yTitle">
+         <div class="modal-card" style="max-width: 480px">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px">
+               <div class="a11y-icon-box" style="background: #7e22ce; color: #fff">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     <circle cx="12" cy="5" r="2"></circle>
+                     <path d="M5 9h14"></path>
+                     <path d="M12 9v6"></path>
+                     <path d="M9 21l3-6 3 6"></path>
+                  </svg>
+               </div>
+               <h2 id="a11yTitle" style="font-size: 24px; margin: 0; color: #6d28d9">ตั้งค่าการช่วยเล่น</h2>
+            </div>
+
+            <div class="a11y-row">
+               <div class="a11y-visual-label">
+                  <div class="a11y-icon-box" style="font-size: 20px"><span style="color: #1e40af">C</span><span style="color: #dc2626">V</span><span style="color: #1e40af">C</span></div>
+                  <span>แยกสีสระ-พยัญชนะ</span>
+               </div>
+               <button id="toggleMontessori" class="toggle-switch" role="switch" aria-checked="true" aria-label="แยกสีสระและพยัญชนะ"></button>
+            </div>
+
+            <div class="a11y-row">
+               <div class="a11y-visual-label">
+                  <div class="a11y-icon-box">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                        <path d="M15.54 8.46a5 5 0 010 7.07" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                     </svg>
+                  </div>
+                  <span>อ่านเสียงตัวอักษร</span>
+               </div>
+               <button id="toggleTileSpeech" class="toggle-switch" role="switch" aria-checked="true" aria-label="อ่านเสียงตัวอักษร"></button>
+            </div>
+
+            <div class="a11y-row">
+               <div class="a11y-visual-label">
+                  <div class="a11y-icon-box">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 3a9 9 0 000 18V3z" fill="currentColor" />
+                     </svg>
+                  </div>
+                  <span>สีคมชัดสูง</span>
+               </div>
+               <button id="toggleContrast" class="toggle-switch" role="switch" aria-checked="false" aria-label="โหมดสีคมชัดสูง"></button>
+            </div>
+
+            <div class="a11y-row">
+               <div class="a11y-visual-label">
+                  <div class="a11y-icon-box">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <path d="M2 12h20" />
+                        <circle cx="12" cy="12" r="4" />
+                     </svg>
+                  </div>
+                  <span>ลดภาพเคลื่อนไหว</span>
+               </div>
+               <button id="toggleCalm" class="toggle-switch" role="switch" aria-checked="false" aria-label="โหมดลดภาพเคลื่อนไหว"></button>
+            </div>
+
+            <div class="a11y-row">
+               <div class="a11y-visual-label">
+                  <div class="a11y-icon-box">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                     </svg>
+                  </div>
+                  <span>เสียงเอฟเฟกต์</span>
+               </div>
+               <button id="toggleSfx" class="toggle-switch" role="switch" aria-checked="true" aria-label="เสียงเอฟเฟกต์"></button>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; justify-content: center">
+               <button id="btnCloseA11y" class="btn-primary-large" style="padding: 10px 36px; font-size: 22px" aria-label="ตกลง">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                     <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>OK</span>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Stage Complete / Phonics Word Wall Modal (Visual Word Cards) -->
+      <div id="completeModal" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="completeTitle">
+         <div class="modal-card">
+            <div style="display: flex; justify-content: center; margin-bottom: 4px" id="trophy-svg-box"></div>
+            <h2 id="completeTitle" class="game-logo-title" style="font-size: 32px; margin-bottom: 8px">STAGE CLEAR!</h2>
+
+            <div class="word-wall-grid" id="wordWallGrid"></div>
+
+            <div class="start-actions">
+               <button id="btnReplayStage" class="btn-secondary-large" aria-label="เล่นซ้ำ">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M21 12a9 9 0 11-3-6.7L21 8"></path>
+                     <path d="M21 3v5h-5"></path>
+                  </svg>
+               </button>
+               <button id="btnNextStage" class="btn-primary-large" aria-label="ด่านถัดไป">
+                  <span>NEXT</span>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * PHONICS CAR PATH: CONNECT & BLEND
+          * Complete Single-File Accessible Educational Game
+          * Covers 18 CVC words across 3 stages and all 5 short vowels (a, e, i, o, u)
+          */
+
+         // ==========================================
+         // 1. VOCABULARY DATA & PHONICS DICTIONARY
+         // ==========================================
+         const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
+
+         // Phonics sound mapping for clear Web Speech synthesis & visual feedback
+         const PHONICS_SOUNDS = {
+            a: { ipa: '/æ/', speak: 'ah', thai: 'แอะ' },
+            e: { ipa: '/e/', speak: 'eh', thai: 'เอะ' },
+            i: { ipa: '/ɪ/', speak: 'ih', thai: 'อิ' },
+            o: { ipa: '/ɒ/', speak: 'aw', thai: 'เอาะ' },
+            u: { ipa: '/ʌ/', speak: 'uh', thai: 'อะ' },
+            b: { ipa: '/b/', speak: 'buh' },
+            c: { ipa: '/k/', speak: 'kuh' },
+            d: { ipa: '/d/', speak: 'duh' },
+            f: { ipa: '/f/', speak: 'fff' },
+            g: { ipa: '/g/', speak: 'guh' },
+            h: { ipa: '/h/', speak: 'huh' },
+            j: { ipa: '/dʒ/', speak: 'juh' },
+            m: { ipa: '/m/', speak: 'mmm' },
+            n: { ipa: '/n/', speak: 'nnn' },
+            p: { ipa: '/p/', speak: 'puh' },
+            r: { ipa: '/r/', speak: 'rrr' },
+            s: { ipa: '/s/', speak: 'sss' },
+            t: { ipa: '/t/', speak: 'tuh' },
+            w: { ipa: '/w/', speak: 'wuh' },
+            x: { ipa: '/ks/', speak: 'ks' },
+         };
+
+         // 3 Stages x 6 Words = 18 CVC Words
+         const STAGES = [
+            {
+               id: 0,
+               name: 'ด่านที่ 1: ทุ่งหญ้าเริ่มต้น',
+               words: [
+                  { word: 'net', meaning: 'สวิงจับแมลง', distractors: ['s', 'a'], obstacles: 0 },
+                  { word: 'cat', meaning: 'แมว', distractors: ['p', 'e'], obstacles: 0 },
+                  { word: 'pen', meaning: 'ปากกา', distractors: ['b', 'i'], obstacles: 0 },
+                  { word: 'hat', meaning: 'หมวก', distractors: ['m', 'o'], obstacles: 0 },
+                  { word: 'bed', meaning: 'เตียงนอน', distractors: ['r', 'u'], obstacles: 0 },
+                  { word: 'map', meaning: 'แผนที่', distractors: ['t', 'e'], obstacles: 0 },
+               ],
+            },
+            {
+               id: 1,
+               name: 'ด่านที่ 2: สวนดอกไม้ปริศนา',
+               words: [
+                  { word: 'pig', meaning: 'หมู', distractors: ['e', 'b', 'n'], obstacles: 0 },
+                  { word: 'dog', meaning: 'สุนัข', distractors: ['a', 'p', 't'], obstacles: 0 },
+                  { word: 'box', meaning: 'กล่อง', distractors: ['u', 'f', 's'], obstacles: 0 },
+                  { word: 'pin', meaning: 'เข็มหมุด', distractors: ['e', 't', 'g'], obstacles: 0 },
+                  { word: 'pot', meaning: 'หม้อ', distractors: ['a', 'd', 'm'], obstacles: 0 },
+                  { word: 'wig', meaning: 'วิกผม', distractors: ['e', 'p', 'n'], obstacles: 0 },
+               ],
+            },
+            {
+               id: 2,
+               name: 'ด่านที่ 3: สนามแข่งแชมป์',
+               words: [
+                  { word: 'sun', meaning: 'พระอาทิตย์', distractors: ['a', 'm', 't'], obstacles: 2 },
+                  { word: 'cup', meaning: 'ถ้วย', distractors: ['o', 'b', 'n'], obstacles: 2 },
+                  { word: 'bus', meaning: 'รถบัส', distractors: ['i', 'g', 'p'], obstacles: 2 },
+                  { word: 'bug', meaning: 'แมลงเต่าทอง', distractors: ['e', 'r', 'd'], obstacles: 2 },
+                  { word: 'fox', meaning: 'สุนัขจิ้งจอก', distractors: ['u', 'b', 't'], obstacles: 2 },
+                  { word: 'jet', meaning: 'เครื่องบินเจ็ต', distractors: ['i', 'n', 'p'], obstacles: 2 },
+               ],
+            },
+         ];
+
+         // ==========================================
+         // 2. CUSTOM VECTOR SVG ILLUSTRATIONS (18 WORDS + ICONS)
+         // ==========================================
+         function getWordSVG(word) {
+            const svgs = {
+               net: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <line x1="22" y1="78" x2="52" y2="48" stroke="#92400e" stroke-width="6" stroke-linecap="round"/>
+          <ellipse cx="64" cy="36" rx="22" ry="15" transform="rotate(-45 64 36)" fill="#e0f2fe" stroke="#2563eb" stroke-width="4"/>
+          <path d="M50 24 L76 50 M58 20 L80 42 M46 32 L68 54 M52 46 L76 22 M60 52 L80 32" stroke="#60a5fa" stroke-width="2"/>
+        </svg>`,
+               cat: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <polygon points="24,42 30,18 46,34" fill="#fb923c" stroke="#9a3412" stroke-width="3"/>
+          <polygon points="76,42 70,18 54,34" fill="#fb923c" stroke="#9a3412" stroke-width="3"/>
+          <circle cx="50" cy="56" r="28" fill="#fdba74" stroke="#9a3412" stroke-width="3"/>
+          <circle cx="40" cy="52" r="4" fill="#1e293b"/>
+          <circle cx="60" cy="52" r="4" fill="#1e293b"/>
+          <polygon points="46,60 54,60 50,65" fill="#f43f5e"/>
+          <path d="M43 68 Q50 74 57 68" fill="none" stroke="#9a3412" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="16" y1="56" x2="32" y2="58" stroke="#9a3412" stroke-width="2"/>
+          <line x1="68" y1="58" x2="84" y2="56" stroke="#9a3412" stroke-width="2"/>
+        </svg>`,
+               pen: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <g transform="rotate(-40 50 50)">
+            <rect x="42" y="18" width="16" height="52" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+            <rect x="42" y="18" width="16" height="12" rx="3" fill="#facc15"/>
+            <polygon points="42,70 58,70 50,86" fill="#fde68a" stroke="#1d4ed8" stroke-width="2.5"/>
+            <circle cx="50" cy="84" r="2.5" fill="#1e293b"/>
+          </g>
+        </svg>`,
+               hat: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <path d="M28 58 L34 26 Q50 20 66 26 L72 58 Z" fill="#a855f7" stroke="#581c87" stroke-width="3"/>
+          <rect x="30" y="48" width="40" height="9" fill="#facc15"/>
+          <ellipse cx="50" cy="60" rx="38" ry="11" fill="#9333ea" stroke="#581c87" stroke-width="3"/>
+        </svg>`,
+               bed: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <rect x="16" y="34" width="8" height="44" rx="3" fill="#92400e"/>
+          <rect x="76" y="46" width="8" height="32" rx="3" fill="#92400e"/>
+          <rect x="22" y="44" width="22" height="12" rx="5" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+          <rect x="22" y="52" width="56" height="18" rx="4" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+          <rect x="16" y="66" width="68" height="8" rx="2" fill="#b45309"/>
+        </svg>`,
+               map: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <polygon points="16,26 38,20 62,28 84,22 84,74 62,80 38,72 16,78" fill="#fef3c7" stroke="#b45309" stroke-width="3"/>
+          <line x1="38" y1="20" x2="38" y2="72" stroke="#d97706" stroke-width="2"/>
+          <line x1="62" y1="28" x2="62" y2="80" stroke="#d97706" stroke-width="2"/>
+          <path d="M26 58 Q45 36 72 48" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="4 4"/>
+          <path d="M68 42 L76 50 M76 42 L68 50" stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`,
+               pig: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <ellipse cx="30" cy="32" rx="9" ry="12" transform="rotate(-25 30 32)" fill="#f472b6" stroke="#be185d" stroke-width="3"/>
+          <ellipse cx="70" cy="32" rx="9" ry="12" transform="rotate(25 70 32)" fill="#f472b6" stroke="#be185d" stroke-width="3"/>
+          <circle cx="50" cy="54" r="28" fill="#f9a8d4" stroke="#be185d" stroke-width="3"/>
+          <circle cx="40" cy="46" r="3.5" fill="#1e293b"/>
+          <circle cx="60" cy="46" r="3.5" fill="#1e293b"/>
+          <ellipse cx="50" cy="60" rx="12" ry="9" fill="#f472b6" stroke="#be185d" stroke-width="2.5"/>
+          <circle cx="46" cy="60" r="2.2" fill="#831843"/>
+          <circle cx="54" cy="60" r="2.2" fill="#831843"/>
+        </svg>`,
+               dog: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <ellipse cx="24" cy="50" rx="9" ry="18" transform="rotate(15 24 50)" fill="#78350f"/>
+          <ellipse cx="76" cy="50" rx="9" ry="18" transform="rotate(-15 76 50)" fill="#78350f"/>
+          <circle cx="50" cy="52" r="26" fill="#d97706" stroke="#78350f" stroke-width="3"/>
+          <circle cx="41" cy="46" r="3.5" fill="#1e293b"/>
+          <circle cx="59" cy="46" r="3.5" fill="#1e293b"/>
+          <ellipse cx="50" cy="58" rx="7" ry="5" fill="#1e293b"/>
+          <path d="M44 66 Q50 72 56 66" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`,
+               box: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <polygon points="50,20 82,34 50,48 18,34" fill="#fde68a" stroke="#92400e" stroke-width="3"/>
+          <polygon points="18,34 50,48 50,82 18,68" fill="#f59e0b" stroke="#92400e" stroke-width="3"/>
+          <polygon points="82,34 50,48 50,82 82,68" fill="#d97706" stroke="#92400e" stroke-width="3"/>
+        </svg>`,
+               pin: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <line x1="50" y1="42" x2="50" y2="84" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="50" cy="32" r="16" fill="#ef4444" stroke="#991b1b" stroke-width="3"/>
+          <circle cx="45" cy="27" r="4" fill="#fecaca"/>
+        </svg>`,
+               pot: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <rect x="16" y="46" width="12" height="8" rx="3" fill="#475569"/>
+          <rect x="72" y="46" width="12" height="8" rx="3" fill="#475569"/>
+          <path d="M26 42 H74 V68 A14 14 0 0 1 60 82 H40 A14 14 0 0 1 26 68 Z" fill="#64748b" stroke="#1e293b" stroke-width="3"/>
+          <ellipse cx="50" cy="36" rx="26" ry="6" fill="#94a3b8" stroke="#1e293b" stroke-width="2.5"/>
+          <circle cx="50" cy="28" r="5" fill="#ef4444"/>
+        </svg>`,
+               wig: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <path d="M24 66 Q20 26 50 24 Q80 26 76 66 Q68 74 62 64 Q56 44 50 44 Q44 44 38 64 Q32 74 24 66 Z" fill="#ec4899" stroke="#9d174d" stroke-width="3"/>
+          <circle cx="32" cy="40" r="8" fill="#f472b6"/>
+          <circle cx="68" cy="40" r="8" fill="#f472b6"/>
+        </svg>`,
+               sun: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <circle cx="50" cy="50" r="22" fill="#facc15" stroke="#ca8a04" stroke-width="3"/>
+          <g stroke="#f59e0b" stroke-width="5" stroke-linecap="round">
+            <line x1="50" y1="14" x2="50" y2="22"/><line x1="50" y1="78" x2="50" y2="86"/>
+            <line x1="14" y1="50" x2="22" y2="50"/><line x1="78" y1="50" x2="86" y2="50"/>
+            <line x1="25" y1="25" x2="31" y2="31"/><line x1="69" y1="69" x2="75" y2="75"/>
+            <line x1="75" y1="25" x2="69" y2="31"/><line x1="31" y1="69" x2="25" y2="75"/>
+          </g>
+          <circle cx="43" cy="47" r="2.5" fill="#713f12"/><circle cx="57" cy="47" r="2.5" fill="#713f12"/>
+          <path d="M44 55 Q50 61 56 55" fill="none" stroke="#713f12" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`,
+               cup: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <path d="M68 40 H78 A8 8 0 0 1 78 60 H68" fill="none" stroke="#0284c7" stroke-width="6"/>
+          <path d="M28 32 H68 V62 A18 18 0 0 1 50 80 H46 A18 18 0 0 1 28 62 Z" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+          <ellipse cx="48" cy="32" rx="20" ry="5" fill="#bae6fd" stroke="#0369a1" stroke-width="2"/>
+        </svg>`,
+               bus: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <rect x="14" y="30" width="72" height="38" rx="8" fill="#facc15" stroke="#a16207" stroke-width="3"/>
+          <rect x="22" y="37" width="16" height="14" rx="2" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+          <rect x="42" y="37" width="16" height="14" rx="2" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+          <rect x="62" y="37" width="16" height="14" rx="2" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+          <circle cx="30" cy="70" r="8" fill="#1e293b"/><circle cx="30" cy="70" r="3" fill="#cbd5e1"/>
+          <circle cx="70" cy="70" r="8" fill="#1e293b"/><circle cx="70" cy="70" r="3" fill="#cbd5e1"/>
+        </svg>`,
+               bug: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <circle cx="50" cy="30" r="11" fill="#1e293b"/>
+          <ellipse cx="50" cy="58" rx="22" ry="25" fill="#ef4444" stroke="#991b1b" stroke-width="3"/>
+          <line x1="50" y1="33" x2="50" y2="83" stroke="#1e293b" stroke-width="3"/>
+          <circle cx="40" cy="50" r="4" fill="#1e293b"/><circle cx="60" cy="50" r="4" fill="#1e293b"/>
+          <circle cx="41" cy="67" r="4" fill="#1e293b"/><circle cx="59" cy="67" r="4" fill="#1e293b"/>
+        </svg>`,
+               fox: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <polygon points="24,44 28,16 46,34" fill="#ea580c" stroke="#7c2d12" stroke-width="3"/>
+          <polygon points="76,44 72,16 54,34" fill="#ea580c" stroke="#7c2d12" stroke-width="3"/>
+          <polygon points="22,52 50,28 78,52 50,80" fill="#f97316" stroke="#7c2d12" stroke-width="3"/>
+          <polygon points="22,52 38,58 50,80" fill="#fff7ed"/>
+          <polygon points="78,52 62,58 50,80" fill="#fff7ed"/>
+          <circle cx="40" cy="50" r="3.5" fill="#1e293b"/><circle cx="60" cy="50" r="3.5" fill="#1e293b"/>
+          <circle cx="50" cy="76" r="4.5" fill="#1e293b"/>
+        </svg>`,
+               jet: `<svg viewBox="0 0 100 100" width="66" height="66">
+          <polygon points="50,16 62,46 86,62 60,64 56,82 50,76 44,82 40,64 14,62 38,46" fill="#38bdf8" stroke="#0369a1" stroke-width="3" stroke-linejoin="round"/>
+          <ellipse cx="50" cy="40" rx="5" ry="11" fill="#fef08a" stroke="#0369a1" stroke-width="2"/>
+        </svg>`,
+            };
+            return svgs[word] || svgs.net;
+         }
+
+         function getHeroCarSVG() {
+            return `<svg width="96" height="64" viewBox="0 0 120 80">
+        <rect x="24" y="10" width="22" height="12" rx="4" fill="#1e293b"/>
+        <rect x="74" y="10" width="22" height="12" rx="4" fill="#1e293b"/>
+        <rect x="24" y="58" width="22" height="12" rx="4" fill="#1e293b"/>
+        <rect x="74" y="58" width="22" height="12" rx="4" fill="#1e293b"/>
+        <rect x="16" y="18" width="88" height="44" rx="18" fill="#8b5cf6" stroke="#4c1d95" stroke-width="4"/>
+        <path d="M28 24 H84 L96 40 L84 56 H28 Z" fill="#38bdf8"/>
+        <rect x="58" y="23" width="22" height="34" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+        <circle cx="96" cy="27" r="4" fill="#fef08a"/>
+        <circle cx="96" cy="53" r="4" fill="#fef08a"/>
+      </svg>`;
+         }
+
+         function getTrophySVG() {
+            return `<svg width="84" height="84" viewBox="0 0 100 100">
+        <path d="M26 24 H14 V38 A14 14 0 0 0 28 52" fill="none" stroke="#eab308" stroke-width="6"/>
+        <path d="M74 24 H86 V38 A14 14 0 0 1 72 52" fill="none" stroke="#eab308" stroke-width="6"/>
+        <path d="M26 20 H74 V44 A24 24 0 0 1 50 68 A24 24 0 0 1 26 44 Z" fill="#facc15" stroke="#a16207" stroke-width="3.5"/>
+        <rect x="44" y="68" width="12" height="12" fill="#eab308"/>
+        <rect x="32" y="80" width="36" height="10" rx="4" fill="#92400e"/>
+        <polygon points="50,30 54,40 65,40 56,47 59,57 50,51 41,57 44,47 35,40 46,40" fill="#ffffff"/>
+      </svg>`;
+         }
+
+         // ==========================================
+         // 3. AUDIO ENGINE (WEB AUDIO SFX + WEB SPEECH API)
+         // ==========================================
+         class SoundEngine {
+            constructor() {
+               this.ctx = null;
+               this.sfxEnabled = true;
+               this.tileSpeechEnabled = true;
+            }
+
+            initContext() {
+               if (!this.ctx) {
+                  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                  if (AudioCtx) this.ctx = new AudioCtx();
+               }
+               if (this.ctx && this.ctx.state === 'suspended') {
+                  this.ctx.resume();
+               }
+            }
+
+            playPop(pitch = 520) {
+               if (!this.sfxEnabled) return;
+               this.initContext();
+               if (!this.ctx) return;
+               const osc = this.ctx.createOscillator();
+               const gain = this.ctx.createGain();
+               osc.type = 'sine';
+               osc.frequency.setValueAtTime(pitch, this.ctx.currentTime);
+               osc.frequency.exponentialRampToValueAtTime(pitch * 1.45, this.ctx.currentTime + 0.11);
+               gain.gain.setValueAtTime(0.22, this.ctx.currentTime);
+               gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+               osc.connect(gain);
+               gain.connect(this.ctx.destination);
+               osc.start();
+               osc.stop(this.ctx.currentTime + 0.12);
+            }
+
+            playErrorBuzz() {
+               if (!this.sfxEnabled) return;
+               this.initContext();
+               if (!this.ctx) return;
+               const osc = this.ctx.createOscillator();
+               const gain = this.ctx.createGain();
+               osc.type = 'triangle';
+               osc.frequency.setValueAtTime(210, this.ctx.currentTime);
+               osc.frequency.linearRampToValueAtTime(145, this.ctx.currentTime + 0.28);
+               gain.gain.setValueAtTime(0.24, this.ctx.currentTime);
+               gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+               osc.connect(gain);
+               gain.connect(this.ctx.destination);
+               osc.start();
+               osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playEngineStep(stepIndex) {
+               if (!this.sfxEnabled) return;
+               this.initContext();
+               if (!this.ctx) return;
+               const notes = [392, 440, 493.88, 587.33];
+               const freq = notes[stepIndex % notes.length];
+               const osc = this.ctx.createOscillator();
+               const gain = this.ctx.createGain();
+               osc.type = 'triangle';
+               osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+               gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+               gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
+               osc.connect(gain);
+               gain.connect(this.ctx.destination);
+               osc.start();
+               osc.stop(this.ctx.currentTime + 0.22);
+            }
+
+            playFanfare() {
+               if (!this.sfxEnabled) return;
+               this.initContext();
+               if (!this.ctx) return;
+               const chord = [523.25, 659.25, 783.99, 1046.5];
+               chord.forEach((freq, idx) => {
+                  const osc = this.ctx.createOscillator();
+                  const gain = this.ctx.createGain();
+                  osc.type = 'sine';
+                  const start = this.ctx.currentTime + idx * 0.09;
+                  osc.frequency.setValueAtTime(freq, start);
+                  gain.gain.setValueAtTime(0.2, start);
+                  gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
+                  osc.connect(gain);
+                  gain.connect(this.ctx.destination);
+                  osc.start(start);
+                  osc.stop(start + 0.46);
+               });
+            }
+
+            speak(text, rate = 0.88) {
+               if (!('speechSynthesis' in window)) return;
+               try {
+                  window.speechSynthesis.cancel();
+                  const utter = new SpeechSynthesisUtterance(text);
+                  utter.lang = 'en-US';
+                  utter.rate = rate;
+                  utter.pitch = 1.08;
+                  window.speechSynthesis.speak(utter);
+               } catch (e) {
+                  // Graceful fallback if speech synthesis blocked
+               }
+            }
+
+            speakLetterPhonics(letter) {
+               if (!this.tileSpeechEnabled) return;
+               const info = PHONICS_SOUNDS[letter.toLowerCase()];
+               const toSpeak = info ? info.speak : letter;
+               this.speak(toSpeak, 0.92);
+            }
+
+            speakWordSlowly(word) {
+               if (!('speechSynthesis' in window)) return;
+               try {
+                  window.speechSynthesis.cancel();
+                  const chars = word.split('');
+                  const parts = chars.map((c) => (PHONICS_SOUNDS[c] ? PHONICS_SOUNDS[c].speak : c));
+                  parts.push(word);
+                  parts.forEach((part, idx) => {
+                     const utter = new SpeechSynthesisUtterance(part);
+                     utter.lang = 'en-US';
+                     utter.rate = idx === parts.length - 1 ? 0.82 : 0.78;
+                     utter.pitch = 1.08;
+                     window.speechSynthesis.speak(utter);
+                  });
+               } catch (e) {}
+            }
+         }
+
+         const sound = new SoundEngine();
+
+         // ==========================================
+         // 4. GAME STATE & GRID ENGINE
+         // ==========================================
+         const canvas = document.getElementById('gameCanvas');
+         const ctx = canvas.getContext('2d');
+
+         const state = {
+            stageIndex: 0,
+            wordIndex: 0,
+            tutorialMode: false,
+            gridCols: 7,
+            gridRows: 5,
+            cellSize: 80,
+            gridOffsetX: 0,
+            gridOffsetY: 0,
+            // Entities on grid
+            carStart: { col: 1, row: 2 },
+            flagPos: { col: 5, row: 2 },
+            tiles: [], // { id, letter, col, row, isVowel, collected, flyAnim }
+            obstacles: [], // { col, row, type }
+            decorFlowers: [],
+            // Path building
+            pathNodes: [], // Array of node objects: { type: 'car'|'tile'|'flag', col, row, id?, letter? }
+            isDragging: false,
+            pointerPos: null,
+            // Keyboard cursor
+            cursor: { col: 1, row: 2 },
+            keyboardActive: false,
+            // Driving & Blending animation
+            phase: 'planning', // 'planning' | 'driving' | 'blending' | 'celebrating'
+            carRender: { x: 0, y: 0, angle: 0 },
+            driveProgress: 0,
+            driveSegment: 0,
+            particles: [],
+            hintActive: false,
+            // Accessibility & Persistence
+            settings: {
+               montessori: true,
+               tileSpeech: true,
+               highContrast: false,
+               sensoryCalm: false,
+               sfx: true,
+            },
+         };
+
+         // Load saved settings safely
+         function loadSettings() {
+            try {
+               const saved = localStorage.getItem('phonicsCarPathSettings');
+               if (saved) {
+                  Object.assign(state.settings, JSON.parse(saved));
+               }
+            } catch (e) {}
+            applySettingsToUI();
+         }
+
+         function saveSettings() {
+            try {
+               localStorage.setItem('phonicsCarPathSettings', JSON.stringify(state.settings));
+            } catch (e) {}
+         }
+
+         function applySettingsToUI() {
+            document.body.classList.toggle('no-montessori', !state.settings.montessori);
+            document.body.classList.toggle('high-contrast', state.settings.highContrast);
+            document.body.classList.toggle('sensory-calm', state.settings.sensoryCalm);
+            sound.sfxEnabled = state.settings.sfx;
+            sound.tileSpeechEnabled = state.settings.tileSpeech;
+
+            document.getElementById('toggleMontessori').setAttribute('aria-checked', state.settings.montessori);
+            document.getElementById('toggleTileSpeech').setAttribute('aria-checked', state.settings.tileSpeech);
+            document.getElementById('toggleContrast').setAttribute('aria-checked', state.settings.highContrast);
+            document.getElementById('toggleCalm').setAttribute('aria-checked', state.settings.sensoryCalm);
+            document.getElementById('toggleSfx').setAttribute('aria-checked', state.settings.sfx);
+         }
+
+         // ==========================================
+         // 5. LEVEL & BOARD GENERATOR
+         // ==========================================
+         function getCurrentWordObj() {
+            return STAGES[state.stageIndex].words[state.wordIndex];
+         }
+
+         function setupLevel(speakIntro = true) {
+            const wordObj = getCurrentWordObj();
+            const targetWord = wordObj.word;
+            const lettersNeeded = targetWord.split('');
+
+            state.phase = 'planning';
+            state.isDragging = false;
+            state.pointerPos = null;
+            state.hintActive = state.tutorialMode && state.stageIndex === 0 && state.wordIndex === 0;
+            state.particles = [];
+
+            // Update Top Banner UI
+            document.getElementById('picture-svg-container').innerHTML = getWordSVG(targetWord);
+            for (let i = 0; i < 3; i++) {
+               const slot = document.getElementById(`slot-${i}`);
+               slot.textContent = '';
+               slot.className = 'word-slot';
+            }
+
+            // Update Bottom Progress
+            document.getElementById('stage-num-text').textContent = `${state.stageIndex + 1}`;
+            document.getElementById('card-progress-text').textContent = `${state.wordIndex + 1} / 6`;
+            const btnGo = document.getElementById('btnGo');
+            btnGo.disabled = true;
+            btnGo.classList.remove('ready-pulse');
+
+            // Responsive Grid Dimensions (7 cols x 5 rows)
+            state.gridCols = 7;
+            state.gridRows = 5;
+
+            // Deterministic yet varied pleasant layouts so paths are always clear & solvable
+            const layoutTemplates = [
+               {
+                  car: { col: 1, row: 3 },
+                  flag: { col: 5, row: 1 },
+                  targetCoords: [
+                     { col: 1, row: 1 },
+                     { col: 3, row: 2 },
+                     { col: 5, row: 3 },
+                  ],
+                  extraCoords: [
+                     { col: 3, row: 4 },
+                     { col: 2, row: 0 },
+                     { col: 4, row: 0 },
+                  ],
+                  obstacleCoords: [
+                     { col: 2, row: 2 },
+                     { col: 4, row: 2 },
+                  ],
+               },
+               {
+                  car: { col: 1, row: 1 },
+                  flag: { col: 5, row: 3 },
+                  targetCoords: [
+                     { col: 2, row: 3 },
+                     { col: 3, row: 1 },
+                     { col: 4, row: 3 },
+                  ],
+                  extraCoords: [
+                     { col: 1, row: 4 },
+                     { col: 5, row: 1 },
+                     { col: 3, row: 4 },
+                  ],
+                  obstacleCoords: [
+                     { col: 2, row: 1 },
+                     { col: 4, row: 1 },
+                  ],
+               },
+               {
+                  car: { col: 1, row: 2 },
+                  flag: { col: 5, row: 2 },
+                  targetCoords: [
+                     { col: 2, row: 1 },
+                     { col: 3, row: 3 },
+                     { col: 4, row: 1 },
+                  ],
+                  extraCoords: [
+                     { col: 1, row: 4 },
+                     { col: 5, row: 4 },
+                     { col: 3, row: 0 },
+                  ],
+                  obstacleCoords: [
+                     { col: 3, row: 1 },
+                     { col: 2, row: 3 },
+                  ],
+               },
+            ];
+
+            const tpl = state.tutorialMode && state.wordIndex === 0 ? layoutTemplates[0] : layoutTemplates[(state.stageIndex + state.wordIndex) % layoutTemplates.length];
+
+            state.carStart = { ...tpl.car };
+            state.flagPos = { ...tpl.flag };
+            state.cursor = { ...tpl.car };
+
+            // Build tiles
+            state.tiles = [];
+            lettersNeeded.forEach((ch, idx) => {
+               const pos = tpl.targetCoords[idx];
+               state.tiles.push({
+                  id: `target-${idx}`,
+                  letter: ch,
+                  col: pos.col,
+                  row: pos.row,
+                  isVowel: VOWELS.has(ch),
+                  isTargetIndex: idx,
+                  collected: false,
+                  flyProgress: 0,
+               });
+            });
+
+            wordObj.distractors.forEach((ch, idx) => {
+               if (tpl.extraCoords[idx]) {
+                  const pos = tpl.extraCoords[idx];
+                  state.tiles.push({
+                     id: `dist-${idx}`,
+                     letter: ch,
+                     col: pos.col,
+                     row: pos.row,
+                     isVowel: VOWELS.has(ch),
+                     isTargetIndex: -1,
+                     collected: false,
+                     flyProgress: 0,
+                  });
+               }
+            });
+
+            // Obstacles in Stage 3
+            state.obstacles = [];
+            for (let i = 0; i < wordObj.obstacles; i++) {
+               if (tpl.obstacleCoords[i]) {
+                  state.obstacles.push({
+                     col: tpl.obstacleCoords[i].col,
+                     row: tpl.obstacleCoords[i].row,
+                     type: i % 2 === 0 ? 'rock' : 'bush',
+                  });
+               }
+            }
+
+            // Initialize path starting at the car
+            state.pathNodes = [{ type: 'car', col: state.carStart.col, row: state.carStart.row }];
+
+            resizeCanvas();
+            updateFeedbackMessage(state.hintActive ? `${lettersNeeded[0]} ➔ ${lettersNeeded[1]} ➔ ${lettersNeeded[2]} ➔ 🏁` : `•  •  •`);
+
+            if (speakIntro) {
+               setTimeout(() => sound.speak(targetWord, 0.85), 250);
+            }
+         }
+
+         function updateFeedbackMessage(msg) {
+            document.getElementById('feedback-text').textContent = msg;
+         }
+
+         // ==========================================
+         // 6. CANVAS COORDINATES & RESPONSIVE RESIZE
+         // ==========================================
+         function resizeCanvas() {
+            const wrapper = document.getElementById('arena-wrapper');
+            const rect = wrapper.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const padX = Math.max(12, rect.width * 0.03);
+            const padY = Math.max(8, rect.height * 0.03);
+            const availW = Math.max(200, rect.width - padX * 2);
+            const availH = Math.max(160, rect.height - padY * 2);
+
+            state.cellSize = Math.floor(Math.min(availW / state.gridCols, availH / state.gridRows));
+            const totalGridW = state.cellSize * state.gridCols;
+            const totalGridH = state.cellSize * state.gridRows;
+
+            state.gridOffsetX = Math.floor((rect.width - totalGridW) / 2);
+            state.gridOffsetY = Math.floor((rect.height - totalGridH) / 2);
+
+            // Update car render position if planning
+            if (state.phase === 'planning') {
+               const startPx = gridToPixel(state.carStart.col, state.carStart.row);
+               state.carRender.x = startPx.x;
+               state.carRender.y = startPx.y;
+               state.carRender.angle = 0;
+            }
+
+            generateDecorFlowers(rect.width, rect.height);
+         }
+
+         // Observe container size changes dynamically (orientation change, address bar hide/show)
+         if ('ResizeObserver' in window) {
+            const arenaObserver = new ResizeObserver(() => resizeCanvas());
+            arenaObserver.observe(document.getElementById('arena-wrapper'));
+         }
+
+         function generateDecorFlowers(w, h) {
+            state.decorFlowers = [];
+            const colors = ['#ffffff', '#fef08a', '#f472b6', '#60a5fa'];
+            for (let i = 0; i < 18; i++) {
+               const edge = i % 4;
+               let x, y;
+               if (edge === 0) {
+                  x = (w / 5) * ((i % 5) + 0.5);
+                  y = 18;
+               } else if (edge === 1) {
+                  x = (w / 5) * ((i % 5) + 0.5);
+                  y = h - 18;
+               } else if (edge === 2) {
+                  x = 22;
+                  y = (h / 5) * ((i % 5) + 0.5);
+               } else {
+                  x = w - 22;
+                  y = (h / 5) * ((i % 5) + 0.5);
+               }
+               state.decorFlowers.push({
+                  x,
+                  y,
+                  color: colors[i % colors.length],
+                  phase: i * 0.9,
+               });
+            }
+         }
+
+         function gridToPixel(col, row) {
+            return {
+               x: state.gridOffsetX + (col + 0.5) * state.cellSize,
+               y: state.gridOffsetY + (row + 0.5) * state.cellSize,
+            };
+         }
+
+         function pixelToGrid(px, py) {
+            const col = Math.floor((px - state.gridOffsetX) / state.cellSize);
+            const row = Math.floor((py - state.gridOffsetY) / state.cellSize);
+            if (col < 0 || col >= state.gridCols || row < 0 || row >= state.gridRows) return null;
+            const center = gridToPixel(col, row);
+            const dist = Math.hypot(px - center.x, py - center.y);
+            if (dist <= state.cellSize * 0.48) {
+               return { col, row };
+            }
+            return null;
+         }
+
+         // ==========================================
+         // 7. PATH CONNECTION LOGIC (DRAG, TAP, KEYBOARD)
+         // ==========================================
+         function getLetterNodesCount() {
+            return state.pathNodes.filter((n) => n.type === 'tile').length;
+         }
+
+         function isPathCompleteToFlag() {
+            const last = state.pathNodes[state.pathNodes.length - 1];
+            return last && last.type === 'flag' && getLetterNodesCount() === 3;
+         }
+
+         function updateGoButtonState() {
+            const btnGo = document.getElementById('btnGo');
+            const ready = isPathCompleteToFlag();
+            btnGo.disabled = !ready;
+            btnGo.classList.toggle('ready-pulse', ready);
+         }
+
+         function tryAddGridCellToPath(col, row) {
+            if (state.phase !== 'planning') return;
+
+            // Check obstacle
+            if (state.obstacles.some((o) => o.col === col && o.row === row)) {
+               sound.playErrorBuzz();
+               return;
+            }
+
+            // Check if clicking the previous node to undo last step
+            if (state.pathNodes.length > 1) {
+               const prevNode = state.pathNodes[state.pathNodes.length - 2];
+               if (prevNode.col === col && prevNode.row === row) {
+                  undoLastPathNode();
+                  return;
+               }
+            }
+
+            const lastNode = state.pathNodes[state.pathNodes.length - 1];
+            if (lastNode.col === col && lastNode.row === row) return;
+
+            // Check if there is a Letter Tile at (col, row)
+            const tile = state.tiles.find((t) => t.col === col && t.row === row);
+            if (tile) {
+               // Prevent selecting the same tile twice
+               if (state.pathNodes.some((n) => n.type === 'tile' && n.id === tile.id)) return;
+               // Max 3 letters allowed
+               if (getLetterNodesCount() >= 3) {
+                  sound.playPop(380);
+                  return;
+               }
+               // Cannot add letters after flag
+               if (lastNode.type === 'flag') return;
+
+               const stepNum = getLetterNodesCount() + 1;
+               state.pathNodes.push({
+                  type: 'tile',
+                  col: tile.col,
+                  row: tile.row,
+                  id: tile.id,
+                  letter: tile.letter,
+               });
+               sound.playPop(460 + stepNum * 90);
+               sound.speakLetterPhonics(tile.letter);
+
+               const picked = state.pathNodes.filter((n) => n.type === 'tile').map((n) => n.letter);
+               const slotsDisplay = [picked[0] || '•', picked[1] || '•', picked[2] || '•'].join('  ');
+               updateFeedbackMessage(stepNum === 3 ? `${slotsDisplay}  ➔  🏁` : slotsDisplay);
+               updateGoButtonState();
+               return;
+            }
+
+            // Check if there is the Finish Flag at (col, row)
+            if (state.flagPos.col === col && state.flagPos.row === row) {
+               if (lastNode.type === 'flag') return;
+               const count = getLetterNodesCount();
+               if (count < 3) {
+                  sound.playErrorBuzz();
+                  return;
+               }
+               state.pathNodes.push({
+                  type: 'flag',
+                  col: state.flagPos.col,
+                  row: state.flagPos.row,
+               });
+               sound.playPop(780);
+               const picked = state.pathNodes
+                  .filter((n) => n.type === 'tile')
+                  .map((n) => n.letter)
+                  .join(' - ');
+               updateFeedbackMessage(`${picked}  ➔  ▶ GO!`);
+               updateGoButtonState();
+            }
+         }
+
+         function undoLastPathNode() {
+            if (state.phase !== 'planning') return;
+            if (state.pathNodes.length > 1) {
+               state.pathNodes.pop();
+               sound.playPop(360);
+               updateGoButtonState();
+               const picked = state.pathNodes.filter((n) => n.type === 'tile').map((n) => n.letter);
+               updateFeedbackMessage([picked[0] || '•', picked[1] || '•', picked[2] || '•'].join('  '));
+            }
+         }
+
+         function resetPath() {
+            if (state.phase !== 'planning') return;
+            state.pathNodes = [{ type: 'car', col: state.carStart.col, row: state.carStart.row }];
+            sound.playPop(320);
+            updateGoButtonState();
+            updateFeedbackMessage('•  •  •');
+         }
+
+         // Pointer Events (Mouse + Touch unified)
+         canvas.addEventListener('pointerdown', (e) => {
+            if (state.phase !== 'planning') return;
+            sound.initContext();
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            state.isDragging = true;
+            state.pointerPos = { x: px, y: py };
+            state.keyboardActive = false;
+
+            const cell = pixelToGrid(px, py);
+            if (cell) {
+               // If user taps car when path exists, allow dragging from end
+               tryAddGridCellToPath(cell.col, cell.row);
+            }
+         });
+
+         canvas.addEventListener('pointermove', (e) => {
+            if (!state.isDragging || state.phase !== 'planning') return;
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            state.pointerPos = { x: px, y: py };
+
+            const cell = pixelToGrid(px, py);
+            if (cell) {
+               tryAddGridCellToPath(cell.col, cell.row);
+            }
+         });
+
+         window.addEventListener('pointerup', () => {
+            state.isDragging = false;
+            state.pointerPos = null;
+         });
+
+         // Keyboard Grid Accessibility Controls
+         window.addEventListener('keydown', (e) => {
+            if (!document.getElementById('startModal').classList.contains('hidden')) return;
+            if (!document.getElementById('a11yModal').classList.contains('hidden')) return;
+            if (!document.getElementById('completeModal').classList.contains('hidden')) return;
+
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+               e.preventDefault();
+               state.keyboardActive = true;
+               if (e.key === 'ArrowUp') state.cursor.row = Math.max(0, state.cursor.row - 1);
+               if (e.key === 'ArrowDown') state.cursor.row = Math.min(state.gridRows - 1, state.cursor.row + 1);
+               if (e.key === 'ArrowLeft') state.cursor.col = Math.max(0, state.cursor.col - 1);
+               if (e.key === 'ArrowRight') state.cursor.col = Math.min(state.gridCols - 1, state.cursor.col + 1);
+               sound.playPop(420);
+            } else if (e.key === ' ' || e.key === 'Enter') {
+               if (state.keyboardActive && state.phase === 'planning') {
+                  e.preventDefault();
+                  tryAddGridCellToPath(state.cursor.col, state.cursor.row);
+               }
+            } else if (e.key.toLowerCase() === 'g') {
+               if (isPathCompleteToFlag() && state.phase === 'planning') {
+                  startCarDrive();
+               }
+            } else if (e.key === 'Backspace') {
+               undoLastPathNode();
+            }
+         });
+
+         // ==========================================
+         // 8. ACTION DRIVE & PHONICS BLENDING SIMULATION
+         // ==========================================
+         function startCarDrive() {
+            if (!isPathCompleteToFlag() || state.phase !== 'planning') return;
+            sound.initContext();
+            state.phase = 'driving';
+            state.driveSegment = 0;
+            state.driveProgress = 0;
+            document.getElementById('btnGo').disabled = true;
+            document.getElementById('btnGo').classList.remove('ready-pulse');
+            updateFeedbackMessage('🚗 💨');
+         }
+
+         function spawnSparkles(x, y, color = '#facc15') {
+            if (state.settings.sensoryCalm) return;
+            for (let i = 0; i < 14; i++) {
+               const angle = (Math.PI * 2 * i) / 14;
+               const speed = 1.5 + Math.random() * 2.5;
+               state.particles.push({
+                  x,
+                  y,
+                  vx: Math.cos(angle) * speed,
+                  vy: Math.sin(angle) * speed,
+                  life: 1,
+                  color,
+               });
+            }
+         }
+
+         function handleNodeArrival(nodeIndex) {
+            const node = state.pathNodes[nodeIndex];
+            const targetWord = getCurrentWordObj().word;
+
+            if (node.type === 'tile') {
+               const slotIdx = nodeIndex - 1; // 0, 1, or 2
+               const expectedChar = targetWord[slotIdx];
+               const tile = state.tiles.find((t) => t.id === node.id);
+
+               if (node.letter === expectedChar) {
+                  // Correct letter at this position!
+                  if (tile) tile.collected = true;
+                  const slotEl = document.getElementById(`slot-${slotIdx}`);
+                  slotEl.textContent = node.letter;
+                  slotEl.classList.add('filled', VOWELS.has(node.letter) ? 'vowel' : 'consonant');
+                  slotEl.classList.add('pulse-phonics');
+                  setTimeout(() => slotEl.classList.remove('pulse-phonics'), 380);
+
+                  const pos = gridToPixel(node.col, node.row);
+                  spawnSparkles(pos.x, pos.y, '#a855f7');
+                  sound.playEngineStep(slotIdx);
+                  sound.speakLetterPhonics(node.letter);
+               } else {
+                  // Wrong letter at this position! Gentle partial rollback
+                  sound.playErrorBuzz();
+                  const pos = gridToPixel(node.col, node.row);
+                  spawnSparkles(pos.x, pos.y, '#ef4444');
+
+                  // Roll back path nodes from this wrong node onward, keeping valid earlier ones
+                  setTimeout(() => {
+                     state.phase = 'planning';
+                     state.pathNodes = state.pathNodes.slice(0, nodeIndex);
+                     // Reset car back to start
+                     const startPx = gridToPixel(state.carStart.col, state.carStart.row);
+                     state.carRender.x = startPx.x;
+                     state.carRender.y = startPx.y;
+                     state.carRender.angle = 0;
+
+                     // Keep already valid slots filled or clear from slotIdx
+                     for (let i = slotIdx; i < 3; i++) {
+                        const sEl = document.getElementById(`slot-${i}`);
+                        sEl.textContent = '';
+                        sEl.className = 'word-slot';
+                     }
+                     state.tiles.forEach((t) => {
+                        if (!state.pathNodes.some((n) => n.id === t.id)) t.collected = false;
+                     });
+
+                     updateGoButtonState();
+                     const chars = targetWord.split('');
+                     updateFeedbackMessage(`/${chars[0]}/ - /${chars[1]}/ - /${chars[2]}/`);
+                     sound.speakWordSlowly(targetWord);
+                  }, 500);
+                  return false; // Stop driving
+               }
+            } else if (node.type === 'flag') {
+               // Reached Finish Flag with all 3 correct letters!
+               state.phase = 'blending';
+               const pos = gridToPixel(node.col, node.row);
+               spawnSparkles(pos.x, pos.y, '#22c55e');
+               runPhonicsBlendingSequence(targetWord);
+            }
+            return true;
+         }
+
+         function runPhonicsBlendingSequence(word) {
+            const chars = word.split('');
+            updateFeedbackMessage(`/${chars[0]}/ - /${chars[1]}/ - /${chars[2]}/`);
+
+            // Pulse each slot sequentially in sync with audio
+            [0, 1, 2].forEach((idx) => {
+               setTimeout(() => {
+                  const slot = document.getElementById(`slot-${idx}`);
+                  slot.classList.add('pulse-phonics');
+                  sound.speakLetterPhonics(chars[idx]);
+                  setTimeout(() => slot.classList.remove('pulse-phonics'), 360);
+               }, idx * 480);
+            });
+
+            // Full blended word pronunciation + celebration
+            setTimeout(() => {
+               [0, 1, 2].forEach((idx) => document.getElementById(`slot-${idx}`).classList.add('pulse-phonics'));
+               sound.playFanfare();
+               sound.speak(word, 0.85);
+               state.phase = 'celebrating';
+               updateFeedbackMessage(`★  ${word.toUpperCase()}  ★`);
+
+               setTimeout(() => {
+                  [0, 1, 2].forEach((idx) => document.getElementById(`slot-${idx}`).classList.remove('pulse-phonics'));
+                  advanceToNextCard();
+               }, 1600);
+            }, 1550);
+         }
+
+         function advanceToNextCard() {
+            const stage = STAGES[state.stageIndex];
+            if (state.wordIndex + 1 < stage.words.length) {
+               state.wordIndex++;
+               setupLevel(true);
+            } else {
+               showStageCompleteModal();
+            }
+         }
+
+         // ==========================================
+         // 9. CANVAS RENDERING LOOP (60 FPS)
+         // ==========================================
+         function drawGridBackground(time) {
+            const cs = state.cellSize;
+            const ox = state.gridOffsetX;
+            const oy = state.gridOffsetY;
+
+            for (let r = 0; r < state.gridRows; r++) {
+               for (let c = 0; c < state.gridCols; c++) {
+                  const x = ox + c * cs;
+                  const y = oy + r * cs;
+                  const isAlt = (r + c) % 2 === 0;
+
+                  if (state.settings.highContrast) {
+                     ctx.fillStyle = isAlt ? '#1a331a' : '#234223';
+                  } else {
+                     ctx.fillStyle = isAlt ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.04)';
+                  }
+                  ctx.beginPath();
+                  ctx.roundRect(x + 2, y + 2, cs - 4, cs - 4, 12);
+                  ctx.fill();
+
+                  ctx.strokeStyle = state.settings.highContrast ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.32)';
+                  ctx.lineWidth = 2;
+                  ctx.stroke();
+               }
+            }
+
+            // Decorative Garden Flowers along edges
+            state.decorFlowers.forEach((f) => {
+               const sway = state.settings.sensoryCalm ? 0 : Math.sin(time * 0.0025 + f.phase) * 2.5;
+               ctx.save();
+               ctx.translate(f.x + sway, f.y);
+               ctx.fillStyle = f.color;
+               for (let p = 0; p < 5; p++) {
+                  const ang = (Math.PI * 2 * p) / 5;
+                  ctx.beginPath();
+                  ctx.arc(Math.cos(ang) * 5, Math.sin(ang) * 5, 4, 0, Math.PI * 2);
+                  ctx.fill();
+               }
+               ctx.fillStyle = '#f59e0b';
+               ctx.beginPath();
+               ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+               ctx.fill();
+               ctx.restore();
+            });
+         }
+
+         function drawTutorialGuide(time) {
+            if (!state.hintActive || state.phase !== 'planning') return;
+            const targetWord = getCurrentWordObj().word.split('');
+            const guidePoints = [gridToPixel(state.carStart.col, state.carStart.row)];
+
+            targetWord.forEach((ch, idx) => {
+               const tile = state.tiles.find((t) => t.isTargetIndex === idx) || state.tiles.find((t) => t.letter === ch);
+               if (tile) guidePoints.push(gridToPixel(tile.col, tile.row));
+            });
+            guidePoints.push(gridToPixel(state.flagPos.col, state.flagPos.row));
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.lineWidth = 7;
+            ctx.setLineDash([12, 12]);
+            ctx.lineDashOffset = -(time * 0.04) % 24;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            guidePoints.forEach((pt, i) => {
+               if (i === 0) ctx.moveTo(pt.x, pt.y);
+               else ctx.lineTo(pt.x, pt.y);
+            });
+            ctx.stroke();
+            ctx.restore();
+         }
+
+         function drawSmoothPurplePath() {
+            const points = state.pathNodes.map((n) => gridToPixel(n.col, n.row));
+            if (state.isDragging && state.pointerPos && state.phase === 'planning' && !isPathCompleteToFlag()) {
+               points.push(state.pointerPos);
+            }
+            if (points.length < 2) return;
+
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Outer Glow
+            ctx.strokeStyle = state.settings.highContrast ? 'rgba(250, 204, 21, 0.45)' : 'rgba(139, 61, 255, 0.35)';
+            ctx.lineWidth = Math.max(18, state.cellSize * 0.24);
+            drawCurveThroughPoints(points);
+            ctx.stroke();
+
+            // Core Purple Path
+            ctx.strokeStyle = state.settings.highContrast ? '#facc15' : '#8b3dff';
+            ctx.lineWidth = Math.max(10, state.cellSize * 0.13);
+            drawCurveThroughPoints(points);
+            ctx.stroke();
+
+            // Inner bright highlight line
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.lineWidth = 3;
+            drawCurveThroughPoints(points);
+            ctx.stroke();
+            ctx.restore();
+         }
+
+         function drawCurveThroughPoints(pts) {
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            if (pts.length === 2) {
+               ctx.lineTo(pts[1].x, pts[1].y);
+               return;
+            }
+            for (let i = 1; i < pts.length - 1; i++) {
+               const midX = (pts[i].x + pts[i + 1].x) / 2;
+               const midY = (pts[i].y + pts[i + 1].y) / 2;
+               ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
+            }
+            const last = pts[pts.length - 1];
+            ctx.lineTo(last.x, last.y);
+         }
+
+         function drawObstacles() {
+            state.obstacles.forEach((obs) => {
+               const pt = gridToPixel(obs.col, obs.row);
+               const r = state.cellSize * 0.34;
+               ctx.save();
+               ctx.translate(pt.x, pt.y);
+               if (obs.type === 'rock') {
+                  ctx.fillStyle = '#64748b';
+                  ctx.strokeStyle = '#334155';
+                  ctx.lineWidth = 3;
+                  ctx.beginPath();
+                  ctx.ellipse(0, 4, r, r * 0.72, 0, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = '#94a3b8';
+                  ctx.beginPath();
+                  ctx.ellipse(-r * 0.25, -2, r * 0.45, r * 0.28, -0.3, 0, Math.PI * 2);
+                  ctx.fill();
+               } else {
+                  ctx.fillStyle = '#16a34a';
+                  ctx.strokeStyle = '#14532d';
+                  ctx.lineWidth = 3;
+                  ctx.beginPath();
+                  ctx.arc(-r * 0.35, 4, r * 0.55, 0, Math.PI * 2);
+                  ctx.arc(r * 0.35, 4, r * 0.55, 0, Math.PI * 2);
+                  ctx.arc(0, -r * 0.25, r * 0.65, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+               }
+               ctx.restore();
+            });
+         }
+
+         function drawFinishFlag() {
+            const pt = gridToPixel(state.flagPos.col, state.flagPos.row);
+            const size = state.cellSize * 0.68;
+            const half = size / 2;
+            const connected = isPathCompleteToFlag();
+
+            ctx.save();
+            ctx.translate(pt.x, pt.y);
+
+            // Base Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+            ctx.beginPath();
+            ctx.roundRect(-half, -half + 5, size, size, 16);
+            ctx.fill();
+
+            // Purple Checkered Flag Sign
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = connected ? '#22c55e' : '#7e22ce';
+            ctx.lineWidth = connected ? 5 : 4;
+            ctx.beginPath();
+            ctx.roundRect(-half, -half, size, size, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner Checkered Pattern
+            const pad = 8;
+            const inner = size - pad * 2;
+            const sq = inner / 4;
+            for (let r = 0; r < 4; r++) {
+               for (let c = 0; c < 4; c++) {
+                  if ((r + c) % 2 === 0) {
+                     ctx.fillStyle = '#7e22ce';
+                     ctx.fillRect(-half + pad + c * sq, -half + pad + r * sq, sq, sq);
+                  }
+               }
+            }
+            ctx.restore();
+         }
+
+         function drawLetterTiles() {
+            const tileSize = state.cellSize * 0.68;
+            const half = tileSize / 2;
+
+            state.tiles.forEach((tile) => {
+               if (tile.collected) return;
+               const pt = gridToPixel(tile.col, tile.row);
+               const orderIndex = state.pathNodes.findIndex((n) => n.type === 'tile' && n.id === tile.id);
+               const isSelected = orderIndex !== -1;
+
+               ctx.save();
+               ctx.translate(pt.x, pt.y);
+
+               // Tile shadow
+               ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
+               ctx.beginPath();
+               ctx.roundRect(-half, -half + 5, tileSize, tileSize, 18);
+               ctx.fill();
+
+               // Tile body
+               ctx.fillStyle = isSelected ? '#faf5ff' : '#ffffff';
+               ctx.strokeStyle = isSelected ? (state.settings.highContrast ? '#facc15' : '#8b3dff') : state.settings.highContrast ? '#000000' : '#cbd5e1';
+               ctx.lineWidth = isSelected ? 5 : 3.5;
+               ctx.beginPath();
+               ctx.roundRect(-half, -half, tileSize, tileSize, 18);
+               ctx.fill();
+               ctx.stroke();
+
+               // Letter text (Montessori color-coding)
+               let letterColor = '#1e293b';
+               if (state.settings.montessori) {
+                  letterColor = tile.isVowel ? '#dc2626' : '#1e40af';
+               }
+               ctx.fillStyle = letterColor;
+               ctx.font = `700 ${Math.floor(tileSize * 0.62)}px 'Fredoka', sans-serif`;
+               ctx.textAlign = 'center';
+               ctx.textBaseline = 'middle';
+               ctx.fillText(tile.letter, 0, 2);
+
+               // Order Badge (1, 2, 3) when connected
+               if (isSelected) {
+                  const badgeR = 13;
+                  ctx.fillStyle = '#8b3dff';
+                  ctx.beginPath();
+                  ctx.arc(half - 4, -half + 4, badgeR, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.fillStyle = '#ffffff';
+                  ctx.font = `700 14px 'Fredoka', sans-serif`;
+                  ctx.fillText(String(orderIndex), half - 4, -half + 4.5);
+               }
+
+               ctx.restore();
+            });
+         }
+
+         function drawRaceCar() {
+            const carLen = state.cellSize * 0.72;
+            const carWid = state.cellSize * 0.48;
+
+            ctx.save();
+            ctx.translate(state.carRender.x, state.carRender.y);
+            ctx.rotate(state.carRender.angle);
+
+            // Car Drop Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+            ctx.beginPath();
+            ctx.roundRect(-carLen / 2, -carWid / 2 + 5, carLen, carWid, 14);
+            ctx.fill();
+
+            // 4 Black Tires
+            ctx.fillStyle = '#1e293b';
+            const tw = carLen * 0.24;
+            const th = carWid * 0.22;
+            ctx.fillRect(-carLen * 0.34, -carWid / 2 - 3, tw, th);
+            ctx.fillRect(carLen * 0.12, -carWid / 2 - 3, tw, th);
+            ctx.fillRect(-carLen * 0.34, carWid / 2 - th + 3, tw, th);
+            ctx.fillRect(carLen * 0.12, carWid / 2 - th + 3, tw, th);
+
+            // Car Chassis (Purple & Cyan Racing Style)
+            ctx.fillStyle = '#8b5cf6';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(-carLen / 2, -carWid / 2, carLen, carWid, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            // Cyan Racing Stripe
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.roundRect(-carLen * 0.36, -carWid * 0.32, carLen * 0.74, carWid * 0.64, 8);
+            ctx.fill();
+
+            // Windshield
+            ctx.fillStyle = '#e0f2fe';
+            ctx.beginPath();
+            ctx.roundRect(carLen * 0.04, -carWid * 0.28, carLen * 0.24, carWid * 0.56, 5);
+            ctx.fill();
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(carLen * 0.42, -carWid * 0.26, 3.5, 0, Math.PI * 2);
+            ctx.arc(carLen * 0.42, carWid * 0.26, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+         }
+
+         function drawKeyboardCursor() {
+            if (!state.keyboardActive || state.phase !== 'planning') return;
+            const pt = gridToPixel(state.cursor.col, state.cursor.row);
+            const s = state.cellSize * 0.84;
+            ctx.save();
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.roundRect(pt.x - s / 2, pt.y - s / 2, s, s, 16);
+            ctx.stroke();
+            ctx.restore();
+         }
+
+         function updateAndDrawParticles() {
+            for (let i = state.particles.length - 1; i >= 0; i--) {
+               const p = state.particles[i];
+               p.x += p.vx;
+               p.y += p.vy;
+               p.life -= 0.035;
+               if (p.life <= 0) {
+                  state.particles.splice(i, 1);
+                  continue;
+               }
+               ctx.save();
+               ctx.globalAlpha = p.life;
+               ctx.fillStyle = p.color;
+               ctx.beginPath();
+               ctx.arc(p.x, p.y, 5 * p.life, 0, Math.PI * 2);
+               ctx.fill();
+               ctx.restore();
+            }
+         }
+
+         function updateDrivingAnimation(dt) {
+            if (state.phase !== 'driving') return;
+            if (state.driveSegment >= state.pathNodes.length - 1) return;
+
+            const fromNode = state.pathNodes[state.driveSegment];
+            const toNode = state.pathNodes[state.driveSegment + 1];
+            const p1 = gridToPixel(fromNode.col, fromNode.row);
+            const p2 = gridToPixel(toNode.col, toNode.row);
+
+            const dist = Math.max(1, Math.hypot(p2.x - p1.x, p2.y - p1.y));
+            const speed = 280; // pixels per second
+            state.driveProgress += (speed * dt) / dist;
+
+            const t = Math.min(1, state.driveProgress);
+            state.carRender.x = p1.x + (p2.x - p1.x) * t;
+            state.carRender.y = p1.y + (p2.y - p1.y) * t;
+            state.carRender.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+
+            if (t >= 1) {
+               state.driveSegment++;
+               state.driveProgress = 0;
+               handleNodeArrival(state.driveSegment);
+            }
+         }
+
+         let lastTimestamp = 0;
+         function gameLoop(timestamp) {
+            const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000 || 0.016);
+            lastTimestamp = timestamp;
+
+            updateDrivingAnimation(dt);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGridBackground(timestamp);
+            drawTutorialGuide(timestamp);
+            drawSmoothPurplePath();
+            drawObstacles();
+            drawFinishFlag();
+            drawLetterTiles();
+            drawRaceCar();
+            drawKeyboardCursor();
+            updateAndDrawParticles();
+
+            requestAnimationFrame(gameLoop);
+         }
+
+         // ==========================================
+         // 10. UI & MODAL EVENT HANDLERS
+         // ==========================================
+         function showStageCompleteModal() {
+            const stage = STAGES[state.stageIndex];
+            document.getElementById('trophy-svg-box').innerHTML = getTrophySVG();
+            document.getElementById('completeTitle').textContent = `STAGE ${state.stageIndex + 1} CLEAR!`;
+
+            const wallGrid = document.getElementById('wordWallGrid');
+            wallGrid.innerHTML = '';
+            stage.words.forEach((wObj) => {
+               const card = document.createElement('div');
+               card.className = 'wall-card';
+               card.setAttribute('role', 'button');
+               card.setAttribute('tabindex', '0');
+               const coloredHTML = wObj.word
+                  .split('')
+                  .map((ch) => {
+                     const color = state.settings.montessori ? (VOWELS.has(ch) ? '#dc2626' : '#1e40af') : '#1e293b';
+                     return `<span style="color:${color}">${ch}</span>`;
+                  })
+                  .join('');
+
+               card.innerHTML = `
+          <div>${getWordSVG(wObj.word)}</div>
+          <div class="wall-word">${coloredHTML}</div>
+        `;
+               card.addEventListener('click', () => {
+                  sound.initContext();
+                  sound.speakWordSlowly(wObj.word);
+               });
+               wallGrid.appendChild(card);
+            });
+
+            document.getElementById('completeModal').classList.remove('hidden');
+            sound.playFanfare();
+         }
+
+         // Stage Selection Cards
+         document.querySelectorAll('.stage-card').forEach((card) => {
+            card.addEventListener('click', () => {
+               document.querySelectorAll('.stage-card').forEach((c) => c.classList.remove('active'));
+               card.classList.add('active');
+               state.stageIndex = Number(card.dataset.stage);
+            });
+         });
+
+         // Start Buttons
+         document.getElementById('btnStartGame').addEventListener('click', () => {
+            sound.initContext();
+            state.tutorialMode = false;
+            state.wordIndex = 0;
+            document.getElementById('startModal').classList.add('hidden');
+            setupLevel(true);
+         });
+
+         document.getElementById('btnStartTutorial').addEventListener('click', () => {
+            sound.initContext();
+            state.stageIndex = 0;
+            state.wordIndex = 0;
+            state.tutorialMode = true;
+            document.getElementById('startModal').classList.add('hidden');
+            setupLevel(true);
+         });
+
+         // Top HUD Controls
+         document.getElementById('btnHome').addEventListener('click', () => {
+            document.getElementById('startModal').classList.remove('hidden');
+         });
+
+         document.getElementById('btnA11y').addEventListener('click', () => {
+            document.getElementById('a11yModal').classList.remove('hidden');
+         });
+
+         document.getElementById('btnStartA11y').addEventListener('click', () => {
+            document.getElementById('a11yModal').classList.remove('hidden');
+         });
+
+         document.getElementById('btnCloseA11y').addEventListener('click', () => {
+            document.getElementById('a11yModal').classList.add('hidden');
+            saveSettings();
+         });
+
+         document.getElementById('btnSpeakWord').addEventListener('click', () => {
+            sound.initContext();
+            sound.speak(getCurrentWordObj().word, 0.85);
+         });
+
+         document.getElementById('picture-box').addEventListener('click', () => {
+            sound.initContext();
+            sound.speak(getCurrentWordObj().word, 0.85);
+         });
+
+         document.getElementById('btnSpeakSlow').addEventListener('click', () => {
+            sound.initContext();
+            const w = getCurrentWordObj().word;
+            const chars = w.split('');
+            updateFeedbackMessage(`/${chars[0]}/ - /${chars[1]}/ - /${chars[2]}/`);
+            sound.speakWordSlowly(w);
+         });
+
+         // Bottom Action Toolbar
+         document.getElementById('btnHint').addEventListener('click', () => {
+            sound.initContext();
+            state.hintActive = true;
+            const w = getCurrentWordObj().word;
+            const chars = w.split('');
+            updateFeedbackMessage(`${chars[0]} ➔ ${chars[1]} ➔ ${chars[2]} ➔ 🏁`);
+            sound.speakWordSlowly(w);
+         });
+
+         document.getElementById('btnUndo').addEventListener('click', undoLastPathNode);
+         document.getElementById('btnReset').addEventListener('click', resetPath);
+         document.getElementById('btnGo').addEventListener('click', startCarDrive);
+
+         // Stage Complete Modal Buttons
+         document.getElementById('btnReplayStage').addEventListener('click', () => {
+            document.getElementById('completeModal').classList.add('hidden');
+            state.wordIndex = 0;
+            setupLevel(true);
+         });
+
+         document.getElementById('btnNextStage').addEventListener('click', () => {
+            document.getElementById('completeModal').classList.add('hidden');
+            state.stageIndex = (state.stageIndex + 1) % STAGES.length;
+            state.wordIndex = 0;
+            setupLevel(true);
+         });
+
+         // Accessibility Toggles
+         document.getElementById('toggleMontessori').addEventListener('click', () => {
+            state.settings.montessori = !state.settings.montessori;
+            applySettingsToUI();
+            saveSettings();
+         });
+         document.getElementById('toggleTileSpeech').addEventListener('click', () => {
+            state.settings.tileSpeech = !state.settings.tileSpeech;
+            applySettingsToUI();
+            saveSettings();
+         });
+         document.getElementById('toggleContrast').addEventListener('click', () => {
+            state.settings.highContrast = !state.settings.highContrast;
+            applySettingsToUI();
+            saveSettings();
+         });
+         document.getElementById('toggleCalm').addEventListener('click', () => {
+            state.settings.sensoryCalm = !state.settings.sensoryCalm;
+            applySettingsToUI();
+            saveSettings();
+         });
+         document.getElementById('toggleSfx').addEventListener('click', () => {
+            state.settings.sfx = !state.settings.sfx;
+            applySettingsToUI();
+            saveSettings();
+         });
+
+         // Initialization on Window Load
+         window.addEventListener('resize', resizeCanvas);
+         window.onload = function () {
+            document.getElementById('hero-car-preview').innerHTML = getHeroCarSVG();
+            loadSettings();
+            setupLevel(false);
+            requestAnimationFrame(gameLoop);
+         };
+      </script>
+   </body>
+</html>

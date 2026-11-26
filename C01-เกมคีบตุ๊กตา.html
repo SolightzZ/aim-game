@@ -1,0 +1,3124 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แก๊งจิ๋วบุกตู้คีบ — เมฆขนมหวาน</title>
+  <style>
+    /* ==========================================================================
+       แก๊งจิ๋วบุกตู้คีบ — เมฆขนมหวาน (Sweet Cloud Claw Machine)
+       - 100% Offline single-file HTML + CSS + Custom SVG + Web Audio + Thai TTS
+       - Pastel palette: Peach Pink, Mint Blue, Grape Purple & Vanilla Cream
+       - Solid high-legibility question panel + pre-question interactive scenes
+       ========================================================================== */
+    :root {
+      --bg-sky-top: #ffd6e0;
+      --bg-sky-mid: #e0fbfc;
+      --bg-sky-bot: #f3e8ff;
+      --cream-panel: #fffdf7;
+      --cream-card: #fff8e7;
+      --peach-main: #ff9ebb;
+      --peach-deep: #e05780;
+      --mint-main: #72efdd;
+      --mint-deep: #007f73;
+      --grape-main: #5a189a;
+      --grape-dark: #240046;
+      --text-ink: #1f1135;
+      --text-muted: #4a3566;
+      --border-cabinet: #7b2cbf;
+      --focus-ring: #ff6d00;
+      --font-sans: system-ui, -apple-system, 'Sarabun', 'Noto Sans Thai', 'Prompt', sans-serif;
+      --base-size: 16px;
+    }
+
+    [data-contrast="high"] {
+      --bg-sky-top: #000000;
+      --bg-sky-mid: #000000;
+      --bg-sky-bot: #000000;
+      --cream-panel: #0a0a0a;
+      --cream-card: #141414;
+      --peach-main: #ff66b2;
+      --peach-deep: #ff3399;
+      --mint-main: #00ffff;
+      --mint-deep: #00e5ff;
+      --grape-main: #ffff00;
+      --grape-dark: #000000;
+      --text-ink: #ffffff;
+      --text-muted: #f8fafc;
+      --border-cabinet: #ffffff;
+      --focus-ring: #ffff00;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: var(--base-size);
+    }
+
+    html[data-text-size="large"] {
+      --base-size: 18.5px;
+    }
+
+    html[data-text-size="xlarge"] {
+      --base-size: 21px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: linear-gradient(180deg, var(--bg-sky-top) 0%, var(--bg-sky-mid) 52%, var(--bg-sky-bot) 100%);
+      color: var(--text-ink);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      line-height: 1.42;
+      overflow-x: hidden;
+    }
+
+    button {
+      font-family: inherit;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    button:focus-visible, [tabindex]:focus-visible {
+      outline: 3.5px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1120px;
+      padding: 0.55rem 0.75rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    /* 1. TOP BAR (Fixed Pause Button in Consistent Corner + Team/Info/Settings) */
+    .top-bar {
+      background: var(--cream-panel);
+      border: 2.5px solid var(--border-cabinet);
+      border-radius: 18px;
+      padding: 0.36rem 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(90, 24, 154, 0.12);
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #ff758f, #7b2cbf);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 0.9rem;
+      padding: 0.22rem 0.72rem;
+      border-radius: 999px;
+    }
+
+    .round-status {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--grape-main);
+    }
+
+    .top-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .util-btn {
+      background: var(--cream-card);
+      border: 2px solid var(--border-cabinet);
+      border-radius: 12px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0.22rem 0.58rem;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--text-ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      transition: transform 0.12s, background-color 0.15s;
+    }
+
+    .util-btn:hover {
+      background: #ffe5ec;
+      transform: translateY(-1px);
+    }
+
+    [data-contrast="high"] .util-btn:hover {
+      background: #262626;
+    }
+
+    .util-btn.pause-corner {
+      background: #fef08a;
+      border-color: #b45309;
+      color: #1f1135;
+    }
+
+    .util-btn.cab-switch-btn {
+      background: #e0fbfc;
+      border-color: #007f73;
+      color: #003833;
+    }
+
+    [data-contrast="high"] .util-btn.cab-switch-btn {
+      background: #001f24;
+      border-color: #00ffff;
+      color: #ffffff;
+    }
+
+    /* 2. CENTER CABINET & DESSERT CART STAGE */
+    .cabinet-wrapper {
+      background: var(--cream-panel);
+      border: 3px solid var(--border-cabinet);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 26px rgba(90, 24, 154, 0.16);
+    }
+
+    .svg-stage-box {
+      width: 100%;
+      height: clamp(325px, 46vh, 410px);
+      position: relative;
+      background: linear-gradient(180deg, #ffccd5 0%, #e0fbfc 62%, #f3e8ff 100%);
+    }
+
+    [data-contrast="high"] .svg-stage-box {
+      background: #000000;
+    }
+
+    .svg-stage-box svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @keyframes crownNudge {
+      0%, 100% { transform: translateY(0px) rotate(-11deg); }
+      45% { transform: translateY(-8px) rotate(-3deg); }
+      70% { transform: translateY(-6px) rotate(-5deg); }
+    }
+
+    .frog-crown-idle {
+      transform-origin: 0px -26px;
+      animation: crownNudge 2.4s ease-in-out infinite;
+    }
+
+    html[data-reduced-motion="true"] .frog-crown-idle {
+      animation: none !important;
+      transform: translateY(-4px) rotate(-6deg);
+    }
+
+    .opening-bar-overlay {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(36, 0, 70, 0) 0%, rgba(36, 0, 70, 0.86) 34%, rgba(36, 0, 70, 0.96) 100%);
+      padding: 1.4rem 1rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+      z-index: 12;
+    }
+
+    .opening-bar-overlay h1 {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: #fef08a;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .opening-cta-row {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 3. FRONT CONTROL PANEL (Solid Vanilla Cream — Situation + Question + 2 Large Buttons) */
+    .front-control-panel {
+      background: var(--cream-panel);
+      border-top: 3px solid var(--border-cabinet);
+      padding: 0.65rem 0.9rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .correct-reward-banner {
+      background: linear-gradient(135deg, #fef08a 0%, #bbf7d0 100%);
+      border: 2.5px solid #15803d;
+      border-radius: 16px;
+      padding: 0.4rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 10px rgba(21, 128, 61, 0.16);
+      animation: popRewardBanner 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-contrast="high"] .correct-reward-banner {
+      background: #052e16;
+      border-color: #4ade80;
+      color: #ffffff;
+    }
+
+    @keyframes popRewardBanner {
+      0% { transform: scale(0.94); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    html[data-reduced-motion="true"] .correct-reward-banner {
+      animation: none !important;
+    }
+
+    .correct-badge-pill {
+      background: #15803d;
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 900;
+      padding: 0.22rem 0.7rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .reward-gift-pill {
+      background: #ffffff;
+      border: 2px solid #f59e0b;
+      color: #78350f;
+      font-size: 0.92rem;
+      font-weight: 900;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .situation-card {
+      background: #f0fdfa;
+      border: 2.5px solid #007f73;
+      border-radius: 18px;
+      padding: 0.52rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    [data-contrast="high"] .situation-card {
+      background: #0d1b1e;
+      border-color: #00ffff;
+    }
+
+    .situation-svg-frame {
+      width: 228px;
+      height: 112px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 2px solid #72efdd;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [data-contrast="high"] .situation-svg-frame {
+      background: #141414;
+      border-color: #00ffff;
+    }
+
+    .situation-svg-frame svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .situation-copy-col {
+      flex: 1;
+      min-width: 210px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .situation-caption {
+      font-size: 1.12rem;
+      font-weight: 900;
+      color: var(--text-ink);
+      line-height: 1.35;
+    }
+
+    .situation-action-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .question-header-box {
+      background: var(--cream-card);
+      border: 2.5px solid var(--border-cabinet);
+      border-radius: 16px;
+      padding: 0.5rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .question-header-box:focus {
+      outline: 3.5px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .prompt-headline {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--text-ink);
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .choice-grid.single-btn {
+      grid-template-columns: 1fr;
+    }
+    @media (max-width: 640px) {
+      .choice-grid {
+        grid-template-columns: 1fr;
+      }
+      .svg-stage-box {
+        height: 295px;
+      }
+      .opening-bar-overlay h1 {
+        font-size: 1.24rem;
+      }
+      .situation-svg-frame {
+        width: 100%;
+        height: 116px;
+      }
+    }
+
+    html[data-text-size="large"] .choice-grid,
+    html[data-text-size="xlarge"] .choice-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .panel-choice-btn {
+      background: #ffffff;
+      border: 3px solid var(--border-cabinet);
+      border-radius: 18px;
+      min-height: 64px;
+      padding: 0.55rem 0.95rem;
+      color: var(--text-ink);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      box-shadow: 0 4px 0 #7b2cbf;
+      transition: transform 0.1s, background-color 0.15s;
+    }
+
+    [data-contrast="high"] .panel-choice-btn {
+      background: #141414;
+      color: #ffffff;
+      box-shadow: 0 4px 0 #ffffff;
+    }
+
+    .panel-choice-btn:hover:not(:disabled) {
+      background: #fff0f5;
+      transform: translateY(-2px);
+    }
+
+    [data-contrast="high"] .panel-choice-btn:hover:not(:disabled) {
+      background: #262626;
+    }
+
+    .panel-choice-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #7b2cbf;
+    }
+
+    .panel-choice-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .panel-choice-btn.primary-mint {
+      background: linear-gradient(180deg, #9ef01a 0%, #70e000 100%);
+      border-color: #004b23;
+      color: #081c15;
+      box-shadow: 0 4px 0 #004b23;
+    }
+
+    .panel-choice-btn.primary-peach {
+      background: linear-gradient(180deg, #ffccd5 0%, #ff8fab 100%);
+      border-color: #800f2f;
+      color: #2b0916;
+      box-shadow: 0 4px 0 #800f2f;
+    }
+
+    .panel-choice-btn.vent-action-btn {
+      background: linear-gradient(180deg, #fef08a 0%, #fde047 100%);
+      border-color: #92400e;
+      color: #1f1135;
+      box-shadow: 0 4px 0 #92400e;
+      min-height: 50px;
+      padding: 0.4rem 0.9rem;
+    }
+
+    .choice-face-badge {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      background: #fff8e7;
+      border: 2px solid #c77dff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .choice-main-label {
+      font-size: 1.15rem;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .switch-highlight {
+      outline: 4.5px solid #ff6d00 !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px rgba(255, 109, 0, 0.4) !important;
+    }
+
+    html[data-reduced-motion="true"] * {
+      transition: none !important;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(24, 6, 48, 0.84);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.85rem;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .modal-card {
+      background: var(--cream-panel);
+      border: 3px solid var(--border-cabinet);
+      border-radius: 22px;
+      padding: 1.15rem 1.3rem;
+      max-width: 620px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.26rem;
+      font-weight: 900;
+      color: var(--grape-main);
+    }
+
+    .setting-row {
+      background: var(--cream-card);
+      border: 2px solid var(--border-cabinet);
+      border-radius: 14px;
+      padding: 0.5rem 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .info-box {
+      background: var(--cream-card);
+      border: 2px solid var(--border-cabinet);
+      border-radius: 14px;
+      padding: 0.7rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .team-showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .team-member-card {
+      background: var(--cream-card);
+      border: 2.5px solid var(--border-cabinet);
+      border-radius: 16px;
+      padding: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.3rem;
+    }
+  </style>
+  <style>
+    #game-rules {
+      --rules-accent: #ffdae4;
+      --rules-ink: #432744;
+      box-sizing: border-box;
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(44rem, calc(100% - 1.5rem));
+      max-height: calc(100% - 1.5rem);
+      padding: 0;
+      overflow: hidden;
+      border: 2px solid var(--rules-ink);
+      border-radius: 24px;
+      background: #fffdf7;
+      color: var(--rules-ink);
+      box-shadow: 0 6px 0 var(--rules-ink), 0 20px 52px #2d1a3059;
+      font: clamp(1.125rem, 1.05rem + .35vw, 1.375rem)/1.5 "Leelawadee UI", Tahoma, sans-serif;
+    }
+    #game-rules[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+    #game-rules::backdrop { background: #27172cbd; }
+    #game-rules .rules-content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+    #game-rules .rules-heading {
+      padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2.25rem);
+      border-bottom: 1px solid #4327443d;
+      background: var(--rules-accent);
+    }
+    #game-rules .rules-label { margin: 0; font-weight: 800; }
+    #game-rules h2 {
+      margin: .25rem 0 0;
+      font-size: clamp(1.625rem, 1.4rem + 1.3vw, 2.5rem);
+      line-height: 1.25;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    #game-rules ol {
+      counter-reset: rule;
+      list-style: none;
+      margin: 0;
+      padding: .4rem clamp(.9rem, 4vw, 2.25rem) 0;
+    }
+    #game-rules li {
+      counter-increment: rule;
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      align-items: start;
+      gap: .7rem;
+      padding-block: clamp(.5rem, 1.3vw, .85rem);
+    }
+    #game-rules li + li { border-top: 1px solid #e6dce5; }
+    #game-rules li::before {
+      content: counter(rule);
+      display: grid;
+      place-items: center;
+      min-height: 2rem;
+      border-radius: 10px;
+      background: var(--rules-accent);
+      font-weight: 800;
+    }
+    #game-rules .rules-switch {
+      margin: .35rem clamp(.9rem, 4vw, 2.25rem) .8rem;
+      padding: .55rem .8rem;
+      border-inline-start: 3px solid var(--rules-ink);
+      border-radius: 8px;
+      background: #f4eef7;
+      overflow-wrap: anywhere;
+    }
+    #game-rules .rules-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .3rem .7rem;
+      padding: .65rem clamp(.9rem, 4vw, 2.25rem);
+      border-top: 1px solid #e6dce5;
+      background: #fffdf7;
+    }
+    #game-rules button, #game-rules a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: .35rem .75rem;
+      font: inherit;
+      font-weight: 800;
+      color: inherit;
+    }
+    #game-rules button {
+      flex: 1;
+      background: #ffd166;
+      border: 2px solid var(--rules-ink);
+      border-radius: 12px;
+      box-shadow: 0 3px 0 var(--rules-ink);
+      cursor: pointer;
+    }
+    #game-rules button:hover { background: #ffe192; }
+    #game-rules a { text-decoration: underline; text-underline-offset: .2em; }
+    #game-rules :focus-visible { outline: 3px solid #6c2aa3; outline-offset: 2px; }
+    #game-rules .rules-content:focus-visible { outline-offset: -4px; }
+    @media (forced-colors: active) {
+      #game-rules li::before { border: 1px solid CanvasText; }
+    }
+  </style>
+</head>
+<body>
+  <dialog id="game-rules" aria-labelledby="game-rules-title">
+    <div class="rules-content" role="region" aria-label="กติกาและการควบคุม" tabindex="0">
+      <div class="rules-heading">
+        <p class="rules-label">วิธีเล่น</p>
+        <h2 id="game-rules-title">แก๊งจิ๋วบุกตู้คีบ</h2>
+      </div>
+      <ol role="list">
+        <li><span>เลือกตู้ แล้วแตะตุ๊กตาที่อยากคีบ</span></li>
+        <li><span>ดูเหตุการณ์เรื่องอากาศ แล้วเลือกคำตอบ กด <strong>ดูอีกครั้ง</strong> เพื่อดูซ้ำ</span></li>
+        <li><span>ตอบถูกเพื่อคีบตุ๊กตา เก็บครบ 6 ตัวจะได้โปสการ์ด</span></li>
+      </ol>
+      <p class="rules-switch">เลือก <strong>โหมดปุ่มเดียว</strong> ที่หน้าเลือกตู้ แล้วกด Space ตอนกรอบอยู่ที่ปุ่มที่ต้องการ</p>
+    </div>
+    <form method="dialog" class="rules-actions">
+      <button type="submit" autofocus>เข้าเกม</button>
+      <a href="./index.html">กลับลานเกม</a>
+    </form>
+  </dialog>
+  <div class="app-shell">
+    <!-- 1. TOP BAR (Pause always stays in the exact same top-right spot) -->
+    <header class="top-bar">
+      <div class="brand-cluster">
+        <span class="brand-badge" id="ui-brand-badge">🧸 แก๊งจิ๋วบุกตู้คีบ — ตู้ 1</span>
+        <span class="round-status" id="ui-round-progress" aria-live="polite">
+          ตู้ 1 เมฆขนมหวาน · ตู้ละ 3 ตัว (รวม 6 ตัว)
+        </span>
+      </div>
+
+      <nav class="top-btn-group" aria-label="แถบเครื่องมือ">
+        <a class="util-btn" href="./index.html">กลับลานเกมสายรุ้ง</a>
+        <button type="button" id="btn-switch-cabinet" class="util-btn cab-switch-btn">
+          <span id="ui-switch-cab-label">🎪 สลับไปตู้ 2</span>
+        </button>
+        <button type="button" id="btn-team-view" class="util-btn">
+          <span>🌟 ทีม & รางวัล (<span id="ui-team-count">0</span>/6)</span>
+        </button>
+        <button type="button" id="btn-info" class="util-btn">
+          <span>📚 ข้อมูล & เครดิต</span>
+        </button>
+        <button type="button" id="btn-settings" class="util-btn">
+          <span>⚙️ ตั้งค่า</span>
+        </button>
+        <button type="button" id="btn-pause" class="util-btn pause-corner">
+          <span id="ui-pause-label">⏸️ พัก</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- 2. MAIN CLAW MACHINE CABINET + CLOUD DESSERT CART -->
+    <main class="cabinet-wrapper">
+      <div class="svg-stage-box" id="svg-stage-box">
+        <svg id="claw-cabinet-svg" viewBox="0 0 1080 365" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="svg-cabinet-title">
+          <title id="svg-cabinet-title">ตู้คีบตุ๊กตาในร้านขนมบนก้อนเมฆ พร้อมตุ๊กตาแก๊งจิ๋ว 6 ตัวจาก 2 ตู้</title>
+          <defs>
+            <linearGradient id="cab-pink" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff9ebb" />
+              <stop offset="55%" stop-color="#ff758f" />
+              <stop offset="100%" stop-color="#c9184a" />
+            </linearGradient>
+            <linearGradient id="cab-mint" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#99f6e4" />
+              <stop offset="100%" stop-color="#2dd4bf" />
+            </linearGradient>
+            <linearGradient id="cab-lavender" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c77dff" />
+              <stop offset="55%" stop-color="#9d4edd" />
+              <stop offset="100%" stop-color="#5a189a" />
+            </linearGradient>
+            <linearGradient id="cab-lemon" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="100%" stop-color="#facc15" />
+            </linearGradient>
+            <linearGradient id="cushion-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f3e8ff" />
+              <stop offset="100%" stop-color="#d8b4fe" />
+            </linearGradient>
+          </defs>
+
+          <!-- Soft Cloud Dessert Shop Backdrop -->
+          <g fill="#ffffff" opacity="0.72">
+            <circle cx="95" cy="70" r="38" />
+            <circle cx="135" cy="64" r="46" />
+            <circle cx="180" cy="74" r="34" />
+            <circle cx="910" cy="58" r="42" />
+            <circle cx="958" cy="54" r="50" />
+            <circle cx="1005" cy="66" r="36" />
+          </g>
+          <path d="M 0 336 Q 180 318 360 334 T 720 330 T 1080 336 L 1080 365 L 0 365 Z" fill="#ffffff" opacity="0.92" />
+
+          <!-- ==================== CLAW MACHINE CABINET (x=140..670) ==================== -->
+          <g id="claw-cabinet-body">
+            <rect id="cab-outer-shell" x="140" y="10" width="530" height="346" rx="28" fill="url(#cab-pink)" stroke="#5a189a" stroke-width="4.5" />
+            <rect id="cab-header-marquee" x="162" y="20" width="486" height="38" rx="16" fill="url(#cab-mint)" stroke="#5a189a" stroke-width="3" />
+            <text id="cab-marquee-text" x="405" y="45" text-anchor="middle" fill="#240046" font-size="18" font-weight="900">
+              ☁️ ตู้ที่ 1 · เมฆขนมหวาน 🍒
+            </text>
+
+            <!-- Pearl Lightbulbs -->
+            <g fill="#fffdf7" stroke="#f59e0b" stroke-width="2">
+              <circle cx="176" cy="39" r="5.5" />
+              <circle cx="212" cy="39" r="5.5" />
+              <circle cx="598" cy="39" r="5.5" />
+              <circle cx="634" cy="39" r="5.5" />
+              <circle cx="152" cy="95" r="5.5" />
+              <circle cx="152" cy="155" r="5.5" />
+              <circle cx="152" cy="215" r="5.5" />
+              <circle cx="658" cy="95" r="5.5" />
+              <circle cx="658" cy="155" r="5.5" />
+              <circle cx="658" cy="215" r="5.5" />
+            </g>
+
+            <!-- Clear Acrylic Star Decorations -->
+            <g fill="rgba(255, 255, 255, 0.65)" stroke="#38bdf8" stroke-width="2">
+              <polygon points="172,72 176,81 186,82 178,89 180,99 172,94 164,99 166,89 158,82 168,81" />
+              <polygon points="638,72 642,81 652,82 644,89 646,99 638,94 630,99 632,89 624,82 634,81" />
+            </g>
+
+            <!-- Cherry Stickers -->
+            <g transform="translate(335, 326)">
+              <path d="M 0 0 Q 8 -14 16 -18 Q 22 -12 24 0" stroke="#15803d" stroke-width="2.5" fill="none" />
+              <ellipse cx="18" cy="-18" rx="7" ry="4" fill="#4ade80" />
+              <circle cx="0" cy="4" r="7" fill="#e11d48" stroke="#ffffff" stroke-width="1.5" />
+              <circle cx="24" cy="4" r="7" fill="#e11d48" stroke="#ffffff" stroke-width="1.5" />
+            </g>
+            <g transform="translate(565, 326)">
+              <path d="M 0 0 Q 8 -14 16 -18 Q 22 -12 24 0" stroke="#15803d" stroke-width="2.5" fill="none" />
+              <ellipse cx="18" cy="-18" rx="7" ry="4" fill="#4ade80" />
+              <circle cx="0" cy="4" r="7" fill="#e11d48" stroke="#ffffff" stroke-width="1.5" />
+              <circle cx="24" cy="4" r="7" fill="#e11d48" stroke="#ffffff" stroke-width="1.5" />
+            </g>
+
+            <!-- Glass Display Interior -->
+            <rect x="166" y="64" width="478" height="230" rx="16" fill="#fffdf7" stroke="#5a189a" stroke-width="3.5" />
+            <rect id="cab-inner-wallpaper" x="170" y="68" width="470" height="222" rx="14" fill="#f0fdfa" />
+            <path d="M 272 260 Q 455 246 640 260 L 640 290 L 272 290 Z" fill="url(#cushion-grad)" stroke="#a855f7" stroke-width="2.5" />
+
+            <!-- Prize Chute Partition & Bottom-Left Chute Door -->
+            <rect x="268" y="218" width="12" height="74" rx="5" fill="#72efdd" stroke="#5a189a" stroke-width="2.5" />
+            <text x="220" y="238" text-anchor="middle" fill="#5a189a" font-size="13" font-weight="900">ช่องรับของ</text>
+            <rect x="178" y="246" width="84" height="44" rx="10" fill="#240046" stroke="#5a189a" stroke-width="2.5" />
+            <rect x="176" y="302" width="104" height="44" rx="12" fill="#e0fbfc" stroke="#5a189a" stroke-width="3" />
+            <text x="228" y="328" text-anchor="middle" fill="#240046" font-size="13" font-weight="900">🎁 ช่องรับตุ๊กตา</text>
+
+            <!-- Top Metal Rail -->
+            <rect x="176" y="76" width="458" height="10" rx="5" fill="#94a3b8" stroke="#475569" stroke-width="2" />
+
+            <g id="layer-cabinet-plushies"></g>
+            <g id="layer-claw-assembly"></g>
+            <g id="layer-chute-prize"></g>
+            <g id="layer-sparkles"></g>
+
+            <polygon points="585,70 632,70 632,126" fill="rgba(255, 255, 255, 0.42)" pointer-events="none" />
+          </g>
+
+          <!-- ==================== DESSERT CART BESIDE CABINET ==================== -->
+          <g id="dessert-cart-group" transform="translate(715, 165)">
+            <path d="M 10 25 L 35 -18 L 285 -18 L 310 25 Z" fill="#ff8fab" stroke="#5a189a" stroke-width="3" />
+            <path d="M 65 -18 L 55 25 L 105 25 L 110 -18 Z" fill="#fffdf7" />
+            <path d="M 160 -18 L 160 25 L 210 25 L 205 -18 Z" fill="#fffdf7" />
+            <path d="M 255 -18 L 265 25 L 305 25 L 285 -18 Z" fill="#fffdf7" />
+            <path d="M 10 25 Q 35 38 60 25 Q 85 38 110 25 Q 135 38 160 25 Q 185 38 210 25 Q 235 38 260 25 Q 285 38 310 25" fill="#ff8fab" stroke="#5a189a" stroke-width="2.5" />
+
+            <rect x="28" y="25" width="10" height="85" fill="#fde047" stroke="#5a189a" stroke-width="2" />
+            <rect x="282" y="25" width="10" height="85" fill="#fde047" stroke="#5a189a" stroke-width="2" />
+            <!-- Cart Counter Body -->
+            <rect id="cart-counter-body" x="16" y="106" width="288" height="62" rx="16" fill="#72efdd" stroke="#5a189a" stroke-width="3.5" />
+            <rect x="30" y="118" width="260" height="26" rx="10" fill="#fffdf7" />
+            <text id="cart-banner-text" x="160" y="136" text-anchor="middle" fill="#5a189a" font-size="14" font-weight="900">
+              🍰 รถขนมตู้ที่ 1 (0/3)
+            </text>
+
+            <circle cx="72" cy="172" r="20" fill="#ff9ebb" stroke="#5a189a" stroke-width="3.5" />
+            <circle cx="72" cy="172" r="7" fill="#fef08a" />
+            <circle cx="248" cy="172" r="20" fill="#ff9ebb" stroke="#5a189a" stroke-width="3.5" />
+            <circle cx="248" cy="172" r="7" fill="#fef08a" />
+
+            <g id="layer-cart-team"></g>
+          </g>
+        </svg>
+
+        <!-- Opening Screen Overlay -->
+        <div class="opening-bar-overlay" id="opening-overlay">
+          <h1>🧸 แก๊งจิ๋วบุกตู้คีบ — 2 ตู้ 6 ตัว</h1>
+          <div class="opening-cta-row">
+            <button type="button" id="btn-start-cab1" class="panel-choice-btn primary-mint" style="min-width: 210px;">
+              <span class="choice-main-label">☁️ เล่นตู้ 1 (ข้อ 1–3)</span>
+            </button>
+            <button type="button" id="btn-start-cab2" class="panel-choice-btn primary-peach" style="min-width: 210px;">
+              <span class="choice-main-label">🌙 เล่นตู้ 2 (ข้อ 4–6)</span>
+            </button>
+            <button type="button" id="btn-start-switch" class="util-btn">
+              <span>🔄 โหมดปุ่มเดียว (Space)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. FRONT CONTROL PANEL (Situation + Question + 2 Large Choice Buttons) -->
+      <section class="front-control-panel" aria-label="แผงควบคุมหน้าตู้คีบ">
+        <!-- Correct Answer & Mini Treat Reward Banner -->
+        <div class="correct-reward-banner" id="ui-correct-banner" hidden>
+          <span class="correct-badge-pill">✅ ถูกต้อง! เก่งมาก!</span>
+          <span class="reward-gift-pill" id="ui-reward-gift-text">🎁 ได้รับดาวขนมหวาน +1 ดวง!</span>
+        </div>
+
+        <!-- Event Situation Visual & Caption Card -->
+        <div class="situation-card" id="ui-situation-card" hidden>
+          <div class="situation-svg-frame" id="ui-situation-svg-frame">
+            <svg id="situation-demo-svg" viewBox="0 0 260 124" role="img" aria-label="ภาพเหตุการณ์ประกอบคำถาม"></svg>
+          </div>
+          <div class="situation-copy-col">
+            <p class="situation-caption" id="ui-situation-caption" aria-live="polite"></p>
+            <div class="situation-action-row" id="ui-situation-actions"></div>
+          </div>
+        </div>
+
+        <!-- Question / Main Prompt Box -->
+        <div class="question-header-box" id="question-focus-region" tabindex="-1">
+          <p class="prompt-headline" id="ui-prompt-headline" aria-live="polite">
+            ดูเจ้ากบสวมมงกุฎยักษ์ในตู้สิ! มันกำลังดันมงกุฎที่ไหลปิดตาขึ้น กด “เริ่มคีบตุ๊กตา” เลย!
+          </p>
+          <button type="button" id="btn-repeat-speech" class="util-btn">
+            <span>🔊 ฟังอีกครั้ง</span>
+          </button>
+        </div>
+
+        <!-- Dynamic 2-Button Action Grid -->
+        <div class="choice-grid" id="ui-choice-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: PAUSE -->
+  <div class="modal-backdrop" id="modal-pause" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title" id="pause-title">⏸️ พักเกมชั่วคราว</h2>
+      <p>หยุดก้ามคีบ เสียงพูด และการสแกนไว้เรียบร้อย กดเล่นต่อจากจังหวะเดิมได้ทันที</p>
+      <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+        <button type="button" id="btn-resume" class="panel-choice-btn primary-mint" style="flex: 1;">
+          <span class="choice-main-label">▶️ เล่นต่อ</span>
+        </button>
+        <button type="button" id="btn-pause-restart" class="util-btn">
+          <span>🔄 เริ่มใหม่</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SETTINGS -->
+  <div class="modal-backdrop" id="modal-settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="settings-title">⚙️ ตั้งค่าการเล่นและการเข้าถึง</h2>
+        <button type="button" id="btn-close-settings" class="util-btn">✕ ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔊 เสียงเอฟเฟกต์และเสียงนำทาง</strong></span>
+        <button type="button" id="set-sound" class="util-btn" aria-pressed="true">เปิดเสียง</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔄 โหมดเล่นด้วยปุ่มเดียว (Space / คลิก)</strong></span>
+        <button type="button" id="set-switch" class="util-btn" aria-pressed="false">ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>⏱️ ความเร็วการวนตัวเลือก</strong></span>
+        <button type="button" id="set-speed" class="util-btn">กลาง (2.5 วิ)</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔠 ขนาดตัวอักษร</strong></span>
+        <button type="button" id="set-text-size" class="util-btn">ปกติ</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🌗 คอนทราสต์สูง</strong></span>
+        <button type="button" id="set-contrast" class="util-btn" aria-pressed="false">ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🌿 ลดการเคลื่อนไหว</strong></span>
+        <button type="button" id="set-motion" class="util-btn" aria-pressed="false">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: TEAM SHOWCASE -->
+  <div class="modal-backdrop" id="modal-team" role="dialog" aria-modal="true" aria-labelledby="team-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="team-title">🌟 ทีมแก๊งจิ๋วบนรถขนมของฉัน</h2>
+        <button type="button" id="btn-close-team" class="util-btn">✕ ปิด</button>
+      </div>
+      <p id="team-summary-text"></p>
+      <div class="team-showcase-grid" id="team-cards-grid"></div>
+      <div id="team-postcard-cta-box" hidden style="display: flex; justify-content: center; margin-top: 0.25rem;">
+        <button type="button" id="btn-team-open-postcard" class="panel-choice-btn primary-mint" style="width: 100%;">
+          <span class="choice-main-label">🖼️ เปิดและดาวน์โหลดโปสการ์ดแก๊งจิ๋วครบ 6 ตัว!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: COLLECTIBLE POSTCARD PREVIEW & PNG DOWNLOAD -->
+  <div class="modal-backdrop" id="modal-postcard" role="dialog" aria-modal="true" aria-labelledby="postcard-title" hidden>
+    <div class="modal-card" style="max-width: 720px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="postcard-title">🖼️ โปสการ์ดที่ระลึก · แก๊งจิ๋วครบ 6 ตัว!</h2>
+        <button type="button" id="btn-close-postcard" class="util-btn">✕ ปิด</button>
+      </div>
+      <p style="font-weight: 800; color: var(--text-muted);">
+        ยินดีด้วย! สะสมสมาชิกและของขวัญจากตู้ที่ 1 และตู้ที่ 2 ครบทั้ง 6 ตัวแล้ว กดบันทึกโปสการ์ดเก็บไว้ได้เลย!
+      </p>
+      <div style="border: 3px solid var(--border-cabinet); border-radius: 18px; overflow: hidden; background: #fffdf7; box-shadow: 0 8px 20px rgba(90, 24, 154, 0.18);">
+        <svg id="postcard-preview-svg" viewBox="0 0 900 560" style="width: 100%; height: auto; display: block;" role="img" aria-label="โปสการ์ดแก๊งจิ๋วบุกตู้คีบครบทั้ง 6 ตัว"></svg>
+      </div>
+      <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+        <button type="button" id="btn-download-postcard-png" class="panel-choice-btn primary-mint" style="flex: 1;">
+          <span class="choice-main-label">📥 ดาวน์โหลดโปสการ์ด (PNG)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: LESSON INFO, TIME REFERENCES & TEACHER NOTES -->
+  <div class="modal-backdrop" id="modal-info" role="dialog" aria-modal="true" aria-labelledby="info-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="info-title">📚 ข้อมูลบทเรียน แหล่งอ้างอิง และคู่มือครู</h2>
+        <button type="button" id="btn-close-info" class="util-btn">✕ ปิด</button>
+      </div>
+
+      <div class="info-box">
+        <strong style="color: var(--grape-main);">📖 ชื่อสื่อและชุดบทเรียน</strong>
+        <p id="info-lesson-name"></p>
+      </div>
+
+      <div class="info-box">
+        <strong style="color: var(--mint-deep);">🔗 แหล่งที่มาต้นฉบับ</strong>
+        <p id="info-source-details"></p>
+      </div>
+
+      <div class="info-box">
+        <strong style="color: var(--grape-main);">👩‍🏫 รายละเอียดและเวลาอ้างอิงสำหรับครู (ครบทั้ง 6 ข้อ)</strong>
+        <div id="info-teacher-guide" style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.92rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. LESSON PACK (6 Questions divided across 2 Switchable Claw Cabinets)
+     * =========================================================================
+     */
+    const CABINET_CONFIGS = [
+      {
+        id: 1,
+        name: 'ตู้ที่ 1 · เมฆขนมหวาน',
+        shortBadge: '🧸 แก๊งจิ๋วบุกตู้คีบ — ตู้ 1',
+        marqueeText: '☁️ ตู้ที่ 1 · เมฆขนมหวาน 🍒',
+        shellGrad: 'url(#cab-pink)',
+        headerGrad: 'url(#cab-mint)',
+        wallpaperFill: '#f0fdfa',
+        cartFill: '#72efdd',
+        plushIds: ['frog', 'cat', 'rabbit']
+      },
+      {
+        id: 2,
+        name: 'ตู้ที่ 2 · สวนดาวพระจันทร์',
+        shortBadge: '🌙 แก๊งจิ๋วบุกตู้คีบ — ตู้ 2',
+        marqueeText: '🌙 ตู้ที่ 2 · สวนดาวพระจันทร์ ⭐',
+        shellGrad: 'url(#cab-lavender)',
+        headerGrad: 'url(#cab-lemon)',
+        wallpaperFill: '#f5f3ff',
+        cartFill: '#fde047',
+        plushIds: ['bear', 'owl', 'penguin']
+      }
+    ];
+
+    const lessonPack = {
+      lessonTitle: 'อากาศมีตัวตน',
+      source: {
+        title: 'อากาศมีตัวตน',
+        organization: 'โครงการบ้านนักวิทยาศาสตร์น้อย ประเทศไทย บน OKRP',
+        url: 'https://www.okrp.in.th/home/detail?type=media&id=e30e1ff4-b28b-4dcc-bdb6-1e48050e03e2'
+      },
+      teacherNotes: 'เกมแบ่งออกเป็น 2 ตู้ ตู้ละ 3 โจทย์และตุ๊กตา 3 ตัว รวมทั้งหมด 6 โจทย์ เด็กสามารถเลือกเล่นตู้ใดก่อนหรือกดปุ่ม “สลับตู้คีบ” ที่แถบด้านบนเพื่อย้ายตู้ได้ตลอดเวลา โดยมีจังหวะ: เลือกตุ๊กตา → ดู/โต้ตอบกับเหตุการณ์ → ตอบ 1 คำถาม → ก้ามคีบทำงาน หากตอบพลาดสามารถกด “ดูอีกครั้ง” เพื่อสังเกตเหตุการณ์ซ้ำได้ทันที',
+      questions: [
+        {
+          id: 'q1-sweep-bag',
+          cabinetId: 1,
+          topicTitle: 'ข้อ 1 (ตู้ 1) — กวาดถุงผ่านอากาศ',
+          demoType: 'sweep_bag',
+          preSceneText: 'เด็กกวาดถุงที่เปิดปากผ่านอากาศ แล้วรวบปากถุงไว้',
+          text: 'อะไรทำให้ถุงพองขึ้น?',
+          options: [
+            { id: 'water', label: 'น้ำ' },
+            { id: 'air', label: 'อากาศ' }
+          ],
+          correctOptionId: 'air',
+          afterText: 'อากาศเข้าไปอยู่ในถุงตอนที่เราเปิดปากถุงกวาดผ่านอากาศ',
+          timeRef: 'อ้างอิงประมาณ 01:15–02:00',
+          teacherTip: 'ชวนเด็กสังเกตว่าถุงพลาสติกที่แบนอยู่พองขึ้นได้เมื่อเปิดปากถุงกวาดผ่านอากาศรอบตัวแล้วรวบปากถุงไว้'
+        },
+        {
+          id: 'q2-squeeze-bag',
+          cabinetId: 1,
+          topicTitle: 'ข้อ 2 (ตู้ 1) — อากาศออกจากถุง',
+          demoType: 'squeeze_bag',
+          preSceneText: 'ถุงยังพองอยู่ ลองทายก่อนเปิดปากถุง',
+          text: 'ถ้าบีบให้อากาศออก ถุงจะเป็นอย่างไร?',
+          options: [
+            { id: 'deflate', label: 'ถุงแฟบลง' },
+            { id: 'inflate', label: 'ถุงพองขึ้น' }
+          ],
+          correctOptionId: 'deflate',
+          afterText: 'เมื่ออากาศออก ถุงก็แฟบลง',
+          timeRef: 'อ้างอิงประมาณ 02:00–03:06',
+          teacherTip: 'เมื่อตอบถูก ภาพจำลองจะแสดงถุงค่อย ๆ ยุบแฟบลงตามจังหวะที่อากาศไหลออก'
+        },
+        {
+          id: 'q3-beam-compare',
+          cabinetId: 1,
+          topicTitle: 'ข้อ 3 (ตู้ 1) — เปรียบเทียบคานแขวนลูกโป่ง',
+          demoType: 'beam_compare',
+          preSceneText: 'ลูกโป่งสองใบแขวนที่ปลายคาน ลูกหนึ่งอยู่ต่ำกว่าอีกลูก ฝั่งดาวเอียงลง',
+          text: 'ลูกโป่งฝั่งไหนหนักกว่า?',
+          options: [
+            { id: 'star', label: 'ฝั่งดาว' },
+            { id: 'moon', label: 'ฝั่งพระจันทร์' }
+          ],
+          correctOptionId: 'star',
+          afterText: 'ในการทดลองนี้ ปลายคานเอียงลงทางฝั่งที่หนักกว่า',
+          timeRef: 'อ้างอิงประมาณ 03:06–03:45',
+          teacherTip: 'สังเกตสัญลักษณ์ดาว ⭐ และพระจันทร์ 🌙 บนลูกโป่งทั้งสองฝั่ง คานจะเอียงต่ำลงทางฝั่งที่มีน้ำหนักมากกว่า'
+        },
+        {
+          id: 'q4-blow-balloon',
+          cabinetId: 2,
+          topicTitle: 'ข้อ 4 (ตู้ 2) — เป่าลูกโป่งเติมอากาศ',
+          demoType: 'blow_balloon',
+          preSceneText: 'เด็กเป่าลูกโป่งก่อนนำไปแขวนบนคาน',
+          text: 'ตอนเป่าลูกโป่ง เราเติมอะไรที่มีน้ำหนักเข้าไป?',
+          options: [
+            { id: 'water', label: 'น้ำ' },
+            { id: 'air', label: 'อากาศ' }
+          ],
+          correctOptionId: 'air',
+          afterText: 'แม้เรามองไม่เห็น แต่อากาศที่เติมเข้าไปก็มีน้ำหนัก',
+          timeRef: 'อ้างอิงประมาณ 03:45–04:13',
+          teacherTip: 'เชื่อมโยงจากข้อ 3 ว่าสาเหตุที่ลูกโป่งฝั่งดาวหนักกว่าเพราะเราเป่าเติมอากาศเข้าไปข้างใน'
+        },
+        {
+          id: 'q5-empty-bottle',
+          cabinetId: 2,
+          topicTitle: 'ข้อ 5 (ตู้ 2) — ขวดใสที่ดูว่าง',
+          demoType: 'empty_bottle',
+          preSceneText: 'ขวดใสที่ยังไม่ได้เทน้ำลงไป',
+          text: 'ก่อนเทน้ำ ในขวดมีอะไรอยู่แล้ว?',
+          options: [
+            { id: 'air', label: 'อากาศ' },
+            { id: 'nothing', label: 'ไม่มีอะไรเลย' }
+          ],
+          correctOptionId: 'air',
+          afterText: 'ขวดที่ดูว่างมีอากาศอยู่ข้างใน',
+          timeRef: 'อ้างอิงประมาณ 05:15–06:10',
+          teacherTip: 'ชวนเด็กคิดทบทวนว่าขวดใสที่มองดูเหมือนว่างเปล่า แท้จริงแล้วมีอากาศบรรจุอยู่เต็มขวด'
+        },
+        {
+          id: 'q6-bottle-vent',
+          cabinetId: 2,
+          topicTitle: 'ข้อ 6 (ตู้ 2) — เปิดช่องข้างขวดให้น้ำไหลลง',
+          demoType: 'bottle_vent',
+          requireVentAction: true,
+          ventButtonLabel: 'เปิดช่องข้างขวด',
+          beforeActionText: 'น้ำค้างอยู่ในกรวย กด “เปิดช่องข้างขวด” เพื่อดูผล',
+          preSceneText: 'พอเปิดช่องข้างขวด น้ำในกรวยไหลลงง่ายขึ้น',
+          text: 'พอเปิดช่องแล้ว น้ำในกรวยเป็นอย่างไร?',
+          options: [
+            { id: 'stay-stuck', label: 'ยังค้างเหมือนเดิม' },
+            { id: 'flow-easy', label: 'ไหลลงง่ายขึ้น' }
+          ],
+          correctOptionId: 'flow-easy',
+          afterText: 'ช่องที่เปิดช่วยให้อากาศออก น้ำจึงเข้าไปแทนที่ได้',
+          timeRef: 'อ้างอิงประมาณ 06:10–08:36',
+          teacherTip: 'ให้เด็กกดปุ่ม “เปิดช่องข้างขวด” ด้วยตนเอง เพื่อสังเกตว่าเมื่ออากาศมีทางออก น้ำในกรวยจึงไหลลงไปแทนที่ได้'
+        }
+      ]
+    };
+
+    /**
+     * =========================================================================
+     * 2. 6 UNIQUE PLUSH CHARACTER DEFINITIONS (3 per Cabinet)
+     * =========================================================================
+     */
+    const PLUSH_CATALOG = [
+      // Cabinet 1 Plushies
+      {
+        id: 'frog',
+        cabinetId: 1,
+        name: 'กบมงกุฎยักษ์',
+        shortName: 'กบ',
+        miniReward: '👑 มงกุฎขนมปังกรอบทองคำ',
+        poseLabel: 'ดันมงกุฎทองคำที่ไหลปิดตาขึ้นอย่างภูมิใจ!',
+        homeX: 350,
+        homeY: 238
+      },
+      {
+        id: 'cat',
+        cabinetId: 1,
+        name: 'แมวก้อนเมฆ',
+        shortName: 'แมว',
+        miniReward: '🍭 อมยิ้มสายไหมก้อนเมฆ',
+        poseLabel: 'สะบัดหางก้อนเมฆฟูฟ่องนุ่มนิ่ม!',
+        homeX: 465,
+        homeY: 238
+      },
+      {
+        id: 'rabbit',
+        cabinetId: 1,
+        name: 'กระต่ายสตรอว์เบอร์รี',
+        shortName: 'กระต่าย',
+        miniReward: '🍓 คัพเค้กสตรอว์เบอร์รีครีมสด',
+        poseLabel: 'กระดิกหูพับข้างเดียวทักทายลูกค้า!',
+        homeX: 575,
+        homeY: 238
+      },
+      // Cabinet 2 Plushies
+      {
+        id: 'bear',
+        cabinetId: 2,
+        name: 'หมีดวงดาว',
+        shortName: 'หมี',
+        miniReward: '⭐ คุกกี้ดวงดาวน้ำผึ้ง',
+        poseLabel: 'ขยับหมวกนอนดาวระยิบระยับ!',
+        homeX: 350,
+        homeY: 238
+      },
+      {
+        id: 'owl',
+        cabinetId: 2,
+        name: 'นกฮูกพระจันทร์',
+        shortName: 'นกฮูก',
+        miniReward: '🌙 มาการองพระจันทร์เสี้ยว',
+        poseLabel: 'กระพือปีกพระจันทร์เสี้ยวแสนอบอุ่น!',
+        homeX: 465,
+        homeY: 238
+      },
+      {
+        id: 'penguin',
+        cabinetId: 2,
+        name: 'เพนกวินเมฆฝน',
+        shortName: 'เพนกวิน',
+        miniReward: '💧 เยลลี่หยดน้ำสีฟ้าสดใส',
+        poseLabel: 'เต้นดุ๊กดิ๊กโชว์พุงหยดน้ำสีฟ้า!',
+        homeX: 575,
+        homeY: 238
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 3. GENTLE CLAW MACHINE AUDIO & THAI SPEECH ENGINE
+     * =========================================================================
+     */
+    class SweetClawAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.unlocked = false;
+        this.paused = false;
+        this.lastSpoken = '';
+        this.isSpeaking = false;
+      }
+
+      unlock() {
+        this.unlocked = true;
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      playClawClick() {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(720, now);
+          osc.frequency.exponentialRampToValueAtTime(240, now + 0.06);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } catch (e) {}
+      }
+
+      playSoftThud() {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(55, now + 0.16);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } catch (e) {}
+      }
+
+      playChuteChime() {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime;
+          [880, 1174.66, 1567.98].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.09);
+            gain.gain.setValueAtTime(0.1, now + i * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.45);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.09);
+            osc.stop(now + i * 0.09 + 0.46);
+          });
+        } catch (e) {}
+      }
+
+      playCorrectFanfare() {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.12, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.34);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.35);
+          });
+        } catch (e) {}
+      }
+
+      playScanTick() {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          gain.gain.setValueAtTime(0.045, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } catch (e) {}
+      }
+
+      speak(text, { interrupt = true, onEnd = null } = {}) {
+        if (!text) {
+          if (onEnd) onEnd();
+          return;
+        }
+        this.lastSpoken = text;
+        if (!this.enabled || !this.unlocked || !('speechSynthesis' in window)) {
+          if (onEnd) onEnd();
+          return;
+        }
+        if (interrupt) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+        this.isSpeaking = true;
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'th-TH';
+          u.rate = 1.0;
+          u.onend = () => {
+            this.isSpeaking = false;
+            if (onEnd) onEnd();
+          };
+          u.onerror = () => {
+            this.isSpeaking = false;
+            if (onEnd) onEnd();
+          };
+          window.speechSynthesis.speak(u);
+        } catch (e) {
+          this.isSpeaking = false;
+          if (onEnd) onEnd();
+        }
+      }
+
+      repeatLast() {
+        if (this.lastSpoken) this.speak(this.lastSpoken, { interrupt: true });
+      }
+
+      setPaused(p) {
+        this.paused = p;
+        if (!('speechSynthesis' in window)) return;
+        try {
+          if (p) window.speechSynthesis.pause();
+          else window.speechSynthesis.resume();
+        } catch (e) {}
+      }
+
+      stopSpeech() {
+        this.isSpeaking = false;
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 4. MAIN CLAW MACHINE GAME ENGINE (2 Switchable Cabinets, 6 Questions)
+     * =========================================================================
+     */
+    class SweetCloudClawGame {
+      constructor() {
+        this.audio = new SweetClawAudio();
+
+        this.settings = {
+          sound: true,
+          switchMode: false,
+          scanSpeedMs: 2500,
+          textSize: 'normal',
+          highContrast: false,
+          reducedMotion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        };
+
+        this.started = false;
+        this.paused = false;
+        this.activeModal = null;
+
+        // Round & persistent team tracking across both cabinets
+        this.activeCabinetId = 1;
+        this.cabinetProgress = {
+          1: { questionIdx: 0, collectedIds: [] },
+          2: { questionIdx: 0, collectedIds: [] }
+        };
+        this.allCollectedIds = [];
+
+        // Game phase: 'OPENING' | 'PICK_PLUSH' | 'EVENT_STEP' | 'QUESTION' | 'CLAW_BUSY' | 'PRIZE_READY' | 'CABINET_DONE'
+        this.phase = 'OPENING';
+        this.selectedPlushId = null;
+        this.missedCurrentQuestion = false;
+        this.inputLockUntil = 0;
+
+        // Interactive pre-scene simulation state
+        this.sceneSim = {
+          type: null,
+          mode: 'PRE', // 'PRE' | 'AFTER'
+          elapsed: 0,
+          ventOpened: false,
+          active: false
+        };
+
+        // Plush positions inside cabinet (persists across cabinet switches!)
+        this.plushState = {};
+
+        // Pausable Claw Physics & Animation State
+        this.claw = {
+          x: 405,
+          ropeLen: 36,
+          openAmount: 1,
+          carryingPlushId: null,
+          anim: null
+        };
+
+        this.chutePrize = null;
+
+        // Single-switch scanning
+        this.scanIndex = 0;
+        this.scanTimeout = null;
+        this.spaceHeld = false;
+
+        this.lastFrameTime = performance.now();
+
+        this.cacheDom();
+        this.bindEvents();
+        this.applySettings();
+        this.initAllPlushStates();
+        this.applyCabinetVisualTheme();
+        this.renderCabinet();
+
+        requestAnimationFrame((t) => this.loop(t));
+      }
+
+      cacheDom() {
+        this.dom = {
+          brandBadge: document.getElementById('ui-brand-badge'),
+          roundProgress: document.getElementById('ui-round-progress'),
+          btnSwitchCabinet: document.getElementById('btn-switch-cabinet'),
+          switchCabLabel: document.getElementById('ui-switch-cab-label'),
+          teamCount: document.getElementById('ui-team-count'),
+          btnTeamView: document.getElementById('btn-team-view'),
+          btnInfo: document.getElementById('btn-info'),
+          btnSettings: document.getElementById('btn-settings'),
+          btnPause: document.getElementById('btn-pause'),
+          pauseLabel: document.getElementById('ui-pause-label'),
+
+          cabOuterShell: document.getElementById('cab-outer-shell'),
+          cabHeaderMarquee: document.getElementById('cab-header-marquee'),
+          cabMarqueeText: document.getElementById('cab-marquee-text'),
+          cabInnerWallpaper: document.getElementById('cab-inner-wallpaper'),
+          cartCounterBody: document.getElementById('cart-counter-body'),
+          cartBannerText: document.getElementById('cart-banner-text'),
+
+          openingOverlay: document.getElementById('opening-overlay'),
+          btnStartCab1: document.getElementById('btn-start-cab1'),
+          btnStartCab2: document.getElementById('btn-start-cab2'),
+          btnStartSwitch: document.getElementById('btn-start-switch'),
+
+          layerPlushies: document.getElementById('layer-cabinet-plushies'),
+          layerClaw: document.getElementById('layer-claw-assembly'),
+          layerChutePrize: document.getElementById('layer-chute-prize'),
+          layerSparkles: document.getElementById('layer-sparkles'),
+          layerCartTeam: document.getElementById('layer-cart-team'),
+
+          correctBanner: document.getElementById('ui-correct-banner'),
+          rewardGiftText: document.getElementById('ui-reward-gift-text'),
+
+          situationCard: document.getElementById('ui-situation-card'),
+          situationDemoSvg: document.getElementById('situation-demo-svg'),
+          situationCaption: document.getElementById('ui-situation-caption'),
+          situationActions: document.getElementById('ui-situation-actions'),
+
+          questionRegion: document.getElementById('question-focus-region'),
+          promptHeadline: document.getElementById('ui-prompt-headline'),
+          btnRepeatSpeech: document.getElementById('btn-repeat-speech'),
+          choiceGrid: document.getElementById('ui-choice-grid'),
+
+          modalPause: document.getElementById('modal-pause'),
+          btnResume: document.getElementById('btn-resume'),
+          btnPauseRestart: document.getElementById('btn-pause-restart'),
+
+          modalSettings: document.getElementById('modal-settings'),
+          btnCloseSettings: document.getElementById('btn-close-settings'),
+          setSound: document.getElementById('set-sound'),
+          setSwitch: document.getElementById('set-switch'),
+          setSpeed: document.getElementById('set-speed'),
+          setTextSize: document.getElementById('set-text-size'),
+          setContrast: document.getElementById('set-contrast'),
+          setMotion: document.getElementById('set-motion'),
+
+          modalTeam: document.getElementById('modal-team'),
+          btnCloseTeam: document.getElementById('btn-close-team'),
+          teamSummaryText: document.getElementById('team-summary-text'),
+          teamCardsGrid: document.getElementById('team-cards-grid'),
+          teamPostcardCtaBox: document.getElementById('team-postcard-cta-box'),
+          btnTeamOpenPostcard: document.getElementById('btn-team-open-postcard'),
+
+          modalPostcard: document.getElementById('modal-postcard'),
+          btnClosePostcard: document.getElementById('btn-close-postcard'),
+          postcardPreviewSvg: document.getElementById('postcard-preview-svg'),
+          btnDownloadPostcardPng: document.getElementById('btn-download-postcard-png'),
+
+          modalInfo: document.getElementById('modal-info'),
+          btnCloseInfo: document.getElementById('btn-close-info'),
+          infoLessonName: document.getElementById('info-lesson-name'),
+          infoSourceDetails: document.getElementById('info-source-details'),
+          infoTeacherGuide: document.getElementById('info-teacher-guide')
+        };
+      }
+
+      bindEvents() {
+        this.dom.btnStartCab1.addEventListener('click', () => this.startGameInCabinet(1, false));
+        this.dom.btnStartCab2.addEventListener('click', () => this.startGameInCabinet(2, false));
+        this.dom.btnStartSwitch.addEventListener('click', () => this.startGameInCabinet(1, true));
+
+        this.dom.btnSwitchCabinet.addEventListener('click', () => {
+          if (this.phase === 'CLAW_BUSY' || this.paused) return;
+          this.audio.unlock();
+          const nextCab = this.activeCabinetId === 1 ? 2 : 1;
+          if (!this.started) {
+            this.startGameInCabinet(nextCab, false);
+          } else {
+            this.switchToCabinet(nextCab);
+          }
+        });
+
+        this.dom.btnRepeatSpeech.addEventListener('click', () => {
+          this.audio.unlock();
+          this.audio.repeatLast();
+        });
+
+        this.dom.btnPause.addEventListener('click', () => this.togglePause());
+        this.dom.btnResume.addEventListener('click', () => {
+          if (this.paused) this.togglePause();
+        });
+        this.dom.btnPauseRestart.addEventListener('click', () => {
+          this.paused = false;
+          this.dom.modalPause.hidden = true;
+          this.dom.pauseLabel.textContent = '⏸️ พัก';
+          this.resetCabinetProgress(this.activeCabinetId);
+          this.enterCabinetCurrentStep();
+        });
+
+        this.dom.btnTeamView.addEventListener('click', () => {
+          this.renderTeamModal();
+          this.openModal('TEAM');
+        });
+        this.dom.btnCloseTeam.addEventListener('click', () => this.closeModal());
+        this.dom.btnTeamOpenPostcard.addEventListener('click', () => {
+          this.renderPostcardSvg();
+          this.openModal('POSTCARD');
+        });
+
+        this.dom.btnClosePostcard.addEventListener('click', () => this.closeModal());
+        this.dom.btnDownloadPostcardPng.addEventListener('click', () => {
+          this.audio.unlock();
+          this.downloadPostcardPng();
+        });
+
+        this.dom.btnInfo.addEventListener('click', () => {
+          this.renderInfoModal();
+          this.openModal('INFO');
+        });
+        this.dom.btnCloseInfo.addEventListener('click', () => this.closeModal());
+
+        this.dom.btnSettings.addEventListener('click', () => this.openModal('SETTINGS'));
+        this.dom.btnCloseSettings.addEventListener('click', () => this.closeModal());
+
+        this.dom.setSound.addEventListener('click', () => {
+          this.settings.sound = !this.settings.sound;
+          this.audio.enabled = this.settings.sound;
+          if (!this.settings.sound) this.audio.stopSpeech();
+          else this.audio.unlock();
+          this.applySettings();
+        });
+
+        this.dom.setSwitch.addEventListener('click', () => {
+          this.settings.switchMode = !this.settings.switchMode;
+          this.applySettings();
+          this.restartSwitchScan();
+        });
+
+        this.dom.setSpeed.addEventListener('click', () => {
+          const speeds = [3500, 2500, 1700];
+          this.settings.scanSpeedMs = speeds[(speeds.indexOf(this.settings.scanSpeedMs) + 1) % speeds.length];
+          this.applySettings();
+          this.restartSwitchScan();
+        });
+
+        this.dom.setTextSize.addEventListener('click', () => {
+          const sizes = ['normal', 'large', 'xlarge'];
+          this.settings.textSize = sizes[(sizes.indexOf(this.settings.textSize) + 1) % sizes.length];
+          this.applySettings();
+        });
+
+        this.dom.setContrast.addEventListener('click', () => {
+          this.settings.highContrast = !this.settings.highContrast;
+          this.applySettings();
+        });
+
+        this.dom.setMotion.addEventListener('click', () => {
+          this.settings.reducedMotion = !this.settings.reducedMotion;
+          this.applySettings();
+          if (this.sceneSim.active) this.renderSituationSvg();
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space' || e.key === ' ') {
+            if (this.settings.switchMode) {
+              e.preventDefault();
+              if (this.spaceHeld || e.repeat) return;
+              this.spaceHeld = true;
+              this.audio.unlock();
+              this.confirmSwitchSelection();
+            } else {
+              const active = document.activeElement;
+              if (active && active.tagName === 'BUTTON' && (this.spaceHeld || e.repeat)) {
+                e.preventDefault();
+                return;
+              }
+              this.spaceHeld = true;
+            }
+          } else if (e.key === 'Escape') {
+            if (this.activeModal) this.closeModal();
+            else if (this.started && !this.paused) this.togglePause();
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.code === 'Space' || e.key === ' ') {
+            this.spaceHeld = false;
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!this.settings.switchMode) return;
+          if (e.target.closest('button')) return;
+          this.audio.unlock();
+          this.confirmSwitchSelection();
+        });
+      }
+
+      applySettings() {
+        document.documentElement.setAttribute('data-text-size', this.settings.textSize);
+        if (this.settings.highContrast) document.documentElement.setAttribute('data-contrast', 'high');
+        else document.documentElement.removeAttribute('data-contrast');
+
+        if (this.settings.reducedMotion) document.documentElement.setAttribute('data-reduced-motion', 'true');
+        else document.documentElement.removeAttribute('data-reduced-motion');
+
+        this.dom.setSound.textContent = this.settings.sound ? 'เปิดเสียง' : 'ปิดเสียง';
+        this.dom.setSound.setAttribute('aria-pressed', String(this.settings.sound));
+
+        this.dom.setSwitch.textContent = this.settings.switchMode ? 'เปิดใช้งาน' : 'ปิด';
+        this.dom.setSwitch.setAttribute('aria-pressed', String(this.settings.switchMode));
+
+        const speedLabels = { 3500: 'ช้า (3.5 วิ)', 2500: 'กลาง (2.5 วิ)', 1700: 'เร็ว (1.7 วิ)' };
+        this.dom.setSpeed.textContent = speedLabels[this.settings.scanSpeedMs] || 'กลาง (2.5 วิ)';
+
+        const textLabels = { normal: 'ปกติ', large: 'ใหญ่', xlarge: 'ใหญ่มาก' };
+        this.dom.setTextSize.textContent = textLabels[this.settings.textSize];
+
+        this.dom.setContrast.textContent = this.settings.highContrast ? 'เปิด' : 'ปิด';
+        this.dom.setContrast.setAttribute('aria-pressed', String(this.settings.highContrast));
+
+        this.dom.setMotion.textContent = this.settings.reducedMotion ? 'เปิด' : 'ปิด';
+        this.dom.setMotion.setAttribute('aria-pressed', String(this.settings.reducedMotion));
+      }
+
+      // =========================================================================
+      // PLUSH SVG ILLUSTRATIONS (6 Unique Characters across 2 Cabinets)
+      // =========================================================================
+      svgPlushCharacter(id, x, y, { scale = 1, idleFrogCrown = false, crownOffsetY = 0, crownTilt = -9, celebratePose = false } = {}) {
+        if (id === 'frog') {
+          const bounceY = celebratePose && !this.settings.reducedMotion ? -6 : 0;
+          return `
+            <g transform="translate(${x}, ${y + bounceY}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="28" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <ellipse cx="0" cy="6" rx="26" ry="20" fill="#80ed99" stroke="#2d6a4f" stroke-width="2.5" />
+              <ellipse cx="0" cy="9" rx="16" ry="12" fill="#d8f3dc" />
+              <ellipse cx="0" cy="-12" rx="25" ry="17" fill="#80ed99" stroke="#2d6a4f" stroke-width="2.5" />
+              <circle cx="-13" cy="-26" r="9" fill="#80ed99" stroke="#2d6a4f" stroke-width="2.5" />
+              <circle cx="13" cy="-26" r="9" fill="#80ed99" stroke="#2d6a4f" stroke-width="2.5" />
+              <circle cx="-13" cy="-26" r="5" fill="#1f1135" />
+              <circle cx="13" cy="-26" r="5" fill="#1f1135" />
+              <circle cx="-11.5" cy="-27.5" r="1.8" fill="#ffffff" />
+              <circle cx="14.5" cy="-27.5" r="1.8" fill="#ffffff" />
+              <ellipse cx="-16" cy="-11" rx="4.5" ry="2.8" fill="#ff8fab" opacity="0.75" />
+              <ellipse cx="16" cy="-11" rx="4.5" ry="2.8" fill="#ff8fab" opacity="0.75" />
+              <path d="M -11 -9 Q 0 -1 11 -9" stroke="#1b4332" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              <circle cx="-22" cy="-18" r="5.5" fill="#52b788" stroke="#2d6a4f" stroke-width="2" />
+              <circle cx="22" cy="-18" r="5.5" fill="#52b788" stroke="#2d6a4f" stroke-width="2" />
+              <g class="${idleFrogCrown ? 'frog-crown-idle' : ''}" transform="translate(0, ${crownOffsetY}) rotate(${crownTilt})">
+                <polygon points="-24,-24 -28,-46 -12,-34 0,-50 12,-34 28,-46 24,-24" fill="#fde047" stroke="#b45309" stroke-width="2.5" stroke-linejoin="round" />
+                <circle cx="0" cy="-32" r="3.5" fill="#ff4d6d" />
+                <circle cx="-14" cy="-30" r="2.5" fill="#38bdf8" />
+                <circle cx="14" cy="-30" r="2.5" fill="#38bdf8" />
+              </g>
+            </g>
+          `;
+        } else if (id === 'cat') {
+          return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="28" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <g transform="translate(24, 6)">
+                <circle cx="0" cy="4" r="12" fill="#ffffff" stroke="#72efdd" stroke-width="2.5" />
+                <circle cx="10" cy="-2" r="11" fill="#ffffff" stroke="#72efdd" stroke-width="2.5" />
+                <circle cx="4" cy="-9" r="10" fill="#ffffff" />
+              </g>
+              <circle cx="-12" cy="8" r="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5" />
+              <circle cx="12" cy="8" r="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5" />
+              <circle cx="0" cy="6" r="17" fill="#ffffff" />
+              <polygon points="-20,-16 -18,-36 -5,-22" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" />
+              <polygon points="20,-16 18,-36 5,-22" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" />
+              <ellipse cx="0" cy="-12" rx="22" ry="16" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5" />
+              <circle cx="-8" cy="-13" r="3.2" fill="#1f1135" />
+              <circle cx="8" cy="-13" r="3.2" fill="#1f1135" />
+              <polygon points="-3,-9 3,-9 0,-6" fill="#ff8fab" />
+              <path d="M -5 -5 Q -2.5 -2 0 -5 Q 2.5 -2 5 -5" stroke="#1f1135" stroke-width="2" fill="none" />
+              <line x1="-24" y1="-11" x2="-14" y2="-10" stroke="#64748b" stroke-width="1.5" />
+              <line x1="14" y1="-10" x2="24" y2="-11" stroke="#64748b" stroke-width="1.5" />
+            </g>
+          `;
+        } else if (id === 'rabbit') {
+          return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="26" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <path d="M -20 -4 Q 0 -10 20 -4 Q 22 22 0 24 Q -22 22 -20 -4 Z" fill="#ff758f" stroke="#a4133c" stroke-width="2.5" />
+              <circle cx="-7" cy="6" r="1.6" fill="#fef08a" />
+              <circle cx="7" cy="6" r="1.6" fill="#fef08a" />
+              <circle cx="0" cy="14" r="1.6" fill="#fef08a" />
+              <polygon points="-18,-4 -8,2 0,-5 8,2 18,-4 0,-9" fill="#52b788" stroke="#1b4332" stroke-width="1.5" />
+              <ellipse cx="-9" cy="-34" rx="6" ry="16" fill="#ffb3c1" stroke="#a4133c" stroke-width="2.5" />
+              <path d="M 8 -22 Q 16 -38 24 -26 Q 28 -16 18 -14 Q 12 -15 8 -22 Z" fill="#ffb3c1" stroke="#a4133c" stroke-width="2.5" />
+              <ellipse cx="0" cy="-14" rx="20" ry="15" fill="#ffb3c1" stroke="#a4133c" stroke-width="2.5" />
+              <circle cx="-7" cy="-15" r="3" fill="#1f1135" />
+              <circle cx="7" cy="-15" r="3" fill="#1f1135" />
+              <circle cx="0" cy="-10" r="2.8" fill="#e11d48" />
+              <path d="M -4 -6 Q 0 -3 4 -6" stroke="#1f1135" stroke-width="2" fill="none" />
+            </g>
+          `;
+        } else if (id === 'bear') {
+          const bounceY = celebratePose && !this.settings.reducedMotion ? -5 : 0;
+          return `
+            <g transform="translate(${x}, ${y + bounceY}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="28" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <ellipse cx="0" cy="6" rx="25" ry="19" fill="#fcd34d" stroke="#92400e" stroke-width="2.5" />
+              <circle cx="0" cy="7" r="11" fill="#fef3c7" />
+              <polygon points="0,0 2.5,5 8,5.5 4,9 5,14 0,11 -5,14 -4,9 -8,5.5 -2.5,5" fill="#f59e0b" />
+              <circle cx="-17" cy="-24" r="7.5" fill="#fcd34d" stroke="#92400e" stroke-width="2.5" />
+              <circle cx="17" cy="-24" r="7.5" fill="#fcd34d" stroke="#92400e" stroke-width="2.5" />
+              <ellipse cx="0" cy="-12" rx="22" ry="17" fill="#fcd34d" stroke="#92400e" stroke-width="2.5" />
+              <polygon points="-12,-24 0,-46 14,-24" fill="#7c3aed" stroke="#240046" stroke-width="2.2" stroke-linejoin="round" />
+              <circle cx="0" cy="-47" r="4" fill="#fef08a" stroke="#92400e" stroke-width="1.5" />
+              <ellipse cx="0" cy="-9" rx="9" ry="6.5" fill="#fef3c7" />
+              <circle cx="-8" cy="-14" r="3" fill="#1f1135" />
+              <circle cx="8" cy="-14" r="3" fill="#1f1135" />
+              <circle cx="0" cy="-10" r="2.8" fill="#78350f" />
+              <path d="M -4 -6 Q 0 -3 4 -6" stroke="#78350f" stroke-width="2" fill="none" />
+            </g>
+          `;
+        } else if (id === 'owl') {
+          return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="26" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <ellipse cx="-21" cy="4" rx="8" ry="14" transform="rotate(14 -21 4)" fill="#a78bfa" stroke="#4c1d95" stroke-width="2.3" />
+              <ellipse cx="21" cy="4" rx="8" ry="14" transform="rotate(-14 21 4)" fill="#a78bfa" stroke="#4c1d95" stroke-width="2.3" />
+              <ellipse cx="0" cy="4" rx="22" ry="20" fill="#c4b5fd" stroke="#4c1d95" stroke-width="2.5" />
+              <ellipse cx="0" cy="7" rx="14" ry="13" fill="#ede9fe" />
+              <path d="M 3 1 A 7 7 0 1 0 3 13 A 5.2 5.2 0 1 1 3 1 Z" fill="#facc15" stroke="#92400e" stroke-width="1.2" />
+              <polygon points="-19,-18 -14,-34 -6,-22" fill="#c4b5fd" stroke="#4c1d95" stroke-width="2.3" stroke-linejoin="round" />
+              <polygon points="19,-18 14,-34 6,-22" fill="#c4b5fd" stroke="#4c1d95" stroke-width="2.3" stroke-linejoin="round" />
+              <ellipse cx="0" cy="-13" rx="21" ry="15" fill="#c4b5fd" stroke="#4c1d95" stroke-width="2.5" />
+              <circle cx="-8" cy="-14" r="6.5" fill="#ffffff" stroke="#4c1d95" stroke-width="2" />
+              <circle cx="8" cy="-14" r="6.5" fill="#ffffff" stroke="#4c1d95" stroke-width="2" />
+              <circle cx="-8" cy="-14" r="3" fill="#1f1135" />
+              <circle cx="8" cy="-14" r="3" fill="#1f1135" />
+              <polygon points="-3.5,-9 3.5,-9 0,-4" fill="#f59e0b" stroke="#92400e" stroke-width="1.2" />
+            </g>
+          `;
+        } else {
+          // Raindrop Penguin
+          return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+              <ellipse cx="0" cy="24" rx="26" ry="8" fill="rgba(90, 24, 154, 0.22)" />
+              <ellipse cx="-20" cy="5" rx="7" ry="14" transform="rotate(16 -20 5)" fill="#38bdf8" stroke="#075985" stroke-width="2.3" />
+              <ellipse cx="20" cy="5" rx="7" ry="14" transform="rotate(-16 20 5)" fill="#38bdf8" stroke="#075985" stroke-width="2.3" />
+              <ellipse cx="0" cy="5" rx="21" ry="20" fill="#38bdf8" stroke="#075985" stroke-width="2.5" />
+              <ellipse cx="0" cy="7" rx="14" ry="14" fill="#ffffff" />
+              <path d="M 0 -1 Q 6 6 0 12 Q -6 6 0 -1 Z" fill="#0284c7" />
+              <ellipse cx="0" cy="-13" rx="19" ry="15" fill="#38bdf8" stroke="#075985" stroke-width="2.5" />
+              <ellipse cx="-6" cy="-12" rx="6" ry="7" fill="#ffffff" />
+              <ellipse cx="6" cy="-12" rx="6" ry="7" fill="#ffffff" />
+              <circle cx="-6" cy="-13" r="2.8" fill="#1f1135" />
+              <circle cx="6" cy="-13" r="2.8" fill="#1f1135" />
+              <polygon points="-4,-8 4,-8 0,-4" fill="#fb923c" stroke="#9a3412" stroke-width="1.2" />
+            </g>
+          `;
+        }
+      }
+
+      svgPlushFaceIcon(id) {
+        const yOff = id === 'frog' || id === 'bear' ? 2 : 0;
+        return `<svg width="42" height="42" viewBox="-32 -48 64 56" aria-hidden="true">${this.svgPlushCharacter(id, 0, yOff, { scale: 0.92 })}</svg>`;
+      }
+
+      // =========================================================================
+      // TWO-CABINET SWITCHING, LIFECYCLE & MODALS
+      // =========================================================================
+      initAllPlushStates() {
+        PLUSH_CATALOG.forEach((p) => {
+          this.plushState[p.id] = {
+            x: p.homeX,
+            y: p.homeY,
+            collectedInRound: false,
+            flipAngle: 0
+          };
+        });
+      }
+
+      resetCabinetProgress(cabId) {
+        this.cabinetProgress[cabId] = { questionIdx: 0, collectedIds: [] };
+        PLUSH_CATALOG.filter((p) => p.cabinetId === cabId).forEach((p) => {
+          this.plushState[p.id] = {
+            x: p.homeX,
+            y: p.homeY,
+            collectedInRound: false,
+            flipAngle: 0
+          };
+          this.allCollectedIds = this.allCollectedIds.filter((id) => id !== p.id);
+        });
+        this.dom.teamCount.textContent = String(this.allCollectedIds.length);
+      }
+
+      applyCabinetVisualTheme() {
+        const cfg = CABINET_CONFIGS.find((c) => c.id === this.activeCabinetId) || CABINET_CONFIGS[0];
+        const otherId = this.activeCabinetId === 1 ? 2 : 1;
+
+        this.dom.brandBadge.textContent = cfg.shortBadge;
+        this.dom.switchCabLabel.textContent = `🎪 สลับไปตู้ ${otherId}`;
+        this.dom.cabOuterShell.setAttribute('fill', cfg.shellGrad);
+        this.dom.cabHeaderMarquee.setAttribute('fill', cfg.headerGrad);
+        this.dom.cabMarqueeText.textContent = cfg.marqueeText;
+        this.dom.cabInnerWallpaper.setAttribute('fill', cfg.wallpaperFill);
+        this.dom.cartCounterBody.setAttribute('fill', cfg.cartFill);
+
+        const cabTeamCount = this.cabinetProgress[this.activeCabinetId].collectedIds.length;
+        this.dom.cartBannerText.textContent = `🍰 รถขนมตู้ที่ ${this.activeCabinetId} (${cabTeamCount}/3)`;
+      }
+
+      getCabinetQuestions(cabId = this.activeCabinetId) {
+        return lessonPack.questions.filter((q) => q.cabinetId === cabId);
+      }
+
+      startGameInCabinet(cabId, enableSwitch = false) {
+        this.audio.unlock();
+        this.started = true;
+        this.paused = false;
+        this.dom.openingOverlay.hidden = true;
+        if (enableSwitch) {
+          this.settings.switchMode = true;
+          this.applySettings();
+        }
+        this.switchToCabinet(cabId);
+      }
+
+      switchToCabinet(cabId) {
+        this.activeCabinetId = cabId;
+        this.selectedPlushId = null;
+        this.missedCurrentQuestion = false;
+        this.chutePrize = null;
+        this.sceneSim.active = false;
+        this.dom.layerSparkles.innerHTML = '';
+        this.dom.situationCard.hidden = true;
+        this.dom.correctBanner.hidden = true;
+
+        this.claw.x = 405;
+        this.claw.ropeLen = 36;
+        this.claw.openAmount = 1;
+        this.claw.carryingPlushId = null;
+        this.claw.anim = null;
+
+        this.applyCabinetVisualTheme();
+        this.enterCabinetCurrentStep();
+      }
+
+      enterCabinetCurrentStep() {
+        const prog = this.cabinetProgress[this.activeCabinetId];
+        const cabQuestions = this.getCabinetQuestions(this.activeCabinetId);
+        if (prog.questionIdx >= cabQuestions.length) {
+          this.enterCabinetCompletePhase();
+        } else {
+          this.enterPlushSelectionPhase();
+        }
+      }
+
+      togglePause() {
+        if (!this.started) return;
+        this.paused = !this.paused;
+        this.dom.modalPause.hidden = !this.paused;
+        this.dom.pauseLabel.textContent = this.paused ? '▶️ เล่นต่อ' : '⏸️ พัก';
+        this.audio.setPaused(this.paused);
+
+        if (this.paused) {
+          this.stopSwitchScan();
+          if (this.settings.switchMode) this.startSwitchScan();
+          else this.dom.btnResume.focus({ preventScroll: true });
+        } else {
+          if (this.settings.switchMode) this.startSwitchScan();
+        }
+      }
+
+      openModal(name) {
+        this.activeModal = name;
+        this.dom.modalSettings.hidden = name !== 'SETTINGS';
+        this.dom.modalTeam.hidden = name !== 'TEAM';
+        this.dom.modalInfo.hidden = name !== 'INFO';
+        this.dom.modalPostcard.hidden = name !== 'POSTCARD';
+        if (this.settings.switchMode) {
+          this.scanIndex = 0;
+          this.startSwitchScan();
+        }
+      }
+
+      closeModal() {
+        this.activeModal = null;
+        this.dom.modalSettings.hidden = true;
+        this.dom.modalTeam.hidden = true;
+        this.dom.modalInfo.hidden = true;
+        this.dom.modalPostcard.hidden = true;
+        if (this.settings.switchMode) {
+          this.scanIndex = 0;
+          this.startSwitchScan();
+        }
+      }
+
+      renderTeamModal() {
+        const count = this.allCollectedIds.length;
+        const allDone = count >= PLUSH_CATALOG.length;
+        this.dom.teamSummaryText.textContent = count === 0
+          ? 'ยังไม่มีตุ๊กตาและขนมรางวัล ลองคีบตุ๊กตาตัวแรกเข้าทีมเลย!'
+          : `สะสมสมาชิกแก๊งจิ๋วและของขวัญพิเศษได้แล้ว ${count} / ${PLUSH_CATALOG.length} ชุด!`;
+
+        this.dom.teamPostcardCtaBox.hidden = !allDone;
+
+        this.dom.teamCardsGrid.innerHTML = PLUSH_CATALOG.map((p) => {
+          const owned = this.allCollectedIds.includes(p.id);
+          return `
+            <div class="team-member-card" style="opacity: ${owned ? '1' : '0.45'};">
+              <svg width="78" height="78" viewBox="-40 -54 80 86" aria-hidden="true">
+                ${this.svgPlushCharacter(p.id, 0, 12, { scale: 1.12, celebratePose: owned })}
+              </svg>
+              <strong>${p.name}</strong>
+              <span style="font-size: 0.8rem; color: var(--grape-main); font-weight: 800;">ตู้ที่ ${p.cabinetId}</span>
+              <span style="font-size: 0.83rem; font-weight: 800; color: #b45309;">${owned ? `ของขวัญ: ${p.miniReward}` : 'ยังอยู่ในตู้คีบ'}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      renderInfoModal() {
+        this.dom.infoLessonName.textContent = `สื่อ: ${lessonPack.lessonTitle} (${lessonPack.questions.length} ข้อ)`;
+        const s = lessonPack.source || {};
+        this.dom.infoSourceDetails.innerHTML = `
+          <strong>${s.title || lessonPack.lessonTitle}</strong> · ${s.organization || ''}<br />
+          <span style="color: var(--mint-deep); word-break: break-all;">${s.url || ''}</span>
+        `;
+
+        const guideHtml = [
+          `<p>${lessonPack.teacherNotes}</p>`,
+          ...lessonPack.questions.map((q) => `
+            <div style="background: var(--cream-panel); border: 1.5px solid var(--border-cabinet); border-radius: 10px; padding: 0.5rem 0.65rem;">
+              <strong>${q.topicTitle}</strong> (${q.timeRef})<br />
+              <span>แนวทางครู: ${q.teacherTip}</span>
+            </div>
+          `)
+        ].join('');
+        this.dom.infoTeacherGuide.innerHTML = guideHtml;
+      }
+
+      // =========================================================================
+      // PHASE 1: CHOOSE ONE OF TWO PLUSHIES IN CURRENT CABINET
+      // =========================================================================
+      getTwoAvailablePlushChoices() {
+        const remaining = PLUSH_CATALOG.filter(
+          (p) => p.cabinetId === this.activeCabinetId && !this.plushState[p.id].collectedInRound
+        );
+        return remaining.slice(0, 2);
+      }
+
+      getCurrentQuestion() {
+        const cabQuestions = this.getCabinetQuestions(this.activeCabinetId);
+        const idx = this.cabinetProgress[this.activeCabinetId].questionIdx;
+        return cabQuestions[idx];
+      }
+
+      enterPlushSelectionPhase() {
+        const cabQuestions = this.getCabinetQuestions(this.activeCabinetId);
+        const prog = this.cabinetProgress[this.activeCabinetId];
+        if (prog.questionIdx >= cabQuestions.length) {
+          this.enterCabinetCompletePhase();
+          return;
+        }
+
+        const q = cabQuestions[prog.questionIdx];
+        const globalNum = lessonPack.questions.findIndex((item) => item.id === q.id) + 1;
+
+        this.phase = 'PICK_PLUSH';
+        this.selectedPlushId = null;
+        this.missedCurrentQuestion = false;
+        this.chutePrize = null;
+        this.sceneSim.active = false;
+        this.dom.layerSparkles.innerHTML = '';
+        this.dom.situationCard.hidden = true;
+        this.dom.correctBanner.hidden = true;
+        this.dom.questionRegion.hidden = false;
+
+        this.dom.roundProgress.textContent = `ตู้ ${this.activeCabinetId} · ข้อที่ ${globalNum} / ${lessonPack.questions.length} · เลือกตุ๊กตา`;
+
+        const candidates = this.getTwoAvailablePlushChoices();
+        const namesText = candidates.map((c) => c.name).join(' หรือ ');
+        const promptMsg = `ตู้ ${this.activeCabinetId}: เลือกตุ๊กตาที่อยากคีบ ${namesText}`;
+        this.setHeadline(promptMsg, true);
+
+        this.dom.choiceGrid.className = candidates.length > 1 ? 'choice-grid' : 'choice-grid single-btn';
+        this.dom.choiceGrid.innerHTML = candidates
+          .map(
+            (p) => `
+            <button type="button" class="panel-choice-btn" data-pick-plush="${p.id}">
+              <span class="choice-face-badge">${this.svgPlushFaceIcon(p.id)}</span>
+              <span class="choice-main-label">คีบ${p.name}</span>
+            </button>
+          `
+          )
+          .join('');
+
+        this.dom.choiceGrid.querySelectorAll('[data-pick-plush]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            this.audio.unlock();
+            const pid = btn.getAttribute('data-pick-plush');
+            this.selectPlushTarget(pid);
+          });
+        });
+
+        this.renderCabinet();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      selectPlushTarget(plushId) {
+        if (this.phase !== 'PICK_PLUSH' || this.paused) return;
+        const plush = PLUSH_CATALOG.find((p) => p.id === plushId && p.cabinetId === this.activeCabinetId);
+        const st = this.plushState[plushId];
+        if (!plush || !st || st.collectedInRound) return;
+
+        this.selectedPlushId = plushId;
+        this.claw.ropeLen = 36;
+        this.claw.openAmount = 1;
+        this.inputLockUntil = performance.now() + 360;
+
+        const distance = Math.abs(st.x - this.claw.x);
+        if (this.settings.reducedMotion || distance < 1) {
+          this.claw.x = st.x;
+          this.enterQuestionWithSituation(plush, { replayEvent: false });
+          return;
+        }
+
+        this.phase = 'CLAW_BUSY';
+        this.stopSwitchScan();
+        this.dom.choiceGrid.querySelectorAll('button').forEach((button) => (button.disabled = true));
+        this.setHeadline(`กำลังเลื่อนก้ามคีบไปหา${plush.name}`);
+        this.claw.anim = {
+          type: 'MOVE_TO_PLUSH',
+          elapsed: 0,
+          startX: this.claw.x,
+          targetX: st.x,
+          duration: Math.min(0.8, Math.max(0.38, distance / 440))
+        };
+      }
+
+      // =========================================================================
+      // PHASE 2: EVENT SITUATION + CLEAN QUESTION SCREEN
+      // =========================================================================
+      enterQuestionWithSituation(plush, { replayEvent = false } = {}) {
+        const q = this.getCurrentQuestion();
+        const globalNum = lessonPack.questions.findIndex((item) => item.id === q.id) + 1;
+
+        this.dom.roundProgress.textContent = `ตู้ ${this.activeCabinetId} · ข้อที่ ${globalNum} / ${lessonPack.questions.length}`;
+
+        this.sceneSim.type = q.demoType;
+        this.sceneSim.mode = 'PRE';
+        this.sceneSim.elapsed = 0;
+        this.sceneSim.ventOpened = false;
+        this.sceneSim.active = true;
+
+        this.dom.situationCard.hidden = false;
+        this.dom.situationActions.innerHTML = '';
+
+        if (q.requireVentAction) {
+          this.phase = 'EVENT_STEP';
+          this.dom.questionRegion.hidden = true;
+          this.dom.choiceGrid.innerHTML = '';
+
+          const initialCaption = q.beforeActionText;
+          this.dom.situationCaption.textContent = initialCaption;
+          this.audio.speak(initialCaption, { interrupt: true });
+
+          this.dom.situationActions.innerHTML = `
+            <button type="button" class="panel-choice-btn vent-action-btn" id="btn-open-vent">
+              <span class="choice-main-label">🔓 ${q.ventButtonLabel}</span>
+            </button>
+          `;
+
+          document.getElementById('btn-open-vent').addEventListener('click', () => {
+            if (this.phase !== 'EVENT_STEP' || this.paused) return;
+            this.audio.unlock();
+            this.triggerVentOpenedStep(plush);
+          });
+
+          this.renderSituationSvg();
+          this.renderCabinet();
+          this.scanIndex = 0;
+          this.restartSwitchScan();
+          return;
+        }
+
+        this.phase = 'QUESTION';
+        this.dom.questionRegion.hidden = false;
+
+        this.dom.situationCaption.textContent = q.preSceneText;
+        this.dom.promptHeadline.textContent = q.text;
+
+        const exactSpokenText = `${q.preSceneText} ${q.text}`;
+        this.audio.speak(exactSpokenText, { interrupt: true });
+
+        this.renderSituationReplayButton(plush);
+        this.renderTwoChoiceButtons(q);
+
+        this.dom.questionRegion.focus({ preventScroll: true });
+        this.renderSituationSvg();
+        this.renderCabinet();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      triggerVentOpenedStep(plush) {
+        const q = this.getCurrentQuestion();
+        this.sceneSim.ventOpened = true;
+        this.sceneSim.elapsed = 0;
+        this.phase = 'QUESTION';
+
+        this.dom.situationCaption.textContent = q.preSceneText;
+        this.dom.questionRegion.hidden = false;
+        this.dom.promptHeadline.textContent = q.text;
+
+        const exactSpokenText = `${q.preSceneText} ${q.text}`;
+        this.audio.speak(exactSpokenText, { interrupt: true });
+
+        this.renderSituationReplayButton(plush);
+        this.renderTwoChoiceButtons(q);
+
+        this.dom.questionRegion.focus({ preventScroll: true });
+        this.renderSituationSvg();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      renderSituationReplayButton(plush) {
+        if (this.missedCurrentQuestion || this.sceneSim.ventOpened) {
+          this.dom.situationActions.innerHTML = `
+            <button type="button" class="util-btn" id="btn-replay-event">
+              <span>🔄 ดูอีกครั้ง</span>
+            </button>
+          `;
+          document.getElementById('btn-replay-event').addEventListener('click', () => {
+            if (this.paused) return;
+            this.audio.unlock();
+            this.enterQuestionWithSituation(plush, { replayEvent: true });
+          });
+        } else {
+          this.dom.situationActions.innerHTML = '';
+        }
+      }
+
+      renderTwoChoiceButtons(q) {
+        const opts = Array.isArray(q.options) ? q.options : [];
+        this.dom.choiceGrid.className = 'choice-grid';
+        this.dom.choiceGrid.innerHTML = opts
+          .map(
+            (opt) => `
+            <button type="button" class="panel-choice-btn" data-answer-id="${opt.id}">
+              <span class="choice-main-label">${opt.label}</span>
+            </button>
+          `
+          )
+          .join('');
+
+        this.dom.choiceGrid.querySelectorAll('[data-answer-id]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (performance.now() < this.inputLockUntil || this.spaceHeld) return;
+            this.audio.unlock();
+            const ansId = btn.getAttribute('data-answer-id');
+            this.submitQuestionAnswer(ansId);
+          });
+        });
+      }
+
+      submitQuestionAnswer(chosenOptionId) {
+        if (this.phase !== 'QUESTION' || this.paused) return;
+        const q = this.getCurrentQuestion();
+        const plush = PLUSH_CATALOG.find((p) => p.id === this.selectedPlushId);
+        const st = this.plushState[this.selectedPlushId];
+        if (!q || !plush || !st) return;
+
+        this.phase = 'CLAW_BUSY';
+        this.stopSwitchScan();
+        this.dom.choiceGrid.querySelectorAll('button').forEach((b) => (b.disabled = true));
+        const replayBtn = document.getElementById('btn-replay-event');
+        if (replayBtn) replayBtn.disabled = true;
+
+        const isCorrect = chosenOptionId === q.correctOptionId;
+
+        if (isCorrect) {
+          this.sceneSim.mode = 'AFTER';
+          this.sceneSim.elapsed = 0;
+
+          // Explicitly tell the child "ถูกต้อง!" and show their mini treat reward
+          this.audio.playCorrectFanfare();
+          this.dom.correctBanner.hidden = false;
+          this.dom.rewardGiftText.textContent = `🎁 ได้รับ ${plush.miniReward}`;
+
+          const afterDisplay = `ถูกต้อง! ${q.afterText}`;
+          this.dom.situationCaption.textContent = afterDisplay;
+          this.dom.promptHeadline.textContent = afterDisplay;
+          this.audio.speak(afterDisplay, { interrupt: true });
+          this.renderSituationSvg();
+
+          this.claw.anim = {
+            type: 'GRAB_SUCCESS',
+            elapsed: 0,
+            startX: this.claw.x,
+            targetX: st.x,
+            targetY: st.y,
+            playedClick: false,
+            playedChute: false
+          };
+        } else {
+          const closerX = Math.max(308, st.x - 42);
+          const cushionY = 240;
+          this.claw.anim = {
+            type: 'GRAB_SLIP',
+            elapsed: 0,
+            startX: this.claw.x,
+            targetX: st.x,
+            targetY: st.y,
+            dropToX: closerX,
+            dropToY: cushionY,
+            playedClick: false,
+            playedThud: false
+          };
+        }
+      }
+
+      // =========================================================================
+      // PAUSABLE FRAME-ACCURATE CLAW ANIMATION LOOP
+      // =========================================================================
+      updateClawAnimation(dt) {
+        const anim = this.claw.anim;
+        if (!anim) return;
+
+        const speedFactor = this.settings.reducedMotion ? 2.5 : 1.0;
+        anim.elapsed += dt * speedFactor;
+
+        const st = this.plushState[this.selectedPlushId];
+        const plush = PLUSH_CATALOG.find((p) => p.id === this.selectedPlushId);
+        if (anim.type === 'MOVE_TO_PLUSH') {
+          const p = this.settings.reducedMotion ? 1 : Math.min(1, anim.elapsed / anim.duration);
+          const eased = p * p * (3 - 2 * p);
+          this.claw.x = anim.startX + (anim.targetX - anim.startX) * eased;
+          if (p === 1) {
+            this.claw.anim = null;
+            this.enterQuestionWithSituation(plush, { replayEvent: false });
+          }
+          return;
+        }
+        const targetRope = anim.targetY - 94;
+
+        if (anim.type === 'GRAB_SUCCESS') {
+          const t = anim.elapsed;
+          if (t < 0.65) {
+            const p = t / 0.65;
+            this.claw.x = anim.targetX;
+            this.claw.ropeLen = 36 + (targetRope - 36) * p;
+            this.claw.openAmount = 1;
+          } else if (t < 0.9) {
+            const p = (t - 0.65) / 0.25;
+            this.claw.ropeLen = targetRope;
+            this.claw.openAmount = 1 - p;
+            if (!anim.playedClick) {
+              anim.playedClick = true;
+              this.audio.playClawClick();
+            }
+          } else if (t < 1.5) {
+            const p = (t - 0.9) / 0.6;
+            this.claw.openAmount = 0;
+            this.claw.carryingPlushId = this.selectedPlushId;
+            this.claw.ropeLen = targetRope - (targetRope - 36) * p;
+            st.x = this.claw.x;
+            st.y = 94 + this.claw.ropeLen;
+          } else if (t < 2.35) {
+            const p = (t - 1.5) / 0.85;
+            this.claw.ropeLen = 36;
+            this.claw.x = anim.targetX + (220 - anim.targetX) * p;
+            st.x = this.claw.x;
+            st.y = 94 + this.claw.ropeLen;
+          } else if (t < 2.75) {
+            const p = (t - 2.35) / 0.4;
+            this.claw.x = 220;
+            this.claw.openAmount = p;
+            this.claw.carryingPlushId = null;
+            st.x = 220;
+            st.y = 130 + p * 120;
+            if (!anim.playedChute) {
+              anim.playedChute = true;
+              this.audio.playChuteChime();
+            }
+          } else {
+            this.claw.anim = null;
+            this.claw.openAmount = 1;
+            st.collectedInRound = true;
+            this.chutePrize = {
+              plushId: this.selectedPlushId,
+              crownDelayed: this.selectedPlushId === 'frog',
+              elapsed: 0
+            };
+            this.enterPrizeReadyPhase(plush);
+          }
+        } else if (anim.type === 'GRAB_SLIP') {
+          const t = anim.elapsed;
+          if (t < 0.55) {
+            const p = t / 0.55;
+            this.claw.x = anim.targetX;
+            this.claw.ropeLen = 36 + (targetRope - 36) * p;
+            this.claw.openAmount = 1;
+          } else if (t < 0.75) {
+            const p = (t - 0.55) / 0.2;
+            this.claw.openAmount = 1 - p * 0.7;
+            if (!anim.playedClick) {
+              anim.playedClick = true;
+              this.audio.playClawClick();
+            }
+          } else if (t < 1.15) {
+            const p = (t - 0.75) / 0.4;
+            this.claw.ropeLen = targetRope - 32 * p;
+            this.claw.x = anim.targetX + (anim.dropToX - anim.targetX) * p;
+            st.x = this.claw.x;
+            st.y = 94 + this.claw.ropeLen;
+          } else if (t < 1.65) {
+            const p = (t - 1.15) / 0.5;
+            this.claw.openAmount = 1;
+            this.claw.ropeLen = 36;
+            st.x = anim.dropToX;
+            st.y = (94 + targetRope - 32) + (anim.dropToY - (94 + targetRope - 32)) * p;
+            st.flipAngle = Math.sin(p * Math.PI) * 35;
+            if (!anim.playedThud && p > 0.85) {
+              anim.playedThud = true;
+              this.audio.playSoftThud();
+            }
+          } else {
+            this.claw.anim = null;
+            st.x = anim.dropToX;
+            st.y = anim.dropToY;
+            st.flipAngle = 0;
+            this.claw.x = st.x;
+            this.claw.ropeLen = 36;
+            this.claw.openAmount = 1;
+
+            this.missedCurrentQuestion = true;
+            this.phase = 'QUESTION';
+
+            const q = this.getCurrentQuestion();
+            const activeCaption = q.requireVentAction && !this.sceneSim.ventOpened ? q.beforeActionText : q.preSceneText;
+            this.dom.situationActions.innerHTML = `
+              <button type="button" class="panel-choice-btn vent-action-btn" id="btn-missed-replay">
+                <span class="choice-main-label">🔄 ดูอีกครั้ง</span>
+              </button>
+            `;
+            document.getElementById('btn-missed-replay').addEventListener('click', () => {
+              if (this.paused) return;
+              this.audio.unlock();
+              this.enterQuestionWithSituation(plush, { replayEvent: true });
+            });
+
+            this.renderTwoChoiceButtons(q);
+
+            const spokenRetry = `${activeCaption} ${q.text}`;
+            this.audio.speak(spokenRetry, { interrupt: true });
+
+            this.scanIndex = 0;
+            this.restartSwitchScan();
+          }
+        }
+      }
+
+      // =========================================================================
+      // PHASE 3: PRIZE EMERGED -> RECEIVE INTO TEAM
+      // =========================================================================
+      enterPrizeReadyPhase(plush) {
+        this.phase = 'PRIZE_READY';
+        const q = this.getCurrentQuestion();
+
+        this.renderSparklesAroundChute();
+
+        const afterDisplay = `ถูกต้อง! ${q.afterText}`;
+        this.dom.situationCaption.textContent = afterDisplay;
+        this.dom.promptHeadline.textContent = afterDisplay;
+        this.dom.situationActions.innerHTML = '';
+
+        this.dom.choiceGrid.className = 'choice-grid single-btn';
+        this.dom.choiceGrid.innerHTML = `
+          <button type="button" class="panel-choice-btn primary-mint" id="btn-accept-team">
+            <span class="choice-main-label">✨ รับ${plush.shortName} + ${plush.miniReward} เข้าทีม!</span>
+          </button>
+        `;
+
+        document.getElementById('btn-accept-team').addEventListener('click', () => {
+          this.audio.unlock();
+          this.acceptPlushIntoTeam(plush);
+        });
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      acceptPlushIntoTeam(plush) {
+        if (this.phase !== 'PRIZE_READY') return;
+        this.chutePrize = null;
+        this.dom.layerSparkles.innerHTML = '';
+
+        const prog = this.cabinetProgress[this.activeCabinetId];
+        if (!prog.collectedIds.includes(plush.id)) {
+          prog.collectedIds.push(plush.id);
+        }
+        if (!this.allCollectedIds.includes(plush.id)) {
+          this.allCollectedIds.push(plush.id);
+        }
+        this.dom.teamCount.textContent = String(this.allCollectedIds.length);
+        this.dom.cartBannerText.textContent = `🍰 รถขนมตู้ที่ ${this.activeCabinetId} (${prog.collectedIds.length}/3)`;
+
+        const q = this.getCurrentQuestion();
+        const cabQuestions = this.getCabinetQuestions(this.activeCabinetId);
+        const isLastInCabinet = prog.questionIdx + 1 >= cabQuestions.length;
+
+        const afterDisplay = `ถูกต้อง! ${q.afterText}`;
+        this.dom.situationCaption.textContent = afterDisplay;
+        this.dom.promptHeadline.textContent = afterDisplay;
+        this.audio.lastSpoken = afterDisplay;
+
+        this.dom.choiceGrid.className = 'choice-grid single-btn';
+        this.dom.choiceGrid.innerHTML = `
+          <button type="button" class="panel-choice-btn primary-peach" id="btn-next-turn">
+            <span class="choice-main-label">${isLastInCabinet ? `🎉 ครบ 3 ตัวในตู้ที่ ${this.activeCabinetId} แล้ว!` : '➡️ ไปคีบตัวต่อไป'}</span>
+          </button>
+        `;
+
+        document.getElementById('btn-next-turn').addEventListener('click', () => {
+          this.audio.unlock();
+          prog.questionIdx += 1;
+          this.enterPlushSelectionPhase();
+        });
+
+        this.renderCabinet();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      // =========================================================================
+      // INTERACTIVE EVENT SVG RENDERER FOR ALL 6 QUESTIONS
+      // =========================================================================
+      renderSituationSvg() {
+        const svg = this.dom.situationDemoSvg;
+        const type = this.sceneSim.type;
+        const mode = this.sceneSim.mode;
+        const t = this.sceneSim.elapsed;
+        const reduced = this.settings.reducedMotion;
+
+        if (type === 'sweep_bag') {
+          const p = reduced || mode === 'AFTER' ? 1 : Math.min(1, t / 1.3);
+          const bagRx = 22 + 34 * p;
+          const bagRy = 18 + 20 * p;
+          const sweepX = 52 + 46 * p;
+
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#f0fdfa" />
+            <!-- Air current lines sweeping into bag -->
+            <g stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="${mode === 'AFTER' ? 0.35 : 0.85}">
+              <line x1="22" y1="44" x2="72" y2="50" />
+              <line x1="16" y1="64" x2="68" y2="64" />
+              <line x1="22" y1="84" x2="72" y2="78" />
+            </g>
+            <!-- Transparent bag filling with air -->
+            <ellipse cx="${sweepX}" cy="64" rx="${bagRx}" ry="${bagRy}" fill="rgba(114, 239, 221, 0.45)" stroke="#007f73" stroke-width="2.8" />
+            <!-- Gathered bag neck & hand holding it -->
+            <path d="M ${sweepX + bagRx - 6} 56 L 178 58 L 178 70 L ${sweepX + bagRx - 6} 72 Z" fill="rgba(114, 239, 221, 0.75)" stroke="#007f73" stroke-width="2.4" />
+            <circle cx="182" cy="64" r="12" fill="#ffd6a5" stroke="#b45309" stroke-width="2.2" />
+            ${
+              mode === 'AFTER'
+                ? `<text x="${sweepX}" y="68" text-anchor="middle" fill="#004b44" font-size="12" font-weight="900">อากาศเต็มถุง</text>`
+                : `<text x="130" y="114" text-anchor="middle" fill="#1f1135" font-size="11.5" font-weight="900">กวาดถุงผ่านอากาศแล้วรวบปากถุง</text>`
+            }
+          `;
+        } else if (type === 'squeeze_bag') {
+          let bagRx = 52;
+          let bagRy = 38;
+          let airArrowOpacity = 0.15;
+          if (mode === 'AFTER') {
+            const p = reduced ? 1 : Math.min(1, t / 1.35);
+            bagRx = 52 - 32 * p;
+            bagRy = 38 - 20 * p;
+            airArrowOpacity = 0.95;
+          } else {
+            const pulse = reduced ? 0 : Math.sin(t * 2.5) * 2;
+            bagRx = 52 + pulse;
+            bagRy = 38 + pulse;
+          }
+
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#f0fdfa" />
+            <ellipse cx="96" cy="64" rx="${bagRx}" ry="${bagRy}" fill="rgba(114, 239, 221, 0.45)" stroke="#007f73" stroke-width="2.8" />
+            <path d="M ${96 + bagRx - 6} 55 L 164 50 L 164 78 L ${96 + bagRx - 6} 73 Z" fill="rgba(114, 239, 221, 0.55)" stroke="#007f73" stroke-width="2.5" />
+            <g transform="translate(154, 34)">
+              <rect x="0" y="0" width="22" height="14" rx="7" fill="#ffd6a5" stroke="#b45309" stroke-width="2" />
+              <rect x="0" y="46" width="22" height="14" rx="7" fill="#ffd6a5" stroke="#b45309" stroke-width="2" />
+            </g>
+            <g opacity="${airArrowOpacity}" stroke="#0284c7" stroke-width="3" stroke-linecap="round">
+              <line x1="176" y1="58" x2="226" y2="52" />
+              <line x1="178" y1="66" x2="234" y2="66" />
+              <line x1="176" y1="74" x2="224" y2="80" />
+            </g>
+            <text x="96" y="114" text-anchor="middle" fill="#1f1135" font-size="12" font-weight="900">
+              ${mode === 'AFTER' ? 'ถุงแฟบลงตามอากาศที่ออก' : 'ถุงยังพองอยู่'}
+            </text>
+          `;
+        } else if (type === 'beam_compare') {
+          const p = reduced || mode === 'AFTER' ? 1 : Math.min(1, t / 1.2);
+          const tiltDeg = 14 * p;
+
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#fff8e7" />
+            <line x1="130" y1="14" x2="130" y2="108" stroke="#5a189a" stroke-width="4" stroke-linecap="round" />
+            <rect x="102" y="106" width="56" height="8" rx="4" fill="#5a189a" />
+            <g transform="translate(130, 34) rotate(${tiltDeg})">
+              <line x1="-80" y1="0" x2="80" y2="0" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" />
+              <!-- Left Balloon: Moon symbol -->
+              <line x1="-68" y1="0" x2="-68" y2="14" stroke="#475569" stroke-width="2" />
+              <ellipse cx="-68" cy="34" rx="16" ry="20" fill="#c4b5fd" stroke="#4c1d95" stroke-width="2.2" />
+              <path d="M -65 27 A 7 7 0 1 0 -65 40 A 5.2 5.2 0 1 1 -65 27 Z" fill="#fef08a" stroke="#92400e" stroke-width="1.2" />
+              <!-- Right Balloon: Star symbol (lower) -->
+              <line x1="68" y1="0" x2="68" y2="14" stroke="#475569" stroke-width="2" />
+              <ellipse cx="68" cy="38" rx="20" ry="24" fill="#72efdd" stroke="#007f73" stroke-width="2.4" />
+              <polygon points="68,28 70.5,34 77,34.5 72,39 73.5,45 68,41.5 62.5,45 64,39 59,34.5 65.5,34"
+                fill="#fde047" stroke="#b45309" stroke-width="1.2" />
+            </g>
+            <text x="54" y="114" text-anchor="middle" fill="#4c1d95" font-size="11" font-weight="900">ฝั่งพระจันทร์ 🌙</text>
+            <text x="206" y="114" text-anchor="middle" fill="#004b44" font-size="11" font-weight="900">ฝั่งดาว ⭐ (ต่ำลง)</text>
+          `;
+        } else if (type === 'blow_balloon') {
+          const p = reduced || mode === 'AFTER' ? 1 : Math.min(1, t / 1.3);
+          const bRx = 16 + 22 * p;
+          const bRy = 14 + 16 * p;
+
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#f5f3ff" />
+            <!-- Child face blowing air -->
+            <circle cx="58" cy="62" r="24" fill="#ffd6a5" stroke="#92400e" stroke-width="2.5" />
+            <circle cx="52" cy="56" r="2.8" fill="#1f1135" />
+            <circle cx="66" cy="56" r="2.8" fill="#1f1135" />
+            <circle cx="72" cy="67" r="4.5" fill="#fb7185" stroke="#9f1239" stroke-width="1.8" />
+            <!-- Air stream into balloon -->
+            <line x1="78" y1="67" x2="104" y2="67" stroke="#0284c7" stroke-width="3" stroke-dasharray="4 3" />
+            <!-- Balloon expanding -->
+            <ellipse cx="${112 + bRx}" cy="64" rx="${bRx}" ry="${bRy}" fill="#72efdd" stroke="#007f73" stroke-width="2.6" />
+            <polygon points="${112 + bRx},54 ${114.5 + bRx},60 ${121 + bRx},60.5 ${116 + bRx},65 ${117.5 + bRx},71 ${112 + bRx},67.5 ${106.5 + bRx},71 ${108 + bRx},65 ${103 + bRx},60.5 ${109.5 + bRx},60"
+              fill="#fde047" stroke="#b45309" stroke-width="1.2" />
+            <text x="148" y="114" text-anchor="middle" fill="#1f1135" font-size="11.5" font-weight="900">
+              ${mode === 'AFTER' ? 'อากาศที่เป่าเข้าไปมีน้ำหนัก' : 'เป่าลมเข้าลูกโป่ง'}
+            </text>
+          `;
+        } else if (type === 'empty_bottle') {
+          const shimmer = reduced ? 0 : Math.sin(t * 3) * 2;
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#f5f3ff" />
+            <!-- Clear transparent bottle before pouring water -->
+            <rect x="98" y="34" width="64" height="72" rx="10" fill="rgba(255, 255, 255, 0.85)" stroke="#0284c7" stroke-width="3" />
+            <rect x="118" y="18" width="24" height="18" rx="3" fill="rgba(255, 255, 255, 0.9)" stroke="#0284c7" stroke-width="2.8" />
+            <!-- Subtle air bubbles inside the "empty" bottle -->
+            <g fill="none" stroke="#38bdf8" stroke-width="2">
+              <circle cx="118" cy="${58 + shimmer}" r="6" />
+              <circle cx="142" cy="${72 - shimmer}" r="7" />
+              <circle cx="126" cy="${88 + shimmer}" r="5.5" />
+            </g>
+            <text x="130" y="118" text-anchor="middle" fill="#1f1135" font-size="11.5" font-weight="900">
+              ${mode === 'AFTER' ? 'ในขวดมีอากาศอยู่เต็ม!' : 'ขวดใสที่ยังไม่ได้เทน้ำ'}
+            </text>
+          `;
+        } else if (type === 'bottle_vent') {
+          const opened = this.sceneSim.ventOpened || mode === 'AFTER';
+          const flowP = !opened ? 0 : (reduced || mode === 'AFTER' ? 1 : Math.min(1, t / 1.2));
+
+          const funnelWaterTopY = 22 + 16 * flowP;
+          const bottleWaterH = 38 * flowP;
+          const bottleWaterY = 106 - bottleWaterH;
+
+          svg.innerHTML = `
+            <rect x="0" y="0" width="260" height="124" fill="#f0fdfa" />
+            <rect x="92" y="48" width="56" height="60" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="2.8" />
+            <rect x="110" y="38" width="20" height="12" fill="#e0fbfc" stroke="#0284c7" stroke-width="2.5" />
+            <rect x="108" y="39" width="24" height="6" rx="2" fill="#ff8fab" />
+            ${bottleWaterH > 1 ? `<rect x="95" y="${bottleWaterY}" width="50" height="${bottleWaterH}" rx="4" fill="#38bdf8" />` : ''}
+            <polygon points="90,12 150,12 128,39 112,39" fill="#ffffff" stroke="#0284c7" stroke-width="2.6" />
+            ${funnelWaterTopY < 38 ? `<polygon points="${94 + flowP * 10},${funnelWaterTopY} ${146 - flowP * 10},${funnelWaterTopY} 127,38 113,38" fill="#38bdf8" />` : ''}
+            ${opened ? `<line x1="120" y1="38" x2="120" y2="${bottleWaterY + 2}" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" />` : ''}
+            <rect x="144" y="62" width="8" height="14" rx="3" fill="${opened ? '#fef08a' : '#ff4d6d'}" stroke="#1f1135" stroke-width="2" />
+            ${
+              opened
+                ? `<path d="M 156 69 L 196 60" stroke="#ff4d6d" stroke-width="3" stroke-linecap="round" />
+                   <text x="204" y="56" text-anchor="middle" fill="#9f1239" font-size="11" font-weight="900">อากาศออก</text>`
+                : `<text x="196" y="73" text-anchor="middle" fill="#1f1135" font-size="11" font-weight="900">ช่องข้างขวด</text>`
+            }
+          `;
+        }
+      }
+
+      // =========================================================================
+      // PHASE 4: CABINET COMPLETE / SWITCH CABINET / FULL 6-PLUSH CELEBRATION
+      // =========================================================================
+      enterCabinetCompletePhase() {
+        this.phase = 'CABINET_DONE';
+        this.sceneSim.active = false;
+        this.dom.situationCard.hidden = true;
+        this.dom.correctBanner.hidden = true;
+
+        const otherCabId = this.activeCabinetId === 1 ? 2 : 1;
+        const otherProg = this.cabinetProgress[otherCabId];
+        const allSixDone = this.allCollectedIds.length >= PLUSH_CATALOG.length;
+
+        this.dom.roundProgress.textContent = allSixDone
+          ? `ครบทั้ง 6 ตัวจาก 2 ตู้แล้ว!`
+          : `ตู้ ${this.activeCabinetId} ครบ 3 ตัวแล้ว! · รวม ${this.allCollectedIds.length}/6 ตัว`;
+
+        const speech = allSixDone
+          ? 'ยอดเยี่ยม! คีบตุ๊กตาแก๊งจิ๋วครบทั้ง 6 ตัวจากทั้ง 2 ตู้แล้ว! กดรับโปสการ์ดที่ระลึกได้เลย!'
+          : `เย้! คีบครบ 3 ตัวในตู้ที่ ${this.activeCabinetId} แล้ว ไปเล่นตู้ที่ ${otherCabId} ต่อได้เลย!`;
+        this.setHeadline(speech, true);
+        this.audio.playChuteChime();
+
+        this.dom.choiceGrid.className = 'choice-grid';
+        const switchBtnLabel = otherProg.collectedIds.length >= 3
+          ? `🎪 สลับไปดูตู้ที่ ${otherCabId}`
+          : `🎪 ไปเล่นตู้ที่ ${otherCabId} ต่อ (${otherProg.collectedIds.length}/3)`;
+
+        if (allSixDone) {
+          this.dom.choiceGrid.innerHTML = `
+            <button type="button" class="panel-choice-btn primary-mint" id="btn-open-postcard">
+              <span class="choice-main-label">🖼️ รับโปสการ์ดตุ๊กตาน่ารัก (ดาวน์โหลด)</span>
+            </button>
+            <button type="button" class="panel-choice-btn primary-peach" id="btn-replay-this-cab">
+              <span class="choice-main-label">🔄 เล่นตู้ที่ ${this.activeCabinetId} อีกครั้ง</span>
+            </button>
+          `;
+
+          document.getElementById('btn-open-postcard').addEventListener('click', () => {
+            this.audio.unlock();
+            this.renderPostcardSvg();
+            this.openModal('POSTCARD');
+          });
+        } else {
+          this.dom.choiceGrid.innerHTML = `
+            <button type="button" class="panel-choice-btn primary-mint" id="btn-go-other-cab">
+              <span class="choice-main-label">${switchBtnLabel}</span>
+            </button>
+            <button type="button" class="panel-choice-btn primary-peach" id="btn-replay-this-cab">
+              <span class="choice-main-label">🔄 เล่นตู้ที่ ${this.activeCabinetId} อีกครั้ง</span>
+            </button>
+          `;
+
+          document.getElementById('btn-go-other-cab').addEventListener('click', () => {
+            this.audio.unlock();
+            this.switchToCabinet(otherCabId);
+          });
+        }
+
+        document.getElementById('btn-replay-this-cab').addEventListener('click', () => {
+          this.audio.unlock();
+          this.resetCabinetProgress(this.activeCabinetId);
+          this.enterCabinetCurrentStep();
+        });
+
+        this.renderCabinet();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      // =========================================================================
+      // COLLECTIBLE POSTCARD SVG GENERATOR & PNG DOWNLOADER
+      // =========================================================================
+      renderPostcardSvg() {
+        const svg = this.dom.postcardPreviewSvg;
+        const treats = {
+          frog: '👑',
+          cat: '🍭',
+          rabbit: '🍓',
+          bear: '⭐',
+          owl: '🌙',
+          penguin: '💧'
+        };
+
+        const plushCardsSvg = PLUSH_CATALOG.map((p, idx) => {
+          const col = idx % 3;
+          const row = Math.floor(idx / 3);
+          const cx = 185 + col * 265;
+          const cy = 225 + row * 172;
+          const cardBg = row === 0 ? '#fff0f5' : '#f3e8ff';
+          const cardStroke = row === 0 ? '#ff758f' : '#9d4edd';
+
+          return `
+            <g>
+              <rect x="${cx - 115}" y="${cy - 68}" width="230" height="150" rx="22" fill="${cardBg}" stroke="${cardStroke}" stroke-width="3" />
+              <text x="${cx + 88}" y="${cy - 42}" text-anchor="middle" font-size="22">${treats[p.id] || '🎁'}</text>
+              ${this.svgPlushCharacter(p.id, cx, cy + 4, { scale: 1.15, celebratePose: false })}
+              <text x="${cx}" y="${cy + 58}" text-anchor="middle" fill="#240046" font-size="16" font-weight="900" font-family="sans-serif">${p.name}</text>
+              <text x="${cx}" y="${cy + 74}" text-anchor="middle" fill="#5a189a" font-size="12" font-weight="700" font-family="sans-serif">ตู้ที่ ${p.cabinetId}</text>
+            </g>
+          `;
+        }).join('');
+
+        svg.innerHTML = `
+          <defs>
+            <linearGradient id="pc-bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffd6e0" />
+              <stop offset="50%" stop-color="#e0fbfc" />
+              <stop offset="100%" stop-color="#f3e8ff" />
+            </linearGradient>
+          </defs>
+          <!-- Postcard Outer Frame -->
+          <rect x="0" y="0" width="900" height="560" fill="url(#pc-bg)" />
+          <rect x="18" y="18" width="864" height="524" rx="28" fill="#fffdf7" stroke="#7b2cbf" stroke-width="5" />
+          <rect x="30" y="30" width="840" height="500" rx="22" fill="none" stroke="#ff9ebb" stroke-width="3" stroke-dasharray="10 8" />
+
+          <!-- Header Banner -->
+          <rect x="155" y="46" width="590" height="54" rx="27" fill="#72efdd" stroke="#5a189a" stroke-width="3.5" />
+          <text x="450" y="80" text-anchor="middle" fill="#240046" font-size="24" font-weight="900" font-family="sans-serif">
+            🧸 โปสการ์ดแก๊งจิ๋วบุกตู้คีบ · ครบทั้ง 6 ตัว! 🎉
+          </text>
+          <text x="450" y="124" text-anchor="middle" fill="#5a189a" font-size="16" font-weight="800" font-family="sans-serif">
+            ภารกิจการทดลอง “อากาศมีตัวตน” สำเร็จครบทั้ง 2 ตู้แล้ว!
+          </text>
+
+          <!-- Cute Postcard Stamp Corner -->
+          <g transform="translate(778, 52)">
+            <rect x="0" y="0" width="68" height="72" rx="10" fill="#fef08a" stroke="#b45309" stroke-width="2.5" stroke-dasharray="5 3" />
+            <text x="34" y="36" text-anchor="middle" font-size="26">⭐</text>
+            <text x="34" y="58" text-anchor="middle" fill="#78350f" font-size="11" font-weight="900" font-family="sans-serif">6/6 ครบ!</text>
+          </g>
+
+          <!-- All 6 Plushies Grid -->
+          ${plushCardsSvg}
+
+          <!-- Footer Ribbon -->
+          <text x="450" y="512" text-anchor="middle" fill="#4a3566" font-size="14" font-weight="800" font-family="sans-serif">
+            ☁️ ร้านขนมบนก้อนเมฆ &amp; สวนดาวพระจันทร์ · บ้านนักวิทยาศาสตร์น้อย ประเทศไทย 🌙
+          </text>
+        `;
+      }
+
+      downloadPostcardPng() {
+        this.renderPostcardSvg();
+        const svgEl = this.dom.postcardPreviewSvg;
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(svgEl);
+        if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+          svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1800;
+          canvas.height = 1120;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fffdf7';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob((pngBlob) => {
+            if (!pngBlob) return;
+            const dlUrl = URL.createObjectURL(pngBlob);
+            const a = document.createElement('a');
+            a.href = dlUrl;
+            a.download = 'postcard-gang-jiw-claw-machine.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(dlUrl), 1500);
+            this.audio.playChuteChime();
+          }, 'image/png');
+        };
+        img.src = url;
+      }
+
+      setHeadline(text, speakNow = false) {
+        this.dom.promptHeadline.textContent = text;
+        if (speakNow) {
+          this.audio.speak(text, { interrupt: true });
+        } else {
+          this.audio.lastSpoken = text;
+        }
+      }
+
+      // =========================================================================
+      // SVG RENDERER FOR CABINET, CLAW, CHUTE PRIZE & DESSERT CART
+      // =========================================================================
+      renderSparklesAroundChute() {
+        if (this.settings.reducedMotion) {
+          this.dom.layerSparkles.innerHTML = '';
+          return;
+        }
+        const pts = [
+          [190, 255], [265, 252], [228, 226], [185, 315], [272, 312]
+        ];
+        this.dom.layerSparkles.innerHTML = pts
+          .map(
+            ([sx, sy]) => `
+            <polygon points="${sx},${sy - 10} ${sx + 3},${sy - 3} ${sx + 10},${sy} ${sx + 3},${sy + 3} ${sx},${sy + 10} ${sx - 3},${sy + 3} ${sx - 10},${sy} ${sx - 3},${sy - 3}"
+              fill="#fde047" stroke="#f59e0b" stroke-width="1.5" />
+          `
+          )
+          .join('');
+      }
+
+      renderCabinet() {
+        const availableIds = this.phase === 'PICK_PLUSH'
+          ? this.getTwoAvailablePlushChoices().map((c) => c.id)
+          : [];
+
+        this.dom.layerPlushies.innerHTML = PLUSH_CATALOG.filter((p) => p.cabinetId === this.activeCabinetId)
+          .map((p) => {
+            const st = this.plushState[p.id];
+            if (!st || st.collectedInRound) return '';
+            const isFrogIdle = p.id === 'frog' && !this.claw.anim;
+            const rot = st.flipAngle || 0;
+            const canTap = availableIds.includes(p.id);
+            return `
+              <g class="cabinet-plush-node" data-plush-hit="${p.id}" style="cursor: ${canTap ? 'pointer' : 'default'};"
+                 transform="rotate(${rot} ${st.x} ${st.y})">
+                ${this.svgPlushCharacter(p.id, st.x, st.y, { scale: 1.0, idleFrogCrown: isFrogIdle })}
+              </g>
+            `;
+          })
+          .join('');
+
+        if (this.phase === 'PICK_PLUSH') {
+          this.dom.layerPlushies.querySelectorAll('[data-plush-hit]').forEach((node) => {
+            node.addEventListener('click', () => {
+              this.audio.unlock();
+              const pid = node.getAttribute('data-plush-hit');
+              this.selectPlushTarget(pid);
+            });
+          });
+        }
+
+        const cx = this.claw.x;
+        const topY = 81;
+        const botY = topY + this.claw.ropeLen;
+        const spread = 14 + this.claw.openAmount * 18;
+
+        this.dom.layerClaw.innerHTML = `
+          <rect x="${cx - 18}" y="${topY - 9}" width="36" height="18" rx="6" fill="#72efdd" stroke="#5a189a" stroke-width="2.5" />
+          <line x1="${cx}" y1="${topY + 9}" x2="${cx}" y2="${botY}" stroke="#475569" stroke-width="4" />
+          <circle cx="${cx}" cy="${botY}" r="9" fill="#fde047" stroke="#5a189a" stroke-width="2.5" />
+          <line x1="${cx}" y1="${botY + 6}" x2="${cx}" y2="${botY + 34}" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+          <path d="M ${cx - 5} ${botY + 4} L ${cx - spread} ${botY + 22} L ${cx - spread + 8} ${botY + 38}" stroke="#475569" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <path d="M ${cx + 5} ${botY + 4} L ${cx + spread} ${botY + 22} L ${cx + spread - 8} ${botY + 38}" stroke="#475569" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        `;
+
+        if (this.chutePrize) {
+          const pid = this.chutePrize.plushId;
+          if (pid === 'frog') {
+            const crownReady = this.chutePrize.elapsed >= 0.65 || this.settings.reducedMotion;
+            const cOff = crownReady ? 0 : -46;
+            const cTilt = crownReady ? -7 : 22;
+            this.dom.layerChutePrize.innerHTML = this.svgPlushCharacter('frog', 228, 314, {
+              scale: 0.92,
+              crownOffsetY: cOff,
+              crownTilt: cTilt
+            });
+          } else {
+            this.dom.layerChutePrize.innerHTML = this.svgPlushCharacter(pid, 228, 314, { scale: 0.92 });
+          }
+        } else {
+          this.dom.layerChutePrize.innerHTML = '';
+        }
+
+        const isFinale = this.phase === 'CABINET_DONE';
+        const cabTeam = this.cabinetProgress[this.activeCabinetId].collectedIds;
+        const treatIcons = {
+          frog: '👑',
+          cat: '🍭',
+          rabbit: '🍓',
+          bear: '⭐',
+          owl: '🌙',
+          penguin: '💧'
+        };
+        this.dom.layerCartTeam.innerHTML = cabTeam
+          .map((pid, idx) => {
+            const seatX = 82 + idx * 78;
+            return `
+              <g>
+                ${this.svgPlushCharacter(pid, seatX, 82, {
+                  scale: 0.96,
+                  celebratePose: isFinale
+                })}
+                <text x="${seatX}" y="30" text-anchor="middle" font-size="16">${treatIcons[pid] || '🎁'}</text>
+              </g>
+            `;
+          })
+          .join('');
+      }
+
+      loop(now) {
+        const dt = Math.min(0.05, (now - this.lastFrameTime) / 1000);
+        this.lastFrameTime = now;
+
+        if (!this.paused) {
+          if (this.claw.anim) {
+            this.updateClawAnimation(dt);
+            this.renderCabinet();
+          } else if (this.chutePrize && this.chutePrize.crownDelayed && this.chutePrize.elapsed < 0.75) {
+            this.chutePrize.elapsed += dt;
+            this.renderCabinet();
+          }
+
+          if (this.sceneSim.active && this.sceneSim.elapsed < 2.2) {
+            this.sceneSim.elapsed += dt;
+            this.renderSituationSvg();
+          }
+        }
+
+        requestAnimationFrame((t) => this.loop(t));
+      }
+
+      // =========================================================================
+      // SINGLE-SWITCH ACCESSIBILITY
+      // =========================================================================
+      getScanTargets() {
+        let root = document;
+        if (this.paused) root = this.dom.modalPause;
+        else if (this.activeModal === 'SETTINGS') root = this.dom.modalSettings;
+        else if (this.activeModal === 'TEAM') root = this.dom.modalTeam;
+        else if (this.activeModal === 'INFO') root = this.dom.modalInfo;
+        else if (this.activeModal === 'POSTCARD') root = this.dom.modalPostcard;
+        else if (!this.started) root = this.dom.openingOverlay;
+        else root = document.querySelector('.app-shell');
+
+        return Array.from(root.querySelectorAll('button')).filter(
+          (btn) => !btn.disabled && !btn.closest('[hidden]') && btn.offsetParent !== null
+        );
+      }
+
+      stopSwitchScan() {
+        if (this.scanTimeout) {
+          clearTimeout(this.scanTimeout);
+          this.scanTimeout = null;
+        }
+        document.querySelectorAll('.switch-highlight').forEach((el) => el.classList.remove('switch-highlight'));
+      }
+
+      restartSwitchScan() {
+        this.stopSwitchScan();
+        if (!this.settings.switchMode) return;
+        if (this.phase === 'CLAW_BUSY' && !this.paused && !this.activeModal) return;
+
+        const targets = this.getScanTargets();
+        if (targets.length === 0) return;
+        if (this.scanIndex >= targets.length) this.scanIndex = 0;
+
+        const current = targets[this.scanIndex];
+        current.classList.add('switch-highlight');
+        current.focus({ preventScroll: true });
+        this.audio.playScanTick();
+
+        const labelEl = current.querySelector('.choice-main-label') || current;
+        const spoken = (labelEl.textContent || '').trim();
+
+        const startDwellTimer = () => {
+          if (!this.settings.switchMode) return;
+          this.scanTimeout = setTimeout(() => {
+            this.scanIndex = (this.scanIndex + 1) % targets.length;
+            this.restartSwitchScan();
+          }, this.settings.scanSpeedMs);
+        };
+
+        this.audio.speak(spoken, { interrupt: true, onEnd: startDwellTimer });
+      }
+
+      confirmSwitchSelection() {
+        if (!this.settings.switchMode) return;
+        const targets = this.getScanTargets();
+        if (targets.length === 0) return;
+        const chosen = targets[this.scanIndex % targets.length];
+        if (chosen) chosen.click();
+      }
+    }
+
+    const gameRules = document.getElementById("game-rules");
+    gameRules.addEventListener("close", () => {
+      window.sweetCloudClawApp = new SweetCloudClawGame();
+      document.getElementById("btn-start-cab1").focus();
+    }, { once: true });
+    gameRules.showModal();
+  </script>
+</body>
+</html>

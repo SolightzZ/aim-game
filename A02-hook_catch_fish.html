@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hook & Catch: Matching Fish - เกมการศึกษาตกปลาคำตอบ (แรงโน้มถ่วงของโลก)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .bubble-glow {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+        }
+        .pulse-soft {
+            animation: pulseSoft 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseSoft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .float-gentle {
+            animation: floatGentle 4s infinite ease-in-out;
+        }
+        @keyframes floatGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body class="bg-sky-50 text-slate-800 h-screen w-screen overflow-hidden flex flex-col justify-between">
+
+    <!-- INITIAL HELP & ACCESSIBILITY GUIDE MODAL (SHOWN BEFORE GAME START) -->
+    <div id="guideModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border-4 border-sky-400 flex flex-col max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-4xl">🎣</span>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-sky-700">Hook & Catch: แรงโน้มถ่วงของโลก</h1>
+                        <p class="text-xs sm:text-sm text-slate-500 font-semibold">วิทยาศาสตร์ ชั้นประถมศึกษาปีที่ 4</p>
+                    </div>
+                </div>
+                <button onclick="readGuideAudio()" class="bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold px-3 py-2 rounded-xl text-sm flex items-center gap-1 transition">
+                    🔊 ฟังเสียงแนะนำ
+                </button>
+            </div>
+
+            <!-- Autism Suitability Highlight Banner -->
+            <div class="bg-gradient-to-r from-amber-100 to-amber-200 border-2 border-amber-400 rounded-2xl p-4 mb-4 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-2xl">🌟</span>
+                    <span class="font-extrabold text-amber-900 text-base sm:text-lg">ทำไมเกมนี้จึงเหมาะกับผู้เรียนทุกกลุ่ม?</span>
+                </div>
+                <p class="text-amber-800 text-sm sm:text-base leading-relaxed">
+                    ออกแบบด้วยสภาพแวดล้อมที่คาดเดาได้ (Predictable Routine) ไม่มีเสียงดังตกใจหรือแสงกะพริบฉับพลัน ปลาว่ายช้าเป็นระเบียบ มีปุ่มหยุดปลาช่วยลดภาวะข้อมูลล้นเกิน (Sensory Overload) และใช้ระบบเสริมแรงเชิงบวก 100% ไม่มีหักคะแนนหรือตัวจับเวลา สร้างความมั่นใจและลดความวิตกกังวล
+                </p>
+            </div>
+
+            <div class="space-y-3 text-slate-700 text-sm sm:text-base mb-6">
+                <div class="flex items-start gap-3 bg-sky-50 p-3 rounded-xl border border-sky-100">
+                    <span class="text-xl">🐟</span>
+                    <div><strong>วิธีเล่น:</strong> อ่านโจทย์เรื่อง "แรงโน้มถ่วงของโลก" ด้านบน แล้วแตะปลาที่มีคำตอบที่ถูกต้อง (หรือกดปุ่ม 1, 2, 3 บนคีย์บอร์ด) เพื่อเหวี่ยงเบ็ดจับปลาเข้าตะกร้า</div>
+                </div>
+                <div class="flex items-start gap-3 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <span class="text-xl">🛡️</span>
+                    <div><strong>ไร้ความกดดัน:</strong> ไม่มีเวลาจำกัด ตอบผิดจะมีคำอธิบายสั้นๆ ให้ทบทวนและลองใหม่ได้ทันที</div>
+                </div>
+                <div class="flex items-start gap-3 bg-purple-50 p-3 rounded-xl border border-purple-100">
+                    <span class="text-xl">🎮</span>
+                    <div><strong>ควบคุมง่าย:</strong> รองรับการแตะหน้าจอ คีย์บอร์ด (แป้น 1-3) หรือปุ่มหยุดปลาให้นิ่งสนิทเพื่อความสบายใจ</div>
+                </div>
+            </div>
+
+            <button onclick="startGameFromGuide()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-lg py-4 rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                <span>🚀 เริ่มเล่นเกมตกปลาคำตอบกันเลย!</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME CONTAINER -->
+    <div id="gameContainer" class="flex-1 flex flex-col justify-between relative overflow-hidden hidden">
+        <!-- TOP HUD -->
+        <header class="bg-white/90 backdrop-blur-md shadow-md px-4 py-3 flex items-center justify-between z-20 border-b border-sky-100">
+            <div class="flex items-center gap-3">
+                <div class="bg-sky-500 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-inner text-sm sm:text-base">
+                    🏆 คะแนน: <span id="scoreDisplay">0</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-sm">
+                    <span>🐟 ตะกร้าปลา:</span>
+                    <span id="basketCount">0</span>/<span id="totalQuestionsDisplay">5</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar / Fish Basket -->
+            <div class="hidden md:flex flex-1 max-w-xs mx-4 items-center bg-slate-200 rounded-full h-4 overflow-hidden shadow-inner">
+                <div id="progressBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleFreezeFish()" id="freezeBtn" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl shadow text-xs sm:text-sm flex items-center gap-1 transition">
+                    ⏸ <span id="freezeBtnText">หยุดปลา</span>
+                </button>
+                <button onclick="openTeacherModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition">
+                    ⚙️ โหมดครู
+                </button>
+                <button onclick="openHelpModal()" class="bg-sky-400 hover:bg-sky-500 text-white font-extrabold w-9 h-9 rounded-xl shadow flex items-center justify-center text-base transition">
+                    ?
+                </button>
+            </div>
+        </header>
+
+        <!-- QUESTION BANNER AREA -->
+        <section class="bg-white/90 backdrop-blur shadow-sm px-4 py-3 z-20 flex flex-col items-center border-b border-sky-100">
+            <div class="flex items-center gap-2 mb-1">
+                <span id="subjectBadge" class="bg-sky-100 text-sky-800 text-xs font-extrabold px-2.5 py-0.5 rounded-full">แรงโน้มถ่วงของโลก</span>
+                <span id="gradeBadge" class="bg-slate-100 text-slate-600 text-[11px] font-semibold px-2 py-0.5 rounded-full">ประถมศึกษาปีที่ 4</span>
+                <span id="questionCounterBadge" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">ข้อที่ 1 / 5</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <h2 id="questionText" class="font-extrabold text-slate-800 text-center leading-snug" style="font-size: clamp(18px, 2.6vw, 26px);">กำลังโหลดโจทย์...</h2>
+                <button onclick="repeatQuestionAudio()" class="bg-sky-100 hover:bg-sky-200 text-sky-700 p-2 rounded-xl text-sm transition shadow-sm" title="ฟังโจทย์ซ้ำ">
+                    🔊
+                </button>
+            </div>
+        </section>
+
+        <!-- CANVAS GAMEPLAY AREA (SIDE VIEW OCEAN & CAT FISHERMAN) -->
+        <main class="flex-1 relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-300 to-sky-600">
+            <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block cursor-pointer"></canvas>
+            
+            <!-- FEEDBACK BANNER OVERLAY -->
+            <div id="feedbackBanner" class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur shadow-2xl border-4 border-emerald-400 rounded-3xl p-6 text-center z-30 hidden transition-all duration-300 scale-90 max-w-md w-[90%]">
+                <div id="feedbackIcon" class="text-5xl mb-2">🎉</div>
+                <h3 id="feedbackTitle" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mb-1">ถูกต้อง!</h3>
+                <p id="feedbackDesc" class="text-slate-600 text-sm sm:text-base font-semibold leading-relaxed">เก่งมากครับ ปลาเข้าตะกร้าแล้ว</p>
+            </div>
+
+            <!-- SUMMARY / CELEBRATION MODAL OVERLAY -->
+            <div id="summaryBanner" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-40 hidden">
+                <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-4 border-emerald-400 text-center">
+                    <div class="text-6xl mb-3">🏆</div>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mb-2">ยอดเยี่ยมมาก!</h3>
+                    <p class="text-slate-600 font-semibold mb-4">คุณตกปลาคำตอบเรื่อง "แรงโน้มถ่วงของโลก" ได้ครบทุกข้อแล้ว!</p>
+                    <div class="bg-sky-50 rounded-2xl p-4 mb-6 border border-sky-200">
+                        <div class="text-sm text-slate-500 font-bold">คะแนนรวมทั้งหมด</div>
+                        <div id="finalScoreText" class="text-4xl font-extrabold text-sky-600 mt-1">500 คะแนน</div>
+                    </div>
+                    <button onclick="initGame()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-lg py-3.5 rounded-2xl shadow-lg transition transform active:scale-95">
+                        🔄 เล่นใหม่อีกครั้ง
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- TEACHER / PARENT SETTINGS MODAL -->
+    <div id="teacherModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border-4 border-slate-300 flex flex-col max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-extrabold text-slate-800">⚙️ โหมดครู / ผู้ปกครอง</h2>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-4 text-slate-700 text-sm mb-6">
+                <div>
+                    <label class="font-bold block mb-1">เลือกชุดวิชาและทักษะ:</label>
+                    <select id="subjectSelect" class="w-full border-2 border-slate-200 rounded-xl p-3 font-semibold bg-slate-50">
+                        <option value="gravity" selected>แรงโน้มถ่วงของโลก (ป.4 - ชุดหลัก)</option>
+                        <option value="science">วิทยาศาสตร์ทั่วไป (General Science)</option>
+                        <option value="biology">ชีววิทยาศาสตร์ (Biology & Life Science)</option>
+                        <option value="life">ทักษะชีวิต (Life Skills)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-bold block mb-1">ความเร็วปลา:</label>
+                    <select id="speedSelect" class="w-full border-2 border-slate-200 rounded-xl p-3 font-semibold bg-slate-50">
+                        <option value="0">ปลาลอยนิ่ง (ไม่ว่ายเลย - เหมาะสำหรับผู้เริ่มต้น)</option>
+                        <option value="0.12" selected>ช้ามากๆๆ (ค่าเริ่มต้น - สบายตา อ่านง่ายสุดๆ)</option>
+                        <option value="0.3">ช้ามาก (ฝึกสมาธิ)</option>
+                        <option value="0.6">ปานกลาง</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="applyTeacherSettings()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-extrabold py-3 rounded-2xl shadow transition">
+                    บันทึกและเริ่มใหม่
+                </button>
+                <button onclick="closeTeacherModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-3 rounded-2xl transition">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO & GAME LOGIC SCRIPT -->
+    <script>
+        /* --- EMBEDDED SOURCE DATA & QUESTION BANKS (SCHEMA 3.0 - แรงโน้มถ่วงของโลก) --- */
+        const sourceGravityQuestions = [
+            {
+                question_id: "ho-001",
+                subject: "แรงโน้มถ่วงของโลก",
+                grade: "ประถมศึกษาปีที่ 4",
+                question: "มวลคืออะไร",
+                audio_script: "มวลคืออะไร",
+                choices: [
+                    { id: "a", label: "ปริมาณเนื้อสาร", icon: "🧱" },
+                    { id: "b", label: "แรงดึงดูด", icon: "🧲" },
+                    { id: "c", label: "เครื่องมือวัด", icon: "⚖️" }
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "ถูกต้อง! มวลคือปริมาณของเนื้อสารทั้งหมดที่มีอยู่ในวัตถุนั้น",
+                feedbackIncorrect: "ลองทบทวนแนวคิดนี้อีกครั้ง: มวล คือ ปริมาณของเนื้อสารทั้งหมดที่มีอยู่ในวัตถุนั้น"
+            },
+            {
+                question_id: "ho-002",
+                subject: "แรงโน้มถ่วงของโลก",
+                grade: "ประถมศึกษาปีที่ 4",
+                question: "น้ำหนักมีหน่วยใด",
+                audio_script: "น้ำหนักมีหน่วยใด",
+                choices: [
+                    { id: "a", label: "นิวตัน", icon: "🍎" },
+                    { id: "b", label: "กรัม", icon: "⚖️" },
+                    { id: "c", label: "กิโลกรัม", icon: "🏋️" }
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "ถูกต้อง! น้ำหนักของวัตถุจะมีหน่วยเป็น นิวตัน (N)",
+                feedbackIncorrect: "ลองทบทวนแนวคิดนี้อีกครั้ง: น้ำหนักของวัตถุจะมีหน่วยเป็น นิวตัน (N) ส่วนกรัมและกิโลกรัมเป็นหน่วยของมวล"
+            },
+            {
+                question_id: "ho-003",
+                subject: "แรงโน้มถ่วงของโลก",
+                grade: "ประถมศึกษาปีที่ 4",
+                question: "แรงโน้มถ่วงดึงวัตถุไปทางใด",
+                audio_script: "แรงโน้มถ่วงดึงวัตถุไปทางใด",
+                choices: [
+                    { id: "a", label: "ศูนย์กลางโลก", icon: "🌍" },
+                    { id: "b", label: "นอกโลก", icon: "🚀" },
+                    { id: "c", label: "ด้านข้าง", icon: "➡️" }
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "ถูกต้อง! แรงโน้มถ่วงจะดึงดูดวัตถุเข้าสู่ศูนย์กลางของโลกเสมอ",
+                feedbackIncorrect: "ลองทบทวนแนวคิดนี้อีกครั้ง: แรงโน้มถ่วงจะดึงดูดวัตถุเข้าสู่ศูนย์กลางของโลก"
+            },
+            {
+                question_id: "ho-004",
+                subject: "แรงโน้มถ่วงของโลก",
+                grade: "ประถมศึกษาปีที่ 4",
+                question: "วัดน้ำหนักใช้เครื่องมือใด",
+                audio_script: "วัดน้ำหนักใช้เครื่องมือใด",
+                choices: [
+                    { id: "a", label: "เครื่องชั่งสปริง", icon: "🪝" },
+                    { id: "b", label: "ไม้บรรทัด", icon: "📏" },
+                    { id: "c", label: "เข็มทิศ", icon: "🧭" }
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "ถูกต้อง! เราวัดน้ำหนักของวัตถุได้โดยใช้เครื่องชั่งสปริง",
+                feedbackIncorrect: "ลองทบทวนแนวคิดนี้อีกครั้ง: เราสามารถวัดน้ำหนักของวัตถุได้โดยใช้เครื่องชั่งสปริง"
+            },
+            {
+                question_id: "ho-005",
+                subject: "แรงโน้มถ่วงของโลก",
+                grade: "ประถมศึกษาปีที่ 4",
+                question: "มวลมากเปลี่ยนการเคลื่อนที่อย่างไร",
+                audio_script: "มวลมากเปลี่ยนการเคลื่อนที่อย่างไร",
+                choices: [
+                    { id: "a", label: "ยากกว่า", icon: "🐘" },
+                    { id: "b", label: "ง่ายกว่า", icon: "🪶" },
+                    { id: "c", label: "เท่ากัน", icon: "⚖️" }
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "ถูกต้อง! วัตถุที่มีมวลมากจะเคลื่อนที่ได้ยากกว่าวัตถุที่มีมวลน้อย",
+                feedbackIncorrect: "ลองทบทวนแนวคิดนี้อีกครั้ง: วัตถุที่มีมวลมากจะเคลื่อนที่ได้ยากกว่าวัตถุที่มีมวลน้อย"
+            }
+        ];
+
+        const questionBanks = {
+            gravity: sourceGravityQuestions,
+            life: [
+                {
+                    id: 1, subject: "ทักษะชีวิต", grade: "ประถมต้น",
+                    question: "อุปกรณ์ใดใช้สำหรับแปรงฟันทำความสะอาดช่องปาก?",
+                    choices: [
+                        { label: "แปรงสีฟัน", icon: "🪥" },
+                        { label: "ช้อนส้อม", icon: "🥄" },
+                        { label: "รองเท้า", icon: "👟" }
+                    ],
+                    correctIndex: 0,
+                    feedbackCorrect: "ถูกต้อง! แปรงสีฟันใช้สำหรับแปรงทำความสะอาดฟัน",
+                    feedbackIncorrect: "แปรงสีฟันใช้สำหรับแปรงทำความสะอาดฟันให้สะอาด"
+                },
+                {
+                    id: 2, subject: "ความปลอดภัย", grade: "ประถมต้น",
+                    question: "เมื่อเจอสัญญาณไฟจราจรสีแดง คนเดินเท้าต้องทำอย่างไร?",
+                    choices: [
+                        { label: "เดินข้ามทันที", icon: "🏃" },
+                        { label: "หยุดรอก่อน", icon: "🛑" },
+                        { label: "วิ่งเล่นบนถนน", icon: "⚽" }
+                    ],
+                    correctIndex: 1,
+                    feedbackCorrect: "ถูกต้อง! ไฟแดงหมายถึงต้องหยุดรอให้รถหยุดก่อนข้ามถนน",
+                    feedbackIncorrect: "ไฟแดงหมายถึงต้องหยุดรอให้รถหยุดก่อนข้ามถนน"
+                }
+            ],
+            science: [
+                {
+                    id: 3, subject: "วิทยาศาสตร์", grade: "ประถมต้น",
+                    question: "ปลาใช้ส่วนใดในการหายใจใต้น้ำ?",
+                    choices: [
+                        { label: "ปอด", icon: "🫁" },
+                        { label: "เหงือก", icon: "🐟" },
+                        { label: "จมูก", icon: "👃" }
+                    ],
+                    correctIndex: 1,
+                    feedbackCorrect: "ถูกต้อง! ปลาใช้เหงือกในการกรองออกซิเจนจากน้ำ",
+                    feedbackIncorrect: "ปลาใช้เหงือกในการกรองออกซิเจนจากน้ำ"
+                },
+                {
+                    id: 4, subject: "วิทยาศาสตร์", grade: "ประถมต้น",
+                    question: "ดาวเคราะห์ดวงใดเป็นศูนย์กลางของระบบสุริยะ?",
+                    choices: [
+                        { label: "ดวงอาทิตย์", icon: "☀️" },
+                        { label: "ดวงจันทร์", icon: "🌙" },
+                        { label: "ดาวอังคาร", icon: "🔴" }
+                    ],
+                    correctIndex: 0,
+                    feedbackCorrect: "ถูกต้อง! ดวงอาทิตย์เป็นศูนย์กลางที่ดาวเคราะห์โคจรรอบ",
+                    feedbackIncorrect: "ดวงอาทิตย์เป็นศูนย์กลางที่ดาวเคราะห์โคจรรอบ"
+                }
+            ],
+            biology: [
+                {
+                    id: 5, subject: "ชีววิทยา", grade: "ประถมกลาง",
+                    question: "ส่วนใดของพืชทำหน้าที่ดูดน้ำและแร่ธาตุจากดิน?",
+                    choices: [
+                        { label: "ใบไม้", icon: "🍃" },
+                        { label: "ราก", icon: "🌱" },
+                        { label: "ดอกไม้", icon: "🌸" }
+                    ],
+                    correctIndex: 1,
+                    feedbackCorrect: "ถูกต้อง! รากทำหน้าที่ยึดลำต้นและดูดน้ำแร่ธาตุจากดิน",
+                    feedbackIncorrect: "รากทำหน้าที่ยึดลำต้นและดูดน้ำแร่ธาตุจากดิน"
+                }
+            ]
+        };
+
+        /* --- GAME STATE VARIABLES --- */
+        let gameState = {
+            subjectKey: "gravity",
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            basketCount: 0,
+            fishSpeed: 0.12, // Default extremely slow for calm focus
+            isFrozen: false,
+            animating: false,
+            hookProgress: 0,
+            targetFish: null
+        };
+
+        let canvas, ctx;
+        let fishes = [];
+        let animationFrameId;
+
+        window.onload = function() {
+            canvas = document.getElementById("gameCanvas");
+            ctx = canvas.getContext("2d");
+            resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
+
+            // Mouse/Touch interaction
+            canvas.addEventListener("click", handleCanvasClick);
+
+            // Keyboard accessibility (1, 2, 3 keys to select fish, Space to freeze)
+            window.addEventListener("keydown", function(e) {
+                if (document.getElementById("guideModal").classList.contains("hidden") &&
+                    document.getElementById("teacherModal").classList.contains("hidden") &&
+                    document.getElementById("summaryBanner").classList.contains("hidden")) {
+                    if (e.key === "1" || e.key === "2" || e.key === "3") {
+                        let idx = parseInt(e.key) - 1;
+                        let target = fishes.find(f => f.index === idx && !f.faded);
+                        if (target && !gameState.animating) {
+                            selectFish(target);
+                        }
+                    } else if (e.code === "Space") {
+                        e.preventDefault();
+                        toggleFreezeFish();
+                    }
+                }
+            });
+        };
+
+        function resizeCanvas() {
+            if (!canvas || !canvas.parentElement) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            // Reposition fish lanes smoothly on resize
+            if (fishes.length > 0) {
+                let lanes = [canvas.height * 0.48, canvas.height * 0.64, canvas.height * 0.80];
+                fishes.forEach((f, idx) => {
+                    f.y = lanes[idx % lanes.length];
+                    if (f.x > canvas.width - 120) f.x = canvas.width - 120;
+                });
+            }
+        }
+
+        /* --- MODAL & GUIDE CONTROLS --- */
+        function openHelpModal() {
+            document.getElementById("guideModal").classList.remove("hidden");
+        }
+
+        function startGameFromGuide() {
+            document.getElementById("guideModal").classList.add("hidden");
+            document.getElementById("gameContainer").classList.remove("hidden");
+            setTimeout(() => {
+                resizeCanvas();
+                initGame();
+            }, 20);
+        }
+
+        function readGuideAudio() {
+            speakText("ยินดีต้อนรับสู่เกมตกปลาคำตอบ เรื่องแรงโน้มถ่วงของโลก เกมนี้ออกแบบมาเพื่อช่วยให้นักเรียนฝึกฝนทักษะอย่างมีความสุข ไม่มีเวลาจำกัด ปลาว่ายช้า และมีปุ่มหยุดปลาช่วยให้เล่นได้อย่างสบายใจครับ");
+        }
+
+        function openTeacherModal() {
+            document.getElementById("teacherModal").classList.remove("hidden");
+        }
+
+        function closeTeacherModal() {
+            document.getElementById("teacherModal").classList.add("hidden");
+        }
+
+        function applyTeacherSettings() {
+            gameState.subjectKey = document.getElementById("subjectSelect").value;
+            gameState.fishSpeed = parseFloat(document.getElementById("speedSelect").value);
+            closeTeacherModal();
+            initGame();
+        }
+
+        /* --- EXTERNAL INJECTION SUPPORT (OPTIONAL) --- */
+        function applyInjectedQuestions(injected) {
+            let list = [];
+            if (Array.isArray(injected)) list = injected;
+            else if (injected && Array.isArray(injected.questions)) list = injected.questions;
+            else if (injected && Array.isArray(injected.items)) list = injected.items;
+            else if (injected && typeof injected === 'object') list = [injected];
+            if (list.length === 0) return;
+
+            try {
+                const fishIcons = ["🐟", "🐠", "🐡", "🦐", "🐙"];
+                const customList = list.map((item, idx) => {
+                    const rawChoices = ((item.payload && Array.isArray(item.payload.choices)) ? item.payload.choices : (item.choices || [])).slice(0, 3);
+                    while (rawChoices.length < 3) {
+                        rawChoices.push({ id: 'dummy_' + rawChoices.length, text: 'ตัวเลือกสำรอง' });
+                    }
+                    let correctIdx = rawChoices.findIndex(c => c.isCorrect || c.id === item.correctChoiceId || (item.payload && item.payload.answer && item.payload.answer.choice_ids && item.payload.answer.choice_ids.includes(c.id)));
+                    if (correctIdx < 0) correctIdx = 0;
+                    return {
+                        id: idx + 1,
+                        subject: item.subject || item.skill_tag || "แรงโน้มถ่วงของโลก",
+                        grade: "ประถมศึกษาปีที่ 4",
+                        question: item.prompt || item.title || item.question || `ข้อที่ ${idx + 1}`,
+                        audio_script: item.audio_script || item.prompt || item.question,
+                        choices: rawChoices.map((c, cIdx) => ({
+                            label: c.text || c.label || String(c),
+                            icon: fishIcons[cIdx % fishIcons.length]
+                        })),
+                        correctIndex: correctIdx,
+                        feedbackCorrect: (item.payload && item.payload.feedback && item.payload.feedback.correct) || "ถูกต้อง! เก่งมากเลยครับ",
+                        feedbackIncorrect: (item.payload && item.payload.explanation) || item.explanation || "ลองทบทวนแนวคิดนี้อีกครั้ง"
+                    };
+                });
+                questionBanks['custom'] = customList;
+                gameState.subjectKey = 'custom';
+                document.getElementById("guideModal").classList.add("hidden");
+                document.getElementById("gameContainer").classList.remove("hidden");
+                resizeCanvas();
+                initGame();
+            } catch(e) { console.warn(e); }
+        }
+
+        if (window.INJECTED_QUESTIONS) {
+            applyInjectedQuestions(window.INJECTED_QUESTIONS);
+        }
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'INJECT_QUESTIONS' && e.data.questions) {
+                applyInjectedQuestions(e.data.questions);
+            }
+        });
+        window.parent?.postMessage({ type: 'TEMPLATE_READY' }, '*');
+
+        /* --- GAME INITIALIZATION & LOOP --- */
+        function initGame() {
+            document.getElementById("summaryBanner").classList.add("hidden");
+            hideFeedback();
+            gameState.questions = [...(questionBanks[gameState.subjectKey] || questionBanks['gravity'])];
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.basketCount = 0;
+            gameState.animating = false;
+            document.getElementById("totalQuestionsDisplay").textContent = gameState.questions.length;
+            updateHUD();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentIndex >= gameState.questions.length) {
+                showSummary();
+                return;
+            }
+            let q = gameState.questions[gameState.currentIndex];
+            document.getElementById("questionText").textContent = q.question;
+            document.getElementById("subjectBadge").textContent = q.subject;
+            document.getElementById("gradeBadge").textContent = q.grade;
+            document.getElementById("questionCounterBadge").textContent = `ข้อที่ ${gameState.currentIndex + 1} / ${gameState.questions.length}`;
+
+            speakText(q.audio_script || q.question);
+            spawnFishes(q);
+
+            if (!animationFrameId) {
+                gameLoop();
+            }
+        }
+
+        function spawnFishes(q) {
+            fishes = [];
+            let lanes = [canvas.height * 0.48, canvas.height * 0.64, canvas.height * 0.80];
+            let shapes = ['round', 'chubby', 'long'];
+            let colors = [
+                { body: '#ff8a80', fin: '#ff5252', stripe: '#ffcdd2' }, // Coral Pastel
+                { body: '#82b1ff', fin: '#448aff', stripe: '#bbdefb' }, // Sky Pastel
+                { body: '#b9f6ca', fin: '#00e676', stripe: '#e8f5e9' }  // Mint Pastel
+            ];
+
+            // Randomize visual order of fish while keeping choice labels & correct flag accurate
+            let indexedChoices = q.choices.map((c, idx) => ({
+                choice: c,
+                isCorrect: idx === q.correctIndex
+            }));
+            // Gentle shuffle so answer isn't always fish #1
+            for (let i = indexedChoices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indexedChoices[i], indexedChoices[j]] = [indexedChoices[j], indexedChoices[i]];
+            }
+
+            indexedChoices.forEach((item, idx) => {
+                let laneY = lanes[idx % lanes.length];
+                let margin = Math.min(160, canvas.width * 0.22);
+                let usableW = Math.max(100, canvas.width - margin * 2);
+                let startX = margin + (idx * (usableW / Math.max(indexedChoices.length - 1, 1)));
+                let speed = (idx % 2 === 0 ? 1 : -1) * gameState.fishSpeed;
+                if (gameState.isFrozen || gameState.fishSpeed === 0) speed = 0;
+
+                fishes.push({
+                    index: idx,
+                    choice: item.choice,
+                    isCorrect: item.isCorrect,
+                    x: startX,
+                    y: laneY,
+                    vx: speed,
+                    radius: 48,
+                    faded: false,
+                    shape: shapes[idx % shapes.length],
+                    palette: colors[idx % colors.length],
+                    wobbleOffset: idx * 1.5
+                });
+            });
+        }
+
+        function toggleFreezeFish() {
+            gameState.isFrozen = !gameState.isFrozen;
+            let btnText = document.getElementById("freezeBtnText");
+            if (gameState.isFrozen) {
+                btnText.textContent = "ปล่อยปลา";
+                fishes.forEach(f => f.vx = 0);
+            } else {
+                btnText.textContent = "หยุดปลา";
+                fishes.forEach(f => f.vx = (Math.random() > 0.5 ? 1 : -1) * gameState.fishSpeed);
+            }
+        }
+
+        /* --- RENDERING & ANIMATION LOOP --- */
+        function gameLoop() {
+            update();
+            render();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            if (!gameState.animating) {
+                fishes.forEach(f => {
+                    if (!gameState.isFrozen && gameState.fishSpeed > 0 && !f.faded) {
+                        f.x += f.vx;
+                        if (f.x < 120) {
+                            f.x = 120;
+                            f.vx = Math.abs(f.vx);
+                        } else if (f.x > canvas.width - 120) {
+                            f.x = canvas.width - 120;
+                            f.vx = -Math.abs(f.vx);
+                        }
+                    }
+                });
+            } else {
+                gameState.hookProgress += 0.03;
+                if (gameState.hookProgress >= 1) {
+                    finishHookAction();
+                }
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let time = Date.now() * 0.0015;
+            let waterLineY = canvas.height * 0.28;
+
+            // 1. Pastel Sky
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, waterLineY);
+            skyGrad.addColorStop(0, '#bae6fd');
+            skyGrad.addColorStop(0.65, '#e0f2fe');
+            skyGrad.addColorStop(1, '#fce7f3');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, waterLineY);
+
+            drawSkyDecorations(time, waterLineY);
+
+            // 2. Layered Pastel Ocean
+            let waterGrad = ctx.createLinearGradient(0, waterLineY, 0, canvas.height);
+            waterGrad.addColorStop(0, '#7dd3fc');
+            waterGrad.addColorStop(0.45, '#38bdf8');
+            waterGrad.addColorStop(0.85, '#0284c7');
+            waterGrad.addColorStop(1, '#0369a1');
+            ctx.fillStyle = waterGrad;
+            ctx.fillRect(0, waterLineY, canvas.width, canvas.height - waterLineY);
+
+            drawUnderwaterDecorations(time, waterLineY);
+
+            // 3. Boat & Cat Fisherman
+            let boatX = canvas.width / 2;
+            let boatBob = Math.sin(time * 1.5) * 4;
+            let boatY = waterLineY - 6 + boatBob;
+            drawBoatAndCat(boatX, boatY, boatBob);
+
+            // 4. Fishing Line & Hook
+            if (gameState.animating && gameState.targetFish) {
+                drawFishingLine(boatX, boatY, gameState.targetFish.x, gameState.targetFish.y, gameState.hookProgress);
+            } else {
+                drawFishingLine(boatX, boatY, boatX + 75, waterLineY + 35 + Math.sin(time * 2) * 3, 1);
+            }
+
+            // 5. Answer Fishes
+            fishes.forEach(f => {
+                drawCuteFish(f, time);
+            });
+        }
+
+        function drawSkyDecorations(time, waterLineY) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+            ctx.beginPath();
+            ctx.arc(canvas.width * 0.14, waterLineY * 0.35, 34, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.moveTo(0, waterLineY);
+            ctx.lineTo(canvas.width * 0.15, waterLineY - 45);
+            ctx.lineTo(canvas.width * 0.35, waterLineY);
+            ctx.fill();
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(canvas.width * 0.65, waterLineY);
+            ctx.lineTo(canvas.width * 0.85, waterLineY - 52);
+            ctx.lineTo(canvas.width, waterLineY);
+            ctx.fill();
+
+            drawCloud(canvas.width * 0.28 + Math.sin(time * 0.3) * 15, waterLineY * 0.28, 0.9);
+            drawCloud(canvas.width * 0.74 + Math.cos(time * 0.25) * 15, waterLineY * 0.24, 1.05);
+            ctx.restore();
+        }
+
+        function drawCloud(cx, cy, scale) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.arc(20, -5, 24, 0, Math.PI * 2);
+            ctx.arc(42, 0, 18, 0, Math.PI * 2);
+            ctx.arc(20, 8, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawUnderwaterDecorations(time, waterLineY) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                let sx = canvas.width * (0.25 + i * 0.25);
+                ctx.moveTo(sx - 20, waterLineY);
+                ctx.lineTo(sx + 20, waterLineY);
+                ctx.lineTo(sx + 80, canvas.height);
+                ctx.lineTo(sx - 60, canvas.height);
+                ctx.fill();
+            }
+
+            let sandY = canvas.height - 28;
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath();
+            ctx.moveTo(0, sandY);
+            ctx.quadraticCurveTo(canvas.width * 0.5, sandY - 14, canvas.width, sandY);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            drawSeaweed(45, canvas.height - 15, 55, time, '#34d399');
+            drawSeaweed(75, canvas.height - 12, 40, time + 1, '#10b981');
+            drawSeaweed(canvas.width - 55, canvas.height - 15, 50, time + 0.5, '#34d399');
+            drawCuteOctopus(135, canvas.height - 32, time);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+            for (let b = 0; b < 6; b++) {
+                let bx = (canvas.width * 0.12 * (b + 1)) + Math.sin(time + b) * 10;
+                let by = canvas.height - 40 - ((time * 22 + b * 75) % (canvas.height - waterLineY - 50));
+                ctx.beginPath();
+                ctx.arc(bx, by, 4 + (b % 3) * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            for (let x = 0; x <= canvas.width; x += 25) {
+                let wy = waterLineY + Math.sin(x * 0.02 + time * 2) * 3;
+                if (x === 0) ctx.moveTo(x, wy);
+                else ctx.lineTo(x, wy);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSeaweed(x, y, height, time, color) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            let sway = Math.sin(time * 1.5) * 10;
+            ctx.quadraticCurveTo(x + sway, y - height * 0.5, x - sway * 0.5, y - height);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawCuteOctopus(ox, oy, time) {
+            ctx.save();
+            let bob = Math.sin(time * 2) * 2;
+            ctx.translate(ox, oy + bob);
+            ctx.strokeStyle = '#fb7185';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            for (let t = -2; t <= 2; t++) {
+                ctx.beginPath();
+                ctx.moveTo(t * 6, 6);
+                ctx.quadraticCurveTo(t * 9, 16, t * 11 + Math.sin(time * 3 + t) * 3, 18);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#fb7185';
+            ctx.beginPath();
+            ctx.arc(0, 0, 16, Math.PI, 0);
+            ctx.lineTo(16, 8);
+            ctx.lineTo(-16, 8);
+            ctx.fill();
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(-5, 0, 2.2, 0, Math.PI * 2);
+            ctx.arc(5, 0, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.arc(0, 2, 4, 0.1 * Math.PI, 0.9 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawBoatAndCat(x, y, bob) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(bob * 0.012);
+
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.roundRect(-52, -6, 26, 20, 6);
+            ctx.fill();
+            ctx.strokeStyle = '#92400e';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(-14, -14, 28, 24, 10);
+            ctx.fill();
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.moveTo(-12, -12);
+            ctx.lineTo(0, -2);
+            ctx.lineTo(12, -12);
+            ctx.fill();
+
+            ctx.fillStyle = '#fdba74';
+            ctx.beginPath();
+            ctx.arc(0, -26, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(-16, -38);
+            ctx.lineTo(-22, -54);
+            ctx.lineTo(-6, -44);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(16, -38);
+            ctx.lineTo(22, -54);
+            ctx.lineTo(6, -44);
+            ctx.fill();
+
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.ellipse(0, -43, 24, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f87171';
+            ctx.fillRect(-12, -48, 24, 4);
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(-7, -27, 2.5, 0, Math.PI * 2);
+            ctx.arc(7, -27, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.35)';
+            ctx.beginPath();
+            ctx.arc(-12, -22, 4, 0, Math.PI * 2);
+            ctx.arc(12, -22, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(-3, -21, 3, 0, Math.PI);
+            ctx.arc(3, -21, 3, 0, Math.PI);
+            ctx.stroke();
+
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.moveTo(-75, 4);
+            ctx.quadraticCurveTo(-65, 34, 0, 34);
+            ctx.quadraticCurveTo(65, 34, 75, 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#92400e';
+            ctx.stroke();
+
+            ctx.strokeStyle = '#fef3c7';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-70, 10);
+            ctx.lineTo(70, 10);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#78350f';
+            ctx.lineWidth = 4.5;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(14, -6);
+            ctx.lineTo(75, -52);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawCuteFish(f, time) {
+            ctx.save();
+            ctx.globalAlpha = f.faded ? 0.35 : 1.0;
+
+            let swimBob = Math.sin(time * 2.5 + f.wobbleOffset) * 3;
+            let fx = f.x;
+            let fy = f.y + swimBob;
+            let facingRight = f.vx >= 0;
+            let dir = facingRight ? 1 : -1;
+
+            let rx = f.shape === 'long' ? 54 : (f.shape === 'round' ? 42 : 48);
+            let ry = f.shape === 'round' ? 34 : (f.shape === 'long' ? 24 : 30);
+
+            let tailWag = Math.sin(time * 5 + f.wobbleOffset) * 4;
+            ctx.fillStyle = f.palette.fin;
+            ctx.beginPath();
+            ctx.moveTo(fx - dir * (rx - 6), fy);
+            ctx.quadraticCurveTo(fx - dir * (rx + 26), fy - 24 + tailWag, fx - dir * (rx + 22), fy);
+            ctx.quadraticCurveTo(fx - dir * (rx + 26), fy + 24 + tailWag, fx - dir * (rx - 6), fy);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(fx, fy - ry + 4, 16, Math.PI, 0);
+            ctx.fill();
+
+            ctx.fillStyle = f.palette.body;
+            ctx.beginPath();
+            ctx.ellipse(fx, fy, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.stroke();
+
+            ctx.fillStyle = f.palette.stripe;
+            if (f.shape === 'round') {
+                ctx.beginPath();
+                ctx.arc(fx - dir * 8, fy - 6, 5, 0, Math.PI * 2);
+                ctx.arc(fx - dir * 18, fy + 6, 4, 0, Math.PI * 2);
+                ctx.arc(fx - dir * 2, fy + 10, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                ctx.roundRect(fx - dir * 12 - 3, fy - ry + 6, 6, (ry - 6) * 2, 3);
+                ctx.roundRect(fx - dir * 24 - 3, fy - ry + 10, 6, (ry - 10) * 2, 3);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = f.palette.fin;
+            ctx.beginPath();
+            ctx.ellipse(fx - dir * 4, fy + 6, 10, 6, dir * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            let eyeX = fx + dir * (rx * 0.45);
+            let eyeY = fy - 6;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(eyeX, eyeY, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(eyeX + dir * 2, eyeY, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(eyeX + dir * 3.5, eyeY - 2, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(fx + dir * (rx * 0.65), fy + 5, 6, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.stroke();
+
+            // Answer Sign Bubble Above Fish
+            let text = `${f.choice.icon} ${f.choice.label}`;
+            let maxBubbleW = Math.max(140, canvas.width - 24);
+            let fontSize = 18;
+            ctx.font = `bold ${fontSize}px Sarabun`;
+            let textWidth = ctx.measureText(text).width;
+            while (textWidth + 56 > maxBubbleW && fontSize > 12) {
+                fontSize -= 1;
+                ctx.font = `bold ${fontSize}px Sarabun`;
+                textWidth = ctx.measureText(text).width;
+            }
+            let bubbleWidth = Math.min(Math.max(textWidth + 56, 145), maxBubbleW);
+            let bubbleHeight = 42;
+            let bx = fx - bubbleWidth / 2;
+            let by = fy - ry - 50;
+
+            if (bx < 12) bx = 12;
+            if (bx + bubbleWidth > canvas.width - 12) bx = canvas.width - bubbleWidth - 12;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(fx - 7, by + bubbleHeight - 2);
+            ctx.lineTo(fx + 7, by + bubbleHeight - 2);
+            ctx.lineTo(fx, by + bubbleHeight + 8);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(bx, by, bubbleWidth, bubbleHeight, 21);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.arc(bx + 21, by + 21, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'extrabold 15px Sarabun';
+            ctx.textAlign = 'center';
+            ctx.fillText(f.index + 1, bx + 21, by + 26);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(bx + 36, by + 2, bubbleWidth - 40, bubbleHeight - 4, 10);
+            ctx.clip();
+            ctx.fillStyle = '#0f172a';
+            ctx.font = `bold ${fontSize}px Sarabun`;
+            ctx.textAlign = 'left';
+            ctx.fillText(text, bx + 42, by + 27);
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function drawFishingLine(boatX, boatY, targetX, targetY, progress) {
+            ctx.save();
+            let rodTipX = boatX + 75;
+            let rodTipY = boatY - 52;
+            let currentX = rodTipX + (targetX - rodTipX) * progress;
+            let currentY = rodTipY + (targetY - rodTipY) * progress;
+
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(rodTipX, rodTipY);
+            ctx.quadraticCurveTo(rodTipX + 20, (rodTipY + currentY) * 0.5 + 30, currentX, currentY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY + 5, 5, 0, Math.PI * 1.3);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        /* --- INTERACTION & FEEDBACK --- */
+        function handleCanvasClick(e) {
+            if (gameState.animating) return;
+            let rect = canvas.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left;
+            let mouseY = e.clientY - rect.top;
+
+            fishes.forEach(f => {
+                if (f.faded) return;
+                // Allow clicking either the fish body or the answer bubble above it
+                let distFish = Math.hypot(mouseX - f.x, mouseY - f.y);
+                let distBubble = Math.hypot(mouseX - f.x, mouseY - (f.y - 65));
+                if (distFish < f.radius + 22 || distBubble < 55) {
+                    selectFish(f);
+                }
+            });
+        }
+
+        function selectFish(f) {
+            gameState.targetFish = f;
+            gameState.animating = true;
+            gameState.hookProgress = 0;
+            speakText(f.choice.label);
+        }
+
+        function finishHookAction() {
+            let f = gameState.targetFish;
+            let q = gameState.questions[gameState.currentIndex];
+            gameState.animating = false;
+
+            if (f.isCorrect) {
+                gameState.score += 100;
+                gameState.basketCount++;
+                updateHUD();
+                let successMsg = (q && q.feedbackCorrect) ? q.feedbackCorrect : "เก่งมากครับ ปลาเข้าตะกร้าแล้ว";
+                showFeedback(true, "ถูกต้อง!", successMsg);
+                speakText("ถูกต้องครับ");
+
+                setTimeout(() => {
+                    hideFeedback();
+                    gameState.currentIndex++;
+                    loadQuestion();
+                }, 2200);
+            } else {
+                f.faded = true;
+                let explanationText = (q && q.feedbackIncorrect) ? q.feedbackIncorrect : "ปลาตัวนี้ยังไม่ใช่คำตอบที่ถูกต้อง";
+                showFeedback(false, "ลองดูอีกครั้งนะ", explanationText);
+                speakText("ลองดูอีกครั้งนะครับ");
+
+                setTimeout(() => {
+                    hideFeedback();
+                }, 2800);
+            }
+        }
+
+        function showFeedback(isSuccess, title, desc) {
+            let banner = document.getElementById("feedbackBanner");
+            let icon = document.getElementById("feedbackIcon");
+            let titleEl = document.getElementById("feedbackTitle");
+            let descEl = document.getElementById("feedbackDesc");
+
+            icon.textContent = isSuccess ? "🎉" : "💡";
+            titleEl.textContent = title;
+            titleEl.className = isSuccess ? "text-2xl sm:text-3xl font-extrabold text-emerald-600 mb-1" : "text-2xl sm:text-3xl font-extrabold text-amber-600 mb-1";
+            banner.className = isSuccess 
+                ? "absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur shadow-2xl border-4 border-emerald-400 rounded-3xl p-6 text-center z-30 transition-all duration-300 scale-100 max-w-md w-[90%]"
+                : "absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur shadow-2xl border-4 border-amber-400 rounded-3xl p-6 text-center z-30 transition-all duration-300 scale-100 max-w-md w-[90%]";
+            descEl.textContent = desc;
+            banner.classList.remove("hidden");
+        }
+
+        function hideFeedback() {
+            document.getElementById("feedbackBanner").classList.add("hidden");
+        }
+
+        function showSummary() {
+            document.getElementById("finalScoreText").textContent = `${gameState.score} คะแนน`;
+            document.getElementById("summaryBanner").classList.remove("hidden");
+            speakText("ยอดเยี่ยมมากครับ คุณตกปลาคำตอบได้ครบทุกข้อแล้ว");
+        }
+
+        function updateHUD() {
+            document.getElementById("scoreDisplay").textContent = gameState.score;
+            document.getElementById("basketCount").textContent = gameState.basketCount;
+            let total = Math.max(1, gameState.questions.length);
+            let progressPercent = Math.min((gameState.basketCount / total) * 100, 100);
+            document.getElementById("progressBar").style.width = progressPercent + "%";
+        }
+
+        function repeatQuestionAudio() {
+            let q = gameState.questions[gameState.currentIndex];
+            if (q) speakText(q.audio_script || q.question);
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = "th-TH";
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>

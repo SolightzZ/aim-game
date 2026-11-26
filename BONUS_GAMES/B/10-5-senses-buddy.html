@@ -1,0 +1,2644 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>ประกอบหน้าเพื่อน 5 สัมผัส 3 มิติ (5 Senses 3D Buddy Builder)</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <style>
+         :root {
+            --bg-cream: #fff8ee;
+            --bg-sky: #ebf7ff;
+            --surface-white: #ffffff;
+            --surface-soft: #fff3e0;
+            --primary: #ff7a59;
+            --primary-dark: #e05a3a;
+            --secondary: #38b6ff;
+            --secondary-dark: #198cd1;
+            --mint: #4cd4b0;
+            --mint-dark: #2ba887;
+            --pink-stage: #f49ac1;
+            --pink-stage-dark: #d972a0;
+            --yellow-accent: #ffd166;
+            --text-main: #3a2e39;
+            --text-muted: #6e5d6c;
+            --border-soft: #f0dfc8;
+            --shadow-clay: 0 10px 24px rgba(58, 46, 57, 0.12), inset 0 4px 6px rgba(255, 255, 255, 0.85);
+            --shadow-btn: 0 6px 0 var(--primary-dark), 0 10px 18px rgba(224, 90, 58, 0.28);
+            --font-scale: 1;
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+         }
+
+         /* High Contrast Mode */
+         body.high-contrast {
+            --bg-cream: #0b0d17;
+            --bg-sky: #141829;
+            --surface-white: #1e243b;
+            --surface-soft: #262e4d;
+            --primary: #ffe600;
+            --primary-dark: #b5a300;
+            --secondary: #00f0ff;
+            --secondary-dark: #0099a3;
+            --mint: #00ff88;
+            --mint-dark: #00a859;
+            --text-main: #ffffff;
+            --text-muted: #e0e6ff;
+            --border-soft: #ffe600;
+            --shadow-clay: 0 0 0 3px #ffe600;
+            --shadow-btn: 0 6px 0 #b5a300;
+         }
+
+         body.high-contrast .rainbow-arc {
+            opacity: 0.12;
+         }
+
+         body.high-contrast .btn-primary {
+            color: #0b0d17;
+         }
+
+         /* Text Sizes */
+         body.text-large {
+            --font-scale: 1.18;
+         }
+         body.text-xlarge {
+            --font-scale: 1.35;
+         }
+
+         /* Sensory Calm / Reduced Motion */
+         body.sensory-calm * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.08s !important;
+         }
+         body.sensory-calm .rainbow-arc,
+         body.sensory-calm .bg-clouds {
+            opacity: 0.25 !important;
+         }
+
+         * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+         }
+
+         html,
+         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Kanit', 'Fredoka', sans-serif;
+            color: var(--text-main);
+            background: linear-gradient(180deg, var(--bg-sky) 0%, var(--bg-cream) 65%, #fcecd8 100%);
+            font-size: calc(16px * var(--font-scale));
+         }
+
+         /* Background Rainbow & Soft Clouds */
+         .studio-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+         }
+
+         .rainbow-arc {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(1100px, 140vw);
+            height: auto;
+            opacity: 0.55;
+         }
+
+         /* Main App Layout */
+         #app {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: clamp(10px, 2vh, 18px) clamp(12px, 2.5vw, 28px);
+            max-width: 1360px;
+            margin: 0 auto;
+         }
+
+         /* Floating Fullscreen Corner Icon Controls (No Navbar) */
+         .floating-controls-left {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 30;
+         }
+
+         .floating-controls-right {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 30;
+         }
+
+         .stage-pill-float {
+            background: var(--surface-white);
+            border: 3px solid var(--mint);
+            border-radius: 999px;
+            padding: 6px 14px;
+            box-shadow: var(--shadow-clay);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: var(--text-main);
+         }
+
+         .icon-btn {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            min-height: 52px;
+            border-radius: 50%;
+            border: 3px solid var(--border-soft);
+            background: var(--surface-white);
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-clay);
+            transition:
+               transform 0.15s ease,
+               background-color 0.15s ease;
+         }
+
+         .icon-btn:hover,
+         .icon-btn:focus-visible {
+            transform: translateY(-2px) scale(1.06);
+            outline: 3px solid var(--secondary);
+            outline-offset: 2px;
+         }
+
+         .icon-btn:active {
+            transform: translateY(2px) scale(0.96);
+         }
+
+         .icon-btn.active-toggle {
+            background: var(--yellow-accent);
+            border-color: #e0a800;
+            color: #2e2200;
+         }
+
+         /* Prompt Banner & Progress Dots */
+         .prompt-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 15;
+            padding-top: 4px;
+         }
+
+         .prompt-banner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface-white);
+            border: 4px solid var(--secondary);
+            border-radius: 999px;
+            padding: 8px 26px 8px 10px;
+            box-shadow: var(--shadow-clay);
+            max-width: min(560px, 72vw);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .prompt-banner.pop {
+            transform: scale(1.05);
+         }
+
+         /* Top Header Bar */
+         .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 54px;
+            z-index: 20;
+         }
+
+         .top-left,
+         .top-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+         }
+
+         .game-title-pill {
+            background: var(--surface-white);
+            border: 3px solid var(--border-soft);
+            border-radius: 999px;
+            padding: 6px 18px;
+            box-shadow: var(--shadow-clay);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+         }
+
+         .game-title-pill h1 {
+            margin: 0;
+            font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+         }
+
+         .stage-badge {
+            background: var(--mint);
+            color: #133b30;
+            font-weight: 700;
+            font-size: 0.85em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+         }
+
+         .icon-btn {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            min-height: 50px;
+            border-radius: 50%;
+            border: 3px solid var(--border-soft);
+            background: var(--surface-white);
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-clay);
+            transition:
+               transform 0.15s ease,
+               background-color 0.15s ease;
+         }
+
+         .icon-btn:hover,
+         .icon-btn:focus-visible {
+            transform: translateY(-2px) scale(1.04);
+            outline: 3px solid var(--secondary);
+            outline-offset: 2px;
+         }
+
+         .icon-btn:active {
+            transform: translateY(2px) scale(0.97);
+         }
+
+         .icon-btn.active-toggle {
+            background: var(--yellow-accent);
+            border-color: #e0a800;
+            color: #2e2200;
+         }
+
+         /* Prompt Banner & Progress Dots */
+         .prompt-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 15;
+         }
+
+         .prompt-banner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface-white);
+            border: 4px solid var(--secondary);
+            border-radius: 999px;
+            padding: 8px 24px 8px 10px;
+            box-shadow: var(--shadow-clay);
+            max-width: 95vw;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .prompt-banner.pop {
+            transform: scale(1.04);
+         }
+
+         .speaker-btn {
+            width: 60px;
+            height: 60px;
+            min-width: 60px;
+            min-height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #52c4ff, var(--secondary-dark));
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow:
+               0 5px 0 #126ca3,
+               0 8px 15px rgba(25, 140, 209, 0.35);
+            transition: transform 0.15s ease;
+            position: relative;
+         }
+
+         .speaker-btn:hover,
+         .speaker-btn:focus-visible {
+            transform: scale(1.06);
+            outline: 3px solid var(--yellow-accent);
+         }
+
+         .speaker-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #126ca3;
+         }
+
+         .speaker-btn.speaking::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 3px solid var(--secondary);
+            animation: pulseRing 1s infinite ease-out;
+         }
+
+         @keyframes pulseRing {
+            0% {
+               transform: scale(0.95);
+               opacity: 0.9;
+            }
+            100% {
+               transform: scale(1.25);
+               opacity: 0;
+            }
+         }
+
+         .prompt-text-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+         }
+
+         .prompt-main {
+            font-size: clamp(1.25rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+         }
+
+         /* 5 Sense Progress Dots */
+         .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.72);
+            padding: 5px 16px;
+            border-radius: 999px;
+            border: 2px solid var(--border-soft);
+         }
+
+         body.high-contrast .progress-bar {
+            background: var(--surface-white);
+         }
+
+         .progress-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #e8dfd3;
+            border: 3px solid #d1c3b2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+         }
+
+         .progress-dot.done {
+            background: var(--mint);
+            border-color: var(--mint-dark);
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(43, 168, 135, 0.35);
+         }
+
+         .progress-dot.current {
+            border-color: var(--primary);
+            background: #fff0ea;
+            transform: scale(1.08);
+         }
+
+         /* Center Stage & 3D Buddy Container */
+         .center-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            width: 100%;
+         }
+
+         .buddy-wrapper {
+            position: relative;
+            width: min(370px, 76vw);
+            height: min(390px, 48vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.25s ease-out;
+         }
+
+         #buddy-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(0 16px 22px rgba(84, 58, 42, 0.16));
+         }
+
+         /* Buddy Idle Breathing & Animations */
+         .buddy-body-group {
+            transform-origin: 200px 270px;
+            animation: buddyBreathe 3.2s ease-in-out infinite;
+         }
+
+         @keyframes buddyBreathe {
+            0%,
+            100% {
+               transform: scale(1, 1) translateY(0px);
+            }
+            50% {
+               transform: scale(1.018, 0.985) translateY(3px);
+            }
+         }
+
+         .buddy-sprout {
+            transform-origin: 200px 92px;
+            animation: sproutSway 2.8s ease-in-out infinite;
+         }
+
+         @keyframes sproutSway {
+            0%,
+            100% {
+               transform: rotate(-3deg);
+            }
+            50% {
+               transform: rotate(4deg);
+            }
+         }
+
+         .buddy-wrapper.happy-bounce .buddy-body-group {
+            animation: happyBounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         @keyframes happyBounce {
+            0% {
+               transform: scale(1, 1);
+            }
+            30% {
+               transform: scale(1.12, 0.88) translateY(10px);
+            }
+            60% {
+               transform: scale(0.94, 1.08) translateY(-14px);
+            }
+            100% {
+               transform: scale(1, 1) translateY(0);
+            }
+         }
+
+         .buddy-wrapper.gentle-shake .buddy-body-group {
+            animation: gentleShake 0.45s ease-in-out;
+         }
+
+         @keyframes gentleShake {
+            0%,
+            100% {
+               transform: translateX(0) rotate(0deg);
+            }
+            25% {
+               transform: translateX(-8px) rotate(-3deg);
+            }
+            50% {
+               transform: translateX(8px) rotate(3deg);
+            }
+            75% {
+               transform: translateX(-5px) rotate(-2deg);
+            }
+         }
+
+         /* Drop Slots on Buddy */
+         .organ-slot {
+            cursor: pointer;
+            transition:
+               opacity 0.2s ease,
+               transform 0.2s ease;
+         }
+
+         .slot-target-ring {
+            fill: rgba(255, 255, 255, 0.45);
+            stroke: #ff7a59;
+            stroke-width: 3.5;
+            stroke-dasharray: 7 5;
+            transition: all 0.2s ease;
+         }
+
+         .organ-slot.highlight .slot-target-ring {
+            fill: rgba(255, 209, 102, 0.45);
+            stroke: #ff5722;
+            stroke-width: 4.5;
+            animation: slotPulse 1.1s infinite ease-in-out;
+         }
+
+         @keyframes slotPulse {
+            0%,
+            100% {
+               opacity: 0.75;
+            }
+            50% {
+               opacity: 1;
+            }
+         }
+
+         /* Stimulus Bubble (for Stage 2 & 3) */
+         .stimulus-card {
+            position: absolute;
+            top: 6px;
+            right: clamp(4px, 3vw, 28px);
+            background: var(--surface-white);
+            border: 4px solid var(--yellow-accent);
+            border-radius: var(--radius-lg);
+            padding: 8px 14px;
+            box-shadow: var(--shadow-clay);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            z-index: 12;
+            animation: floatStimulus 2.6s ease-in-out infinite;
+         }
+
+         @keyframes floatStimulus {
+            0%,
+            100% {
+               transform: translateY(0px);
+            }
+            50% {
+               transform: translateY(-6px);
+            }
+         }
+
+         .stimulus-label {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+         }
+
+         /* Feedback Toast Banner */
+         .feedback-pill {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--surface-white);
+            border: 3px solid var(--mint-dark);
+            color: var(--text-main);
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.98em;
+            box-shadow: var(--shadow-clay);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 25;
+            white-space: nowrap;
+            max-width: 92vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+         }
+
+         .feedback-pill.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+         }
+
+         .feedback-pill.error {
+            border-color: var(--primary);
+            background: #fff4f0;
+         }
+
+         body.high-contrast .feedback-pill.error {
+            background: #3a1515;
+         }
+
+         /* Bottom Organ Tray */
+         .tray-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 3px solid var(--border-soft);
+            border-radius: 32px;
+            padding: 12px 18px;
+            box-shadow: var(--shadow-clay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            align-self: center;
+         }
+
+         body.high-contrast .tray-container {
+            background: var(--surface-white);
+         }
+
+         .organ-tray {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(10px, 2.2vw, 20px);
+         }
+
+         .organ-card {
+            width: clamp(78px, 14vw, 104px);
+            height: clamp(86px, 13vh, 108px);
+            min-width: 74px;
+            min-height: 80px;
+            background: linear-gradient(180deg, #ffffff 0%, #fff7ec 100%);
+            border: 3px solid var(--border-soft);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: grab;
+            box-shadow:
+               0 6px 0 #dfcbb2,
+               0 10px 16px rgba(58, 46, 57, 0.12);
+            transition:
+               transform 0.15s ease,
+               border-color 0.15s ease,
+               box-shadow 0.15s ease;
+            touch-action: none;
+            position: relative;
+         }
+
+         body.high-contrast .organ-card {
+            background: var(--surface-soft);
+            box-shadow: 0 5px 0 var(--primary-dark);
+         }
+
+         .organ-card:hover,
+         .organ-card:focus-visible {
+            transform: translateY(-4px) scale(1.04);
+            border-color: var(--secondary);
+            outline: 3px solid var(--secondary);
+            outline-offset: 2px;
+         }
+
+         .organ-card.selected {
+            transform: translateY(-6px) scale(1.07);
+            border-color: var(--primary);
+            background: #fff1e8;
+            box-shadow:
+               0 7px 0 var(--primary-dark),
+               0 12px 20px rgba(255, 122, 89, 0.3);
+         }
+
+         body.high-contrast .organ-card.selected {
+            background: #332e00;
+         }
+
+         .organ-card.used {
+            opacity: 0.35;
+            pointer-events: none;
+            transform: scale(0.94);
+            box-shadow: none;
+         }
+
+         .organ-card-label {
+            font-size: 0.88em;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+         }
+
+         /* Floating Drag Ghost */
+         #drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 96px;
+            height: 96px;
+            transform: translate(-50%, -50%) scale(1.15);
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.25));
+            display: none;
+         }
+
+         /* Particle Layer */
+         #particle-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+         }
+
+         /* Modals & Overlays (Start Screen, Stage Clear, Settings, Help) */
+         .overlay-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(42, 32, 45, 0.55);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+         }
+
+         .overlay-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+         }
+
+         /* Fullscreen Colorful Game Start Screen */
+         #modal-start {
+            background: linear-gradient(180deg, #ddf2ff 0%, #fff7eb 58%, #fce4ec 100%);
+            backdrop-filter: none;
+         }
+
+         body.high-contrast #modal-start {
+            background: #0b0d17;
+         }
+
+         .start-stage-shell {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            text-align: center;
+            padding: 12px;
+         }
+
+         .game-logo-badge {
+            background: var(--surface-white);
+            border: 5px solid var(--yellow-accent);
+            border-radius: 36px;
+            padding: 14px 32px;
+            box-shadow:
+               0 10px 0 #e6b43c,
+               0 18px 32px rgba(58, 46, 57, 0.16);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+         }
+
+         .game-logo-title {
+            margin: 0;
+            font-size: clamp(1.55rem, 4.2vw, 2.35rem);
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1.15;
+         }
+
+         body.high-contrast .game-logo-title {
+            color: var(--primary);
+         }
+
+         .hero-buddy-showcase {
+            position: relative;
+            width: 190px;
+            height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: heroFloat 3s ease-in-out infinite;
+         }
+
+         @keyframes heroFloat {
+            0%,
+            100% {
+               transform: translateY(0px) scale(1);
+            }
+            50% {
+               transform: translateY(-8px) scale(1.03);
+            }
+         }
+
+         .orbit-sense {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface-white);
+            border: 3px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-clay);
+         }
+
+         .modal-card {
+            background: var(--surface-white);
+            border: 4px solid var(--border-soft);
+            border-radius: 32px;
+            padding: clamp(20px, 4vw, 30px);
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 20px 45px rgba(34, 24, 38, 0.25);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            max-height: 92vh;
+            overflow-y: auto;
+         }
+
+         .modal-title {
+            margin: 0;
+            font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+            font-weight: 700;
+            color: var(--text-main);
+         }
+
+         .btn-primary {
+            background: linear-gradient(180deg, #6ce5b1 0%, var(--mint-dark) 100%);
+            color: #ffffff;
+            border: 4px solid #ffffff;
+            border-radius: 999px;
+            padding: 16px 46px;
+            font-family: inherit;
+            font-size: 1.45em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow:
+               0 8px 0 #1b7a60,
+               0 14px 26px rgba(43, 168, 135, 0.35);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 68px;
+            transition: transform 0.15s ease;
+         }
+
+         .btn-primary:hover,
+         .btn-primary:focus-visible {
+            transform: translateY(-3px) scale(1.04);
+            outline: 3px solid var(--secondary);
+            outline-offset: 3px;
+         }
+
+         .btn-primary:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #1b7a60;
+         }
+
+         .btn-secondary {
+            background: var(--surface-soft);
+            color: var(--text-main);
+            border: 3px solid var(--border-soft);
+            border-radius: 999px;
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+         }
+
+         /* Visual Stage Selector Cards on Start Screen */
+         .stage-select-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            width: 100%;
+         }
+
+         .stage-choice-btn {
+            background: var(--surface-white);
+            border: 4px solid var(--border-soft);
+            border-radius: 26px;
+            padding: 14px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 0 #dfcbb2;
+            transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .stage-choice-btn:hover {
+            transform: translateY(-3px);
+         }
+
+         .stage-choice-btn.selected-stage {
+            border-color: var(--primary);
+            background: #fff3eb;
+            box-shadow:
+               0 7px 0 var(--primary-dark),
+               0 12px 20px rgba(255, 122, 89, 0.25);
+            transform: translateY(-4px) scale(1.04);
+         }
+
+         body.high-contrast .stage-choice-btn.selected-stage {
+            background: #332e00;
+         }
+
+         .stage-num-badge {
+            background: var(--secondary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.95em;
+            padding: 2px 14px;
+            border-radius: 999px;
+         }
+
+         .stage-choice-btn.selected-stage .stage-num-badge {
+            background: var(--primary);
+         }
+
+         /* Visual Step Cards in Help Modal */
+         .visual-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+         }
+
+         .visual-step-card {
+            background: var(--surface-soft);
+            border: 3px solid var(--border-soft);
+            border-radius: 22px;
+            padding: 14px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+         }
+
+         .overlay-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+         }
+
+         .modal-card {
+            background: var(--surface-white);
+            border: 4px solid var(--border-soft);
+            border-radius: 32px;
+            padding: clamp(20px, 4vw, 32px);
+            max-width: 540px;
+            width: 100%;
+            box-shadow: 0 20px 45px rgba(34, 24, 38, 0.28);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            max-height: 92vh;
+            overflow-y: auto;
+         }
+
+         .modal-title {
+            margin: 0;
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
+            font-weight: 700;
+            color: var(--text-main);
+         }
+
+         .modal-desc {
+            margin: 0;
+            font-size: 1.05em;
+            color: var(--text-muted);
+            line-height: 1.5;
+         }
+
+         .btn-primary {
+            background: linear-gradient(180deg, #ff9173 0%, var(--primary) 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            padding: 14px 34px;
+            font-family: inherit;
+            font-size: 1.25em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow-btn);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 58px;
+            transition: transform 0.15s ease;
+         }
+
+         .btn-primary:hover,
+         .btn-primary:focus-visible {
+            transform: translateY(-2px) scale(1.03);
+            outline: 3px solid var(--secondary);
+            outline-offset: 3px;
+         }
+
+         .btn-primary:active {
+            transform: translateY(3px);
+         }
+
+         .btn-secondary {
+            background: var(--surface-soft);
+            color: var(--text-main);
+            border: 3px solid var(--border-soft);
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+         }
+
+         .btn-secondary:hover,
+         .btn-secondary:focus-visible {
+            border-color: var(--secondary);
+            outline: 2px solid var(--secondary);
+         }
+
+         /* Stage Selector Pills on Start Screen */
+         .stage-select-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+         }
+
+         .stage-choice-btn {
+            background: var(--surface-soft);
+            border: 3px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            padding: 12px 8px;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+         }
+
+         .stage-choice-btn.selected-stage {
+            border-color: var(--primary);
+            background: #fff0e6;
+            transform: scale(1.03);
+         }
+
+         body.high-contrast .stage-choice-btn.selected-stage {
+            background: #332e00;
+         }
+
+         /* Accessibility Settings Controls */
+         .a11y-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--surface-soft);
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border-soft);
+            text-align: left;
+         }
+
+         .a11y-row-label {
+            font-weight: 600;
+            font-size: 0.98em;
+         }
+
+         .segmented-group {
+            display: flex;
+            gap: 6px;
+         }
+
+         .seg-btn {
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border-soft);
+            background: var(--surface-white);
+            color: var(--text-main);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 40px;
+         }
+
+         .seg-btn.active {
+            background: var(--secondary);
+            color: #ffffff;
+            border-color: var(--secondary-dark);
+         }
+
+         .switch-toggle {
+            width: 58px;
+            height: 34px;
+            border-radius: 999px;
+            background: #cfc4b6;
+            border: none;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+         }
+
+         .switch-toggle::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+         }
+
+         .switch-toggle[aria-checked='true'] {
+            background: var(--mint-dark);
+         }
+
+         .switch-toggle[aria-checked='true']::after {
+            transform: translateX(24px);
+         }
+
+         /* Responsive Adjustments */
+         @media (max-width: 640px) {
+            .floating-controls-left,
+            .floating-controls-right {
+               top: 8px;
+               gap: 6px;
+            }
+            .floating-controls-left {
+               left: 8px;
+            }
+            .floating-controls-right {
+               right: 8px;
+            }
+            .icon-btn {
+               width: 46px;
+               height: 46px;
+               min-width: 46px;
+               min-height: 46px;
+            }
+            .stage-pill-float {
+               display: none;
+            }
+            .prompt-section {
+               margin-top: 46px;
+            }
+            .prompt-banner {
+               max-width: 94vw;
+            }
+            .stimulus-card {
+               top: 2px;
+               right: 4px;
+               padding: 5px 10px;
+               transform: scale(0.85);
+               transform-origin: top right;
+            }
+            .organ-card {
+               width: 66px;
+               height: 78px;
+               min-width: 62px;
+            }
+            .visual-steps-grid {
+               grid-template-columns: 1fr;
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <!-- Pastel Studio Background -->
+      <div class="studio-bg" aria-hidden="true">
+         <svg class="rainbow-arc" viewBox="0 0 1000 500" fill="none">
+            <path d="M 80 480 A 420 420 0 0 1 920 480" stroke="#FFB5C2" stroke-width="28" stroke-linecap="round" />
+            <path d="M 110 480 A 390 390 0 0 1 890 480" stroke="#FFD6A5" stroke-width="28" stroke-linecap="round" />
+            <path d="M 140 480 A 360 360 0 0 1 860 480" stroke="#FDFFB6" stroke-width="28" stroke-linecap="round" />
+            <path d="M 170 480 A 330 330 0 0 1 830 480" stroke="#CAFFBF" stroke-width="28" stroke-linecap="round" />
+            <path d="M 200 480 A 300 300 0 0 1 800 480" stroke="#A0C4FF" stroke-width="28" stroke-linecap="round" />
+         </svg>
+      </div>
+
+      <!-- Particle Effects Layer -->
+      <div id="particle-layer" aria-hidden="true"></div>
+
+      <!-- Drag Ghost -->
+      <div id="drag-ghost" aria-hidden="true"></div>
+
+      <!-- Floating Fullscreen Corner Controls (No Top Navbar) -->
+      <div class="floating-controls-left">
+         <button id="btn-home" class="icon-btn" aria-label="กลับหน้าหลัก" title="กลับหน้าหลัก">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M3 10.5L12 3l9 7.5" />
+               <path d="M5 9.5V20h14V9.5" />
+            </svg>
+         </button>
+         <div id="stage-badge" class="stage-pill-float" aria-label="ด่านปัจจุบัน">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFD166" stroke="#E09F24" stroke-width="2">
+               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span id="stage-badge-text">1 / 3</span>
+         </div>
+      </div>
+
+      <div class="floating-controls-right">
+         <button id="btn-help" class="icon-btn" aria-label="วิธีเล่น" title="วิธีเล่น">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+               <circle cx="12" cy="12" r="10" />
+               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+               <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+         </button>
+         <button id="btn-a11y" class="icon-btn" aria-label="ตั้งค่าการเข้าถึง" title="ตั้งค่าการเข้าถึง">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+               <circle cx="12" cy="5" r="2" />
+               <path d="M5 9h14" />
+               <path d="M12 9v6" />
+               <path d="M9 21l3-6 3 6" />
+            </svg>
+         </button>
+         <button id="btn-mute" class="icon-btn" aria-label="เปิดหรือปิดเสียง" title="เปิดหรือปิดเสียง">
+            <svg id="icon-sound-on" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+               <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+               <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            </svg>
+            <svg
+               id="icon-sound-off"
+               style="display: none"
+               width="26"
+               height="26"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2.6"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+               <line x1="23" y1="9" x2="17" y2="15" />
+               <line x1="17" y1="9" x2="23" y2="15" />
+            </svg>
+         </button>
+      </div>
+
+      <!-- Main Game Application -->
+      <main id="app">
+         <!-- Prompt Banner & 5 Dots Progress -->
+         <section class="prompt-section" aria-live="polite">
+            <div id="prompt-banner" class="prompt-banner">
+               <button id="btn-speak-prompt" class="speaker-btn" aria-label="ฟังเสียงโจทย์อีกครั้ง" title="กดเพื่อฟังเสียงโจทย์">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="rgba(255,255,255,0.25)" />
+                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+               </button>
+               <div class="prompt-text-wrap">
+                  <div id="prompt-main" class="prompt-main">ชิมด้วยลิ้น!</div>
+               </div>
+            </div>
+
+            <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-label="ความคืบหน้า 5 สัมผัส">
+               <!-- 5 Dots rendered by JS -->
+            </div>
+         </section>
+
+         <!-- Center 3D Clay Buddy Stage -->
+         <section class="center-stage">
+            <!-- Stimulus Card for Stages 2 & 3 -->
+            <div id="stimulus-card" class="stimulus-card" style="display: none">
+               <div id="stimulus-art"></div>
+               <div id="stimulus-label" class="stimulus-label">เค้กสตรอว์เบอร์รี</div>
+            </div>
+
+            <div id="buddy-wrapper" class="buddy-wrapper">
+               <svg id="buddy-svg" viewBox="0 0 400 420" role="img" aria-label="ตัวละครน้องต้นกล้าบนแท่นวงกลม">
+                  <defs>
+                     <!-- 3D Clay Gradients -->
+                     <radialGradient id="clayBodyGrad" cx="38%" cy="30%" r="68%">
+                        <stop offset="0%" stop-color="#E7C8A6" />
+                        <stop offset="55%" stop-color="#CFA67E" />
+                        <stop offset="100%" stop-color="#A97D56" />
+                     </radialGradient>
+
+                     <radialGradient id="clayLeafGrad" cx="30%" cy="25%" r="75%">
+                        <stop offset="0%" stop-color="#A8F090" />
+                        <stop offset="60%" stop-color="#68C953" />
+                        <stop offset="100%" stop-color="#3E9632" />
+                     </radialGradient>
+
+                     <linearGradient id="stageTopGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#FDB8D5" />
+                        <stop offset="100%" stop-color="#E67FA9" />
+                     </linearGradient>
+
+                     <linearGradient id="stageBaseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#C85D8B" />
+                        <stop offset="50%" stop-color="#E87AA9" />
+                        <stop offset="100%" stop-color="#B94E7C" />
+                     </linearGradient>
+
+                     <radialGradient id="pearlMintGrad" cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#A8FFEE" />
+                        <stop offset="60%" stop-color="#48CFAF" />
+                        <stop offset="100%" stop-color="#22967B" />
+                     </radialGradient>
+
+                     <radialGradient id="pearlWhiteGrad" cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#FFFFFF" />
+                        <stop offset="70%" stop-color="#F2ECE4" />
+                        <stop offset="100%" stop-color="#D2C6B8" />
+                     </radialGradient>
+
+                     <radialGradient id="cheekGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.75" />
+                        <stop offset="100%" stop-color="#FF8FA3" stop-opacity="0" />
+                     </radialGradient>
+
+                     <radialGradient id="handClayGrad" cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#FFF0A8" />
+                        <stop offset="60%" stop-color="#FFD166" />
+                        <stop offset="100%" stop-color="#E09F24" />
+                     </radialGradient>
+                  </defs>
+
+                  <!-- 3D Pedestal Stage -->
+                  <g id="pedestal-group">
+                     <!-- Ground Drop Shadow -->
+                     <ellipse cx="200" cy="392" rx="138" ry="20" fill="rgba(78, 52, 66, 0.2)" />
+                     <!-- Stage Cylinder Wall -->
+                     <path d="M 74 352 L 74 374 A 126 24 0 0 0 326 374 L 326 352 Z" fill="url(#stageBaseGrad)" />
+                     <!-- Stage Top Disc -->
+                     <ellipse cx="200" cy="352" rx="126" ry="24" fill="url(#stageTopGrad)" stroke="#FFCDE2" stroke-width="2" />
+                     <!-- Decorative Pearls around Pedestal -->
+                     <g id="stage-pearls">
+                        <circle cx="84" cy="364" r="9" fill="url(#pearlMintGrad)" />
+                        <circle cx="106" cy="373" r="9.5" fill="url(#pearlWhiteGrad)" />
+                        <circle cx="132" cy="379" r="10" fill="url(#pearlMintGrad)" />
+                        <circle cx="164" cy="383" r="10.5" fill="url(#pearlWhiteGrad)" />
+                        <circle cx="200" cy="385" r="11" fill="url(#pearlMintGrad)" />
+                        <circle cx="236" cy="383" r="10.5" fill="url(#pearlWhiteGrad)" />
+                        <circle cx="268" cy="379" r="10" fill="url(#pearlMintGrad)" />
+                        <circle cx="294" cy="373" r="9.5" fill="url(#pearlWhiteGrad)" />
+                        <circle cx="316" cy="364" r="9" fill="url(#pearlMintGrad)" />
+                     </g>
+                  </g>
+
+                  <!-- Sprout Buddy Character -->
+                  <g id="buddy-character" class="buddy-body-group">
+                     <!-- Character Contact Shadow on Stage -->
+                     <ellipse cx="200" cy="350" rx="76" ry="13" fill="rgba(90, 52, 34, 0.28)" />
+
+                     <!-- Sprout Leaves on Top -->
+                     <g class="buddy-sprout">
+                        <!-- Stem -->
+                        <path d="M 200 104 Q 198 84 203 72" stroke="#4CA63E" stroke-width="7" stroke-linecap="round" fill="none" />
+                        <!-- Left Leaf -->
+                        <path d="M 201 84 C 176 58, 142 66, 146 88 C 150 105, 182 100, 201 84 Z" fill="url(#clayLeafGrad)" />
+                        <path d="M 196 84 Q 172 80 156 86" stroke="#B9F8A4" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                        <!-- Right Leaf -->
+                        <path d="M 202 80 C 224 52, 260 58, 256 82 C 252 100, 220 96, 202 80 Z" fill="url(#clayLeafGrad)" />
+                        <path d="M 206 80 Q 230 74 246 80" stroke="#B9F8A4" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                     </g>
+
+                     <!-- Ears Slot (Behind/Side of Head) -->
+                     <g id="slot-ears" class="organ-slot" data-sense="ears" tabindex="0" role="button" aria-label="ตำแหน่งวางหู">
+                        <circle class="slot-target-ring" cx="96" cy="205" r="24" />
+                        <circle class="slot-target-ring" cx="304" cy="205" r="24" />
+                        <g id="placed-ears" style="display: none">
+                           <!-- Left Ear -->
+                           <ellipse cx="96" cy="205" rx="22" ry="30" fill="url(#clayBodyGrad)" stroke="#9C714B" stroke-width="2" />
+                           <path d="M 98 188 C 86 192, 86 218, 98 222" stroke="#9C714B" stroke-width="4" stroke-linecap="round" fill="none" />
+                           <!-- Right Ear -->
+                           <ellipse cx="304" cy="205" rx="22" ry="30" fill="url(#clayBodyGrad)" stroke="#9C714B" stroke-width="2" />
+                           <path d="M 302 188 C 314 192, 314 218, 302 222" stroke="#9C714B" stroke-width="4" stroke-linecap="round" fill="none" />
+                        </g>
+                     </g>
+
+                     <!-- Main 3D Pear/Seed Body -->
+                     <path
+                        d="M 200 100
+                     C 256 100, 294 148, 302 212
+                     C 310 278, 286 346, 200 348
+                     C 114 346, 90 278, 98 212
+                     C 106 148, 144 100, 200 100 Z"
+                        fill="url(#clayBodyGrad)" />
+
+                     <!-- Soft 3D Specular Highlight on Forehead -->
+                     <ellipse cx="172" cy="134" rx="34" ry="15" transform="rotate(-18 172 134)" fill="rgba(255,255,255,0.34)" />
+
+                     <!-- Rosy Cheeks -->
+                     <ellipse cx="142" cy="226" rx="22" ry="14" fill="url(#cheekGrad)" />
+                     <ellipse cx="258" cy="226" rx="22" ry="14" fill="url(#cheekGrad)" />
+
+                     <!-- Eyes Slot -->
+                     <g id="slot-eyes" class="organ-slot" data-sense="eyes" tabindex="0" role="button" aria-label="ตำแหน่งวางดวงตา">
+                        <rect class="slot-target-ring" x="134" y="168" width="132" height="44" rx="22" />
+                        <g id="placed-eyes" style="display: none">
+                           <!-- Left Eye -->
+                           <g class="buddy-eye-left">
+                              <ellipse cx="164" cy="190" rx="20" ry="22" fill="#FFFFFF" stroke="#5A3E28" stroke-width="2.5" />
+                              <circle cx="166" cy="191" r="12" fill="#2E1E14" />
+                              <circle cx="161" cy="185" r="4.5" fill="#FFFFFF" />
+                              <circle cx="171" cy="196" r="2.2" fill="#FFFFFF" />
+                           </g>
+                           <!-- Right Eye -->
+                           <g class="buddy-eye-right">
+                              <ellipse cx="236" cy="190" rx="20" ry="22" fill="#FFFFFF" stroke="#5A3E28" stroke-width="2.5" />
+                              <circle cx="234" cy="191" r="12" fill="#2E1E14" />
+                              <circle cx="229" cy="185" r="4.5" fill="#FFFFFF" />
+                              <circle cx="239" cy="196" r="2.2" fill="#FFFFFF" />
+                           </g>
+                        </g>
+                     </g>
+
+                     <!-- Nose Slot -->
+                     <g id="slot-nose" class="organ-slot" data-sense="nose" tabindex="0" role="button" aria-label="ตำแหน่งวางจมูก">
+                        <circle class="slot-target-ring" cx="200" cy="222" r="20" />
+                        <g id="placed-nose" style="display: none">
+                           <ellipse cx="200" cy="222" rx="15" ry="12" fill="#B56E4B" stroke="#7D452B" stroke-width="2" />
+                           <ellipse cx="196" cy="218" rx="5" ry="3" fill="rgba(255,255,255,0.55)" />
+                        </g>
+                     </g>
+
+                     <!-- Mouth / Tongue Slot -->
+                     <g id="slot-tongue" class="organ-slot" data-sense="tongue" tabindex="0" role="button" aria-label="ตำแหน่งวางปากและลิ้น">
+                        <rect class="slot-target-ring" x="164" y="246" width="72" height="44" rx="22" />
+                        <g id="placed-tongue" style="display: none">
+                           <!-- Smiling Mouth Cavity -->
+                           <path d="M 168 256 Q 200 264 232 256 C 232 284, 168 284, 168 256 Z" fill="#6E2130" stroke="#4A121D" stroke-width="2.5" />
+                           <!-- Cute Pink Tongue -->
+                           <path d="M 184 267 C 184 292, 216 292, 216 267 Z" fill="#FF6B8B" stroke="#D94566" stroke-width="2" />
+                           <line x1="200" y1="268" x2="200" y2="282" stroke="#D94566" stroke-width="2" stroke-linecap="round" />
+                        </g>
+                     </g>
+
+                     <!-- Hands Slot -->
+                     <g id="slot-hands" class="organ-slot" data-sense="hands" tabindex="0" role="button" aria-label="ตำแหน่งวางมือ">
+                        <circle class="slot-target-ring" cx="76" cy="276" r="26" />
+                        <circle class="slot-target-ring" cx="324" cy="276" r="26" />
+                        <g id="placed-hands" style="display: none">
+                           <!-- Left Chubby Hand -->
+                           <g transform="translate(74, 274) rotate(-18)">
+                              <rect x="-18" y="-20" width="36" height="38" rx="18" fill="url(#handClayGrad)" stroke="#C78816" stroke-width="2.2" />
+                              <ellipse cx="16" cy="-4" rx="9" ry="7" fill="url(#handClayGrad)" stroke="#C78816" stroke-width="2" />
+                           </g>
+                           <!-- Right Chubby Hand -->
+                           <g transform="translate(326, 274) rotate(18)">
+                              <rect x="-18" y="-20" width="36" height="38" rx="18" fill="url(#handClayGrad)" stroke="#C78816" stroke-width="2.2" />
+                              <ellipse cx="-16" cy="-4" rx="9" ry="7" fill="url(#handClayGrad)" stroke="#C78816" stroke-width="2" />
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </svg>
+            </div>
+
+            <!-- Feedback Pill -->
+            <div id="feedback-pill" class="feedback-pill" role="status" aria-live="polite"></div>
+         </section>
+
+         <!-- Bottom Tray of 5 Sense Organs (Icon-First) -->
+         <section class="tray-container" aria-label="ถาดเลือกอวัยวะรับสัมผัส">
+            <div id="organ-tray" class="organ-tray">
+               <!-- Rendered dynamically by JS -->
+            </div>
+         </section>
+      </main>
+
+      <!-- Fullscreen Game-Style Start Screen -->
+      <div id="modal-start" class="overlay-backdrop active" role="dialog" aria-modal="true" aria-labelledby="start-title">
+         <div class="start-stage-shell">
+            <!-- Game Title Emblem -->
+            <div class="game-logo-badge">
+               <h2 id="start-title" class="game-logo-title">ประกอบหน้าเพื่อน 5 สัมผัส</h2>
+            </div>
+
+            <!-- Illustrated Hero Character with Orbiting 5 Sense Icons -->
+            <div class="hero-buddy-showcase" aria-hidden="true">
+               <!-- Orbiting Sense Badges -->
+               <div class="orbit-sense" style="top: 6px; left: -12px">
+                  <svg width="28" height="28" viewBox="0 0 72 64">
+                     <ellipse cx="22" cy="32" rx="14" ry="16" fill="#FFF" stroke="#4A3222" stroke-width="3" />
+                     <circle cx="23" cy="33" r="8" fill="#2E1E14" />
+                     <ellipse cx="50" cy="32" rx="14" ry="16" fill="#FFF" stroke="#4A3222" stroke-width="3" />
+                     <circle cx="49" cy="33" r="8" fill="#2E1E14" />
+                  </svg>
+               </div>
+               <div class="orbit-sense" style="top: 6px; right: -12px">
+                  <svg width="26" height="26" viewBox="0 0 64 64">
+                     <path d="M 24 12 C 42 10, 50 24, 46 38 C 43 48, 34 54, 26 52" fill="#E3BA93" stroke="#9C714B" stroke-width="4" stroke-linecap="round" />
+                  </svg>
+               </div>
+               <div class="orbit-sense" style="bottom: 28px; left: -24px">
+                  <svg width="26" height="26" viewBox="0 0 64 64">
+                     <path d="M 32 14 C 30 26, 20 34, 20 42 C 20 48, 44 48, 44 42 C 44 34, 34 26, 32 14 Z" fill="#D49E72" stroke="#8F5D38" stroke-width="3" />
+                  </svg>
+               </div>
+               <div class="orbit-sense" style="bottom: 28px; right: -24px">
+                  <svg width="26" height="26" viewBox="0 0 64 64">
+                     <rect x="20" y="24" width="26" height="28" rx="13" fill="#FFD166" stroke="#C78816" stroke-width="3" />
+                     <rect x="24" y="10" width="6" height="18" rx="3" fill="#FFD166" stroke="#C78816" stroke-width="2" />
+                     <rect x="33" y="8" width="6" height="20" rx="3" fill="#FFD166" stroke="#C78816" stroke-width="2" />
+                  </svg>
+               </div>
+               <div class="orbit-sense" style="bottom: -10px; left: 50%; transform: translateX(-50%)">
+                  <svg width="26" height="26" viewBox="0 0 64 64">
+                     <path d="M 10 24 Q 32 32 54 24 C 54 50, 10 50, 10 24 Z" fill="#7A2032" />
+                     <path d="M 22 33 C 22 56, 42 56, 42 33 Z" fill="#FF6B8B" />
+                  </svg>
+               </div>
+
+               <!-- Central Sprout Buddy Artwork -->
+               <svg width="168" height="168" viewBox="0 0 140 145">
+                  <ellipse cx="70" cy="130" rx="52" ry="10" fill="#F49AC1" stroke="#D972A0" stroke-width="2" />
+                  <path d="M 70 28 C 52 10, 30 18, 33 32 C 36 43, 58 39, 70 28 Z" fill="url(#clayLeafGrad)" />
+                  <path d="M 70 26 C 88 8, 110 16, 107 30 C 104 41, 82 37, 70 26 Z" fill="url(#clayLeafGrad)" />
+                  <ellipse cx="70" cy="82" rx="42" ry="46" fill="url(#clayBodyGrad)" />
+                  <circle cx="52" cy="74" r="9" fill="#FFF" />
+                  <circle cx="53" cy="75" r="5.5" fill="#2E1E14" />
+                  <circle cx="51" cy="72" r="2" fill="#FFF" />
+                  <circle cx="88" cy="74" r="9" fill="#FFF" />
+                  <circle cx="87" cy="75" r="5.5" fill="#2E1E14" />
+                  <circle cx="85" cy="72" r="2" fill="#FFF" />
+                  <ellipse cx="44" cy="88" rx="8" ry="5" fill="#FF8FA3" opacity="0.65" />
+                  <ellipse cx="96" cy="88" rx="8" ry="5" fill="#FF8FA3" opacity="0.65" />
+                  <ellipse cx="70" cy="86" rx="6" ry="4.5" fill="#B56E4B" />
+                  <path d="M 56 98 Q 70 112 84 98 Z" fill="#6E2130" />
+                  <path d="M 63 103 C 63 114, 77 114, 77 103 Z" fill="#FF6B8B" />
+               </svg>
+            </div>
+
+            <!-- Illustrated Stage Selector Cards (Visual First) -->
+            <div class="stage-select-grid" role="radiogroup" aria-label="เลือกด่าน">
+               <button type="button" class="stage-choice-btn selected-stage" data-stage="0" aria-label="ด่านที่ 1 ประกอบหน้าเพื่อน">
+                  <span class="stage-num-badge">ด่าน 1</span>
+                  <svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true">
+                     <circle cx="32" cy="34" r="22" fill="#E3BA93" />
+                     <path d="M32 14 C22 4 12 8 14 16 C16 22 26 20 32 14 Z" fill="#68C953" />
+                     <circle cx="24" cy="30" r="4" fill="#2E1E14" />
+                     <circle cx="40" cy="30" r="4" fill="#2E1E14" />
+                     <path d="M24 41 Q32 49 40 41" stroke="#6E2130" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                  </svg>
+                  <strong>ประกอบหน้า</strong>
+               </button>
+
+               <button type="button" class="stage-choice-btn" data-stage="1" aria-label="ด่านที่ 2 สิ่งของปริศนา">
+                  <span class="stage-num-badge">ด่าน 2</span>
+                  <svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true">
+                     <polygon points="22,32 42,32 32,56" fill="#E0A96D" />
+                     <circle cx="32" cy="24" r="13" fill="#FF8FA3" />
+                     <circle cx="48" cy="18" r="7" fill="#FFD166" />
+                  </svg>
+                  <strong>สิ่งของปริศนา</strong>
+               </button>
+
+               <button type="button" class="stage-choice-btn" data-stage="2" aria-label="ด่านที่ 3 นักสำรวจ">
+                  <span class="stage-num-badge">ด่าน 3</span>
+                  <svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true">
+                     <polygon points="32,8 39,24 56,26 43,38 46,55 32,46 18,55 21,38 8,26 25,24" fill="#FFD166" stroke="#E09F24" stroke-width="3" stroke-linejoin="round" />
+                  </svg>
+                  <strong>นักสำรวจ</strong>
+               </button>
+            </div>
+
+            <!-- Big Bouncy Play Button -->
+            <button id="btn-start-game" class="btn-primary" aria-label="เริ่มเล่นเกม">
+               <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+               </svg>
+               <span>เล่นเลย!</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- Stage Clear / Completion Modal -->
+      <div id="modal-complete" class="overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="complete-title">
+         <div class="modal-card">
+            <svg width="110" height="110" viewBox="0 0 100 100" aria-hidden="true">
+               <polygon points="50,6 63,34 94,38 71,60 77,91 50,76 23,91 29,60 6,38 37,34" fill="#FFD166" stroke="#E09F24" stroke-width="4" stroke-linejoin="round" />
+               <circle cx="40" cy="48" r="4" fill="#3A2E39" />
+               <circle cx="60" cy="48" r="4" fill="#3A2E39" />
+               <path d="M 41 60 Q 50 69 59 60" stroke="#3A2E39" stroke-width="4" stroke-linecap="round" fill="none" />
+            </svg>
+            <h2 id="complete-title" class="modal-title">เก่งมาก! ครบ 5 สัมผัสแล้ว!</h2>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; justify-content: center">
+               <button id="btn-replay-stage" class="btn-secondary" aria-label="เล่นอีกครั้ง">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                     <polyline points="1 4 1 10 7 10" />
+                     <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                  </svg>
+                  <span>เล่นซ้ำ</span>
+               </button>
+               <button id="btn-next-stage" class="btn-primary" aria-label="ด่านถัดไป">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                     <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  <span id="btn-next-stage-text">ด่านถัดไป</span>
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Visual Help / Tutorial Modal -->
+      <div id="modal-help" class="overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="help-title">
+         <div class="modal-card">
+            <h2 id="help-title" class="modal-title">วิธีเล่น</h2>
+            <div class="visual-steps-grid">
+               <div class="visual-step-card">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#198CD1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#DDF2FF" />
+                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+                  <span>1. กดฟังเสียง</span>
+               </div>
+               <div class="visual-step-card">
+                  <svg width="52" height="52" viewBox="0 0 64 64">
+                     <ellipse cx="22" cy="32" rx="13" ry="15" fill="#FFF" stroke="#4A3222" stroke-width="3" />
+                     <circle cx="23" cy="33" r="7" fill="#2E1E14" />
+                     <ellipse cx="46" cy="32" rx="13" ry="15" fill="#FFF" stroke="#4A3222" stroke-width="3" />
+                     <circle cx="45" cy="33" r="7" fill="#2E1E14" />
+                  </svg>
+                  <span>2. เลือกอวัยวะ</span>
+               </div>
+               <div class="visual-step-card">
+                  <svg width="52" height="52" viewBox="0 0 64 64">
+                     <circle cx="32" cy="32" r="22" fill="#FFF0EA" stroke="#FF7A59" stroke-width="4" stroke-dasharray="6 4" />
+                     <polyline points="22 33 29 40 43 25" fill="none" stroke="#2BA887" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <span>3. วางบนตัวเพื่อน</span>
+               </div>
+            </div>
+            <button id="btn-close-help" class="btn-primary">
+               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+               </svg>
+               <span>พร้อมแล้ว!</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- Stage Clear / Completion Modal -->
+      <div id="modal-complete" class="overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="complete-title">
+         <div class="modal-card">
+            <svg width="96" height="96" viewBox="0 0 100 100" aria-hidden="true">
+               <polygon points="50,6 63,34 94,38 71,60 77,91 50,76 23,91 29,60 6,38 37,34" fill="#FFD166" stroke="#E09F24" stroke-width="4" stroke-linejoin="round" />
+               <circle cx="40" cy="48" r="4" fill="#3A2E39" />
+               <circle cx="60" cy="48" r="4" fill="#3A2E39" />
+               <path d="M 41 60 Q 50 69 59 60" stroke="#3A2E39" stroke-width="4" stroke-linecap="round" fill="none" />
+            </svg>
+            <h2 id="complete-title" class="modal-title">เก่งมาก! ครบ 5 สัมผัสแล้ว!</h2>
+            <p id="complete-desc" class="modal-desc">น้องต้นกล้ามีครบทั้ง ตา หู จมูก ลิ้น และมือ พร้อมออกไปสำรวจโลกกว้างแล้ว!</p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center">
+               <button id="btn-replay-stage" class="btn-secondary">เล่นด่านนี้อีกครั้ง</button>
+               <button id="btn-next-stage" class="btn-primary">ด่านถัดไป</button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Help / Tutorial Modal -->
+      <div id="modal-help" class="overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="help-title">
+         <div class="modal-card">
+            <h2 id="help-title" class="modal-title">วิธีเล่นง่ายๆ 3 ขั้นตอน</h2>
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 12px; width: 100%">
+               <div class="a11y-row">
+                  <span class="a11y-row-label">1. กดปุ่มลำโพงสีฟ้าด้านซ้าย เพื่อฟังเสียงโจทย์</span>
+               </div>
+               <div class="a11y-row">
+                  <span class="a11y-row-label">2. แตะเลือกอวัยวะจากถาดด้านล่าง (ตา หู จมูก ลิ้น มือ)</span>
+               </div>
+               <div class="a11y-row">
+                  <span class="a11y-row-label">3. แตะวางบนจุดประบนตัวน้องต้นกล้า หรือลากไปวางให้ตรงช่อง</span>
+               </div>
+            </div>
+            <button id="btn-close-help" class="btn-primary">เข้าใจแล้ว!</button>
+         </div>
+      </div>
+
+      <!-- Accessibility Drawer Modal -->
+      <div id="modal-a11y" class="overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="a11y-title">
+         <div class="modal-card">
+            <h2 id="a11y-title" class="modal-title">ตั้งค่าการเข้าถึง (Accessibility)</h2>
+
+            <div class="a11y-row">
+               <span class="a11y-row-label">โหมดความคมชัดสูง (High Contrast)</span>
+               <button id="toggle-contrast" class="switch-toggle" role="switch" aria-checked="false" aria-label="เปิดหรือปิดโหมดความคมชัดสูง"></button>
+            </div>
+
+            <div class="a11y-row">
+               <span class="a11y-row-label">โหมดลดสิ่งเร้า (Sensory Calm)</span>
+               <button id="toggle-calm" class="switch-toggle" role="switch" aria-checked="false" aria-label="เปิดหรือปิดโหมดลดสิ่งเร้า"></button>
+            </div>
+
+            <div class="a11y-row">
+               <span class="a11y-row-label">เส้นประนำทางอัตโนมัติ (Hint)</span>
+               <button id="toggle-hint" class="switch-toggle" role="switch" aria-checked="true" aria-label="เปิดหรือปิดเส้นประนำทาง"></button>
+            </div>
+
+            <div class="a11y-row">
+               <span class="a11y-row-label">ขนาดตัวอักษร</span>
+               <div class="segmented-group" role="group" aria-label="เลือกขนาดตัวอักษร">
+                  <button type="button" class="seg-btn active" data-size="normal">ปกติ</button>
+                  <button type="button" class="seg-btn" data-size="large">ใหญ่</button>
+                  <button type="button" class="seg-btn" data-size="xlarge">ใหญ่มาก</button>
+               </div>
+            </div>
+
+            <button id="btn-close-a11y" class="btn-primary">บันทึกและปิด</button>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * ประกอบหน้าเพื่อน 5 สัมผัส 3 มิติ (5 Senses 3D Buddy Builder)
+          * Single-File Accessible Educational Game for Early Childhood (Kindergarten 3)
+          */
+         (function () {
+            'use strict';
+
+            /* =========================================================================
+             * 1. LEARNING CONTENT & STAGE DATA
+             * ========================================================================= */
+            const ORGANS = {
+               tongue: {
+                  id: 'tongue',
+                  name: 'ลิ้น',
+                  fullName: 'ลิ้นและปาก',
+                  functionText: 'ใช้ชิมรสชาติ หวาน เปรี้ยว เค็ม ขม',
+                  gentleError: 'เอ๊ะ นั่น{chosen}เอาไว้{chosenFunc} ลองหาอวัยวะที่ใช้ชิมรสดูนะ!',
+                  successSpeech: 'ถูกต้อง! ลิ้นใช้ชิมรสชาติ อร่อยจังเลย!',
+                  svgIcon: `
+            <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M 10 24 Q 32 32 54 24 C 54 50, 10 50, 10 24 Z" fill="#7A2032" stroke="#4A101C" stroke-width="2.5"/>
+              <path d="M 22 33 C 22 56, 42 56, 42 33 Z" fill="#FF6B8B" stroke="#D94566" stroke-width="2"/>
+              <line x1="32" y1="34" x2="32" y2="48" stroke="#D94566" stroke-width="2" stroke-linecap="round"/>
+            </svg>`,
+               },
+               eyes: {
+                  id: 'eyes',
+                  name: 'ตา',
+                  fullName: 'ดวงตา',
+                  functionText: 'ใช้มองเห็นภาพ แสง สี และรูปร่าง',
+                  gentleError: 'นั่น{chosen}เอาไว้{chosenFunc} ลองหาอวัยวะที่ใช้มองเห็นดูสิ!',
+                  successSpeech: 'เก่งมาก! ดวงตาใช้มองเห็นสิ่งต่างๆ รอบตัว!',
+                  svgIcon: `
+            <svg width="56" height="52" viewBox="0 0 72 64" aria-hidden="true">
+              <ellipse cx="22" cy="32" rx="14" ry="16" fill="#FFF" stroke="#4A3222" stroke-width="2.5"/>
+              <circle cx="23" cy="33" r="8.5" fill="#2E1E14"/>
+              <circle cx="20" cy="29" r="3" fill="#FFF"/>
+              <ellipse cx="50" cy="32" rx="14" ry="16" fill="#FFF" stroke="#4A3222" stroke-width="2.5"/>
+              <circle cx="49" cy="33" r="8.5" fill="#2E1E14"/>
+              <circle cx="46" cy="29" r="3" fill="#FFF"/>
+            </svg>`,
+               },
+               ears: {
+                  id: 'ears',
+                  name: 'หู',
+                  fullName: 'ใบหู',
+                  functionText: 'ใช้ฟังเสียงพูดและเสียงดนตรี',
+                  gentleError: 'นั่น{chosen}เอาไว้{chosenFunc} ลองหาอวัยวะที่ใช้ฟังเสียงดูนะ!',
+                  successSpeech: 'เยี่ยมเลย! หูใช้ฟังเสียงไพเราะรอบตัว!',
+                  svgIcon: `
+            <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M 24 12 C 42 10, 50 24, 46 38 C 43 48, 34 54, 26 52 C 20 50, 18 42, 24 38" fill="#E3BA93" stroke="#9C714B" stroke-width="3" stroke-linecap="round"/>
+              <path d="M 28 22 C 36 22, 38 32, 32 38" stroke="#9C714B" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </svg>`,
+               },
+               nose: {
+                  id: 'nose',
+                  name: 'จมูก',
+                  fullName: 'จมูก',
+                  functionText: 'ใช้ดมกลิ่นหอม กลิ่นเหม็น และหายใจ',
+                  gentleError: 'นั่น{chosen}เอาไว้{chosenFunc} ลองหาอวัยวะที่ใช้ดมกลิ่นดูสิ!',
+                  successSpeech: 'ใช่แล้ว! จมูกใช้ดมกลิ่นหอมๆ และหายใจ!',
+                  svgIcon: `
+            <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M 32 14 C 30 26, 20 34, 20 42 C 20 48, 44 48, 44 42 C 44 34, 34 26, 32 14 Z" fill="#D49E72" stroke="#8F5D38" stroke-width="2.5"/>
+              <circle cx="26" cy="42" r="3" fill="#6E4223"/>
+              <circle cx="38" cy="42" r="3" fill="#6E4223"/>
+            </svg>`,
+               },
+               hands: {
+                  id: 'hands',
+                  name: 'มือ',
+                  fullName: 'มือและผิวหนัง',
+                  functionText: 'ใช้จับ สัมผัส รู้สึกร้อน เย็น นุ่ม แข็ง',
+                  gentleError: 'นั่น{chosen}เอาไว้{chosenFunc} ลองหาอวัยวะที่ใช้จับสัมผัสดูนะ!',
+                  successSpeech: 'สุดยอด! มือใช้จับและสัมผัสสิ่งของต่างๆ!',
+                  svgIcon: `
+            <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="20" y="24" width="26" height="28" rx="13" fill="#FFD166" stroke="#C78816" stroke-width="2.5"/>
+              <rect x="22" y="10" width="6" height="18" rx="3" fill="#FFD166" stroke="#C78816" stroke-width="2"/>
+              <rect x="30" y="8" width="6" height="20" rx="3" fill="#FFD166" stroke="#C78816" stroke-width="2"/>
+              <rect x="38" y="11" width="6" height="18" rx="3" fill="#FFD166" stroke="#C78816" stroke-width="2"/>
+              <rect x="13" y="28" width="12" height="6" rx="3" transform="rotate(-25 13 28)" fill="#FFD166" stroke="#C78816" stroke-width="2"/>
+            </svg>`,
+               },
+            };
+
+            const STAGES = [
+               {
+                  id: 0,
+                  title: 'ด่านที่ 1 : รู้จักอวัยวะรับสัมผัส',
+                  subPrompt: 'ภารกิจที่ 1 : ประกอบหน้าเพื่อน 5 สัมผัส',
+                  tasks: [
+                     { target: 'tongue', prompt: 'ชิมด้วยลิ้น!', speech: 'ชิมด้วยลิ้น! ลองเลือก ลิ้น มาวางให้น้องต้นกล้าสิ' },
+                     { target: 'eyes', prompt: 'มองด้วยตา!', speech: 'มองด้วยตา! ลองเลือก ดวงตา มาวางให้น้องต้นกล้าสิ' },
+                     { target: 'ears', prompt: 'ฟังด้วยหู!', speech: 'ฟังด้วยหู! ลองเลือก ใบหู มาวางให้น้องต้นกล้าสิ' },
+                     { target: 'nose', prompt: 'ดมด้วยจมูก!', speech: 'ดมด้วยจมูก! ลองเลือก จมูก มาวางให้น้องต้นกล้าสิ' },
+                     { target: 'hands', prompt: 'จับด้วยมือ!', speech: 'จับด้วยมือ! ลองเลือก มือ มาวางให้น้องต้นกล้าสิ' },
+                  ],
+               },
+               {
+                  id: 1,
+                  title: 'ด่านที่ 2 : สิ่งของปริศนารอบตัว',
+                  subPrompt: 'ภารกิจที่ 2 : ใช้อวัยวะไหนสำรวจสิ่งนี้ดีนะ?',
+                  tasks: [
+                     {
+                        target: 'nose',
+                        prompt: 'ดอกไม้หอมจัง! ใช้อะไรดมกลิ่นดีนะ?',
+                        speech: 'ดอกไม้หอมจังเลย! เราใช้อวัยวะไหนดมกลิ่นหอมดีนะ?',
+                        stimulusLabel: 'ดอกไม้แสนหอม',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="16" r="10" fill="#FF8FA3"/><circle cx="46" cy="28" r="10" fill="#FF8FA3"/><circle cx="40" cy="44" r="10" fill="#FF8FA3"/><circle cx="24" cy="44" r="10" fill="#FF8FA3"/><circle cx="18" cy="28" r="10" fill="#FF8FA3"/><circle cx="32" cy="32" r="9" fill="#FFD166"/></svg>`,
+                     },
+                     {
+                        target: 'ears',
+                        prompt: 'กระดิ่งดังกริ๊งๆ! ใช้อะไรฟังเสียงดีนะ?',
+                        speech: 'กระดิ่งดังกริ๊งๆ! เราใช้อวัยวะไหนฟังเสียงดีนะ?',
+                        stimulusLabel: 'กระดิ่งเสียงใส',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><path d="M32 12 C20 12 16 24 16 38 L10 44 L54 44 L48 38 C48 24 44 12 32 12 Z" fill="#FFD166" stroke="#D99B1E" stroke-width="2.5"/><circle cx="32" cy="48" r="6" fill="#E09F24"/></svg>`,
+                     },
+                     {
+                        target: 'tongue',
+                        prompt: 'ไอศกรีมหวานเย็น! ใช้อะไรชิมรสดีนะ?',
+                        speech: 'ไอศกรีมหวานเย็นน่ากินจัง! เราใช้อวัยวะไหนชิมรสดีนะ?',
+                        stimulusLabel: 'ไอศกรีมหวานเย็น',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><polygon points="22,32 42,32 32,58" fill="#E0A96D"/><circle cx="32" cy="24" r="14" fill="#FF8FA3"/><circle cx="32" cy="10" r="4" fill="#E63946"/></svg>`,
+                     },
+                     {
+                        target: 'hands',
+                        prompt: 'ตุ๊กตาหมีขนนุ่มนิ่ม! ใช้อะไรจับสัมผัสดีนะ?',
+                        speech: 'ตุ๊กตาหมีขนนุ่มนิ่ม! เราใช้อวัยวะไหนจับสัมผัสดีนะ?',
+                        stimulusLabel: 'ตุ๊กตาหมีนุ่มนิ่ม',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="20" cy="20" r="8" fill="#C68B59"/><circle cx="44" cy="20" r="8" fill="#C68B59"/><circle cx="32" cy="34" r="18" fill="#D99B66"/><circle cx="26" cy="30" r="2.5" fill="#3A2E39"/><circle cx="38" cy="30" r="2.5" fill="#3A2E39"/><ellipse cx="32" cy="38" rx="6" ry="4" fill="#FFE6C7"/></svg>`,
+                     },
+                     {
+                        target: 'eyes',
+                        prompt: 'รุ้งกินน้ำ 7 สีสวยงาม! ใช้อะไรมองดูดีนะ?',
+                        speech: 'รุ้งกินน้ำ 7 สีสวยงามบนท้องฟ้า! เราใช้อวัยวะไหนมองดูดีนะ?',
+                        stimulusLabel: 'สายรุ้ง 7 สี',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><path d="M10 46 A22 22 0 0 1 54 46" stroke="#FF595E" stroke-width="5" fill="none"/><path d="M15 46 A17 17 0 0 1 49 46" stroke="#FFCA3A" stroke-width="5" fill="none"/><path d="M20 46 A12 12 0 0 1 44 46" stroke="#8AC926" stroke-width="5" fill="none"/><path d="M25 46 A7 7 0 0 1 39 46" stroke="#1982C4" stroke-width="5" fill="none"/></svg>`,
+                     },
+                  ],
+               },
+               {
+                  id: 2,
+                  title: 'ด่านที่ 3 : ซ่อมแซมหุ่นเพื่อนนักสำรวจ',
+                  subPrompt: 'ภารกิจที่ 3 : ช่วยน้องต้นกล้าสำรวจรอบตัวให้ครบ 5 สัมผัส!',
+                  tasks: [
+                     {
+                        target: 'eyes',
+                        prompt: 'น้องต้นกล้าอยากอ่านหนังสือนิทานภาพ!',
+                        speech: 'น้องต้นกล้าอยากอ่านหนังสือนิทานภาพ! ช่วยใส่อวัยวะที่ใช้มองภาพหน่อยสิ',
+                        stimulusLabel: 'หนังสือนิทาน',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><rect x="12" y="16" width="20" height="32" rx="3" fill="#4CC9F0" stroke="#2B8CBE" stroke-width="2"/><rect x="32" y="16" width="20" height="32" rx="3" fill="#90E0EF" stroke="#2B8CBE" stroke-width="2"/></svg>`,
+                     },
+                     {
+                        target: 'hands',
+                        prompt: 'น้ำแข็งก้อนนี้เย็นเจี๊ยบ! ใช้อะไรแตะรับรู้ความเย็น?',
+                        speech: 'น้ำแข็งก้อนนี้เย็นเจี๊ยบเลย! ใช้อวัยวะไหนแตะเพื่อรับรู้ความเย็น?',
+                        stimulusLabel: 'ก้อนน้ำแข็งเย็น',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><rect x="16" y="16" width="32" height="32" rx="8" fill="#A0E7FF" stroke="#38B6FF" stroke-width="3"/><line x1="22" y1="24" x2="32" y2="24" stroke="#FFF" stroke-width="3" stroke-linecap="round"/></svg>`,
+                     },
+                     {
+                        target: 'nose',
+                        prompt: 'โอ๊ะ! ถุงเท้าคู่นี้มีกลิ่นเหม็นตุๆ ใช้อะไรได้กลิ่นนะ?',
+                        speech: 'โอ๊ะ! ถุงเท้าคู่นี้มีกลิ่นเหม็นตุๆ เราใช้อวัยวะไหนได้กลิ่นนะ?',
+                        stimulusLabel: 'ถุงเท้ามีกลิ่น',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><path d="M26 14 L38 14 L38 36 C38 44 20 48 16 40 C13 34 22 30 26 30 Z" fill="#B8E0D2" stroke="#5C9E87" stroke-width="2.5"/></svg>`,
+                     },
+                     {
+                        target: 'ears',
+                        prompt: 'คุณแม่กำลังร้องเพลงกล่อม ใช้อะไรฟังเสียงเพลง?',
+                        speech: 'คุณแม่กำลังร้องเพลงกล่อมแสนไพเราะ ใช้อวัยวะไหนฟังเสียงเพลงนะ?',
+                        stimulusLabel: 'เสียงเพลงไพเราะ',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="24" cy="44" r="7" fill="#FF7A59"/><path d="M30 44 L30 18 L48 14 L48 38" stroke="#FF7A59" stroke-width="4" fill="none"/><circle cx="42" cy="38" r="7" fill="#FF7A59"/></svg>`,
+                     },
+                     {
+                        target: 'tongue',
+                        prompt: 'มะนาวลูกนี้เปรี้ยวจี๊ด! ใช้อะไรรับรู้รสเปรี้ยว?',
+                        speech: 'มะนาวลูกนี้เปรี้ยวจี๊ดเลย! ใช้อวัยวะไหนรับรู้รสเปรี้ยวนะ?',
+                        stimulusLabel: 'มะนาวรสเปรี้ยว',
+                        stimulusSvg: `<svg width="64" height="64" viewBox="0 0 64 64"><ellipse cx="32" cy="32" rx="20" ry="15" fill="#D9ED92" stroke="#99D98C" stroke-width="3"/><circle cx="12" cy="32" r="3" fill="#B5E48C"/><circle cx="52" cy="32" r="3" fill="#B5E48C"/></svg>`,
+                     },
+                  ],
+               },
+            ];
+
+            /* =========================================================================
+             * 2. AUDIO ENGINE (Web Audio API + Thai Web Speech API)
+             * ========================================================================= */
+            const AudioEngine = {
+               ctx: null,
+               muted: false,
+               thaiVoice: null,
+
+               init() {
+                  if (!this.ctx) {
+                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                     if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                     }
+                  }
+                  if (this.ctx && this.ctx.state === 'suspended') {
+                     this.ctx.resume().catch(() => {});
+                  }
+                  this.loadVoices();
+               },
+
+               loadVoices() {
+                  if (!('speechSynthesis' in window)) return;
+                  const findVoice = () => {
+                     const voices = window.speechSynthesis.getVoices();
+                     this.thaiVoice = voices.find((v) => v.lang && v.lang.toLowerCase().includes('th')) || null;
+                  };
+                  findVoice();
+                  window.speechSynthesis.onvoiceschanged = findVoice;
+               },
+
+               playTone(freq, type = 'sine', duration = 0.18, delay = 0, vol = 0.22) {
+                  if (this.muted) return;
+                  this.init();
+                  if (!this.ctx) return;
+                  const effectiveVol = document.body.classList.contains('sensory-calm') ? vol * 0.45 : vol;
+                  const now = this.ctx.currentTime + delay;
+                  const osc = this.ctx.createOscillator();
+                  const gain = this.ctx.createGain();
+                  osc.type = type;
+                  osc.frequency.setValueAtTime(freq, now);
+                  gain.gain.setValueAtTime(0.001, now);
+                  gain.gain.exponentialRampToValueAtTime(effectiveVol, now + 0.02);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                  osc.connect(gain);
+                  gain.connect(this.ctx.destination);
+                  osc.start(now);
+                  osc.stop(now + duration + 0.02);
+               },
+
+               playPop() {
+                  this.playTone(520, 'sine', 0.1, 0, 0.2);
+                  this.playTone(680, 'sine', 0.12, 0.05, 0.18);
+               },
+
+               playSuccess() {
+                  this.playTone(523.25, 'triangle', 0.16, 0, 0.24); // C5
+                  this.playTone(659.25, 'triangle', 0.16, 0.09, 0.24); // E5
+                  this.playTone(783.99, 'triangle', 0.25, 0.18, 0.26); // G5
+                  this.playTone(1046.5, 'sine', 0.35, 0.28, 0.22); // C6
+               },
+
+               playGentleError() {
+                  this.playTone(330, 'sine', 0.18, 0, 0.16);
+                  this.playTone(277.18, 'sine', 0.24, 0.12, 0.16);
+               },
+
+               playStageFanfare() {
+                  const notes = [523.25, 659.25, 783.99, 1046.5, 987.77, 1046.5];
+                  notes.forEach((n, idx) => {
+                     this.playTone(n, 'triangle', 0.22, idx * 0.11, 0.24);
+                  });
+               },
+
+               speak(text) {
+                  if (this.muted || !('speechSynthesis' in window)) return;
+                  try {
+                     window.speechSynthesis.cancel();
+                     const utter = new SpeechSynthesisUtterance(text);
+                     utter.lang = 'th-TH';
+                     if (this.thaiVoice) utter.voice = this.thaiVoice;
+                     utter.rate = 0.92; // Clear, gentle pace for young children
+                     utter.pitch = 1.12;
+                     const speakerBtn = document.getElementById('btn-speak-prompt');
+                     utter.onstart = () => speakerBtn && speakerBtn.classList.add('speaking');
+                     utter.onend = () => speakerBtn && speakerBtn.classList.remove('speaking');
+                     utter.onerror = () => speakerBtn && speakerBtn.classList.remove('speaking');
+                     window.speechSynthesis.speak(utter);
+                  } catch (e) {
+                     // Fallback silently if speech synthesis is blocked
+                  }
+               },
+            };
+
+            /* =========================================================================
+             * 3. GAME STATE & PERSISTENCE
+             * ========================================================================= */
+            const state = {
+               stageIndex: 0,
+               taskIndex: 0,
+               placedOrgans: new Set(),
+               selectedOrganId: null,
+               isDragging: false,
+               dragOrganId: null,
+               settings: {
+                  highContrast: false,
+                  sensoryCalm: false,
+                  showHints: true,
+                  textSize: 'normal',
+               },
+            };
+
+            function loadSettings() {
+               try {
+                  const saved = localStorage.getItem('fiveSensesBuddySettings');
+                  if (saved) {
+                     Object.assign(state.settings, JSON.parse(saved));
+                  }
+               } catch (e) {
+                  // Ignore storage restrictions
+               }
+               applySettingsToDOM();
+            }
+
+            function saveSettings() {
+               try {
+                  localStorage.setItem('fiveSensesBuddySettings', JSON.stringify(state.settings));
+               } catch (e) {
+                  // Ignore storage restrictions
+               }
+            }
+
+            function applySettingsToDOM() {
+               document.body.classList.toggle('high-contrast', state.settings.highContrast);
+               document.body.classList.toggle('sensory-calm', state.settings.sensoryCalm);
+               document.body.classList.remove('text-large', 'text-xlarge');
+               if (state.settings.textSize === 'large') document.body.classList.add('text-large');
+               if (state.settings.textSize === 'xlarge') document.body.classList.add('text-xlarge');
+
+               document.getElementById('toggle-contrast').setAttribute('aria-checked', String(state.settings.highContrast));
+               document.getElementById('toggle-calm').setAttribute('aria-checked', String(state.settings.sensoryCalm));
+               document.getElementById('toggle-hint').setAttribute('aria-checked', String(state.settings.showHints));
+
+               document.querySelectorAll('.seg-btn').forEach((btn) => {
+                  btn.classList.toggle('active', btn.dataset.size === state.settings.textSize);
+               });
+
+               updateSlotHighlights();
+            }
+
+            /* =========================================================================
+             * 4. UI RENDERING & GAMEPLAY LOGIC
+             * ========================================================================= */
+            const dom = {
+               stageBadgeText: document.getElementById('stage-badge-text'),
+               promptBanner: document.getElementById('prompt-banner'),
+               promptMain: document.getElementById('prompt-main'),
+               progressBar: document.getElementById('progress-bar'),
+               stimulusCard: document.getElementById('stimulus-card'),
+               stimulusArt: document.getElementById('stimulus-art'),
+               stimulusLabel: document.getElementById('stimulus-label'),
+               buddyWrapper: document.getElementById('buddy-wrapper'),
+               organTray: document.getElementById('organ-tray'),
+               feedbackPill: document.getElementById('feedback-pill'),
+               dragGhost: document.getElementById('drag-ghost'),
+               particleLayer: document.getElementById('particle-layer'),
+            };
+
+            let feedbackTimer = null;
+
+            function showFeedback(text, isError = false) {
+               clearTimeout(feedbackTimer);
+               dom.feedbackPill.textContent = text;
+               dom.feedbackPill.classList.toggle('error', isError);
+               dom.feedbackPill.classList.add('show');
+               feedbackTimer = setTimeout(() => {
+                  dom.feedbackPill.classList.remove('show');
+               }, 3200);
+            }
+
+            function getCurrentStage() {
+               return STAGES[state.stageIndex];
+            }
+
+            function getCurrentTask() {
+               const stage = getCurrentStage();
+               return stage.tasks[state.taskIndex] || null;
+            }
+
+            function startStage(stageIdx) {
+               state.stageIndex = stageIdx;
+               state.taskIndex = 0;
+               state.placedOrgans.clear();
+               state.selectedOrganId = null;
+
+               // Reset placed organs on SVG
+               Object.keys(ORGANS).forEach((id) => {
+                  const placedEl = document.getElementById(`placed-${id}`);
+                  const slotEl = document.getElementById(`slot-${id}`);
+                  if (placedEl) placedEl.style.display = 'none';
+                  if (slotEl) {
+                     slotEl.style.display = 'inline';
+                     slotEl.querySelectorAll('.slot-target-ring').forEach((r) => (r.style.display = 'inline'));
+                  }
+               });
+
+               renderTray();
+               updateTaskUI(true);
+            }
+
+            function updateTaskUI(shouldSpeak = true) {
+               const stage = getCurrentStage();
+               const task = getCurrentTask();
+
+               dom.stageBadgeText.textContent = `${stage.id + 1} / ${STAGES.length}`;
+
+               if (task) {
+                  dom.promptMain.textContent = task.prompt;
+                  dom.promptBanner.classList.remove('pop');
+                  void dom.promptBanner.offsetWidth;
+                  dom.promptBanner.classList.add('pop');
+
+                  if (task.stimulusSvg) {
+                     dom.stimulusCard.style.display = 'flex';
+                     dom.stimulusArt.innerHTML = task.stimulusSvg;
+                     dom.stimulusLabel.textContent = task.stimulusLabel || '';
+                  } else {
+                     dom.stimulusCard.style.display = 'none';
+                  }
+
+                  if (shouldSpeak) {
+                     AudioEngine.speak(task.speech);
+                  }
+               }
+
+               renderProgressDots();
+               updateSlotHighlights();
+            }
+
+            function renderProgressDots() {
+               const stage = getCurrentStage();
+               dom.progressBar.innerHTML = '';
+               dom.progressBar.setAttribute('aria-valuenow', String(state.placedOrgans.size));
+
+               stage.tasks.forEach((task, idx) => {
+                  const dot = document.createElement('div');
+                  dot.className = 'progress-dot';
+                  if (idx < state.taskIndex) {
+                     dot.classList.add('done');
+                     dot.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#133B30" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+                  } else if (idx === state.taskIndex) {
+                     dot.classList.add('current');
+                  }
+                  dom.progressBar.appendChild(dot);
+               });
+            }
+
+            function renderTray() {
+               dom.organTray.innerHTML = '';
+               // Fixed tactile order matching educational flow
+               const order = ['tongue', 'eyes', 'ears', 'nose', 'hands'];
+               order.forEach((id) => {
+                  const organ = ORGANS[id];
+                  const card = document.createElement('button');
+                  card.type = 'button';
+                  card.className = 'organ-card';
+                  card.dataset.organ = id;
+                  card.setAttribute('aria-label', `${organ.fullName} : ${organ.functionText}`);
+                  if (state.placedOrgans.has(id)) card.classList.add('used');
+                  if (state.selectedOrganId === id) card.classList.add('selected');
+
+                  card.innerHTML = `
+            ${organ.svgIcon}
+            <span class="organ-card-label">${organ.name}</span>
+          `;
+
+                  // Tap/Click Selection
+                  card.addEventListener('click', () => {
+                     if (state.placedOrgans.has(id)) return;
+                     AudioEngine.playPop();
+                     state.selectedOrganId = state.selectedOrganId === id ? null : id;
+                     updateTraySelection();
+                     updateSlotHighlights();
+                     if (state.selectedOrganId) {
+                        AudioEngine.speak(organ.fullName);
+                     }
+                  });
+
+                  // Pointer Drag Initiation
+                  card.addEventListener('pointerdown', (e) => {
+                     if (state.placedOrgans.has(id) || (e.button !== 0 && e.pointerType === 'mouse')) return;
+                     startDrag(e, id);
+                  });
+
+                  dom.organTray.appendChild(card);
+               });
+            }
+
+            function updateTraySelection() {
+               document.querySelectorAll('.organ-card').forEach((card) => {
+                  const id = card.dataset.organ;
+                  card.classList.toggle('used', state.placedOrgans.has(id));
+                  card.classList.toggle('selected', state.selectedOrganId === id);
+               });
+            }
+
+            function updateSlotHighlights() {
+               const task = getCurrentTask();
+               document.querySelectorAll('.organ-slot').forEach((slot) => {
+                  const senseId = slot.dataset.sense;
+                  const isPlaced = state.placedOrgans.has(senseId);
+                  const shouldGlow = !isPlaced && (state.selectedOrganId === senseId || (state.settings.showHints && task && task.target === senseId));
+                  slot.classList.toggle('highlight', Boolean(shouldGlow));
+               });
+            }
+
+            /* =========================================================================
+             * 5. PLACEMENT VALIDATION & SENSORY REACTIONS
+             * ========================================================================= */
+            function attemptPlaceOrgan(organId, targetSlotId) {
+               const task = getCurrentTask();
+               if (!task || !organId) return;
+
+               // Must match the current prompt's target sense AND the intended slot
+               if (organId === task.target && (!targetSlotId || targetSlotId === task.target)) {
+                  handleCorrectPlacement(organId);
+               } else if (targetSlotId && organId !== targetSlotId) {
+                  // Dropped onto wrong body location
+                  AudioEngine.playGentleError();
+                  triggerBuddyAnimation('gentle-shake');
+                  const msg = `อ๊ะ! ลองวาง${ORGANS[organId].name}ให้ตรงตำแหน่งบนตัวน้องต้นกล้านะ`;
+                  showFeedback(msg, true);
+                  AudioEngine.speak(msg);
+               } else {
+                  // Wrong sense organ chosen for the prompt
+                  AudioEngine.playGentleError();
+                  triggerBuddyAnimation('gentle-shake');
+                  const chosen = ORGANS[organId];
+                  const target = ORGANS[task.target];
+                  const gentleMsg = target.gentleError.replace('{chosen}', chosen.name).replace('{chosenFunc}', chosen.functionText);
+                  showFeedback(gentleMsg, true);
+                  AudioEngine.speak(gentleMsg);
+               }
+            }
+
+            function handleCorrectPlacement(organId) {
+               state.placedOrgans.add(organId);
+               state.selectedOrganId = null;
+
+               // Show organ on Buddy & hide dashed target ring
+               const slotEl = document.getElementById(`slot-${organId}`);
+               const placedEl = document.getElementById(`placed-${organId}`);
+               if (slotEl) {
+                  slotEl.querySelectorAll('.slot-target-ring').forEach((r) => (r.style.display = 'none'));
+               }
+               if (placedEl) {
+                  placedEl.style.display = 'inline';
+               }
+
+               AudioEngine.playSuccess();
+               triggerBuddyAnimation('happy-bounce');
+               spawnCelebrationParticles(20);
+
+               const organ = ORGANS[organId];
+               showFeedback(organ.successSpeech, false);
+               AudioEngine.speak(organ.successSpeech);
+
+               updateTraySelection();
+               state.taskIndex++;
+
+               if (state.taskIndex >= getCurrentStage().tasks.length) {
+                  renderProgressDots();
+                  updateSlotHighlights();
+                  setTimeout(() => {
+                     completeCurrentStage();
+                  }, 1450);
+               } else {
+                  setTimeout(() => {
+                     updateTaskUI(true);
+                  }, 1350);
+               }
+            }
+
+            function triggerBuddyAnimation(className) {
+               dom.buddyWrapper.classList.remove('happy-bounce', 'gentle-shake');
+               void dom.buddyWrapper.offsetWidth;
+               dom.buddyWrapper.classList.add(className);
+            }
+
+            function completeCurrentStage() {
+               AudioEngine.playStageFanfare();
+               spawnCelebrationParticles(45);
+
+               const isLastStage = state.stageIndex >= STAGES.length - 1;
+               const modal = document.getElementById('modal-complete');
+               const title = document.getElementById('complete-title');
+               const nextBtnText = document.getElementById('btn-next-stage-text');
+
+               if (isLastStage) {
+                  title.textContent = 'ยินดีด้วย! ครบทั้ง 3 ด่านแล้ว!';
+                  nextBtnText.textContent = 'เล่นใหม่';
+               } else {
+                  title.textContent = `ยอดเยี่ยม! ผ่านด่านที่ ${state.stageIndex + 1} แล้ว!`;
+                  nextBtnText.textContent = 'ด่านถัดไป';
+               }
+
+               modal.classList.add('active');
+               AudioEngine.speak(title.textContent);
+            }
+
+            /* =========================================================================
+             * 6. HYBRID DRAG & DROP + TAP-TO-PLACE + KEYBOARD SUPPORT
+             * ========================================================================= */
+            let dragStartPos = { x: 0, y: 0 };
+
+            function startDrag(e, organId) {
+               state.dragOrganId = organId;
+               state.isDragging = false;
+               dragStartPos = { x: e.clientX, y: e.clientY };
+
+               const onPointerMove = (moveEvent) => {
+                  const dx = moveEvent.clientX - dragStartPos.x;
+                  const dy = moveEvent.clientY - dragStartPos.y;
+                  if (!state.isDragging && Math.hypot(dx, dy) > 8) {
+                     state.isDragging = true;
+                     state.selectedOrganId = organId;
+                     updateTraySelection();
+                     updateSlotHighlights();
+                     dom.dragGhost.innerHTML = ORGANS[organId].svgIcon;
+                     dom.dragGhost.style.display = 'block';
+                  }
+                  if (state.isDragging) {
+                     dom.dragGhost.style.left = `${moveEvent.clientX}px`;
+                     dom.dragGhost.style.top = `${moveEvent.clientY}px`;
+                  }
+               };
+
+               const onPointerUp = (upEvent) => {
+                  window.removeEventListener('pointermove', onPointerMove);
+                  window.removeEventListener('pointerup', onPointerUp);
+
+                  if (state.isDragging) {
+                     dom.dragGhost.style.display = 'none';
+                     const droppedSlot = findDropSlotAtPoint(upEvent.clientX, upEvent.clientY);
+                     if (droppedSlot) {
+                        attemptPlaceOrgan(organId, droppedSlot);
+                     } else {
+                        // Check if dropped anywhere inside the Buddy character area for kid-friendly forgiveness
+                        const buddyRect = dom.buddyWrapper.getBoundingClientRect();
+                        if (upEvent.clientX >= buddyRect.left && upEvent.clientX <= buddyRect.right && upEvent.clientY >= buddyRect.top && upEvent.clientY <= buddyRect.bottom) {
+                           attemptPlaceOrgan(organId, null);
+                        }
+                     }
+                  }
+                  state.isDragging = false;
+                  state.dragOrganId = null;
+               };
+
+               window.addEventListener('pointermove', onPointerMove);
+               window.addEventListener('pointerup', onPointerUp);
+            }
+
+            function findDropSlotAtPoint(x, y) {
+               const elements = document.elementsFromPoint(x, y);
+               for (const el of elements) {
+                  const slot = el.closest('.organ-slot');
+                  if (slot && slot.dataset.sense) {
+                     return slot.dataset.sense;
+                  }
+               }
+               return null;
+            }
+
+            // Bind Click & Keyboard on Buddy SVG Slots
+            document.querySelectorAll('.organ-slot').forEach((slot) => {
+               const senseId = slot.dataset.sense;
+               const activateSlot = () => {
+                  if (state.placedOrgans.has(senseId)) return;
+                  if (state.selectedOrganId) {
+                     attemptPlaceOrgan(state.selectedOrganId, senseId);
+                  } else {
+                     const hintMsg = 'แตะเลือกอวัยวะจากถาดด้านล่างก่อนนะ!';
+                     showFeedback(hintMsg, false);
+                     AudioEngine.speak(hintMsg);
+                  }
+               };
+
+               slot.addEventListener('click', activateSlot);
+               slot.addEventListener('keydown', (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                     e.preventDefault();
+                     activateSlot();
+                  }
+               });
+            });
+
+            // Interactive 2.5D Parallax Tilt on Buddy Stage
+            window.addEventListener('pointermove', (e) => {
+               if (state.settings.sensoryCalm) {
+                  dom.buddyWrapper.style.transform = 'none';
+                  return;
+               }
+               const cx = window.innerWidth / 2;
+               const cy = window.innerHeight / 2;
+               const rx = ((e.clientX - cx) / cx) * 4;
+               const ry = ((e.clientY - cy) / cy) * 3;
+               dom.buddyWrapper.style.transform = `perspective(700px) rotateY(${rx}deg) rotateX(${-ry}deg)`;
+            });
+
+            /* =========================================================================
+             * 7. CELEBRATION PARTICLES (Procedural SVG Shapes)
+             * ========================================================================= */
+            function spawnCelebrationParticles(count = 24) {
+               if (state.settings.sensoryCalm) return;
+               const colors = ['#FF7A59', '#FFD166', '#4CD4B0', '#38B6FF', '#F49AC1'];
+               for (let i = 0; i < count; i++) {
+                  const el = document.createElement('div');
+                  const size = 10 + Math.random() * 12;
+                  const color = colors[i % colors.length];
+                  const startX = 30 + Math.random() * 40;
+                  const startY = 35 + Math.random() * 20;
+                  const driftX = (Math.random() - 0.5) * 260;
+                  const driftY = -120 - Math.random() * 180;
+
+                  el.style.position = 'fixed';
+                  el.style.left = `${startX}vw`;
+                  el.style.top = `${startY}vh`;
+                  el.style.width = `${size}px`;
+                  el.style.height = `${size}px`;
+                  el.style.borderRadius = i % 2 === 0 ? '50%' : '4px';
+                  el.style.backgroundColor = color;
+                  el.style.transition = 'transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.1s ease-out';
+                  el.style.transform = 'translate(0, 0) scale(1)';
+                  el.style.opacity = '1';
+
+                  dom.particleLayer.appendChild(el);
+
+                  requestAnimationFrame(() => {
+                     el.style.transform = `translate(${driftX}px, ${driftY}px) rotate(${Math.random() * 360}deg) scale(0.4)`;
+                     el.style.opacity = '0';
+                  });
+
+                  setTimeout(() => el.remove(), 1150);
+               }
+            }
+
+            /* =========================================================================
+             * 8. MODAL & CONTROL EVENT LISTENERS
+             * ========================================================================= */
+            // Start Screen Stage Choice Buttons
+            let chosenStartStage = 0;
+            document.querySelectorAll('.stage-choice-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  AudioEngine.playPop();
+                  chosenStartStage = Number(btn.dataset.stage);
+                  document.querySelectorAll('.stage-choice-btn').forEach((b) => b.classList.remove('selected-stage'));
+                  btn.classList.add('selected-stage');
+               });
+            });
+
+            document.getElementById('btn-start-game').addEventListener('click', () => {
+               AudioEngine.init();
+               AudioEngine.playPop();
+               document.getElementById('modal-start').classList.remove('active');
+               startStage(chosenStartStage);
+            });
+
+            document.getElementById('btn-home').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-start').classList.add('active');
+            });
+
+            document.getElementById('btn-speak-prompt').addEventListener('click', () => {
+               const task = getCurrentTask();
+               if (task) {
+                  AudioEngine.speak(task.speech);
+               }
+            });
+
+            // Mute Button
+            document.getElementById('btn-mute').addEventListener('click', () => {
+               AudioEngine.muted = !AudioEngine.muted;
+               if (AudioEngine.muted && 'speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+               }
+               document.getElementById('icon-sound-on').style.display = AudioEngine.muted ? 'none' : 'inline';
+               document.getElementById('icon-sound-off').style.display = AudioEngine.muted ? 'inline' : 'none';
+               document.getElementById('btn-mute').classList.toggle('active-toggle', AudioEngine.muted);
+            });
+
+            // Help Modal
+            document.getElementById('btn-help').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-help').classList.add('active');
+               AudioEngine.speak('กดปุ่มลำโพงเพื่อฟังเสียงโจทย์ จากนั้นเลือกอวัยวะด้านล่างมาวางบนตัวน้องต้นกล้า');
+            });
+            document.getElementById('btn-close-help').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-help').classList.remove('active');
+            });
+
+            // Accessibility Modal
+            document.getElementById('btn-a11y').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-a11y').classList.add('active');
+            });
+            document.getElementById('btn-close-a11y').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-a11y').classList.remove('active');
+            });
+
+            document.getElementById('toggle-contrast').addEventListener('click', () => {
+               state.settings.highContrast = !state.settings.highContrast;
+               applySettingsToDOM();
+               saveSettings();
+            });
+
+            document.getElementById('toggle-calm').addEventListener('click', () => {
+               state.settings.sensoryCalm = !state.settings.sensoryCalm;
+               applySettingsToDOM();
+               saveSettings();
+            });
+
+            document.getElementById('toggle-hint').addEventListener('click', () => {
+               state.settings.showHints = !state.settings.showHints;
+               applySettingsToDOM();
+               saveSettings();
+            });
+
+            document.querySelectorAll('.seg-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  state.settings.textSize = btn.dataset.size;
+                  applySettingsToDOM();
+                  saveSettings();
+               });
+            });
+
+            // Stage Complete Buttons
+            document.getElementById('btn-replay-stage').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-complete').classList.remove('active');
+               startStage(state.stageIndex);
+            });
+
+            document.getElementById('btn-next-stage').addEventListener('click', () => {
+               AudioEngine.playPop();
+               document.getElementById('modal-complete').classList.remove('active');
+               const nextIdx = (state.stageIndex + 1) % STAGES.length;
+               startStage(nextIdx);
+            });
+
+            // Initialize App on Load
+            window.addEventListener('DOMContentLoaded', () => {
+               loadSettings();
+               renderTray();
+               renderProgressDots();
+            });
+         })();
+      </script>
+   </body>
+</html>

@@ -1,0 +1,2947 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🫧 ป๊อป! ฟองสายรุ้ง — Boom Play · OKRP Game Template</title>
+  <style>
+    /* ==========================================================================
+       🫧 ป๊อป! ฟองสายรุ้ง — Boom Play · Universal OKRP Game Template
+       - 100% Offline Single-File HTML + CSS + Custom Vinyl-Toy SVG + Web Audio + Thai TTS
+       - Full Pastel Rainbow Sky + Interactive Treasure Chest & Starlight Pop Volcano
+       ========================================================================== */
+    :root {
+      --bg-cream: #FFFDF7;
+      --ink-plum: #4A304D;
+      --peach: #FF9EBB;
+      --peach-soft: #FFE5EE;
+      --yellow: #FFD166;
+      --yellow-soft: #FFF5D6;
+      --mint: #80ED99;
+      --mint-soft: #D8F3DC;
+      --sky-blue: #BDE0FE;
+      --focus-ring: #FF477E;
+      --base-font: 16px;
+      --font-main: system-ui, -apple-system, 'Sarabun', 'Leelawadee UI', 'Noto Sans Thai', sans-serif;
+    }
+
+    html { font-size: var(--base-font); }
+    html[data-text-size="large"] { --base-font: 18px; }
+    html[data-text-size="xlarge"] { --base-font: 20px; }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #FFE5EE 0%, #FFFDF7 46%, #E0F7FA 100%);
+      color: var(--ink-plum);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.45;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    button, a.toy-btn {
+      font-family: inherit;
+      color: var(--ink-plum);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    button:focus-visible, a.toy-btn:focus-visible {
+      outline: 4px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    [hidden] { display: none !important; }
+
+    /* Shell */
+    .app-shell {
+      width: 100%;
+      max-width: 960px;
+      padding: 0.45rem 0.65rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background: var(--bg-cream);
+      border: 3px solid var(--ink-plum);
+      border-radius: 22px;
+      box-shadow: 0 4px 0 var(--ink-plum);
+      padding: 0.4rem 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-pill {
+      background: var(--yellow);
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.14rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .game-title {
+      font-size: 1.12rem;
+      font-weight: 900;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .toy-btn {
+      background: var(--bg-cream);
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 15px;
+      box-shadow: 0 3px 0 var(--ink-plum);
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.32rem 0.68rem;
+      font-size: 0.88rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.32rem;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+    }
+
+    .toy-btn:hover:not(:disabled) {
+      transform: translateY(-1.5px);
+      filter: brightness(1.03);
+    }
+
+    .toy-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--ink-plum);
+    }
+
+    .toy-btn.bg-peach { background: var(--peach); }
+    .toy-btn.bg-yellow { background: var(--yellow); }
+    .toy-btn.bg-mint { background: var(--mint); }
+    .toy-btn.bg-blue { background: var(--sky-blue); }
+    .toy-btn.bg-purple { background: #F3E8FF; }
+
+    /* Single-switch scan highlight */
+    .scan-focus {
+      outline: 5px solid #FF477E !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 7px rgba(255, 209, 102, 0.92), 0 5px 0 var(--ink-plum) !important;
+      transform: scale(1.06) !important;
+      z-index: 35 !important;
+    }
+
+    /* HUD Bar */
+    .hud-card {
+      background: var(--bg-cream);
+      border: 3px solid var(--ink-plum);
+      border-radius: 22px;
+      box-shadow: 0 4px 0 var(--ink-plum);
+      padding: 0.42rem 0.72rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .star-meter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 210px;
+    }
+
+    .star-badge {
+      background: var(--yellow-soft);
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.12rem 0.62rem;
+      font-size: 0.92rem;
+      font-weight: 900;
+      white-space: nowrap;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .star-badge.pulse { transform: scale(1.16); }
+
+    .star-meter-track {
+      flex: 1;
+      height: 22px;
+      background: #FFF3D1;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      overflow: hidden;
+      padding: 2px;
+    }
+
+    .star-meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #FF9EBB 0%, #FFD166 50%, #80ED99 100%);
+      border-radius: 999px;
+      transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .combo-pill {
+      background: var(--peach-soft);
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.12rem 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 900;
+      white-space: nowrap;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .combo-pill.fever-active {
+      background: linear-gradient(90deg, #FF9EBB, #FFD166, #80ED99);
+      transform: scale(1.08);
+    }
+
+    .legend-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.38rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-chip {
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.12rem 0.6rem;
+      font-size: 0.82rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .legend-chip.good { background: var(--mint-soft); }
+    .legend-chip.bad { background: #FFE5D9; }
+
+    /* Main Sky & Rainbow Bubble Arena */
+    .arena-stage {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      background: linear-gradient(180deg, #CBEFFF 0%, #FFFDF7 58%, #DCFCE7 100%);
+      border: 3.5px solid var(--ink-plum);
+      border-radius: 28px;
+      box-shadow: 0 7px 0 var(--ink-plum);
+      overflow: hidden;
+      touch-action: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .arena-stage.fever-mode {
+      box-shadow: 0 0 0 6px rgba(255, 209, 102, 0.85), 0 8px 0 var(--ink-plum);
+    }
+
+    .sky-decor {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .sky-cloud {
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .sky-cloud:hover { transform: scale(1.05); }
+
+    /* Top Mascot Guardian */
+    .mascot-dock {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: rgba(255, 253, 247, 0.94);
+      border: 3px solid var(--ink-plum);
+      border-radius: 999px;
+      box-shadow: 0 4px 0 var(--ink-plum);
+      padding: 0.22rem 0.8rem;
+      pointer-events: none;
+      max-width: 92%;
+    }
+
+    .mascot-avatar {
+      width: 50px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    .mascot-speech {
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: var(--ink-plum);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Full-Height Left & Right Interactive Woven Toy Baskets */
+    .drop-basket {
+      position: absolute;
+      top: 66px;
+      bottom: 14px;
+      width: 146px;
+      border: 3.5px dashed var(--ink-plum);
+      border-radius: 26px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.35rem 0.55rem;
+      text-align: center;
+      z-index: 6;
+      touch-action: manipulation;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .drop-basket.left-basket {
+      left: 10px;
+      background: linear-gradient(180deg, rgba(216, 243, 220, 0.92) 0%, rgba(183, 228, 199, 0.95) 100%);
+      box-shadow: 0 5px 0 rgba(5, 150, 105, 0.35);
+    }
+
+    .drop-basket.right-basket {
+      right: 10px;
+      background: linear-gradient(180deg, rgba(255, 229, 217, 0.92) 0%, rgba(255, 204, 213, 0.95) 100%);
+      box-shadow: 0 5px 0 rgba(225, 29, 72, 0.3);
+    }
+
+    .drop-basket.basket-highlight {
+      transform: scale(1.07);
+      border-style: solid;
+    }
+
+    .drop-basket.left-basket.basket-highlight {
+      background: #B7E4C7;
+      box-shadow: 0 0 0 6px rgba(128, 237, 153, 0.72), 0 6px 0 var(--ink-plum);
+    }
+
+    .drop-basket.right-basket.basket-highlight {
+      background: #FFCCD5;
+      box-shadow: 0 0 0 6px rgba(255, 158, 187, 0.72), 0 6px 0 var(--ink-plum);
+    }
+
+    @keyframes basketNom {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.14, 0.88); }
+      70% { transform: scale(0.95, 1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .basket-nom { animation: basketNom 0.38s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @keyframes basketShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .basket-shake { animation: basketShake 0.32s ease; }
+
+    /* Station Loot Shelf & Charge Meter */
+    .station-loot-shelf {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      min-height: 28px;
+      width: 100%;
+      background: rgba(255, 253, 247, 0.72);
+      border: 2px solid var(--ink-plum);
+      border-radius: 12px;
+      padding: 2px 4px;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .loot-token {
+      display: inline-block;
+      animation: lootPopIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes lootPopIn {
+      0% { transform: scale(0) rotate(-25deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .station-visual-box {
+      width: 96px;
+      height: 88px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .station-visual-box svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .station-charge-wrap {
+      width: 92%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      pointer-events: none;
+    }
+
+    .station-charge-track {
+      width: 100%;
+      height: 11px;
+      background: rgba(255, 253, 247, 0.9);
+      border: 2px solid var(--ink-plum);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .station-charge-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .left-basket .station-charge-fill {
+      background: linear-gradient(90deg, #FFD166, #06D6A0);
+    }
+
+    .right-basket .station-charge-fill {
+      background: linear-gradient(90deg, #FF9EBB, #FF477E);
+    }
+
+    .basket-title {
+      font-size: 0.9rem;
+      font-weight: 900;
+      background: #FFFDF7;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 2px 10px;
+      pointer-events: none;
+    }
+
+    .basket-hint {
+      font-size: 0.72rem;
+      font-weight: 900;
+      background: rgba(255, 253, 247, 0.82);
+      border-radius: 999px;
+      padding: 1px 7px;
+      pointer-events: none;
+    }
+
+    /* 3D Glossy & Squishy Toy Bubbles */
+    .bubble-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    @keyframes bubbleIdleFloat {
+      0%, 100% {
+        border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+        transform: scale(1, 1) rotate(0deg);
+      }
+      25% {
+        border-radius: 56% 44% 53% 47% / 45% 55% 46% 54%;
+        transform: scale(1.04, 0.95) rotate(-2deg);
+      }
+      50% {
+        border-radius: 45% 55% 46% 54% / 55% 45% 54% 46%;
+        transform: scale(0.95, 1.05) rotate(2deg);
+      }
+      75% {
+        border-radius: 53% 47% 56% 44% / 47% 53% 45% 55%;
+        transform: scale(1.03, 0.96) rotate(-1.5deg);
+      }
+    }
+
+    @keyframes bubbleJellyDrag {
+      0%, 100% {
+        border-radius: 58% 42% 55% 45% / 43% 57% 44% 56%;
+      }
+      50% {
+        border-radius: 42% 58% 45% 55% / 57% 43% 56% 44%;
+      }
+    }
+
+    @keyframes bubbleDimplePoke {
+      0% {
+        transform: scale(1, 1);
+        border-radius: 50%;
+      }
+      28% {
+        transform: scale(0.84, 1.18);
+        border-radius: 40% 60% 42% 58% / 60% 40% 58% 42%;
+      }
+      56% {
+        transform: scale(1.16, 0.86);
+        border-radius: 60% 40% 58% 42% / 40% 60% 42% 58%;
+      }
+      80% {
+        transform: scale(0.96, 1.05);
+        border-radius: 47% 53% 48% 52% / 53% 47% 52% 48%;
+      }
+      100% {
+        transform: scale(1, 1);
+        border-radius: 50%;
+      }
+    }
+
+    .toy-bubble {
+      position: absolute;
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 3.5px solid var(--ink-plum);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: none;
+      will-change: transform, top, left, border-radius;
+      animation: bubbleIdleFloat 2.8s ease-in-out infinite;
+      transition: box-shadow 0.15s ease;
+    }
+
+    .toy-bubble:hover {
+      animation: bubbleDimplePoke 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toy-bubble.is-poke-bounce {
+      animation: bubbleDimplePoke 0.52s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toy-bubble.is-dragging,
+    .toy-bubble.is-selected {
+      cursor: grabbing;
+      z-index: 28 !important;
+      outline: 4px dashed #FF477E;
+      outline-offset: 3px;
+      animation: bubbleJellyDrag 0.45s ease-in-out infinite;
+    }
+
+    .toy-bubble.good-bubble {
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.42) 18%, transparent 42%),
+        radial-gradient(circle at 74% 78%, rgba(183, 228, 199, 0.95) 0%, rgba(116, 198, 157, 0.92) 45%, #52B788 100%);
+      box-shadow:
+        inset -10px -12px 18px rgba(5, 150, 105, 0.38),
+        inset 8px 8px 14px rgba(255, 255, 255, 0.95),
+        inset 0 -3px 8px rgba(255, 209, 102, 0.55),
+        0 7px 0 var(--ink-plum),
+        0 11px 16px rgba(74, 48, 77, 0.22);
+    }
+
+    .toy-bubble.hazard-bubble {
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.42) 18%, transparent 42%),
+        radial-gradient(circle at 74% 78%, rgba(255, 229, 217, 0.95) 0%, rgba(255, 158, 187, 0.92) 45%, #FF7096 100%);
+      box-shadow:
+        inset -10px -12px 18px rgba(225, 29, 72, 0.32),
+        inset 8px 8px 14px rgba(255, 255, 255, 0.95),
+        inset 0 -3px 8px rgba(144, 224, 239, 0.55),
+        0 7px 0 var(--ink-plum),
+        0 11px 16px rgba(74, 48, 77, 0.22);
+    }
+
+    .toy-bubble.bonus-star-bubble {
+      border-color: #D97706;
+      box-shadow:
+        inset -10px -12px 18px rgba(245, 158, 11, 0.36),
+        inset 8px 8px 14px rgba(255, 255, 255, 0.95),
+        0 0 0 4px rgba(255, 209, 102, 0.88),
+        0 7px 0 var(--ink-plum);
+    }
+
+    @keyframes bubbleJellyDrag {
+      0%, 100% { border-radius: 54% 46% 52% 48% / 46% 54% 47% 53%; }
+      50% { border-radius: 46% 54% 48% 52% / 54% 46% 53% 47%; }
+    }
+
+    .toy-bubble {
+      position: absolute;
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 3.5px solid var(--ink-plum);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: none;
+      will-change: transform, top, left, border-radius;
+      animation: bubbleIdleFloat 3.4s ease-in-out infinite;
+      transition: box-shadow 0.15s ease;
+    }
+
+    .toy-bubble:hover {
+      transform: scale(1.06);
+    }
+
+    .toy-bubble.is-dragging,
+    .toy-bubble.is-selected {
+      cursor: grabbing;
+      z-index: 28 !important;
+      outline: 4px dashed #FF477E;
+      outline-offset: 3px;
+      animation: bubbleJellyDrag 0.55s ease-in-out infinite;
+    }
+
+    .toy-bubble.good-bubble {
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.4) 18%, transparent 42%),
+        radial-gradient(circle at 74% 78%, rgba(183, 228, 199, 0.95) 0%, rgba(116, 198, 157, 0.92) 45%, #52B788 100%);
+      box-shadow:
+        inset -10px -12px 18px rgba(5, 150, 105, 0.38),
+        inset 8px 8px 14px rgba(255, 255, 255, 0.95),
+        inset 0 -3px 8px rgba(255, 209, 102, 0.55),
+        0 7px 0 var(--ink-plum),
+        0 11px 16px rgba(74, 48, 77, 0.22);
+    }
+
+    .toy-bubble.hazard-bubble {
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.4) 18%, transparent 42%),
+        radial-gradient(circle at 74% 78%, rgba(255, 229, 217, 0.95) 0%, rgba(255, 158, 187, 0.92) 45%, #FF7096 100%);
+      box-shadow:
+        inset -10px -12px 18px rgba(225, 29, 72, 0.32),
+        inset 8px 8px 14px rgba(255, 255, 255, 0.95),
+        inset 0 -3px 8px rgba(144, 224, 239, 0.55),
+        0 7px 0 var(--ink-plum),
+        0 11px 16px rgba(74, 48, 77, 0.22);
+    }
+
+    .toy-bubble {
+      position: absolute;
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 3.5px solid var(--ink-plum);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px;
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: none;
+      will-change: transform, top, left;
+      transition: box-shadow 0.15s ease;
+    }
+
+    .toy-bubble:hover {
+      transform: scale(1.06);
+    }
+
+    .toy-bubble.is-dragging,
+    .toy-bubble.is-selected {
+      cursor: grabbing;
+      z-index: 28 !important;
+      outline: 4px dashed #FF477E;
+      outline-offset: 3px;
+    }
+
+    .toy-bubble.good-bubble {
+      background: radial-gradient(circle at 30% 25%, #FFFFFF 0%, #D8F3DC 38%, #74C69D 100%);
+      box-shadow:
+        inset -6px -8px 14px rgba(5, 150, 105, 0.28),
+        inset 6px 6px 12px rgba(255, 255, 255, 0.9),
+        0 5px 0 var(--ink-plum);
+    }
+
+    .toy-bubble.hazard-bubble {
+      background: radial-gradient(circle at 30% 25%, #FFFFFF 0%, #FFE5D9 38%, #FF9EBB 100%);
+      box-shadow:
+        inset -6px -8px 14px rgba(225, 29, 72, 0.25),
+        inset 6px 6px 12px rgba(255, 255, 255, 0.9),
+        0 5px 0 var(--ink-plum);
+    }
+
+    .toy-bubble.bonus-star-bubble {
+      border-color: #D97706;
+      box-shadow:
+        inset -6px -8px 14px rgba(245, 158, 11, 0.32),
+        inset 6px 6px 12px rgba(255, 255, 255, 0.95),
+        0 0 0 4px rgba(255, 209, 102, 0.88),
+        0 5px 0 var(--ink-plum);
+    }
+
+    .bonus-crown-tag {
+      position: absolute;
+      top: -10px;
+      right: -6px;
+      background: #FFD166;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      box-shadow: 0 2px 0 var(--ink-plum);
+      pointer-events: none;
+    }
+
+    .toy-bubble::before {
+      content: '';
+      position: absolute;
+      top: 11px;
+      left: 19px;
+      width: 28px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      transform: rotate(-28deg);
+      pointer-events: none;
+    }
+
+    .toy-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: 13px;
+      right: 22px;
+      width: 14px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.65);
+      transform: rotate(-28deg);
+      pointer-events: none;
+    }
+
+    .bubble-icon-box {
+      width: 52px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .bubble-icon-box svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .bubble-label {
+      font-size: 0.8rem;
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: center;
+      background: rgba(255, 253, 247, 0.94);
+      border: 2px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 2px 8px;
+      max-width: 112px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .bubble-action-tag {
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .good-bubble .bubble-action-tag {
+      background: #059669;
+      color: #FFFFFF;
+    }
+
+    .hazard-bubble .bubble-action-tag {
+      background: #E11D48;
+      color: #FFFFFF;
+    }
+
+    /* Flying Reward Star & Popups */
+    .flying-star {
+      position: fixed;
+      font-size: 1.65rem;
+      pointer-events: none;
+      z-index: 80;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
+    }
+
+    .pop-spark {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.45rem;
+      z-index: 30;
+      animation: popBurstAnim 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .pop-ring {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      margin-left: -17px;
+      margin-top: -17px;
+      border-radius: 50%;
+      border: 4px solid #FFFFFF;
+      box-shadow: 0 0 0 3px var(--ring-color, #FFD166), inset 0 0 8px rgba(255, 255, 255, 0.9);
+      pointer-events: none;
+      z-index: 29;
+      animation: bubbleRingExpand 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .mini-pop-bubble {
+      position: absolute;
+      width: var(--bsize, 22px);
+      height: var(--bsize, 22px);
+      border-radius: 50%;
+      border: 2.5px solid var(--ink-plum);
+      background: radial-gradient(circle at 30% 25%, #FFFFFF 0%, var(--bcolor, #90E0EF) 70%);
+      box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.14);
+      pointer-events: none;
+      z-index: 30;
+      animation: miniBubbleFloatPop 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes bubbleRingExpand {
+      0% { opacity: 1; transform: scale(0.4); }
+      100% { opacity: 0; transform: scale(3.6); }
+    }
+
+    @keyframes miniBubbleFloatPop {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.45); }
+      75% { opacity: 0.95; transform: translate(var(--tx), var(--ty)) scale(1.1); }
+      100% { opacity: 0; transform: translate(var(--tx), calc(var(--ty) - 18px)) scale(0.2); }
+    }
+
+    @keyframes popBurstAnim {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.5); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.25); }
+    }
+
+    .float-callout {
+      position: absolute;
+      z-index: 32;
+      pointer-events: none;
+      background: #FFFDF7;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.88rem;
+      font-weight: 900;
+      box-shadow: 0 3px 0 var(--ink-plum);
+      animation: floatUpFade 0.85s ease-out forwards;
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
+      100% { opacity: 0; transform: translate(-50%, -46px) scale(1.08); }
+    }
+
+    /* Overlay Screens inside Arena */
+    .arena-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      background: rgba(255, 253, 247, 0.9);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      gap: 0.7rem;
+    }
+
+    .overlay-card {
+      background: var(--bg-cream);
+      border: 3.5px solid var(--ink-plum);
+      border-radius: 26px;
+      box-shadow: 0 6px 0 var(--ink-plum);
+      padding: 0.95rem 1.2rem;
+      max-width: 530px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .overlay-title { font-size: 1.35rem; font-weight: 900; }
+
+    .summary-stickers-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.42rem;
+      width: 100%;
+    }
+
+    .summary-chip {
+      background: #FFF8E7;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 16px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Bottom Coach & Audio Strip */
+    .coach-panel {
+      background: #FFF9EB;
+      border: 3px solid var(--ink-plum);
+      border-radius: 22px;
+      box-shadow: 0 4px 0 var(--ink-plum);
+      padding: 0.6rem 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .coach-text {
+      font-size: 1.02rem;
+      font-weight: 900;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .cta-big-btn {
+      min-height: 52px;
+      padding: 0.6rem 1.25rem;
+      font-size: 1.06rem;
+      font-weight: 900;
+      border-radius: 18px;
+    }
+
+    @keyframes mascotBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .mascot-bob { animation: mascotBob 2s ease-in-out infinite; }
+
+    html[data-reduced-motion="true"] .pop-spark,
+    html[data-reduced-motion="true"] .pop-ring,
+    html[data-reduced-motion="true"] .mini-pop-bubble,
+    html[data-reduced-motion="true"] .toy-bubble,
+    html[data-reduced-motion="true"] .mascot-bob,
+    html[data-reduced-motion="true"] .basket-nom,
+    html[data-reduced-motion="true"] .loot-token {
+      animation: none !important;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(74, 48, 77, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      z-index: 60;
+    }
+
+    .modal-card {
+      background: var(--bg-cream);
+      border: 3.5px solid var(--ink-plum);
+      border-radius: 24px;
+      box-shadow: 0 6px 0 var(--ink-plum);
+      width: 100%;
+      max-width: 600px;
+      max-height: 88dvh;
+      overflow-y: auto;
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .modal-title { font-size: 1.18rem; font-weight: 900; }
+
+    .info-section, .setting-row {
+      background: #FFF6E9;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 16px;
+      padding: 0.58rem 0.78rem;
+      font-size: 0.9rem;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .json-editor {
+      width: 100%;
+      min-height: 120px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.8rem;
+      padding: 0.55rem;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 14px;
+      background: #FFFFFF;
+      color: var(--ink-plum);
+      resize: vertical;
+    }
+
+    .json-status {
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 0.4rem 0.65rem;
+      border-radius: 12px;
+      border: 2px solid var(--ink-plum);
+    }
+
+    .json-status.ok { background: #D8F3DC; }
+    .json-status.err { background: #FFE5EE; }
+
+    @media (max-width: 560px) {
+      .arena-stage { height: 420px; }
+      .drop-basket { width: 98px; top: 62px; padding: 0.35rem 0.2rem; }
+      .station-visual-box { width: 64px; height: 58px; }
+      .station-loot-shelf { font-size: 0.82rem; min-height: 22px; }
+      .basket-title { font-size: 0.74rem; padding: 2px 6px; }
+      .basket-hint { display: none; }
+      .toy-bubble { width: 100px; height: 100px; }
+      .bubble-icon-box { width: 42px; height: 36px; }
+      .bubble-label { font-size: 0.72rem; max-width: 90px; }
+      .mascot-speech { font-size: 0.82rem; }
+    }
+  </style>
+  <style>
+    #game-rules {
+      --rules-accent: #dff3f7;
+      --rules-ink: #432744;
+      box-sizing: border-box;
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(44rem, calc(100% - 1.5rem));
+      max-height: calc(100% - 1.5rem);
+      padding: 0;
+      overflow: hidden;
+      border: 2px solid var(--rules-ink);
+      border-radius: 24px;
+      background: #fffdf7;
+      color: var(--rules-ink);
+      box-shadow: 0 6px 0 var(--rules-ink), 0 20px 52px #2d1a3059;
+      font: clamp(1.125rem, 1.05rem + .35vw, 1.375rem)/1.5 "Leelawadee UI", Tahoma, sans-serif;
+    }
+    #game-rules[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+    #game-rules::backdrop { background: #27172cbd; }
+    #game-rules .rules-content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+    #game-rules .rules-heading {
+      padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2.25rem);
+      border-bottom: 1px solid #4327443d;
+      background: var(--rules-accent);
+    }
+    #game-rules .rules-label { margin: 0; font-weight: 800; }
+    #game-rules h2 {
+      margin: .25rem 0 0;
+      font-size: clamp(1.625rem, 1.4rem + 1.3vw, 2.5rem);
+      line-height: 1.25;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    #game-rules ol {
+      counter-reset: rule;
+      list-style: none;
+      margin: 0;
+      padding: .4rem clamp(.9rem, 4vw, 2.25rem) 0;
+    }
+    #game-rules li {
+      counter-increment: rule;
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      align-items: start;
+      gap: .7rem;
+      padding-block: clamp(.5rem, 1.3vw, .85rem);
+    }
+    #game-rules li + li { border-top: 1px solid #e6dce5; }
+    #game-rules li::before {
+      content: counter(rule);
+      display: grid;
+      place-items: center;
+      min-height: 2rem;
+      border-radius: 10px;
+      background: var(--rules-accent);
+      font-weight: 800;
+    }
+    #game-rules .rules-switch {
+      margin: .35rem clamp(.9rem, 4vw, 2.25rem) .8rem;
+      padding: .55rem .8rem;
+      border-inline-start: 3px solid var(--rules-ink);
+      border-radius: 8px;
+      background: #f4eef7;
+      overflow-wrap: anywhere;
+    }
+    #game-rules .rules-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .3rem .7rem;
+      padding: .65rem clamp(.9rem, 4vw, 2.25rem);
+      border-top: 1px solid #e6dce5;
+      background: #fffdf7;
+    }
+    #game-rules button, #game-rules a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: .35rem .75rem;
+      font: inherit;
+      font-weight: 800;
+      color: inherit;
+    }
+    #game-rules button {
+      flex: 1;
+      background: #ffd166;
+      border: 2px solid var(--rules-ink);
+      border-radius: 12px;
+      box-shadow: 0 3px 0 var(--rules-ink);
+      cursor: pointer;
+    }
+    #game-rules button:hover { background: #ffe192; }
+    #game-rules a { text-decoration: underline; text-underline-offset: .2em; }
+    #game-rules :focus-visible { outline: 3px solid #6c2aa3; outline-offset: 2px; }
+    #game-rules .rules-content:focus-visible { outline-offset: -4px; }
+    @media (forced-colors: active) {
+      #game-rules li::before { border: 1px solid CanvasText; }
+    }
+  </style>
+</head>
+<body>
+  <dialog id="game-rules" aria-labelledby="game-rules-title">
+    <div class="rules-content" role="region" aria-label="กติกาและการควบคุม" tabindex="0">
+      <div class="rules-heading">
+        <p class="rules-label">วิธีเล่น</p>
+        <h2 id="game-rules-title">ป๊อป! ฟองสายรุ้ง</h2>
+      </div>
+      <ol role="list">
+        <li><span>กด <strong>เริ่มลากฟองเลย</strong> แล้วดูรูปหรือฟังชื่อของในฟอง</span></li>
+        <li><span>ลากสิ่งที่ดีต่อปอดลง <strong>ตะกร้าซ้าย</strong> แล้วลากสิ่งที่ควรหลีกเลี่ยง เช่น ควันบุหรี่ ไป <strong>ถังขวา</strong></span></li>
+        <li><span>ถ้าวางผิดฝั่ง ลองฟังคำใบ้แล้วลากใหม่ แยกฟองให้ครบเพื่อจบรอบ</span></li>
+      </ol>
+      <p class="rules-switch">แตะฟองแล้วแตะฝั่งที่ต้องการได้ด้วย หรือเปิด <strong>สวิตช์เดียว</strong> แล้วกด Space เมื่อกรอบอยู่ที่ฟองหรือจุดวาง</p>
+    </div>
+    <form method="dialog" class="rules-actions">
+      <button type="submit" autofocus>เข้าเกม</button>
+      <a href="./index.html#bonus-title">กลับลานเกม</a>
+    </form>
+  </dialog>
+  <div class="app-shell">
+    <!-- 1. TOP TOOLBAR -->
+    <header class="top-bar">
+      <div class="brand-group">
+        <span class="brand-pill">🌈 Boom Play · OKRP Template</span>
+        <h1 class="game-title">🫧 ป๊อป! ฟองสายรุ้ง</h1>
+      </div>
+
+      <nav class="toolbar-group" aria-label="เครื่องมือควบคุมเกม">
+        <a href="./index.html" class="toy-btn bg-peach" id="btnHubTop">← ศูนย์รวมเกม</a>
+        <button type="button" class="toy-btn bg-blue" id="btnSwitchMode" aria-pressed="false">
+          ⌨️ <span id="switchLabel">สวิตช์เดียว</span>
+        </button>
+        <button type="button" class="toy-btn bg-purple" id="btnTeacher">
+          👩‍🏫 ครู / เปลี่ยนเรื่อง
+        </button>
+        <button type="button" class="toy-btn" id="btnSettings">
+          ⚙️ ตั้งค่า
+        </button>
+        <button type="button" class="toy-btn bg-yellow" id="btnPause" aria-pressed="false">
+          ⏸️ <span id="pauseLabel">พัก</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- 2. HUD: STAR METER + CATEGORY LEGEND -->
+    <section class="hud-card" aria-label="แถบพลังดาวและกติกา">
+      <div class="star-meter-wrap">
+        <span class="star-badge" id="starBadge">⭐ <span id="starCountText">0 / 18</span></span>
+        <div class="star-meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="18" aria-valuenow="0" id="starProgressBar">
+          <div class="star-meter-fill" id="starMeterFill"></div>
+        </div>
+        <span class="combo-pill" id="comboBadge">✨ คอมโบ x1</span>
+      </div>
+
+      <div class="legend-pills">
+        <span class="legend-chip good" id="legendGood">⬅️ ซ้าย: ดีต่อปอด</span>
+        <span class="legend-chip bad" id="legendBad">➡️ ขวา: เสี่ยงทำร้ายปอด</span>
+      </div>
+    </section>
+
+    <!-- 3. INTERACTIVE RAINBOW BUBBLE SKY ARENA -->
+    <main class="arena-stage" id="arenaStage">
+      <!-- Background Rainbow, Interactive Clouds & Growing Garden Hills SVG -->
+      <svg class="sky-decor" id="skyDecorSvg" viewBox="0 0 800 440" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M 80 440 A 320 320 0 0 1 720 440" fill="none" stroke="rgba(255, 158, 187, 0.25)" stroke-width="26" />
+        <path d="M 106 440 A 294 294 0 0 1 694 440" fill="none" stroke="rgba(255, 209, 102, 0.25)" stroke-width="26" />
+        <path d="M 132 440 A 268 268 0 0 1 668 440" fill="none" stroke="rgba(128, 237, 153, 0.25)" stroke-width="26" />
+        <path d="M 158 440 A 242 242 0 0 1 642 440" fill="none" stroke="rgba(144, 224, 239, 0.25)" stroke-width="26" />
+        <!-- Interactive Fluffy Clouds -->
+        <g class="sky-cloud" id="cloudLeft" fill="#FFFFFF" opacity="0.82">
+          <circle cx="95" cy="92" r="26" /><circle cx="125" cy="85" r="32" /><circle cx="158" cy="93" r="24" />
+        </g>
+        <g class="sky-cloud" id="cloudRight" fill="#FFFFFF" opacity="0.82">
+          <circle cx="645" cy="108" r="24" /><circle cx="678" cy="100" r="30" /><circle cx="710" cy="109" r="23" />
+        </g>
+        <!-- Rolling Pastel Hills & Growing Garden Sprouts -->
+        <path d="M 0 398 Q 220 362 440 398 T 800 392 L 800 440 L 0 440 Z" fill="#B7E4C7" opacity="0.82" />
+        <g id="gardenSproutsLayer"></g>
+      </svg>
+
+      <!-- Top Mascot Guardian -->
+      <div class="mascot-dock" id="mascotDock">
+        <div class="mascot-avatar mascot-bob" id="mascotSvgMount"></div>
+        <span class="mascot-speech" id="mascotSpeechText">ลากฟองไปซ้ายหรือขวาเลย!</span>
+      </div>
+
+      <!-- Left Woven Toy Basket (GOOD) -->
+      <button type="button" class="drop-basket left-basket" id="basketLeft" aria-label="ตะกร้าฝั่งซ้าย">
+        <div class="station-loot-shelf" id="leftLootShelf" aria-hidden="true"></div>
+        <div class="station-visual-box" id="leftStationVisual"></div>
+        <div class="station-charge-wrap">
+          <div class="station-charge-track">
+            <div class="station-charge-fill" id="leftStationFill"></div>
+          </div>
+          <span class="basket-title" id="basketLeftTitle">ดีต่อปอด</span>
+          <span class="basket-hint" id="leftStationHint">🧺 ใส่ตะกร้า 0/3</span>
+        </div>
+      </button>
+
+      <!-- Right Woven Toy Basket (HAZARD) -->
+      <button type="button" class="drop-basket right-basket" id="basketRight" aria-label="ตะกร้าป๊อปฝั่งขวา">
+        <div class="station-loot-shelf" id="rightLootShelf" aria-hidden="true"></div>
+        <div class="station-visual-box" id="rightStationVisual"></div>
+        <div class="station-charge-wrap">
+          <div class="station-charge-track">
+            <div class="station-charge-fill" id="rightStationFill"></div>
+          </div>
+          <span class="basket-title" id="basketRightTitle">เสี่ยงทำร้ายปอด</span>
+          <span class="basket-hint" id="rightStationHint">🫧 ป๊อปฟอง 0/3</span>
+        </div>
+      </button>
+
+      <!-- Floating Bubbles Layer -->
+      <div class="bubble-layer" id="bubbleLayer"></div>
+
+      <!-- Cover / Finale Overlay -->
+      <div class="arena-overlay" id="arenaOverlay">
+        <div class="overlay-card" id="overlayCardContent"></div>
+      </div>
+    </main>
+
+    <!-- 4. BOTTOM COACH & AUDIO BAR -->
+    <section class="coach-panel" aria-live="polite">
+      <p class="coach-text" id="coachFeedbackText">
+        เรื่อง: เรื่องง่าย ๆ เกี่ยวกับมะเร็งปอด — กด “เริ่มลากฟองเลย!” เพื่อช่วยดูแลปอดกัน
+      </p>
+      <button type="button" class="toy-btn bg-yellow" id="btnListenCoach">
+        🔊 ฟังเสียงอ่าน
+      </button>
+    </section>
+  </div>
+
+  <!-- MODAL: PAUSE -->
+  <div class="modal-backdrop" id="modalPause" role="dialog" aria-modal="true" aria-labelledby="pauseModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="pauseModalTitle">⏸️ พักเกมชั่วคราว</h2>
+      </div>
+      <p>หยุดฟองสบู่และเสียงอ่านไว้เรียบร้อย กดเล่นต่อได้ทันที</p>
+      <div style="display: flex; gap: 0.55rem; flex-wrap: wrap;">
+        <button type="button" class="toy-btn bg-mint cta-big-btn" id="btnResumeGame" style="flex: 1;">
+          ▶️ เล่นต่อ
+        </button>
+        <button type="button" class="toy-btn bg-yellow" id="btnRestartGame">
+          🔄 เริ่มด่านใหม่
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS -->
+  <div class="modal-backdrop" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="settingsModalTitle">⚙️ ตั้งค่าการเล่นและการเข้าถึง</h2>
+        <button type="button" class="toy-btn bg-peach" id="btnCloseSettings">✕ ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>⭐ จำนวนดาวต่อรอบ (ความยาวเกม)</strong></span>
+        <button type="button" class="toy-btn bg-mint" id="btnRoundLength">ยาวจุใจ (18 ดาว)</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🎈 ความเร็วฟองลอย</strong></span>
+        <button type="button" class="toy-btn bg-yellow" id="btnBubbleSpeed">ช้าสบายตา</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔊 เสียงเอฟเฟกต์และเสียงอ่านภาษาไทย</strong></span>
+        <button type="button" class="toy-btn bg-yellow" id="btnToggleSound" aria-pressed="true">เปิดเสียง</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>⌨️ โหมดสวิตช์เดียว (วนกรอบ + กด Space ป๊อปฟอง)</strong></span>
+        <button type="button" class="toy-btn bg-blue" id="btnToggleSwitchModal" aria-pressed="false">ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔠 ขนาดตัวอักษร</strong></span>
+        <button type="button" class="toy-btn" id="btnTextSize">ปกติ</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🌿 ลดการเคลื่อนไหว (Reduced Motion)</strong></span>
+        <button type="button" class="toy-btn bg-mint" id="btnReducedMotion" aria-pressed="false">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TEACHER & LESSON PACK JSON EDITOR -->
+  <div class="modal-backdrop" id="modalTeacher" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="teacherModalTitle">👩‍🏫 สำหรับครู & เปลี่ยนชุดเนื้อหา OKRP</h2>
+        <button type="button" class="toy-btn bg-peach" id="btnCloseTeacher">✕ ปิด</button>
+      </div>
+
+      <div class="info-section" id="teacherMetadataBox"></div>
+
+      <div class="info-section">
+        <strong>🧩 สลับชุดบทเรียนตัวอย่าง:</strong>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem;">
+          <button type="button" class="toy-btn bg-mint" id="btnLoadPackLung">
+            🫁 ชุดที่ 1: มะเร็งปอด (OKRP PDF)
+          </button>
+          <button type="button" class="toy-btn bg-blue" id="btnLoadPackRoad">
+            🚦 ชุดที่ 2: ข้ามถนนปลอดภัย
+          </button>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <strong>📝 แก้ไขหรือวางข้อมูล lessonPack (JSON) เพื่อสร้างด่านใหม่:</strong>
+        <textarea class="json-editor" id="lessonJsonInput" aria-label="แก้ไขข้อมูลชุดบทเรียน JSON"></textarea>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.45rem;">
+          <button type="button" class="toy-btn bg-yellow" id="btnApplyJson">
+            ✅ ใช้ชุดบทเรียนนี้
+          </button>
+          <span class="json-status ok" id="jsonStatusText">พร้อมใช้งาน</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. UNIVERSAL OKRP LESSON PACKS
+     * =========================================================================
+     */
+    const LESSON_PACKS = {
+      lung_cancer_okrp: {
+        packId: '32f05266-2287-4d24-8f8c-cbfc2cafa88f',
+        lessonTitle: 'เรื่องง่าย ๆ เกี่ยวกับมะเร็งปอด',
+        subtitle: 'ลากสิ่งดีต่อปอดไปฝั่งซ้าย และเจาะสิ่งเสี่ยงทำร้ายปอดที่ฝั่งขวา',
+        targetStars: 18,
+        source: {
+          mediaTitle: 'เรื่องง่ายๆ เกี่ยวกับมะเร็งปอด',
+          platform: 'OKRP (คลังสื่อการเรียนรู้)',
+          url: 'https://www.okrp.in.th/home/detail?type=media&id=32f05266-2287-4d24-8f8c-cbfc2cafa88f',
+          author: 'นายณัฐพล แสงสวัสดิ์',
+          school: 'รร.พิจิตรปัญญานุกูล',
+          license: 'CC BY-ND',
+          pageGuide: 'อ้างอิงเนื้อหา PDF หน้า 3 ถึง หน้า 8'
+        },
+        categories: {
+          good: { label: 'ดีต่อปอด' },
+          hazard: { label: 'เสี่ยงทำร้ายปอด' }
+        },
+        items: [
+          {
+            id: 'clean-park',
+            type: 'good',
+            label: 'อากาศบริสุทธิ์',
+            icon: 'park_clean',
+            spokenSuccess: 'อากาศที่สะอาดช่วยให้ปอดแข็งแรงและหายใจได้เต็มปอด',
+            spokenHint: 'อากาศบริสุทธิ์เป็นสิ่งดีต่อปอด ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'หน้า 8'
+          },
+          {
+            id: 'doctor-check',
+            type: 'good',
+            label: 'ตรวจสุขภาพปอด',
+            icon: 'doctor_ct',
+            spokenSuccess: 'การตรวจสุขภาพปอดกับคุณหมอช่วยให้ดูแลปอดได้อย่างปลอดภัย',
+            spokenHint: 'การตรวจสุขภาพปอดเป็นสิ่งดี ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'หน้า 7-8'
+          },
+          {
+            id: 'no-smoke-home',
+            type: 'good',
+            label: 'บ้านปลอดบุหรี่',
+            icon: 'smoke_free_home',
+            spokenSuccess: 'บ้านนี้ไม่มีควันบุหรี่ ทุกคนจึงได้หายใจในอากาศที่สะอาดขึ้น',
+            spokenHint: 'บ้านปลอดบุหรี่ช่วยให้ทุกคนปลอดภัย ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'หน้า 3 และ 8'
+          },
+          {
+            id: 'wear-mask',
+            type: 'good',
+            label: 'สวมหน้ากากกันฝุ่น',
+            icon: 'mask_shield',
+            spokenSuccess: 'การสวมหน้ากากช่วยป้องกันฝุ่นควันและมลพิษไม่ให้เข้าสู่ปอด',
+            spokenHint: 'หน้ากากช่วยป้องกันฝุ่นให้ปอด ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'หน้า 8'
+          },
+          {
+            id: 'secondhand-smoke',
+            type: 'hazard',
+            label: 'ควันบุหรี่คนอื่น',
+            icon: 'cigarette_smoke',
+            spokenSuccess: 'หลีกเลี่ยงควันบุหรี่จากผู้อื่น ช่วยลดความเสี่ยงทำร้ายปอดได้มาก',
+            spokenHint: 'ควันบุหรี่เป็นอันตรายต่อปอด ลองลากไปเจาะทิ้งที่ถังฝั่งขวานะ',
+            sourceRef: 'หน้า 3'
+          },
+          {
+            id: 'air-pollution',
+            type: 'hazard',
+            label: 'ฝุ่นควันมลพิษ',
+            icon: 'toxic_cloud',
+            spokenSuccess: 'ฝุ่นควันและสารพิษในอากาศทำร้ายปอด เราจึงต้องหลีกเลี่ยง',
+            spokenHint: 'ฝุ่นควันมลพิษทำร้ายปอด ลองลากไปเจาะทิ้งที่ถังฝั่งขวานะ',
+            sourceRef: 'หน้า 3'
+          },
+          {
+            id: 'chronic-cough',
+            type: 'hazard',
+            label: 'ไอเรื้อรัง',
+            icon: 'cough_alert',
+            spokenSuccess: 'เมื่อมีอาการไอเรื้อรังหรือเหนื่อยง่าย ต้องรีบบอกผู้ใหญ่เพื่อไปพบแพทย์',
+            spokenHint: 'อาการไอเรื้อรังเป็นสัญญาณเตือน ลองลากไปไว้ฝั่งขวาเพื่อสังเกตอาการนะ',
+            sourceRef: 'หน้า 4-6'
+          }
+        ]
+      },
+
+      road_safety_demo: {
+        packId: 'demo-road-safety',
+        lessonTitle: 'ตัวอย่างเทมเพลต: ข้ามถนนปลอดภัย',
+        subtitle: 'ลากพฤติกรรมปลอดภัยไปฝั่งซ้าย และเจาะสิ่งอันตรายบนถนนที่ฝั่งขวา',
+        targetStars: 14,
+        source: {
+          mediaTitle: 'ชุดตัวอย่างการสลับบทเรียน Boom Play',
+          platform: 'OKRP Template Demo',
+          url: 'https://www.okrp.in.th',
+          author: 'แม่แบบครูผู้สอน',
+          school: 'ศูนย์การศึกษาพิเศษ / โรงเรียนเรียนรวม',
+          license: 'Template Ready',
+          pageGuide: 'ตัวอย่างการเปลี่ยนเนื้อหาผ่าน JSON'
+        },
+        categories: {
+          good: { label: 'ปลอดภัย' },
+          hazard: { label: 'อันตราย' }
+        },
+        items: [
+          {
+            id: 'zebra',
+            type: 'good',
+            label: 'ข้ามทางม้าลาย',
+            icon: 'park_clean',
+            spokenSuccess: 'การข้ามถนนตรงทางม้าลายช่วยให้รถมองเห็นและปลอดภัย',
+            spokenHint: 'ข้ามทางม้าลายปลอดภัย ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'ข้อ 1'
+          },
+          {
+            id: 'helmet',
+            type: 'good',
+            label: 'สวมหมวกกันน็อก',
+            icon: 'mask_shield',
+            spokenSuccess: 'สวมหมวกกันน็อกทุกครั้งช่วยปกป้องศีรษะเมื่อนั่งรถจักรยานยนต์',
+            spokenHint: 'สวมหมวกกันน็อกปลอดภัย ลองลากไปใส่ตะกร้าฝั่งซ้ายนะ',
+            sourceRef: 'ข้อ 2'
+          },
+          {
+            id: 'run-road',
+            type: 'hazard',
+            label: 'วิ่งตัดหน้ารถ',
+            icon: 'toxic_cloud',
+            spokenSuccess: 'ไม่วิ่งเล่นหรือวิ่งตัดหน้ารถบนถนน ช่วยป้องกันอุบัติเหตุได้',
+            spokenHint: 'วิ่งตัดหน้ารถอันตรายมาก ลองลากไปเจาะทิ้งที่ถังฝั่งขวานะ',
+            sourceRef: 'ข้อ 3'
+          },
+          {
+            id: 'red-light',
+            type: 'hazard',
+            label: 'ฝ่าไฟแดง',
+            icon: 'cigarette_smoke',
+            spokenSuccess: 'เมื่อเห็นสัญญาณไฟแดง เราต้องหยุดรอหลังเส้นขาวเสมอ',
+            spokenHint: 'การฝ่าไฟแดงเป็นอันตราย ลองลากไปเจาะทิ้งที่ถังฝั่งขวานะ',
+            sourceRef: 'ข้อ 4'
+          }
+        ]
+      }
+    };
+
+    /**
+     * =========================================================================
+     * 2. SYNTHESIZED WEB AUDIO + THAI TTS ENGINE (100% Offline)
+     * =========================================================================
+     */
+    class RainbowAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.unlocked = false;
+        this.paused = false;
+        this.lastSpoken = '';
+        this.isSpeaking = false;
+        this.lastSpokenAt = 0;
+        this.speakSeq = 0;
+      }
+
+      unlock() {
+        this.unlocked = true;
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      playTone(freq, duration = 0.14, type = 'sine', vol = 0.14, slideTo = null, delay = 0) {
+        if (!this.enabled || !this.unlocked || !this.ctx || this.paused) return;
+        try {
+          const now = this.ctx.currentTime + delay;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(vol, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (e) {}
+      }
+
+      playGoodCollect(combo = 1) {
+        const pitchBoost = Math.min(combo * 32, 220);
+        this.playTone(523 + pitchBoost, 0.11, 'triangle', 0.15, 784 + pitchBoost, 0);
+        this.playTone(784 + pitchBoost, 0.15, 'sine', 0.13, 1046 + pitchBoost, 0.08);
+      }
+
+      playHazardPop() {
+        this.playTone(420, 0.08, 'sine', 0.17, 860, 0);
+        this.playTone(240, 0.1, 'triangle', 0.14, 110, 0.04);
+      }
+
+      playBonusStar() {
+        [659.25, 880, 1174.66, 1318.5].forEach((n, i) => {
+          this.playTone(n, 0.14, 'triangle', 0.15, null, i * 0.065);
+        });
+      }
+
+      playFeverChime() {
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((n, i) => {
+          this.playTone(n, 0.14, 'sine', 0.14, null, i * 0.06);
+        });
+      }
+
+      playWinFanfare() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((n, i) => {
+          this.playTone(n, 0.18, 'triangle', 0.15, null, i * 0.1);
+        });
+      }
+
+      playScanTick() {
+        this.playTone(480, 0.045, 'sine', 0.05);
+      }
+
+      sanitizeSpeech(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ' ')
+          .replace(/หน้า\s*\d+(\s*[-–]\s*\d+)?/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      speak(text, { interrupt = true } = {}) {
+        const clean = this.sanitizeSpeech(text);
+        if (!clean) return Promise.resolve();
+        this.lastSpoken = clean;
+
+        if (!this.enabled || !this.unlocked || this.paused || !('speechSynthesis' in window)) {
+          return Promise.resolve();
+        }
+
+        if (!interrupt && this.isSpeaking) {
+          return Promise.resolve();
+        }
+
+        const seq = ++this.speakSeq;
+        this.stopSpeech(false);
+        this.isSpeaking = true;
+        this.lastSpokenAt = performance.now();
+
+        return new Promise((resolve) => {
+          try {
+            const utter = new SpeechSynthesisUtterance(clean);
+            utter.lang = 'th-TH';
+            utter.rate = 0.96;
+            utter.pitch = 1.06;
+            let done = false;
+            const finish = () => {
+              if (done) return;
+              done = true;
+              if (this.speakSeq === seq) {
+                this.isSpeaking = false;
+              }
+              resolve();
+            };
+            utter.onend = finish;
+            utter.onerror = finish;
+            setTimeout(finish, Math.max(2600, clean.length * 105));
+            window.speechSynthesis.speak(utter);
+          } catch (e) {
+            this.isSpeaking = false;
+            resolve();
+          }
+        });
+      }
+
+      stopSpeech(bumpSeq = true) {
+        if (bumpSeq) this.speakSeq += 1;
+        this.isSpeaking = false;
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+      }
+
+      setPaused(p) {
+        this.paused = p;
+        if (p) this.stopSpeech();
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 3. CUTE VINYL-TOY SVG ARTWORK & INTERACTIVE REWARD STATIONS
+     * =========================================================================
+     */
+    const ToyIcons = {
+      renderMascot(mood = 'happy') {
+        const isExcited = mood === 'excited';
+        return `
+          <svg viewBox="0 0 80 68" aria-hidden="true">
+            <ellipse cx="26" cy="14" rx="6" ry="12" transform="rotate(-14 26 14)" fill="#FFFDF7" stroke="#4A304D" stroke-width="2.8" />
+            <ellipse cx="26" cy="14" rx="3" ry="7" transform="rotate(-14 26 14)" fill="#FF9EBB" />
+            <ellipse cx="54" cy="14" rx="6" ry="12" transform="rotate(14 54 14)" fill="#FFFDF7" stroke="#4A304D" stroke-width="2.8" />
+            <ellipse cx="54" cy="14" rx="3" ry="7" transform="rotate(14 54 14)" fill="#FF9EBB" />
+            <ellipse cx="40" cy="40" rx="28" ry="22" fill="#FFFDF7" stroke="#4A304D" stroke-width="3" />
+            ${isExcited ? `
+              <path d="M 25 36 Q 30 29 35 36" fill="none" stroke="#4A304D" stroke-width="3" stroke-linecap="round" />
+              <path d="M 45 36 Q 50 29 55 36" fill="none" stroke="#4A304D" stroke-width="3" stroke-linecap="round" />
+            ` : `
+              <circle cx="30" cy="36" r="4" fill="#4A304D" />
+              <circle cx="50" cy="36" r="4" fill="#4A304D" />
+              <circle cx="31.5" cy="34.5" r="1.4" fill="#FFFFFF" />
+              <circle cx="51.5" cy="34.5" r="1.4" fill="#FFFFFF" />
+            `}
+            <ellipse cx="22" cy="43" rx="5" ry="3.5" fill="#FF9EBB" />
+            <ellipse cx="58" cy="43" rx="5" ry="3.5" fill="#FF9EBB" />
+            <path d="M 35 44 Q 40 50 45 44" fill="none" stroke="#4A304D" stroke-width="2.6" stroke-linecap="round" />
+            <polygon points="40,12 42,17 48,17 43,20 45,25 40,22 35,25 37,20 32,17 38,17" fill="#FFD166" stroke="#4A304D" stroke-width="1.8" />
+          </svg>
+        `;
+      },
+
+      renderTreasureChest(count = 0) {
+        const tier = Math.min(3, count);
+        return `
+          <svg viewBox="0 0 110 96" aria-hidden="true">
+            <!-- Cute Woven Pastel Picnic Basket (Left) -->
+            <path d="M 30 42 A 25 24 0 0 1 80 42" fill="none" stroke="#4A304D" stroke-width="5.5" stroke-linecap="round" />
+            <path d="M 30 42 A 25 24 0 0 1 80 42" fill="none" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round" />
+            ${tier >= 1 ? `<circle cx="38" cy="40" r="8" fill="#80ED99" stroke="#4A304D" stroke-width="2.2" />` : ''}
+            ${tier >= 2 ? `<polygon points="55,26 58,33 65,33 59,37 61,44 55,40 49,44 51,37 45,33 52,33" fill="#FFD166" stroke="#4A304D" stroke-width="2" />` : ''}
+            ${tier >= 3 ? `<circle cx="72" cy="40" r="8" fill="#FF9EBB" stroke="#4A304D" stroke-width="2.2" />` : ''}
+            <path d="M 18 44 L 92 44 L 82 86 Q 80 90 74 90 L 36 90 Q 30 90 28 86 Z" fill="#F4A261" stroke="#4A304D" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 24 58 L 86 58 M 26 72 L 84 72 M 42 44 L 44 90 M 68 44 L 66 90" stroke="#B07D4F" stroke-width="2.2" stroke-linecap="round" />
+            <rect x="14" y="39" width="82" height="10" rx="5" fill="#80ED99" stroke="#4A304D" stroke-width="2.8" />
+            <circle cx="47" cy="65" r="2.6" fill="#4A304D" />
+            <circle cx="63" cy="65" r="2.6" fill="#4A304D" />
+            <path d="M 51 70 Q 55 75 59 70" fill="none" stroke="#4A304D" stroke-width="2.4" stroke-linecap="round" />
+          </svg>
+        `;
+      },
+
+      renderPopVolcano(count = 0) {
+        const tier = Math.min(3, count);
+        return `
+          <svg viewBox="0 0 110 96" aria-hidden="true">
+            <!-- Cute Woven Bubble-Pop Basket (Right) -->
+            <path d="M 30 42 A 25 24 0 0 1 80 42" fill="none" stroke="#4A304D" stroke-width="5.5" stroke-linecap="round" />
+            <path d="M 30 42 A 25 24 0 0 1 80 42" fill="none" stroke="#FF9EBB" stroke-width="2.5" stroke-linecap="round" />
+            ${tier >= 1 ? `<circle cx="40" cy="38" r="7.5" fill="#90E0EF" stroke="#4A304D" stroke-width="2.2" />` : ''}
+            ${tier >= 2 ? `<circle cx="55" cy="31" r="9" fill="#FF9EBB" stroke="#4A304D" stroke-width="2.2" />` : ''}
+            ${tier >= 3 ? `<circle cx="70" cy="38" r="7.5" fill="#FFD166" stroke="#4A304D" stroke-width="2.2" />` : ''}
+            <path d="M 18 44 L 92 44 L 82 86 Q 80 90 74 90 L 36 90 Q 30 90 28 86 Z" fill="#FFCCD5" stroke="#4A304D" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 24 58 L 86 58 M 26 72 L 84 72 M 42 44 L 44 90 M 68 44 L 66 90" stroke="#E5989B" stroke-width="2.2" stroke-linecap="round" />
+            <rect x="14" y="39" width="82" height="10" rx="5" fill="#FF9EBB" stroke="#4A304D" stroke-width="2.8" />
+            <circle cx="47" cy="65" r="2.6" fill="#4A304D" />
+            <circle cx="63" cy="65" r="2.6" fill="#4A304D" />
+            <path d="M 51 70 Q 55 75 59 70" fill="none" stroke="#4A304D" stroke-width="2.4" stroke-linecap="round" />
+          </svg>
+        `;
+      },
+
+      renderItemIcon(iconKey) {
+        switch (iconKey) {
+          case 'park_clean':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <circle cx="32" cy="24" r="16" fill="#80ED99" stroke="#4A304D" stroke-width="2.6" />
+                <rect x="29" y="34" width="6" height="14" rx="2" fill="#B08968" stroke="#4A304D" stroke-width="2.2" />
+                <circle cx="48" cy="14" r="6" fill="#FFD166" stroke="#4A304D" stroke-width="2" />
+                <circle cx="16" cy="18" r="4" fill="#FF9EBB" stroke="#4A304D" stroke-width="1.8" />
+              </svg>
+            `;
+          case 'doctor_ct':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <rect x="14" y="8" width="36" height="38" rx="10" fill="#FFFFFF" stroke="#4A304D" stroke-width="2.6" />
+                <path d="M 32 14 L 32 22 M 29 21 Q 20 20 20 31 Q 20 40 27 40 Q 30 40 30 33 Z" fill="#FF9EBB" stroke="#4A304D" stroke-width="2" />
+                <path d="M 35 21 Q 44 20 44 31 Q 44 40 37 40 Q 34 40 34 33 Z" fill="#FF9EBB" stroke="#4A304D" stroke-width="2" />
+                <circle cx="46" cy="13" r="6" fill="#80ED99" stroke="#4A304D" stroke-width="2" />
+              </svg>
+            `;
+          case 'smoke_free_home':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <polygon points="10,26 32,8 54,26" fill="#FF9EBB" stroke="#4A304D" stroke-width="2.6" />
+                <rect x="16" y="26" width="32" height="22" rx="5" fill="#FFFDF7" stroke="#4A304D" stroke-width="2.6" />
+                <path d="M 32 31 C 29 28 24 30 24 34 C 24 38 32 43 32 43 C 32 43 40 38 40 34 C 40 30 35 28 32 31 Z" fill="#FF477E" stroke="#4A304D" stroke-width="1.8" />
+              </svg>
+            `;
+          case 'mask_shield':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <path d="M 16 22 Q 32 14 48 22 L 45 38 Q 32 46 19 38 Z" fill="#90E0EF" stroke="#4A304D" stroke-width="2.6" />
+                <path d="M 16 24 Q 8 24 10 32 Q 12 36 18 35" fill="none" stroke="#4A304D" stroke-width="2.2" />
+                <path d="M 48 24 Q 56 24 54 32 Q 52 36 46 35" fill="none" stroke="#4A304D" stroke-width="2.2" />
+                <path d="M 25 29 L 30 34 L 40 24" fill="none" stroke="#059669" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            `;
+          case 'cigarette_smoke':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <rect x="10" y="32" width="32" height="9" rx="3" fill="#FFFFFF" stroke="#4A304D" stroke-width="2.4" />
+                <rect x="10" y="32" width="10" height="9" rx="2" fill="#F4A261" stroke="#4A304D" stroke-width="2.2" />
+                <circle cx="44" cy="36.5" r="4" fill="#FF477E" />
+                <path d="M 46 28 Q 38 20 46 12 Q 38 6 45 2" fill="none" stroke="#6C757D" stroke-width="3.5" stroke-linecap="round" />
+              </svg>
+            `;
+          case 'cough_alert':
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <circle cx="28" cy="28" r="16" fill="#FFD166" stroke="#4A304D" stroke-width="2.6" />
+                <path d="M 21 24 L 25 27 L 21 30 M 35 24 L 31 27 L 35 30" fill="none" stroke="#4A304D" stroke-width="2.4" stroke-linecap="round" />
+                <circle cx="28" cy="35" r="4" fill="#FF7096" stroke="#4A304D" stroke-width="2" />
+                <path d="M 46 22 L 54 18 M 47 29 L 56 29 M 46 36 L 54 40" stroke="#E11D48" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            `;
+          default:
+            return `
+              <svg viewBox="0 0 64 54" aria-hidden="true">
+                <circle cx="24" cy="30" r="12" fill="#ADB5BD" stroke="#4A304D" stroke-width="2.5" />
+                <circle cx="38" cy="26" r="14" fill="#CED4DA" stroke="#4A304D" stroke-width="2.5" />
+                <circle cx="44" cy="34" r="10" fill="#ADB5BD" stroke="#4A304D" stroke-width="2.5" />
+                <path d="M 32 18 L 32 28 M 32 33 L 32 35" stroke="#E11D48" stroke-width="3.5" stroke-linecap="round" />
+              </svg>
+            `;
+        }
+      }
+    };
+
+    /**
+     * =========================================================================
+     * 4. RAINBOW BUBBLE POP ENGINE
+     * =========================================================================
+     */
+    class RainbowBubbleTemplateGame {
+      constructor() {
+        this.audio = new RainbowAudioEngine();
+        this.pack = LESSON_PACKS.lung_cancer_okrp;
+
+        this.settings = {
+          roundLength: 'long', // 'short' | 'long' | 'marathon'
+          speedLevel: 'slow',  // 'slow' | 'medium' | 'fast'
+          sound: true,
+          switchMode: false,
+          textSize: 'normal',
+          reducedMotion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        };
+
+        this.state = 'COVER';
+        this.paused = false;
+        this.activeModal = null;
+
+        this.stars = 0;
+        this.combo = 1;
+        this.leftStationCount = 0;
+        this.rightStationCount = 0;
+        this.deck = [];
+        this.collectedFacts = new Map();
+        this.bubbles = [];
+        this.nextBubbleId = 1;
+        this.lastFrameTime = 0;
+        this.spawnCooldown = 0;
+        this.rafId = null;
+
+        this.draggedBubble = null;
+        this.selectedBubble = null;
+
+        this.scanIndex = 0;
+        this.scanTimer = null;
+        this.spaceHeld = false;
+
+        this.cacheDom();
+        this.bindEvents();
+        this.applySettings();
+        this.loadLessonPack(LESSON_PACKS.lung_cancer_okrp, false);
+      }
+
+      cacheDom() {
+        this.dom = {
+          btnSwitchMode: document.getElementById('btnSwitchMode'),
+          switchLabel: document.getElementById('switchLabel'),
+          btnTeacher: document.getElementById('btnTeacher'),
+          btnSettings: document.getElementById('btnSettings'),
+          btnPause: document.getElementById('btnPause'),
+          pauseLabel: document.getElementById('pauseLabel'),
+
+          starBadge: document.getElementById('starBadge'),
+          starCountText: document.getElementById('starCountText'),
+          starProgressBar: document.getElementById('starProgressBar'),
+          starMeterFill: document.getElementById('starMeterFill'),
+          comboBadge: document.getElementById('comboBadge'),
+          legendGood: document.getElementById('legendGood'),
+          legendBad: document.getElementById('legendBad'),
+
+          arenaStage: document.getElementById('arenaStage'),
+          cloudLeft: document.getElementById('cloudLeft'),
+          cloudRight: document.getElementById('cloudRight'),
+          gardenSproutsLayer: document.getElementById('gardenSproutsLayer'),
+          mascotSvgMount: document.getElementById('mascotSvgMount'),
+          mascotSpeechText: document.getElementById('mascotSpeechText'),
+          basketLeft: document.getElementById('basketLeft'),
+          basketRight: document.getElementById('basketRight'),
+          leftLootShelf: document.getElementById('leftLootShelf'),
+          rightLootShelf: document.getElementById('rightLootShelf'),
+          leftStationVisual: document.getElementById('leftStationVisual'),
+          rightStationVisual: document.getElementById('rightStationVisual'),
+          leftStationFill: document.getElementById('leftStationFill'),
+          rightStationFill: document.getElementById('rightStationFill'),
+          leftStationHint: document.getElementById('leftStationHint'),
+          rightStationHint: document.getElementById('rightStationHint'),
+          basketLeftTitle: document.getElementById('basketLeftTitle'),
+          basketRightTitle: document.getElementById('basketRightTitle'),
+          bubbleLayer: document.getElementById('bubbleLayer'),
+          arenaOverlay: document.getElementById('arenaOverlay'),
+          overlayCardContent: document.getElementById('overlayCardContent'),
+
+          coachFeedbackText: document.getElementById('coachFeedbackText'),
+          btnListenCoach: document.getElementById('btnListenCoach'),
+
+          modalPause: document.getElementById('modalPause'),
+          btnResumeGame: document.getElementById('btnResumeGame'),
+          btnRestartGame: document.getElementById('btnRestartGame'),
+
+          modalSettings: document.getElementById('modalSettings'),
+          btnCloseSettings: document.getElementById('btnCloseSettings'),
+          btnRoundLength: document.getElementById('btnRoundLength'),
+          btnBubbleSpeed: document.getElementById('btnBubbleSpeed'),
+          btnToggleSound: document.getElementById('btnToggleSound'),
+          btnToggleSwitchModal: document.getElementById('btnToggleSwitchModal'),
+          btnTextSize: document.getElementById('btnTextSize'),
+          btnReducedMotion: document.getElementById('btnReducedMotion'),
+
+          modalTeacher: document.getElementById('modalTeacher'),
+          btnCloseTeacher: document.getElementById('btnCloseTeacher'),
+          teacherMetadataBox: document.getElementById('teacherMetadataBox'),
+          btnLoadPackLung: document.getElementById('btnLoadPackLung'),
+          btnLoadPackRoad: document.getElementById('btnLoadPackRoad'),
+          lessonJsonInput: document.getElementById('lessonJsonInput'),
+          btnApplyJson: document.getElementById('btnApplyJson'),
+          jsonStatusText: document.getElementById('jsonStatusText')
+        };
+      }
+
+      getFloatSpeedPxPerSec() {
+        if (this.settings.reducedMotion) return 22;
+        if (this.settings.speedLevel === 'slow') return 38;
+        if (this.settings.speedLevel === 'medium') return 58;
+        return 82;
+      }
+
+      getTargetStars() {
+        const base = this.pack.targetStars || 18;
+        if (this.settings.roundLength === 'short') return Math.max(8, Math.round(base * 0.7));
+        if (this.settings.roundLength === 'marathon') return Math.round(base * 1.5);
+        return base;
+      }
+
+      drawNextItemFromDeck() {
+        if (this.deck.length === 0) {
+          this.deck = [...this.pack.items];
+          for (let i = this.deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+          }
+        }
+        return this.deck.pop();
+      }
+
+      loadLessonPack(packObj, autoStart = false) {
+        this.audio.stopSpeech();
+        this.stopGameLoop();
+        this.stopSwitchScan();
+        this.clearAllBubbles();
+
+        this.pack = packObj;
+        this.stars = 0;
+        this.combo = 1;
+        this.leftStationCount = 0;
+        this.rightStationCount = 0;
+        this.deck = [];
+        this.collectedFacts.clear();
+        this.updateRewardStations();
+
+        this.dom.legendGood.textContent = `⬅️ ซ้าย: ${this.pack.categories.good.label}`;
+        this.dom.legendBad.textContent = `➡️ ขวา: ${this.pack.categories.hazard.label}`;
+        this.dom.basketLeftTitle.textContent = this.pack.categories.good.label;
+        this.dom.basketRightTitle.textContent = this.pack.categories.hazard.label;
+
+        const s = this.pack.source || {};
+        this.dom.teacherMetadataBox.innerHTML = `
+          <p><strong>📖 บทเรียนปัจจุบัน:</strong> ${this.pack.lessonTitle}</p>
+          <p><strong>🎬 สื่ออ้างอิง:</strong> ${s.mediaTitle || '-'} (${s.platform || 'OKRP'})</p>
+          <p><strong>✍️ ผู้จัดทำ:</strong> ${s.author || '-'} · ${s.school || '-'} (${s.license || '-'})</p>
+          <p><strong>📄 รายละเอียดหน้า:</strong> ${s.pageGuide || '-'} · <a href="${s.url || 'https://www.okrp.in.th'}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #0077B6;">เปิดหน้าสื่อต้นทาง</a></p>
+        `;
+        this.dom.lessonJsonInput.value = JSON.stringify(this.pack, null, 2);
+        this.dom.jsonStatusText.className = 'json-status ok';
+        this.dom.jsonStatusText.textContent = 'โหลดชุดข้อมูลเรียบร้อย';
+
+        if (autoStart) {
+          this.startNewRound();
+        } else {
+          this.showCoverScreen();
+        }
+      }
+
+      showCoverScreen() {
+        this.state = 'COVER';
+        this.stopGameLoop();
+        this.clearAllBubbles();
+        this.stars = 0;
+        this.combo = 1;
+        this.leftStationCount = 0;
+        this.rightStationCount = 0;
+        this.updateHud();
+        this.updateGardenSprouts();
+        this.updateRewardStations();
+        this.dom.arenaStage.classList.remove('fever-mode');
+
+        this.dom.mascotSvgMount.innerHTML = ToyIcons.renderMascot('happy');
+        this.dom.mascotSpeechText.textContent = 'พร้อมเล่นป๊อปฟองสายรุ้งหรือยัง?';
+
+        const intro = `เรื่อง ${this.pack.lessonTitle} ลากฟอง${this.pack.categories.good.label}ไปซ้าย และลาก${this.pack.categories.hazard.label}ไปขวา`;
+        this.dom.coachFeedbackText.textContent = `เรื่อง: ${this.pack.lessonTitle} — ${this.pack.subtitle}`;
+
+        this.dom.arenaOverlay.hidden = false;
+        this.dom.overlayCardContent.innerHTML = `
+          <div style="width: 74px; height: 62px;">${ToyIcons.renderMascot('excited')}</div>
+          <h2 class="overlay-title">🫧 ${this.pack.lessonTitle}</h2>
+          <p style="font-weight: 800;">${this.pack.subtitle}</p>
+          <div class="legend-pills" style="justify-content: center;">
+            <span class="legend-chip good">⬅️ ซ้าย: ${this.pack.categories.good.label}</span>
+            <span class="legend-chip bad">➡️ ขวา: ${this.pack.categories.hazard.label}</span>
+          </div>
+          <button type="button" class="toy-btn bg-mint cta-big-btn" id="btnStartPlay">
+            🎈 เริ่มลากฟองเลย!
+          </button>
+        `;
+
+        document.getElementById('btnStartPlay').addEventListener('click', () => {
+          this.audio.unlock();
+          this.startNewRound();
+        });
+
+        this.restartSwitchScan();
+      }
+
+      startNewRound() {
+        this.state = 'PLAYING';
+        this.stars = 0;
+        this.combo = 1;
+        this.leftStationCount = 0;
+        this.rightStationCount = 0;
+        this.deck = [];
+        this.collectedFacts.clear();
+        this.clearAllBubbles();
+        this.updateHud();
+        this.updateGardenSprouts();
+        this.updateRewardStations();
+        this.dom.arenaStage.classList.remove('fever-mode');
+
+        this.dom.arenaOverlay.hidden = true;
+        this.dom.mascotSvgMount.innerHTML = ToyIcons.renderMascot('happy');
+        this.dom.mascotSpeechText.textContent = `⬅️ ${this.pack.categories.good.label} · ➡️ ${this.pack.categories.hazard.label}`;
+
+        const startSpeech = `เริ่มเลย! ลากฟอง${this.pack.categories.good.label}ไปซ้าย และลาก${this.pack.categories.hazard.label}ไปขวา`;
+        this.dom.coachFeedbackText.textContent = startSpeech;
+        this.audio.speak(startSpeech, { interrupt: true });
+
+        this.spawnBubble();
+        setTimeout(() => {
+          if (this.state === 'PLAYING' && !this.paused) this.spawnBubble();
+        }, 620);
+
+        this.spawnCooldown = 1.6;
+        this.lastFrameTime = performance.now();
+        this.startGameLoop();
+        this.restartSwitchScan();
+      }
+
+      spawnBubble() {
+        if (this.state !== 'PLAYING' || this.paused) return;
+        const maxOnScreen = this.settings.switchMode ? 3 : 4;
+        if (this.bubbles.length >= maxOnScreen) return;
+
+        const item = this.drawNextItemFromDeck();
+        const isGood = item.type === 'good';
+        const isBonusStar = !this.bubbles.some((b) => b.isBonusStar) && Math.random() < 0.24;
+
+        const arenaRect = this.dom.arenaStage.getBoundingClientRect();
+        const arenaW = arenaRect.width || 640;
+        const arenaH = arenaRect.height || 440;
+        const bubbleSize = arenaW <= 560 ? 100 : 118;
+        const basketPad = arenaW <= 560 ? 112 : 164;
+
+        const minLeft = basketPad;
+        const maxLeft = Math.max(minLeft + 10, arenaW - basketPad - bubbleSize);
+        let x = minLeft + Math.random() * (maxLeft - minLeft);
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const candidate = minLeft + Math.random() * (maxLeft - minLeft);
+          const tooClose = this.bubbles.some((b) => Math.abs(b.x - candidate) < bubbleSize * 0.8 && b.y > arenaH - 180);
+          if (!tooClose) {
+            x = candidate;
+            break;
+          }
+        }
+
+        const y = arenaH - 12;
+        const id = this.nextBubbleId++;
+
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = `toy-bubble ${isGood ? 'good-bubble' : 'hazard-bubble'}${isBonusStar ? ' bonus-star-bubble' : ''}`;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.setAttribute('aria-label', `${item.label}${isBonusStar ? ' ฟองดาวคู่' : ''} ลากไปซ้ายหรือขวา`);
+        el.innerHTML = `
+          ${isBonusStar ? '<span class="bonus-crown-tag">⭐ x2</span>' : ''}
+          <div class="bubble-icon-box">${ToyIcons.renderItemIcon(item.icon)}</div>
+          <span class="bubble-label">${item.label}</span>
+          <span class="bubble-action-tag">${isGood ? '⬅️ ซ้าย' : '➡️ ขวา'}</span>
+        `;
+
+        const bubbleObj = {
+          id,
+          el,
+          item,
+          isGood,
+          isBonusStar,
+          x,
+          y,
+          baseX: x,
+          wobblePhase: Math.random() * Math.PI * 2,
+          speed: this.getFloatSpeedPxPerSec() * (0.92 + Math.random() * 0.16),
+          isDragging: false
+        };
+
+        this.attachDragHandlers(bubbleObj);
+        this.dom.bubbleLayer.appendChild(el);
+        this.bubbles.push(bubbleObj);
+      }
+
+      attachDragHandlers(bubbleObj) {
+        const el = bubbleObj.el;
+        let startClientX = 0;
+        let startClientY = 0;
+        let startBubbleX = 0;
+        let startBubbleY = 0;
+        let lastMoveX = 0;
+        let lastMoveY = 0;
+        let movedEnough = false;
+
+        el.addEventListener('pointerdown', (e) => {
+          if (this.state !== 'PLAYING' || this.paused) return;
+          e.preventDefault();
+          this.audio.unlock();
+
+          if (this.settings.switchMode && e.pointerType === '') {
+            this.resolveBubbleDrop(bubbleObj, bubbleObj.isGood ? 'left' : 'right');
+            return;
+          }
+
+          bubbleObj.isDragging = true;
+          this.draggedBubble = bubbleObj;
+          el.classList.remove('is-poke-bounce');
+          el.classList.add('is-dragging');
+          if (!this.settings.reducedMotion) {
+            el.style.transform = 'scale(0.92, 1.18)';
+            setTimeout(() => {
+              if (bubbleObj.isDragging) el.style.transform = 'scale(1.14, 1.06)';
+            }, 90);
+          }
+          el.setPointerCapture(e.pointerId);
+
+          startClientX = e.clientX;
+          startClientY = e.clientY;
+          lastMoveX = e.clientX;
+          lastMoveY = e.clientY;
+          startBubbleX = bubbleObj.x;
+          startBubbleY = bubbleObj.y;
+          movedEnough = false;
+        });
+
+        el.addEventListener('pointermove', (e) => {
+          if (!bubbleObj.isDragging) return;
+          const dx = e.clientX - startClientX;
+          const dy = e.clientY - startClientY;
+          const vx = e.clientX - lastMoveX;
+          const vy = e.clientY - lastMoveY;
+          lastMoveX = e.clientX;
+          lastMoveY = e.clientY;
+          if (Math.hypot(dx, dy) > 8) movedEnough = true;
+
+          const arenaW = this.dom.arenaStage.clientWidth || 640;
+          const arenaH = this.dom.arenaStage.clientHeight || 440;
+          const size = el.offsetWidth || 118;
+
+          bubbleObj.x = Math.max(4, Math.min(arenaW - size - 4, startBubbleX + dx));
+          bubbleObj.y = Math.max(58, Math.min(arenaH - size - 4, startBubbleY + dy));
+          bubbleObj.baseX = bubbleObj.x;
+          el.style.left = `${bubbleObj.x}px`;
+          el.style.top = `${bubbleObj.y}px`;
+
+          if (!this.settings.reducedMotion) {
+            const tilt = Math.max(-16, Math.min(16, dx * 0.07 + vx * 0.45));
+            const stretchX = 1.12 + Math.min(0.14, Math.abs(vx) * 0.008);
+            const stretchY = 1.12 + Math.min(0.14, Math.abs(vy) * 0.008) - Math.min(0.06, Math.abs(vx) * 0.004);
+            el.style.transform = `scale(${stretchX.toFixed(2)}, ${stretchY.toFixed(2)}) rotate(${tilt.toFixed(1)}deg)`;
+          }
+
+          const centerX = bubbleObj.x + size / 2;
+          const leftEdge = this.dom.basketLeft.offsetLeft + this.dom.basketLeft.offsetWidth + 14;
+          const rightEdge = this.dom.basketRight.offsetLeft - 14;
+
+          this.dom.basketLeft.classList.toggle('basket-highlight', centerX <= leftEdge);
+          this.dom.basketRight.classList.toggle('basket-highlight', centerX >= rightEdge);
+        });
+
+        const endDrag = () => {
+          if (!bubbleObj.isDragging) return;
+          bubbleObj.isDragging = false;
+          this.draggedBubble = null;
+          el.classList.remove('is-dragging');
+          el.style.transform = '';
+          if (!this.settings.reducedMotion) {
+            el.classList.remove('is-poke-bounce');
+            void el.offsetWidth;
+            el.classList.add('is-poke-bounce');
+          }
+          this.dom.basketLeft.classList.remove('basket-highlight');
+          this.dom.basketRight.classList.remove('basket-highlight');
+
+          const size = el.offsetWidth || 118;
+          const centerX = bubbleObj.x + size / 2;
+          const leftEdge = this.dom.basketLeft.offsetLeft + this.dom.basketLeft.offsetWidth + 18;
+          const rightEdge = this.dom.basketRight.offsetLeft - 18;
+
+          if (centerX <= leftEdge) {
+            this.resolveBubbleDrop(bubbleObj, 'left');
+          } else if (centerX >= rightEdge) {
+            this.resolveBubbleDrop(bubbleObj, 'right');
+          } else if (!movedEnough) {
+            this.selectBubbleForTapSort(bubbleObj);
+          }
+        };
+
+        el.addEventListener('pointerup', endDrag);
+        el.addEventListener('pointercancel', endDrag);
+      }
+
+      selectBubbleForTapSort(bubbleObj) {
+        if (this.selectedBubble && this.selectedBubble.el) {
+          this.selectedBubble.el.classList.remove('is-selected');
+        }
+        if (this.selectedBubble === bubbleObj) {
+          this.selectedBubble = null;
+          return;
+        }
+        this.selectedBubble = bubbleObj;
+        bubbleObj.el.classList.add('is-selected');
+        const msg = `เลือก ${bubbleObj.item.label} แล้ว แตะตะกร้าซ้ายหรือขวาได้เลย`;
+        this.dom.coachFeedbackText.textContent = msg;
+        this.audio.speak(msg, { interrupt: true });
+      }
+
+      updateRewardStations() {
+        const leftMod = this.leftStationCount % 3;
+        const leftTier = this.leftStationCount === 0 ? 0 : (leftMod === 0 ? 3 : leftMod);
+        this.dom.leftStationVisual.innerHTML = ToyIcons.renderTreasureChest(leftTier);
+        this.dom.leftStationFill.style.width = `${(leftTier / 3) * 100}%`;
+        this.dom.leftStationHint.textContent = leftTier === 3 ? '🎉 ตะกร้าเต็มวิ้ง!' : `🧺 ใส่ตะกร้า ${leftTier}/3`;
+
+        const leftLootIcons = ['💚', '⭐', '🌈', '🍀', '💎', '🎀'];
+        const leftTokens = [];
+        for (let i = 0; i < Math.min(this.leftStationCount, 6); i++) {
+          leftTokens.push(`<span class="loot-token">${leftLootIcons[i % leftLootIcons.length]}</span>`);
+        }
+        this.dom.leftLootShelf.innerHTML = leftTokens.join('');
+
+        const rightMod = this.rightStationCount % 3;
+        const rightTier = this.rightStationCount === 0 ? 0 : (rightMod === 0 ? 3 : rightMod);
+        this.dom.rightStationVisual.innerHTML = ToyIcons.renderPopVolcano(rightTier);
+        this.dom.rightStationFill.style.width = `${(rightTier / 3) * 100}%`;
+        this.dom.rightStationHint.textContent = rightTier === 3 ? '🫧 ป๊อปฟองกระจาย!' : `🫧 ป๊อปฟอง ${rightTier}/3`;
+
+        const rightLootIcons = ['🫧', '💥', '🌟', '✨', '🎉', '🎈'];
+        const rightTokens = [];
+        for (let i = 0; i < Math.min(this.rightStationCount, 6); i++) {
+          rightTokens.push(`<span class="loot-token">${rightLootIcons[i % rightLootIcons.length]}</span>`);
+        }
+        this.dom.rightLootShelf.innerHTML = rightTokens.join('');
+      }
+
+      async resolveBubbleDrop(bubbleObj, side) {
+        if (this.state !== 'PLAYING' || this.paused) return;
+        const idx = this.bubbles.findIndex((b) => b.id === bubbleObj.id);
+        if (idx === -1) return;
+
+        const isCorrect = (side === 'left' && bubbleObj.isGood) || (side === 'right' && !bubbleObj.isGood);
+
+        if (!isCorrect) {
+          this.combo = 1;
+          this.dom.arenaStage.classList.remove('fever-mode');
+          this.updateHud();
+
+          const targetBasket = side === 'left' ? this.dom.basketLeft : this.dom.basketRight;
+          targetBasket.classList.remove('basket-shake');
+          void targetBasket.offsetWidth;
+          targetBasket.classList.add('basket-shake');
+
+          const arenaW = this.dom.arenaStage.clientWidth || 640;
+          const size = bubbleObj.el.offsetWidth || 118;
+          bubbleObj.x = (arenaW - size) / 2;
+          bubbleObj.baseX = bubbleObj.x;
+          bubbleObj.el.style.left = `${bubbleObj.x}px`;
+
+          const hintMsg = bubbleObj.item.spokenHint || `ลองใหม่นะ ${bubbleObj.item.label} ต้องไปอีกฝั่ง`;
+          this.dom.mascotSpeechText.textContent = 'ลองลากไปอีกฝั่งดูนะ!';
+          this.dom.coachFeedbackText.textContent = `💡 ${hintMsg}`;
+          this.audio.playScanTick();
+          this.audio.speak(hintMsg, { interrupt: true });
+          return;
+        }
+
+        // Correct Drop!
+        if (this.selectedBubble === bubbleObj) this.selectedBubble = null;
+        this.bubbles.splice(idx, 1);
+
+        const basketEl = side === 'left' ? this.dom.basketLeft : this.dom.basketRight;
+        basketEl.classList.remove('basket-nom');
+        void basketEl.offsetWidth;
+        basketEl.classList.add('basket-nom');
+
+        const centerX = basketEl.offsetLeft + basketEl.offsetWidth / 2;
+        const centerY = basketEl.offsetTop + basketEl.offsetHeight / 2;
+        bubbleObj.el.remove();
+
+        const targetStars = this.getTargetStars();
+        const gained = bubbleObj.isBonusStar ? 2 : 1;
+        this.stars = Math.min(targetStars, this.stars + gained);
+        this.combo += 1;
+        const isFever = this.combo >= 4;
+        if (isFever) {
+          this.dom.arenaStage.classList.add('fever-mode');
+        }
+
+        const isFirstTimeItem = !this.collectedFacts.has(bubbleObj.item.id);
+        this.collectedFacts.set(bubbleObj.item.id, bubbleObj.item);
+
+        if (side === 'left') {
+          this.leftStationCount += 1;
+        } else {
+          this.rightStationCount += 1;
+        }
+        this.updateRewardStations();
+
+        const stationMilestone = (side === 'left' ? this.leftStationCount : this.rightStationCount) % 3 === 0;
+
+        if (bubbleObj.isBonusStar) {
+          this.audio.playBonusStar();
+          this.spawnBubbleBurstEffect(centerX, centerY, '#FFD166');
+          this.spawnPopParticles(centerX, centerY, ['🌟', '👑', '🌈', '✨']);
+          this.spawnCallout(centerX, centerY - 24, '+2 ⭐ ดาวคู่!');
+          this.dom.mascotSpeechText.textContent = `ว้าว! ฟองดาวคู่ +2 ดาว!`;
+        } else if (stationMilestone) {
+          this.audio.playBonusStar();
+          this.spawnBubbleBurstEffect(centerX, centerY, side === 'left' ? '#80ED99' : '#FF9EBB');
+          this.spawnPopParticles(centerX, centerY, side === 'left' ? ['💚', '🌈', '⭐', '✨'] : ['🫧', '💥', '🌟', '🎉']);
+          this.spawnCallout(centerX, centerY - 24, side === 'left' ? '🧺 ตะกร้าเต็มวิ้ง!' : '🫧 ป๊อปฟองกระจาย!');
+          this.dom.mascotSpeechText.textContent = side === 'left' ? 'ตะกร้าซ้ายเต็มแล้ว เยี่ยมเลย!' : 'ป๊อปฟองครบชุด สุดยอด!';
+        } else if (side === 'left') {
+          this.audio.playGoodCollect(this.combo);
+          this.spawnBubbleBurstEffect(centerX, centerY, '#80ED99');
+          this.spawnPopParticles(centerX, centerY, ['⭐', '💚', '✨', '🌈']);
+          this.spawnCallout(centerX, centerY - 24, isFever ? '🌈 ฟีเวอร์ +1 ⭐' : '+1 ⭐');
+          this.dom.mascotSpeechText.textContent = `เยี่ยม! ใส่ตะกร้า ${bubbleObj.item.label} แล้ว`;
+        } else {
+          this.audio.playHazardPop();
+          this.spawnBubbleBurstEffect(centerX, centerY, '#FF9EBB');
+          this.spawnPopParticles(centerX, centerY, ['💥', '✨', '🌟', '🎉']);
+          this.spawnCallout(centerX, centerY - 24, isFever ? '🌈 ฟีเวอร์ ป๊อป!' : 'ป๊อป! +1 ⭐');
+          this.dom.mascotSpeechText.textContent = `ป๊อป! จัดการ ${bubbleObj.item.label} สำเร็จ`;
+        }
+
+        if (this.combo === 4) {
+          this.audio.playFeverChime();
+          this.spawnCallout(centerX, centerY - 52, '🌈 โหมดสายรุ้งฟีเวอร์!');
+        }
+
+        this.flyRewardStar(centerX, centerY, bubbleObj.isBonusStar);
+        this.updateGardenSprouts();
+
+        this.dom.mascotSvgMount.innerHTML = ToyIcons.renderMascot('excited');
+        setTimeout(() => {
+          if (this.state === 'PLAYING') {
+            this.dom.mascotSvgMount.innerHTML = ToyIcons.renderMascot('happy');
+          }
+        }, 620);
+
+        const textDisplay = bubbleObj.item.spokenSuccess || bubbleObj.item.label;
+        this.dom.coachFeedbackText.textContent = `💡 ${textDisplay}`;
+        this.updateHud();
+
+        const isLastStar = this.stars >= targetStars;
+        const now = performance.now();
+        const calmEnoughToSpeak = isFirstTimeItem || (now - this.audio.lastSpokenAt > 3200);
+
+        if (isLastStar) {
+          if (!this.audio.isSpeaking && calmEnoughToSpeak) {
+            await this.audio.speak(textDisplay, { interrupt: false });
+          } else if (this.audio.isSpeaking) {
+            await new Promise((r) => setTimeout(r, 1400));
+          }
+          if (this.state === 'PLAYING') {
+            this.finishRoundCelebration();
+          }
+          return;
+        }
+
+        if (calmEnoughToSpeak) {
+          this.audio.speak(textDisplay, { interrupt: false });
+        }
+        this.restartSwitchScan();
+      }
+
+      spawnBubbleBurstEffect(x, y, ringColor = '#FFD166') {
+        if (this.settings.reducedMotion) return;
+        const ring = document.createElement('div');
+        ring.className = 'pop-ring';
+        ring.style.left = `${x}px`;
+        ring.style.top = `${y}px`;
+        ring.style.setProperty('--ring-color', ringColor);
+        this.dom.arenaStage.appendChild(ring);
+        setTimeout(() => ring.remove(), 640);
+
+        const bubbleColors = ['#90E0EF', '#FF9EBB', '#FFD166', '#80ED99', '#E0AAFF'];
+        for (let i = 0; i < 7; i++) {
+          const mini = document.createElement('div');
+          mini.className = 'mini-pop-bubble';
+          const angle = (Math.PI * 2 * i) / 7 + (Math.random() * 0.3);
+          const dist = 36 + Math.random() * 44;
+          const size = 14 + Math.round(Math.random() * 14);
+          mini.style.left = `${x - size / 2}px`;
+          mini.style.top = `${y - size / 2}px`;
+          mini.style.setProperty('--bsize', `${size}px`);
+          mini.style.setProperty('--bcolor', bubbleColors[i % bubbleColors.length]);
+          mini.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+          mini.style.setProperty('--ty', `${Math.sin(angle) * dist - 14}px`);
+          this.dom.arenaStage.appendChild(mini);
+          setTimeout(() => mini.remove(), 800);
+        }
+      }
+
+      spawnPopParticles(x, y, emojis) {
+        if (this.settings.reducedMotion) return;
+        for (let i = 0; i < 6; i++) {
+          const spark = document.createElement('span');
+          spark.className = 'pop-spark';
+          spark.textContent = emojis[i % emojis.length];
+          const angle = (Math.PI * 2 * i) / 6;
+          const dist = 42 + Math.random() * 34;
+          spark.style.left = `${x}px`;
+          spark.style.top = `${y}px`;
+          spark.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+          spark.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+          this.dom.arenaStage.appendChild(spark);
+          setTimeout(() => spark.remove(), 700);
+        }
+      }
+
+      spawnCallout(x, y, text) {
+        if (this.settings.reducedMotion) return;
+        const badge = document.createElement('div');
+        badge.className = 'float-callout';
+        badge.textContent = text;
+        badge.style.left = `${x}px`;
+        badge.style.top = `${y}px`;
+        this.dom.arenaStage.appendChild(badge);
+        setTimeout(() => badge.remove(), 860);
+      }
+
+      flyRewardStar(startX, startY, isDouble = false) {
+        const badge = this.dom.starBadge;
+        if (this.settings.reducedMotion || !badge) {
+          if (badge) {
+            badge.classList.add('pulse');
+            setTimeout(() => badge.classList.remove('pulse'), 250);
+          }
+          return;
+        }
+        const arenaRect = this.dom.arenaStage.getBoundingClientRect();
+        const badgeRect = badge.getBoundingClientRect();
+        const count = isDouble ? 2 : 1;
+
+        for (let i = 0; i < count; i++) {
+          const star = document.createElement('span');
+          star.className = 'flying-star';
+          star.textContent = '⭐';
+          const sx = arenaRect.left + startX + (i * 18 - 8);
+          const sy = arenaRect.top + startY;
+          star.style.left = `${sx}px`;
+          star.style.top = `${sy}px`;
+          document.body.appendChild(star);
+
+          requestAnimationFrame(() => {
+            const dx = (badgeRect.left + badgeRect.width / 2) - sx;
+            const dy = (badgeRect.top + badgeRect.height / 2) - sy;
+            star.style.transform = `translate(${dx}px, ${dy}px) scale(0.6)`;
+            star.style.opacity = '0.2';
+          });
+
+          setTimeout(() => {
+            star.remove();
+            badge.classList.add('pulse');
+            setTimeout(() => badge.classList.remove('pulse'), 220);
+          }, 560);
+        }
+      }
+
+      updateGardenSprouts() {
+        const layer = this.dom.gardenSproutsLayer;
+        if (!layer) return;
+        const spots = [
+          { x: 185, y: 392, color: '#FF9EBB' },
+          { x: 245, y: 382, color: '#FFD166' },
+          { x: 315, y: 388, color: '#90E0EF' },
+          { x: 395, y: 384, color: '#FF7096' },
+          { x: 468, y: 390, color: '#FFD166' },
+          { x: 538, y: 382, color: '#C77DFF' },
+          { x: 605, y: 392, color: '#FF9EBB' }
+        ];
+        const unlocked = Math.min(spots.length, Math.floor(this.stars / 2));
+        let svg = '';
+        for (let i = 0; i < unlocked; i++) {
+          const s = spots[i];
+          svg += `
+            <g>
+              <line x1="${s.x}" y1="${s.y + 18}" x2="${s.x}" y2="${s.y}" stroke="#059669" stroke-width="3" stroke-linecap="round" />
+              <circle cx="${s.x}" cy="${s.y}" r="7" fill="${s.color}" stroke="#4A304D" stroke-width="2" />
+              <circle cx="${s.x}" cy="${s.y}" r="2.6" fill="#FFFDF7" />
+            </g>
+          `;
+        }
+        layer.innerHTML = svg;
+      }
+
+      updateHud() {
+        const target = this.getTargetStars();
+        const pct = Math.min(100, Math.round((this.stars / target) * 100));
+        this.dom.starCountText.textContent = `${this.stars} / ${target}`;
+        this.dom.starMeterFill.style.width = `${pct}%`;
+        this.dom.starProgressBar.setAttribute('aria-valuemax', String(target));
+        this.dom.starProgressBar.setAttribute('aria-valuenow', String(this.stars));
+        if (this.combo >= 4) {
+          this.dom.comboBadge.textContent = `🌈 ฟีเวอร์ x${this.combo}`;
+          this.dom.comboBadge.classList.add('fever-active');
+        } else {
+          this.dom.comboBadge.textContent = `✨ คอมโบ x${this.combo}`;
+          this.dom.comboBadge.classList.remove('fever-active');
+        }
+      }
+
+      startGameLoop() {
+        this.stopGameLoop();
+        const step = (now) => {
+          if (this.state !== 'PLAYING') return;
+          const dt = Math.min(0.05, (now - this.lastFrameTime) / 1000);
+          this.lastFrameTime = now;
+
+          if (!this.paused && !this.activeModal) {
+            this.spawnCooldown -= dt;
+            if (this.spawnCooldown <= 0) {
+              this.spawnBubble();
+              this.spawnCooldown = this.settings.speedLevel === 'fast' ? 1.15 : (this.settings.speedLevel === 'medium' ? 1.55 : 2.0);
+            }
+
+            const arenaW = this.dom.arenaStage.clientWidth || 640;
+            const bubbleSize = arenaW <= 560 ? 100 : 118;
+            const basketPad = arenaW <= 560 ? 108 : 160;
+
+            for (let i = this.bubbles.length - 1; i >= 0; i--) {
+              const b = this.bubbles[i];
+              if (b.isDragging) continue;
+              b.y -= b.speed * dt;
+              if (!this.settings.reducedMotion) {
+                b.wobblePhase += dt * 2.1;
+                const sway = Math.sin(b.wobblePhase) * 12;
+                b.x = Math.max(basketPad, Math.min(arenaW - basketPad - bubbleSize, b.baseX + sway));
+              }
+              b.el.style.top = `${b.y}px`;
+              b.el.style.left = `${b.x}px`;
+
+              if (b.y < -bubbleSize) {
+                if (this.selectedBubble === b) this.selectedBubble = null;
+                b.el.remove();
+                this.bubbles.splice(i, 1);
+              }
+            }
+          }
+
+          this.rafId = requestAnimationFrame(step);
+        };
+        this.rafId = requestAnimationFrame(step);
+      }
+
+      stopGameLoop() {
+        if (this.rafId) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+      }
+
+      clearAllBubbles() {
+        this.draggedBubble = null;
+        this.selectedBubble = null;
+        this.bubbles.forEach((b) => b.el.remove());
+        this.bubbles = [];
+        this.dom.bubbleLayer.innerHTML = '';
+      }
+
+      finishRoundCelebration() {
+        this.state = 'COMPLETE';
+        this.stopGameLoop();
+        this.clearAllBubbles();
+        this.dom.arenaStage.classList.remove('fever-mode');
+        this.audio.playWinFanfare();
+
+        this.dom.mascotSvgMount.innerHTML = ToyIcons.renderMascot('excited');
+        this.dom.mascotSpeechText.textContent = 'เก่งที่สุด! เก็บดาวสายรุ้งครบแล้ว!';
+
+        const targetStars = this.getTargetStars();
+        const summaryList = Array.from(this.collectedFacts.values());
+        const winSpeech = `ยอดเยี่ยมมาก เก็บดาวสายรุ้งครบ ${targetStars} ดวงในเรื่อง ${this.pack.lessonTitle} แล้ว`;
+        this.dom.coachFeedbackText.textContent = `🎉 ${winSpeech}`;
+        this.audio.speak(winSpeech, { interrupt: true });
+
+        this.dom.arenaOverlay.hidden = false;
+        this.dom.overlayCardContent.innerHTML = `
+          <div style="width: 78px; height: 66px;">${ToyIcons.renderMascot('excited')}</div>
+          <h2 class="overlay-title">🎉 เย้! เก็บดาวสายรุ้งครบ ${targetStars} ดวง!</h2>
+          <p style="font-weight: 800;">สิ่งที่หนูได้เรียนรู้ในด่านนี้:</p>
+          <div class="summary-stickers-grid">
+            ${summaryList.map((item) => `
+              <span class="summary-chip">
+                ${item.type === 'good' ? '💚' : '💥'} ${item.label}
+              </span>
+            `).join('')}
+          </div>
+          <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.25rem;">
+            <button type="button" class="toy-btn bg-mint cta-big-btn" id="btnPlayAgain">
+              🔄 เล่นอีกครั้ง
+            </button>
+          </div>
+        `;
+
+        document.getElementById('btnPlayAgain').addEventListener('click', () => {
+          this.audio.unlock();
+          this.startNewRound();
+        });
+
+        this.restartSwitchScan();
+      }
+
+      bindEvents() {
+        this.dom.btnListenCoach.addEventListener('click', () => {
+          this.audio.unlock();
+          this.audio.speak(this.dom.coachFeedbackText.textContent, { interrupt: true });
+        });
+
+        // Interactive Sky Clouds
+        [this.dom.cloudLeft, this.dom.cloudRight].forEach((cloudEl, idx) => {
+          if (!cloudEl) return;
+          cloudEl.addEventListener('click', () => {
+            this.audio.unlock();
+            this.audio.playTone(idx === 0 ? 660 : 784, 0.12, 'sine', 0.12, 988);
+            const cx = idx === 0 ? 125 : 678;
+            const cy = idx === 0 ? 92 : 108;
+            this.spawnPopParticles(cx, cy, ['☁️', '✨', '🌈']);
+          });
+        });
+
+        // Tap-to-Sort on Left/Right Stations
+        this.dom.basketLeft.addEventListener('click', () => {
+          this.audio.unlock();
+          if (this.selectedBubble) {
+            this.resolveBubbleDrop(this.selectedBubble, 'left');
+          } else if (this.bubbles.length > 0 && this.state === 'PLAYING') {
+            this.resolveBubbleDrop(this.bubbles[0], 'left');
+          }
+        });
+
+        this.dom.basketRight.addEventListener('click', () => {
+          this.audio.unlock();
+          if (this.selectedBubble) {
+            this.resolveBubbleDrop(this.selectedBubble, 'right');
+          } else if (this.bubbles.length > 0 && this.state === 'PLAYING') {
+            this.resolveBubbleDrop(this.bubbles[0], 'right');
+          }
+        });
+
+        this.dom.btnPause.addEventListener('click', () => this.togglePause());
+        this.dom.btnResumeGame.addEventListener('click', () => {
+          if (this.paused) this.togglePause();
+        });
+        this.dom.btnRestartGame.addEventListener('click', () => {
+          if (this.paused) this.togglePause();
+          this.startNewRound();
+        });
+
+        const toggleSwitch = () => {
+          this.audio.unlock();
+          this.settings.switchMode = !this.settings.switchMode;
+          this.applySettings();
+          this.restartSwitchScan();
+        };
+        this.dom.btnSwitchMode.addEventListener('click', toggleSwitch);
+        this.dom.btnToggleSwitchModal.addEventListener('click', toggleSwitch);
+
+        this.dom.btnSettings.addEventListener('click', () => this.openModal('SETTINGS'));
+        this.dom.btnCloseSettings.addEventListener('click', () => this.closeModal());
+
+        this.dom.btnRoundLength.addEventListener('click', () => {
+          const order = ['long', 'marathon', 'short'];
+          this.settings.roundLength = order[(order.indexOf(this.settings.roundLength) + 1) % order.length];
+          this.applySettings();
+          this.updateHud();
+        });
+
+        this.dom.btnBubbleSpeed.addEventListener('click', () => {
+          const order = ['slow', 'medium', 'fast'];
+          this.settings.speedLevel = order[(order.indexOf(this.settings.speedLevel) + 1) % order.length];
+          this.applySettings();
+        });
+
+        this.dom.btnToggleSound.addEventListener('click', () => {
+          this.settings.sound = !this.settings.sound;
+          this.audio.enabled = this.settings.sound;
+          if (!this.settings.sound) this.audio.stopSpeech();
+          else this.audio.unlock();
+          this.applySettings();
+        });
+
+        this.dom.btnTextSize.addEventListener('click', () => {
+          const sizes = ['normal', 'large', 'xlarge'];
+          this.settings.textSize = sizes[(sizes.indexOf(this.settings.textSize) + 1) % sizes.length];
+          this.applySettings();
+        });
+
+        this.dom.btnReducedMotion.addEventListener('click', () => {
+          this.settings.reducedMotion = !this.settings.reducedMotion;
+          this.applySettings();
+        });
+
+        this.dom.btnTeacher.addEventListener('click', () => this.openModal('TEACHER'));
+        this.dom.btnCloseTeacher.addEventListener('click', () => this.closeModal());
+
+        this.dom.btnLoadPackLung.addEventListener('click', () => {
+          this.closeModal();
+          this.loadLessonPack(LESSON_PACKS.lung_cancer_okrp, false);
+        });
+        this.dom.btnLoadPackRoad.addEventListener('click', () => {
+          this.closeModal();
+          this.loadLessonPack(LESSON_PACKS.road_safety_demo, false);
+        });
+
+        this.dom.btnApplyJson.addEventListener('click', () => {
+          try {
+            const parsed = JSON.parse(this.dom.lessonJsonInput.value);
+            if (!parsed || typeof parsed.lessonTitle !== 'string' || !parsed.categories || !Array.isArray(parsed.items) || parsed.items.length === 0) {
+              throw new Error('ต้องมี lessonTitle, categories (good/hazard) และ items อย่างน้อย 1 รายการ');
+            }
+            for (const it of parsed.items) {
+              if (!it.label || (it.type !== 'good' && it.type !== 'hazard')) {
+                throw new Error('ทุกรายการใน items ต้องมี label และ type เป็น "good" หรือ "hazard"');
+              }
+            }
+            this.dom.jsonStatusText.className = 'json-status ok';
+            this.dom.jsonStatusText.textContent = 'อัปเดตบทเรียนสำเร็จ!';
+            this.closeModal();
+            this.loadLessonPack(parsed, false);
+          } catch (err) {
+            this.dom.jsonStatusText.className = 'json-status err';
+            this.dom.jsonStatusText.textContent = `JSON ไม่ถูกต้อง: ${err.message}`;
+          }
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space' || e.key === ' ') {
+            if (this.settings.switchMode) {
+              e.preventDefault();
+              if (this.spaceHeld || e.repeat) return;
+              this.spaceHeld = true;
+              this.audio.unlock();
+              this.confirmSwitchScan();
+            }
+          } else if (e.key === 'Escape' && this.activeModal) {
+            this.closeModal();
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.code === 'Space' || e.key === ' ') {
+            this.spaceHeld = false;
+          }
+        });
+      }
+
+      applySettings() {
+        document.documentElement.setAttribute('data-text-size', this.settings.textSize);
+        if (this.settings.reducedMotion) {
+          document.documentElement.setAttribute('data-reduced-motion', 'true');
+        } else {
+          document.documentElement.removeAttribute('data-reduced-motion');
+        }
+
+        const base = this.pack.targetStars || 18;
+        const roundLabels = {
+          short: `สั้น (${Math.max(8, Math.round(base * 0.7))} ดาว)`,
+          long: `ยาวจุใจ (${base} ดาว)`,
+          marathon: `ยาวพิเศษ (${Math.round(base * 1.5)} ดาว)`
+        };
+        this.dom.btnRoundLength.textContent = roundLabels[this.settings.roundLength];
+
+        const speedLabels = { slow: 'ช้าสบายตา', medium: 'ปานกลาง', fast: 'สนุกทันใจ' };
+        this.dom.btnBubbleSpeed.textContent = speedLabels[this.settings.speedLevel];
+
+        this.dom.btnToggleSound.textContent = this.settings.sound ? 'เปิดเสียง' : 'ปิดเสียง';
+        this.dom.btnToggleSound.setAttribute('aria-pressed', String(this.settings.sound));
+
+        this.dom.btnSwitchMode.setAttribute('aria-pressed', String(this.settings.switchMode));
+        this.dom.switchLabel.textContent = this.settings.switchMode ? 'สวิตช์เดียว: เปิด' : 'สวิตช์เดียว';
+        this.dom.btnToggleSwitchModal.textContent = this.settings.switchMode ? 'เปิดใช้งาน' : 'ปิด';
+        this.dom.btnToggleSwitchModal.setAttribute('aria-pressed', String(this.settings.switchMode));
+
+        const sizeText = { normal: 'ปกติ', large: 'ใหญ่', xlarge: 'ใหญ่มาก' };
+        this.dom.btnTextSize.textContent = sizeText[this.settings.textSize];
+
+        this.dom.btnReducedMotion.textContent = this.settings.reducedMotion ? 'เปิด' : 'ปิด';
+        this.dom.btnReducedMotion.setAttribute('aria-pressed', String(this.settings.reducedMotion));
+      }
+
+      togglePause() {
+        this.paused = !this.paused;
+        this.dom.modalPause.hidden = !this.paused;
+        this.dom.btnPause.setAttribute('aria-pressed', String(this.paused));
+        this.dom.pauseLabel.textContent = this.paused ? 'เล่นต่อ' : 'พัก';
+        this.audio.setPaused(this.paused);
+        this.restartSwitchScan();
+      }
+
+      openModal(name) {
+        this.activeModal = name;
+        this.dom.modalSettings.hidden = name !== 'SETTINGS';
+        this.dom.modalTeacher.hidden = name !== 'TEACHER';
+        this.audio.stopSpeech();
+        this.restartSwitchScan();
+      }
+
+      closeModal() {
+        this.activeModal = null;
+        this.dom.modalSettings.hidden = true;
+        this.dom.modalTeacher.hidden = true;
+        this.lastFrameTime = performance.now();
+        this.restartSwitchScan();
+      }
+
+      getScanTargets() {
+        if (this.paused) return [this.dom.btnResumeGame, this.dom.btnRestartGame];
+        if (this.activeModal === 'SETTINGS') return Array.from(this.dom.modalSettings.querySelectorAll('button'));
+        if (this.activeModal === 'TEACHER') return [this.dom.btnCloseTeacher, this.dom.btnLoadPackLung, this.dom.btnLoadPackRoad, this.dom.btnApplyJson];
+        if (this.state !== 'PLAYING') {
+          return Array.from(this.dom.overlayCardContent.querySelectorAll('button'));
+        }
+        const bubbleEls = this.bubbles.map((b) => b.el);
+        return bubbleEls.length > 0 ? bubbleEls : [this.dom.btnListenCoach, this.dom.btnPause];
+      }
+
+      stopSwitchScan() {
+        if (this.scanTimer) {
+          clearInterval(this.scanTimer);
+          this.scanTimer = null;
+        }
+        document.querySelectorAll('.scan-focus').forEach((el) => el.classList.remove('scan-focus'));
+      }
+
+      startSwitchScan() {
+        this.stopSwitchScan();
+        if (!this.settings.switchMode) return;
+        const step = () => {
+          document.querySelectorAll('.scan-focus').forEach((el) => el.classList.remove('scan-focus'));
+          const targets = this.getScanTargets();
+          if (targets.length === 0) return;
+          this.scanIndex = this.scanIndex % targets.length;
+          targets[this.scanIndex].classList.add('scan-focus');
+          this.audio.playScanTick();
+        };
+        step();
+        this.scanTimer = setInterval(() => {
+          const targets = this.getScanTargets();
+          if (targets.length === 0) return;
+          this.scanIndex = (this.scanIndex + 1) % targets.length;
+          step();
+        }, 1600);
+      }
+
+      restartSwitchScan() {
+        this.stopSwitchScan();
+        if (this.settings.switchMode) this.startSwitchScan();
+      }
+
+      confirmSwitchScan() {
+        const targets = this.getScanTargets();
+        if (targets.length === 0) return;
+        const el = targets[this.scanIndex % targets.length];
+        if (el) {
+          el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+          el.click();
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.rainbowBubbleApp = new RainbowBubbleTemplateGame();
+    });
+  </script>
+  <script>
+    {
+      const rules = document.getElementById('game-rules');
+      rules.addEventListener('close', () => {
+        document.getElementById('btnStartPlay')?.focus();
+      }, { once: true });
+      rules.showModal();
+    }
+  </script>
+</body>
+</html>

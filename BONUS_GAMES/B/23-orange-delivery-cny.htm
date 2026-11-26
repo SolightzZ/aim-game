@@ -1,0 +1,2839 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+      <title>ปั่นส่งส้ม รับอั่งเปา — Mandarin Orange Courier</title>
+      <style>
+         /* ==========================================================================
+       1. DESIGN TOKENS & ACCESSIBILITY THEME VARIABLES
+       ========================================================================== */
+         :root {
+            /* Light Theme Palette (Warm Festive Chinese New Year) */
+            --bg-sky-top: #dce8e2;
+            --bg-sky-bottom: #f5f3ee;
+            --road-surface: #e5e2dc;
+            --road-border: #cbd5e1;
+            --road-stripe: #ffffff;
+
+            /* Left House (Warm Coral + Circular Cloud Frame) */
+            --left-wall: #e6a89e;
+            --left-wall-dark: #c98378;
+            --left-accent: #b83b35;
+            --left-bg-pill: #fff1ef;
+
+            /* Right House (Soft Mint + Octagonal Coin Frame) */
+            --right-wall: #9ed2c6;
+            --right-wall-dark: #74b3a5;
+            --right-accent: #1d6f5f;
+            --right-bg-pill: #eefaf7;
+
+            /* Festive Crimson & Gold Accents */
+            --crimson: #c83e37;
+            --crimson-dark: #991b1b;
+            --gold: #f59e0b;
+            --gold-light: #fef3c7;
+            --tangerine: #ea580c;
+
+            /* UI Surfaces & Typography */
+            --surface-card: rgba(255, 255, 255, 0.96);
+            --surface-glass: rgba(255, 253, 249, 0.92);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-subtle: rgba(30, 41, 59, 0.14);
+            --focus-ring: #2563eb;
+            --shadow-soft: 0 10px 28px rgba(30, 41, 59, 0.12);
+            --shadow-card: 0 16px 40px rgba(30, 41, 59, 0.18);
+
+            /* Dynamic Text Scale */
+            --font-scale: 1;
+            --font-family-main: 'Noto Sans Thai', 'Sarabun', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+         }
+
+         /* High Contrast Mode Override */
+         body.high-contrast {
+            --bg-sky-top: #fffdf7;
+            --bg-sky-bottom: #fffdf7;
+            --road-surface: #f1f5f9;
+            --road-border: #0f172a;
+            --road-stripe: #0f172a;
+
+            --left-wall: #ffe4e6;
+            --left-wall-dark: #991b1b;
+            --left-accent: #991b1b;
+            --left-bg-pill: #ffffff;
+
+            --right-wall: #dcfce7;
+            --right-wall-dark: #065f46;
+            --right-accent: #065f46;
+            --right-bg-pill: #ffffff;
+
+            --crimson: #991b1b;
+            --crimson-dark: #7f1d1d;
+            --gold: #d97706;
+            --gold-light: #fef08a;
+
+            --surface-card: #ffffff;
+            --surface-glass: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #1e293b;
+            --border-subtle: #000000;
+            --focus-ring: #0000ff;
+         }
+
+         /* Text Size Levels */
+         body.text-large {
+            --font-scale: 1.18;
+         }
+         body.text-xlarge {
+            --font-scale: 1.35;
+         }
+
+         /* ==========================================================================
+       2. RESET & FULLSCREEN LAYOUT
+       ========================================================================== */
+         *,
+         *::before,
+         *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+         }
+
+         html,
+         body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: var(--font-family-main);
+            background: var(--bg-sky-bottom);
+            color: var(--text-primary);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+         }
+
+         /* Focus Ring for HTML Controls */
+         button:focus-visible,
+         select:focus-visible,
+         input:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 3px;
+         }
+
+         /* Screen Reader Only Utility */
+         .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+         }
+
+         /* Main Fullscreen Game Container */
+         #app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+         }
+
+         /* ==========================================================================
+       3. FULLSCREEN SVG STAGE (85%+ GAMEPLAY CANVAS)
+       ========================================================================== */
+         #world-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 1;
+         }
+
+         /* Gentle Lantern Sway Animation (Disabled in Reduce Motion) */
+         @keyframes lanternSway {
+            0%,
+            100% {
+               transform: rotate(-3deg);
+            }
+            50% {
+               transform: rotate(3deg);
+            }
+         }
+         .lantern-swing {
+            transform-box: fill-box;
+            transform-origin: top center;
+            animation: lanternSway 3.6s ease-in-out infinite;
+         }
+         body.reduce-motion .lantern-swing {
+            animation: none !important;
+         }
+
+         /* Sound Wave Bar Animation */
+         @keyframes wavePulse {
+            0%,
+            100% {
+               transform: scaleY(0.4);
+            }
+            50% {
+               transform: scaleY(1.15);
+            }
+         }
+         .speaking .wave-bar {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: wavePulse 0.55s ease-in-out infinite;
+         }
+         .speaking .wave-bar:nth-child(2) {
+            animation-delay: 0.12s;
+         }
+         .speaking .wave-bar:nth-child(3) {
+            animation-delay: 0.24s;
+         }
+         .speaking .wave-bar:nth-child(4) {
+            animation-delay: 0.1s;
+         }
+
+         /* Interactive House Target Hover / Focus (No Black Bounding Box) */
+         .house-clickable {
+            cursor: pointer;
+            transition: filter 0.2s ease;
+         }
+         .house-clickable,
+         .house-clickable:focus,
+         .house-clickable:focus-visible,
+         .house-clickable:active {
+            outline: none !important;
+         }
+         .house-clickable:hover {
+            filter: brightness(1.03);
+         }
+         .house-clickable:focus-visible .house-frame-ring {
+            stroke: var(--focus-ring) !important;
+            stroke-width: 9px !important;
+         }
+         .house-scan-highlight .house-frame-ring {
+            stroke: #2563eb !important;
+            stroke-width: 10px !important;
+            filter: drop-shadow(0 0 14px rgba(37, 99, 235, 0.7));
+         }
+
+         /* ==========================================================================
+       4. MINIMALIST FLOATING HUD (NO NAVBAR)
+       ========================================================================== */
+         .hud-top {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 8px max(14px, env(safe-area-inset-left));
+            pointer-events: none;
+         }
+
+         .hud-top > * {
+            pointer-events: auto;
+         }
+
+         .hud-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface-glass);
+            border: 2px solid var(--border-subtle);
+            border-radius: 999px;
+            padding: 8px 16px;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(8px);
+            min-height: 56px;
+         }
+         body.high-contrast .hud-pill {
+            border-width: 3px;
+         }
+
+         .hud-stat-value {
+            font-size: calc(1.25rem * var(--font-scale));
+            font-weight: 800;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+         }
+
+         .hud-stage-badge {
+            font-size: calc(0.85rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--crimson);
+            background: var(--gold-light);
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1.5px solid var(--gold);
+         }
+
+         /* Central Mission Plaque */
+         .mission-plaque {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--surface-card);
+            border: 3px solid var(--crimson);
+            border-radius: 24px;
+            padding: 10px 22px 12px;
+            box-shadow: var(--shadow-card);
+            max-width: min(460px, 56vw);
+            text-align: center;
+            position: relative;
+            transition:
+               transform 0.2s ease,
+               border-color 0.2s ease;
+         }
+         body.high-contrast .mission-plaque {
+            border-width: 4px;
+         }
+
+         .mission-prompt-label {
+            font-size: calc(0.92rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--crimson);
+            letter-spacing: 0.02em;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+         }
+
+         .mission-main-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+         }
+
+         .mission-hanzi {
+            font-size: calc(clamp(2rem, 4.4vw, 3.1rem) * var(--font-scale));
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1.12;
+            letter-spacing: 0.06em;
+         }
+
+         .mission-pinyin {
+            font-size: calc(clamp(1.05rem, 2vw, 1.35rem) * var(--font-scale));
+            font-weight: 700;
+            color: var(--crimson-dark);
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+         }
+
+         /* Icon Buttons (Minimum 56x56 touch target) */
+         .icon-btn {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-width: 56px;
+            min-height: 56px;
+            padding: 8px 12px;
+            border-radius: 18px;
+            border: 2px solid var(--border-subtle);
+            background: var(--surface-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            transition:
+               transform 0.15s ease,
+               background-color 0.15s ease,
+               box-shadow 0.15s ease;
+         }
+         body.high-contrast .icon-btn {
+            border-width: 3px;
+         }
+         .icon-btn:hover {
+            transform: translateY(-2px);
+            background: #fffbeb;
+         }
+         .icon-btn:active {
+            transform: translateY(1px) scale(0.97);
+         }
+         .icon-btn.primary-crimson {
+            background: var(--crimson);
+            color: #ffffff;
+            border-color: var(--crimson-dark);
+         }
+         .icon-btn.primary-crimson:hover {
+            background: var(--crimson-dark);
+         }
+
+         .icon-btn-label {
+            font-size: calc(0.75rem * var(--font-scale));
+            font-weight: 700;
+            line-height: 1.1;
+            display: none;
+         }
+         body.show-labels .icon-btn-label {
+            display: block;
+         }
+
+         .hud-right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+         }
+
+         /* ==========================================================================
+       5. GENTLE FEEDBACK BANNER (NON-PUNITIVE LEARNING TOAST)
+       ========================================================================== */
+         .feedback-banner {
+            position: fixed;
+            top: 145px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 22px;
+            border-radius: 20px;
+            background: var(--surface-card);
+            border: 3px solid var(--gold);
+            box-shadow: var(--shadow-card);
+            font-size: calc(1.05rem * var(--font-scale));
+            font-weight: 800;
+            color: var(--text-primary);
+            opacity: 0;
+            pointer-events: none;
+            transition:
+               opacity 0.25s ease,
+               transform 0.25s ease;
+            max-width: 90vw;
+            text-align: center;
+         }
+         .feedback-banner.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+         }
+         .feedback-banner.success {
+            border-color: #16a34a;
+            background: #f0fdf4;
+            color: #14532d;
+         }
+         .feedback-banner.retry {
+            border-color: #d97706;
+            background: #fffbeb;
+            color: #78350f;
+         }
+
+         /* ==========================================================================
+       6. BOTTOM TOSS CONTROLS (LARGE TOUCH TARGETS, UNOBSTRUCTIVE)
+       ========================================================================== */
+         .controls-bottom {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 10px max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+            pointer-events: none;
+         }
+
+         .toss-btn {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 112px;
+            min-height: 92px;
+            padding: 12px 18px;
+            border-radius: 26px;
+            border: 3px solid;
+            cursor: pointer;
+            box-shadow: var(--shadow-card);
+            transition:
+               transform 0.14s ease,
+               box-shadow 0.14s ease,
+               background-color 0.14s ease;
+         }
+         body.high-contrast .toss-btn {
+            border-width: 4px;
+         }
+
+         .toss-btn-left {
+            background: var(--left-bg-pill);
+            border-color: var(--left-accent);
+            color: var(--left-accent);
+         }
+         .toss-btn-right {
+            background: var(--right-bg-pill);
+            border-color: var(--right-accent);
+            color: var(--right-accent);
+         }
+
+         .toss-btn:hover:not(:disabled) {
+            transform: translateY(-4px) scale(1.03);
+         }
+         .toss-btn:active:not(:disabled) {
+            transform: translateY(1px) scale(0.96);
+         }
+         .toss-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+         }
+
+         .toss-btn.scan-active {
+            outline: 4px solid #2563eb;
+            outline-offset: 4px;
+            transform: scale(1.06);
+         }
+
+         .toss-btn-title {
+            font-size: calc(1rem * var(--font-scale));
+            font-weight: 900;
+         }
+         .toss-btn-key {
+            font-size: calc(0.78rem * var(--font-scale));
+            font-weight: 700;
+            opacity: 0.85;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.06);
+         }
+
+         .center-status-pill {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--surface-glass);
+            border: 2px solid var(--border-subtle);
+            font-size: calc(0.88rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 6px;
+         }
+
+         /* ==========================================================================
+       7. OVERLAY SCREENS & MODALS (START SCREEN, SETTINGS, PAUSE, SUMMARY)
+       ========================================================================== */
+         .overlay-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.2s ease;
+         }
+         .overlay-backdrop.transparent-start {
+            background: rgba(245, 243, 238, 0.22);
+            backdrop-filter: blur(1px);
+         }
+         .overlay-backdrop.hidden {
+            display: none !important;
+         }
+
+         .modal-card {
+            background: var(--surface-card);
+            border: 3px solid var(--crimson);
+            border-radius: 30px;
+            padding: clamp(18px, 3.5vw, 30px);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-card);
+            position: relative;
+         }
+         body.high-contrast .modal-card {
+            border-width: 4px;
+         }
+
+         /* Start Screen Floating Archway Card */
+         .start-card {
+            max-width: 490px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255, 253, 249, 0.97) 0%, rgba(254, 249, 238, 0.96) 100%);
+            border: 4px solid var(--crimson);
+            box-shadow: 0 22px 48px rgba(153, 27, 27, 0.18);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+         }
+
+         .start-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+         }
+
+         .start-emblem-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: var(--gold-light);
+            border: 2px solid var(--gold);
+            margin-bottom: 10px;
+         }
+
+         .game-title-cn {
+            font-size: calc(1.1rem * var(--font-scale));
+            font-weight: 800;
+            color: var(--crimson);
+            letter-spacing: 0.12em;
+         }
+
+         .game-title-th {
+            font-size: calc(clamp(1.85rem, 4.2vw, 2.55rem) * var(--font-scale));
+            font-weight: 900;
+            color: var(--text-primary);
+            margin: 2px 0 4px;
+            line-height: 1.15;
+         }
+
+         .game-subtitle {
+            font-size: calc(0.98rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+         }
+
+         /* Stage & Vocabulary Set Selectors */
+         .selector-group {
+            margin: 12px 0;
+            text-align: center;
+         }
+         .selector-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: calc(0.88rem * var(--font-scale));
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+         }
+         .pill-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+         }
+         .choice-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-height: 68px;
+            padding: 10px 8px;
+            border-radius: 20px;
+            border: 2.5px solid var(--border-subtle);
+            background: #ffffff;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: calc(0.92rem * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s ease;
+         }
+         .choice-pill[aria-pressed='true'] {
+            background: var(--gold-light);
+            border-color: var(--crimson);
+            color: var(--crimson-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(200, 62, 55, 0.18);
+         }
+
+         .start-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            flex: 0 0 auto;
+         }
+
+         .btn-play-big {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 64px;
+            padding: 14px 32px;
+            border-radius: 999px;
+            border: 3px solid var(--crimson-dark);
+            background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: calc(1.25rem * var(--font-scale));
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(185, 28, 28, 0.32);
+            transition:
+               transform 0.15s ease,
+               box-shadow 0.15s ease;
+         }
+         .btn-play-big:hover {
+            transform: translateY(-2px) scale(1.02);
+         }
+         .btn-play-big:active {
+            transform: translateY(1px) scale(0.98);
+         }
+
+         .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 2px solid var(--border-subtle);
+            background: #ffffff;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: calc(1rem * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+         }
+         .btn-secondary:hover {
+            background: #f8fafc;
+         }
+
+         /* Settings Grid */
+         .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-subtle);
+         }
+         .settings-title {
+            font-size: calc(1.35rem * var(--font-scale));
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+         }
+
+         .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+         }
+         .setting-row:last-child {
+            border-bottom: none;
+         }
+         .setting-lead {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+         }
+         .setting-icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--gold-light);
+            color: var(--crimson);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+         }
+         .setting-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+         }
+         .setting-name {
+            font-size: calc(1rem * var(--font-scale));
+            font-weight: 800;
+         }
+
+         /* Accessible Toggle Switch */
+         .toggle-switch {
+            position: relative;
+            min-width: 64px;
+            height: 36px;
+            border-radius: 999px;
+            border: 2px solid var(--border-subtle);
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+         }
+         .toggle-switch[aria-checked='true'] {
+            background: #16a34a;
+            border-color: #14532d;
+         }
+         .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+         }
+         .toggle-switch[aria-checked='true'] .toggle-knob {
+            transform: translateX(28px);
+         }
+
+         .segment-group {
+            display: inline-flex;
+            gap: 6px;
+            flex-wrap: wrap;
+         }
+         .segment-btn {
+            min-width: 56px;
+            min-height: 44px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 2px solid var(--border-subtle);
+            background: #ffffff;
+            font-family: inherit;
+            font-size: calc(0.85rem * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+         }
+         .segment-btn[aria-pressed='true'] {
+            background: var(--crimson);
+            color: #ffffff;
+            border-color: var(--crimson-dark);
+         }
+
+         /* Stage Complete Vocabulary Recap Grid */
+         .vocab-recap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 16px 0;
+         }
+         .vocab-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 18px;
+            border: 2px solid var(--border-subtle);
+            background: #fffbeb;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+         }
+         .vocab-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--crimson);
+         }
+         .vocab-card-cn {
+            font-size: calc(1.4rem * var(--font-scale));
+            font-weight: 900;
+            color: var(--text-primary);
+         }
+         .vocab-card-py {
+            font-size: calc(0.88rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--crimson);
+         }
+         .vocab-card-th {
+            font-size: calc(0.88rem * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-secondary);
+         }
+
+         /* Responsive Adjustments for Mobile Portrait */
+         @media (max-width: 640px) {
+            .hud-top {
+               flex-wrap: wrap;
+               justify-content: space-between;
+            }
+            .mission-plaque {
+               order: 3;
+               width: 100%;
+               max-width: 100%;
+               margin-top: 4px;
+               padding: 8px 14px;
+            }
+            .toss-btn {
+               min-width: 96px;
+               min-height: 82px;
+               padding: 10px 12px;
+            }
+            .pill-grid {
+               grid-template-columns: 1fr;
+            }
+            .feedback-banner {
+               top: 195px;
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <!-- Screen Reader Live Announcer -->
+      <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+      <div id="app">
+         <!-- ========================================================================
+         1. FULLSCREEN PSEUDO-3D PERSPECTIVE SVG SCENE
+         ======================================================================== -->
+         <svg id="world-svg" viewBox="0 0 1200 750" preserveAspectRatio="xMidYMid slice" role="img" aria-label="ฉากถนนหมู่บ้านเทศกาลตรุษจีน ปั่นจักรยานส่งส้มมงคล">
+            <defs>
+               <!-- Sky & Ground Gradients -->
+               <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--bg-sky-top)" />
+                  <stop offset="100%" stop-color="var(--bg-sky-bottom)" />
+               </linearGradient>
+
+               <linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#d6d3cd" />
+                  <stop offset="100%" stop-color="var(--road-surface)" />
+               </linearGradient>
+
+               <!-- Festive Lantern Gradient -->
+               <radialGradient id="lanternGrad" cx="40%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#ff6b5b" />
+                  <stop offset="65%" stop-color="#c83e37" />
+                  <stop offset="100%" stop-color="#881b15" />
+               </radialGradient>
+
+               <!-- Mandarin Orange Gradient -->
+               <radialGradient id="orangeGrad" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#fdba74" />
+                  <stop offset="50%" stop-color="#f97316" />
+                  <stop offset="100%" stop-color="#c2410c" />
+               </radialGradient>
+
+               <!-- Woven Basket Pattern -->
+               <pattern id="basketWeave" width="12" height="12" patternUnits="userSpaceOnUse">
+                  <rect width="12" height="12" fill="#b45309" />
+                  <path d="M0 6H12M6 0V12" stroke="#78350f" stroke-width="2" />
+                  <rect x="1" y="1" width="4" height="4" fill="#d97706" />
+                  <rect x="7" y="7" width="4" height="4" fill="#d97706" />
+               </pattern>
+
+               <!-- House Roof Tile Pattern -->
+               <pattern id="roofPattern" width="24" height="14" patternUnits="userSpaceOnUse">
+                  <path d="M0 14 Q12 2 24 14" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="2.5" />
+               </pattern>
+
+               <!-- Clip Paths for Left (Circle) and Right (Octagon) Elder Frames -->
+               <clipPath id="leftPortraitClip">
+                  <circle cx="0" cy="0" r="56" />
+               </clipPath>
+               <clipPath id="rightPortraitClip">
+                  <polygon points="-24,-54 24,-54 54,-24 54,24 24,54 -24,54 -54,24 -54,-24" />
+               </clipPath>
+            </defs>
+
+            <!-- Sky Backdrop -->
+            <rect x="0" y="0" width="1200" height="310" fill="url(#skyGrad)" />
+
+            <!-- Distant Village Silhouette (Hidden when Reduced Distractions is ON) -->
+            <g id="scenery-distant">
+               <path d="M0 295 Q160 245 340 295 L340 310 L0 310 Z" fill="#cbd5c8" opacity="0.55" />
+               <path d="M840 295 Q1020 240 1200 295 L1200 310 L840 310 Z" fill="#cbd5c8" opacity="0.55" />
+               <path d="M475 290 L515 268 L555 290 Z" fill="#94a3b8" opacity="0.45" />
+               <path d="M645 290 L685 268 L725 290 Z" fill="#94a3b8" opacity="0.45" />
+            </g>
+
+            <!-- Sidewalks & Lawn Ground -->
+            <rect x="0" y="295" width="1200" height="455" fill="#ebe7df" />
+
+            <!-- Perspective Street Trapezoid -->
+            <polygon points="525,295 675,295 1040,750 160,750" fill="url(#roadGrad)" stroke="var(--road-border)" stroke-width="4" />
+            <!-- Sidewalk Curbs -->
+            <polygon points="495,295 525,295 160,750 110,750" fill="#d6d3d1" />
+            <polygon points="675,295 705,295 1090,750 1040,750" fill="#d6d3d1" />
+
+            <!-- Animated Perspective Road Center Lines -->
+            <g id="road-stripes-group"></g>
+
+            <!-- Overhead Festive Red Lantern Garlands -->
+            <g id="lantern-garland">
+               <path d="M120 75 Q600 155 1080 75" fill="none" stroke="#991b1b" stroke-width="3.5" />
+               <g transform="translate(220, 96)">
+                  <g class="lantern-swing">
+                     <line x1="0" y1="0" x2="0" y2="14" stroke="#f59e0b" stroke-width="3" />
+                     <ellipse cx="0" cy="36" rx="22" ry="25" fill="url(#lanternGrad)" stroke="#991b1b" stroke-width="2" />
+                     <rect x="-11" y="10" width="22" height="5" rx="2" fill="#f59e0b" />
+                     <rect x="-11" y="59" width="22" height="5" rx="2" fill="#f59e0b" />
+                     <line x1="0" y1="64" x2="0" y2="82" stroke="#f59e0b" stroke-width="3" />
+                  </g>
+               </g>
+               <g transform="translate(380, 114)">
+                  <g class="lantern-swing">
+                     <line x1="0" y1="0" x2="0" y2="12" stroke="#f59e0b" stroke-width="3" />
+                     <ellipse cx="0" cy="31" rx="18" ry="21" fill="url(#lanternGrad)" stroke="#991b1b" stroke-width="2" />
+                     <rect x="-9" y="9" width="18" height="4" rx="2" fill="#f59e0b" />
+                     <rect x="-9" y="50" width="18" height="4" rx="2" fill="#f59e0b" />
+                     <line x1="0" y1="54" x2="0" y2="69" stroke="#f59e0b" stroke-width="2.5" />
+                  </g>
+               </g>
+               <g transform="translate(820, 114)">
+                  <g class="lantern-swing">
+                     <line x1="0" y1="0" x2="0" y2="12" stroke="#f59e0b" stroke-width="3" />
+                     <ellipse cx="0" cy="31" rx="18" ry="21" fill="url(#lanternGrad)" stroke="#991b1b" stroke-width="2" />
+                     <rect x="-9" y="9" width="18" height="4" rx="2" fill="#f59e0b" />
+                     <rect x="-9" y="50" width="18" height="4" rx="2" fill="#f59e0b" />
+                     <line x1="0" y1="54" x2="0" y2="69" stroke="#f59e0b" stroke-width="2.5" />
+                  </g>
+               </g>
+               <g transform="translate(980, 96)">
+                  <g class="lantern-swing">
+                     <line x1="0" y1="0" x2="0" y2="14" stroke="#f59e0b" stroke-width="3" />
+                     <ellipse cx="0" cy="36" rx="22" ry="25" fill="url(#lanternGrad)" stroke="#991b1b" stroke-width="2" />
+                     <rect x="-11" y="10" width="22" height="5" rx="2" fill="#f59e0b" />
+                     <rect x="-11" y="59" width="22" height="5" rx="2" fill="#f59e0b" />
+                     <line x1="0" y1="64" x2="0" y2="82" stroke="#f59e0b" stroke-width="3" />
+                  </g>
+               </g>
+            </g>
+
+            <!-- ======================================================================
+           LEFT HOUSE TARGET (Warm Coral + Circular Auspicious Frame)
+           ====================================================================== -->
+            <g id="left-house-group" class="house-clickable" role="button" tabindex="0" aria-label="บ้านฝั่งซ้าย โยนส้มให้บ้านซ้าย">
+               <!-- House Body -->
+               <rect x="-145" y="-110" width="270" height="230" rx="18" fill="var(--left-wall)" stroke="var(--left-wall-dark)" stroke-width="5" />
+               <!-- Curved Chinese Eaves Roof -->
+               <path d="M-168 -105 Q-10 -158 148 -105 L132 -86 L-152 -86 Z" fill="#991b1b" stroke="#7f1d1d" stroke-width="4" />
+               <path d="M-168 -105 Q-10 -158 148 -105 L132 -86 L-152 -86 Z" fill="url(#roofPattern)" />
+               <!-- Doorway -->
+               <rect x="-118" y="-15" width="66" height="135" rx="8" fill="#7f1d1d" stroke="#f59e0b" stroke-width="3" />
+               <circle cx="-64" cy="54" r="5" fill="#f59e0b" />
+
+               <!-- Circular Elder Frame (Shape Coding: Circle = Left) -->
+               <g transform="translate(26, -12)">
+                  <circle class="house-frame-ring" cx="0" cy="0" r="64" fill="#fffbeb" stroke="var(--crimson)" stroke-width="6" />
+                  <circle cx="0" cy="0" r="58" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-dasharray="6 4" />
+                  <g id="left-elder-portrait" clip-path="url(#leftPortraitClip)"></g>
+               </g>
+
+               <!-- House Nameplate Sign -->
+               <g transform="translate(0, 88)">
+                  <rect x="-126" y="-26" width="252" height="58" rx="14" fill="#ffffff" stroke="var(--left-accent)" stroke-width="3.5" />
+                  <text id="left-house-primary" x="0" y="-2" text-anchor="middle" font-size="22" font-weight="900" fill="var(--text-primary)">ปู่</text>
+                  <text id="left-house-secondary" x="0" y="21" text-anchor="middle" font-size="16" font-weight="700" fill="var(--left-accent)">บ้านฝั่งซ้าย</text>
+               </g>
+
+               <!-- Result Badge -->
+               <g id="left-result-badge" transform="translate(76, -64)" opacity="0">
+                  <circle cx="0" cy="0" r="24" fill="#16a34a" stroke="#ffffff" stroke-width="3" />
+                  <path d="M-10 0 L-3 8 L11 -7" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+               </g>
+            </g>
+
+            <!-- ======================================================================
+           RIGHT HOUSE TARGET (Soft Mint + Octagonal Coin Frame)
+           ====================================================================== -->
+            <g id="right-house-group" class="house-clickable" role="button" tabindex="0" aria-label="บ้านฝั่งขวา โยนส้มให้บ้านขวา">
+               <!-- House Body -->
+               <rect x="-125" y="-110" width="270" height="230" rx="18" fill="var(--right-wall)" stroke="var(--right-wall-dark)" stroke-width="5" />
+               <!-- Curved Chinese Eaves Roof -->
+               <path d="M-148 -105 Q10 -158 168 -105 L152 -86 L-132 -86 Z" fill="#115e59" stroke="#134e4a" stroke-width="4" />
+               <path d="M-148 -105 Q10 -158 168 -105 L152 -86 L-132 -86 Z" fill="url(#roofPattern)" />
+               <!-- Doorway -->
+               <rect x="52" y="-15" width="66" height="135" rx="8" fill="#134e4a" stroke="#f59e0b" stroke-width="3" />
+               <circle cx="64" cy="54" r="5" fill="#f59e0b" />
+
+               <!-- Octagonal Elder Frame (Shape Coding: Octagon = Right) -->
+               <g transform="translate(-26, -12)">
+                  <polygon class="house-frame-ring" points="-28,-62 28,-62 62,-28 62,28 28,62 -28,62 -62,28 -62,-28" fill="#fffbeb" stroke="var(--right-accent)" stroke-width="6" />
+                  <polygon points="-24,-54 24,-54 54,-24 54,24 24,54 -24,54 -54,24 -54,-24" fill="none" stroke="var(--gold)" stroke-width="2.5" />
+                  <g id="right-elder-portrait" clip-path="url(#rightPortraitClip)"></g>
+               </g>
+
+               <!-- House Nameplate Sign -->
+               <g transform="translate(0, 88)">
+                  <rect x="-126" y="-26" width="252" height="58" rx="14" fill="#ffffff" stroke="var(--right-accent)" stroke-width="3.5" />
+                  <text id="right-house-primary" x="0" y="-2" text-anchor="middle" font-size="22" font-weight="900" fill="var(--text-primary)">ตา</text>
+                  <text id="right-house-secondary" x="0" y="21" text-anchor="middle" font-size="16" font-weight="700" fill="var(--right-accent)">บ้านฝั่งขวา</text>
+               </g>
+
+               <!-- Result Badge -->
+               <g id="right-result-badge" transform="translate(-76, -64)" opacity="0">
+                  <circle cx="0" cy="0" r="24" fill="#16a34a" stroke="#ffffff" stroke-width="3" />
+                  <path d="M-10 0 L-3 8 L11 -7" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+               </g>
+            </g>
+
+            <!-- ======================================================================
+           CYCLIST CHARACTER & WOVEN BASKETS (REAR 3/4 PERSPECTIVE)
+           ====================================================================== -->
+            <g id="cyclist-group" transform="translate(600, 610)">
+               <!-- Ground Shadow -->
+               <ellipse cx="0" cy="96" rx="84" ry="18" fill="rgba(15, 23, 42, 0.22)" />
+
+               <!-- Bicycle Rear Frame & Fender -->
+               <path d="M-42 20 L0 -18 L42 20" fill="none" stroke="#dc2626" stroke-width="7" stroke-linecap="round" />
+               <rect x="-54" y="14" width="108" height="10" rx="5" fill="#475569" />
+
+               <!-- Rear Bicycle Tire & Animated Spokes -->
+               <g transform="translate(0, 52)">
+                  <ellipse cx="0" cy="0" rx="13" ry="44" fill="#1e293b" stroke="#0f172a" stroke-width="3" />
+                  <ellipse cx="0" cy="0" rx="7" ry="34" fill="none" stroke="#94a3b8" stroke-width="2" />
+                  <line id="wheel-spoke-1" x1="0" y1="-34" x2="0" y2="34" stroke="#e2e8f0" stroke-width="2" />
+                  <line id="wheel-spoke-2" x1="-6" y1="-20" x2="6" y2="20" stroke="#e2e8f0" stroke-width="2" />
+               </g>
+
+               <!-- Pedaling Legs (Animated in JS loop) -->
+               <g id="left-leg" transform="translate(-24, 18)">
+                  <rect x="-9" y="0" width="18" height="36" rx="8" fill="#1d4ed8" />
+                  <rect x="-11" y="32" width="22" height="11" rx="5" fill="#1e293b" />
+               </g>
+               <g id="right-leg" transform="translate(24, 18)">
+                  <rect x="-9" y="0" width="18" height="36" rx="8" fill="#1d4ed8" />
+                  <rect x="-11" y="32" width="22" height="11" rx="5" fill="#1e293b" />
+               </g>
+
+               <!-- Left Woven Basket with Mandarin Oranges -->
+               <g id="basket-left" transform="translate(-66, 22)">
+                  <path d="M-28 -18 L28 -18 L22 30 L-22 30 Z" fill="url(#basketWeave)" stroke="#78350f" stroke-width="3" />
+                  <circle cx="-10" cy="-22" r="14" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+                  <path d="M-10 -36 Q-4 -42 0 -35" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+                  <circle cx="11" cy="-21" r="14" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+                  <path d="M11 -35 Q17 -41 21 -34" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+               </g>
+
+               <!-- Right Woven Basket with Mandarin Oranges & Collected Red Envelopes -->
+               <g id="basket-right" transform="translate(66, 22)">
+                  <path d="M-28 -18 L28 -18 L22 30 L-22 30 Z" fill="url(#basketWeave)" stroke="#78350f" stroke-width="3" />
+                  <circle cx="-11" cy="-21" r="14" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+                  <path d="M-11 -35 Q-5 -41 -1 -34" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+                  <circle cx="10" cy="-22" r="14" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+                  <path d="M10 -36 Q16 -42 20 -35" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+                  <rect x="-12" y="-12" width="24" height="16" rx="2" fill="#dc2626" stroke="#f59e0b" stroke-width="1.5" transform="rotate(-8)" />
+               </g>
+
+               <!-- Child Rider Body -->
+               <g id="rider-upper">
+                  <path d="M-26 -46 L-56 -28" stroke="#f59e0b" stroke-width="13" stroke-linecap="round" />
+                  <path d="M26 -46 L56 -28" stroke="#f59e0b" stroke-width="13" stroke-linecap="round" />
+                  <path d="M-64 -30 Q0 -40 64 -30" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+
+                  <path d="M-32 -56 C-34 -12 34 -12 32 -56 Z" fill="#f59e0b" stroke="#b45309" stroke-width="3" />
+                  <line x1="0" y1="-54" x2="0" y2="-16" stroke="#b91c1c" stroke-width="3" />
+                  <line x1="-6" y1="-44" x2="6" y2="-44" stroke="#b91c1c" stroke-width="3" stroke-linecap="round" />
+                  <line x1="-6" y1="-32" x2="6" y2="-32" stroke="#b91c1c" stroke-width="3" stroke-linecap="round" />
+
+                  <circle cx="0" cy="-82" r="26" fill="#fde68a" stroke="#d97706" stroke-width="2.5" />
+                  <path d="M-24 -80 Q0 -58 24 -80 L22 -64 Q0 -54 -22 -64 Z" fill="#1e293b" />
+                  <path d="M-26 -84 C-26 -112 26 -112 26 -84 Z" fill="#dc2626" stroke="#991b1b" stroke-width="2.5" />
+                  <circle cx="0" cy="-108" r="6" fill="#f59e0b" />
+                  <circle cx="0" cy="-93" r="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" />
+               </g>
+            </g>
+
+            <!-- ======================================================================
+           FLYING PROJECTILES (MANDARIN ORANGES & RED ENVELOPES)
+           ====================================================================== -->
+            <g id="flying-oranges" opacity="0" pointer-events="none">
+               <circle cx="-12" cy="0" r="16" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+               <path d="M-12 -16 Q-5 -23 0 -15" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+               <circle cx="12" cy="4" r="16" fill="url(#orangeGrad)" stroke="#9a3412" stroke-width="2" />
+               <path d="M12 -12 Q19 -19 24 -11" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+            </g>
+
+            <g id="flying-hongbao" opacity="0" pointer-events="none">
+               <rect x="-20" y="-28" width="40" height="56" rx="6" fill="#dc2626" stroke="#f59e0b" stroke-width="3" />
+               <path d="M-20 -12 Q0 4 20 -12" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+               <circle cx="0" cy="4" r="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" />
+               <text x="0" y="9" text-anchor="middle" font-size="13" font-weight="900" fill="#b91c1c">福</text>
+            </g>
+
+            <!-- Celebratory Gold Sparkles Layer -->
+            <g id="sparkles-layer" pointer-events="none"></g>
+         </svg>
+
+         <!-- ========================================================================
+         2. TOP MINIMALIST HUD (PROGRESS, MISSION PLAQUE, SCORE & CONTROLS)
+         ======================================================================== -->
+         <header class="hud-top" aria-label="แถบสถานะเกม">
+            <!-- Top-Left: Mandarin Orange Progress Counter -->
+            <div class="hud-pill" aria-label="ความคืบหน้าการส่งส้ม">
+               <svg width="32" height="32" viewBox="0 0 36 36" aria-hidden="true">
+                  <circle cx="18" cy="20" r="13" fill="#f97316" stroke="#9a3412" stroke-width="2" />
+                  <path d="M18 7 Q25 1 29 8" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+               </svg>
+               <span id="hud-progress" class="hud-stat-value">0/8</span>
+               <span id="hud-stage-badge" class="hud-stage-badge">ด่าน 1</span>
+            </div>
+
+            <!-- Top-Center: Mission Plaque -->
+            <section class="mission-plaque" aria-label="ป้ายภารกิจคำศัพท์ภาษาจีน">
+               <div class="mission-prompt-label">
+                  <span id="mission-instruction">ส่งส้มคู่นี้ให้...</span>
+                  <span id="mystery-badge" class="hud-stage-badge" style="display: none">ภารกิจฟังเสียง!</span>
+               </div>
+
+               <div class="mission-main-row">
+                  <div>
+                     <div id="mission-hanzi" class="mission-hanzi">给爷爷</div>
+                     <div id="mission-pinyin" class="mission-pinyin">gěi yéye</div>
+                  </div>
+
+                  <!-- Audio Replay Button with Animated Sound Waves -->
+                  <button id="btn-speak" type="button" class="icon-btn primary-crimson" aria-label="ฟังเสียงอ่านภาษาจีนซ้ำ (กด R)" title="ฟังเสียงอ่านคำศัพท์ซ้ำ">
+                     <svg id="speak-icon-svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+                        <path d="M4 10 H9 L15 5 V23 L9 18 H4 Z" fill="currentColor" />
+                        <rect class="wave-bar" x="18" y="9" width="2.5" height="10" rx="1.2" fill="currentColor" />
+                        <rect class="wave-bar" x="22" y="6" width="2.5" height="16" rx="1.2" fill="currentColor" />
+                        <rect class="wave-bar" x="26" y="10" width="2" height="8" rx="1" fill="currentColor" />
+                     </svg>
+                     <span class="icon-btn-label">ฟังเสียง</span>
+                  </button>
+               </div>
+            </section>
+
+            <!-- Top-Right: Gold Star Score + Settings & Pause Icon Buttons -->
+            <div class="hud-right-group">
+               <div class="hud-pill" aria-label="คะแนนสะสม">
+                  <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+                     <polygon points="16,2 20,11 30,12 22,19 25,29 16,23 7,29 10,19 2,12 12,11" fill="#f59e0b" stroke="#b45309" stroke-width="2" />
+                  </svg>
+                  <span id="hud-score" class="hud-stat-value">0</span>
+               </div>
+
+               <button id="btn-open-a11y" type="button" class="icon-btn" aria-label="ตั้งค่าการเข้าถึงและเกม" title="ตั้งค่า">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <circle cx="12" cy="12" r="3" />
+                     <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  </svg>
+                  <span class="icon-btn-label">ตั้งค่า</span>
+               </button>
+
+               <button id="btn-pause" type="button" class="icon-btn" aria-label="หยุดเกมชั่วคราว (กด Esc)" title="หยุดชั่วคราว">
+                  <svg width="26" height="26" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true">
+                     <rect x="7" y="6" width="5" height="16" rx="2" />
+                     <rect x="16" y="6" width="5" height="16" rx="2" />
+                  </svg>
+                  <span class="icon-btn-label">หยุด</span>
+               </button>
+            </div>
+         </header>
+
+         <!-- ========================================================================
+         3. GENTLE NON-PUNITIVE FEEDBACK BANNER
+         ======================================================================== -->
+         <div id="feedback-banner" class="feedback-banner" role="status" aria-live="polite">
+            <span id="feedback-icon"></span>
+            <span id="feedback-text">ยอดเยี่ยม! รับอั่งเปา +100</span>
+         </div>
+
+         <!-- ========================================================================
+         4. BOTTOM TOSS CONTROLS (LEFT & RIGHT LARGE TOUCH BUTTONS)
+         ======================================================================== -->
+         <footer class="controls-bottom" aria-label="ปุ่มควบคุมการโยนส้ม">
+            <button id="btn-toss-left" type="button" class="toss-btn toss-btn-left" aria-label="โยนส้มให้บ้านฝั่งซ้าย (กดลูกศรซ้าย หรือ A)">
+               <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M24 8 L12 18 L24 28" />
+                  <circle cx="9" cy="18" r="3" fill="#ea580c" stroke="none" />
+               </svg>
+               <span class="toss-btn-title">โยนซ้าย</span>
+               <span class="toss-btn-key">← / A</span>
+            </button>
+
+            <div id="center-status-pill" class="center-status-pill">
+               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <circle cx="10" cy="10" r="8" />
+                  <path d="M10 6 V10 L13 12" />
+               </svg>
+               <span id="status-mode-text">โหมดหยุดรอหน้าบ้าน</span>
+            </div>
+
+            <button id="btn-toss-right" type="button" class="toss-btn toss-btn-right" aria-label="โยนส้มให้บ้านฝั่งขวา (กดลูกศรขวา หรือ D)">
+               <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 8 L24 18 L12 28" />
+                  <circle cx="27" cy="18" r="3" fill="#ea580c" stroke="none" />
+               </svg>
+               <span class="toss-btn-title">โยนขวา</span>
+               <span class="toss-btn-key">→ / D</span>
+            </button>
+         </footer>
+
+         <!-- ========================================================================
+         5. START SCREEN OVERLAY (ARCHWAY PLAQUE OVER LIVE SVG SCENE)
+         ======================================================================== -->
+         <div id="start-overlay" class="overlay-backdrop transparent-start" role="dialog" aria-modal="true" aria-labelledby="start-title">
+            <div class="modal-card start-card">
+               <div class="start-scroll">
+                  <!-- Decorative SVG Oranges & Red Envelope Emblem -->
+                  <div class="start-emblem-badge" aria-hidden="true">
+                     <svg width="32" height="32" viewBox="0 0 36 36">
+                        <circle cx="18" cy="20" r="13" fill="#f97316" stroke="#9a3412" stroke-width="2.2" />
+                        <path d="M18 7 Q25 1 29 8" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+                     </svg>
+                     <span class="game-title-cn">新春送橘 · 领红包</span>
+                     <svg width="28" height="32" viewBox="0 0 32 36">
+                        <rect x="5" y="3" width="22" height="30" rx="4" fill="#dc2626" stroke="#f59e0b" stroke-width="2" />
+                        <circle cx="16" cy="18" r="6" fill="#fef3c7" />
+                     </svg>
+                  </div>
+   
+                  <h1 id="start-title" class="game-title-th">ปั่นส่งส้ม รับอั่งเปา</h1>
+                  <p class="game-subtitle">Mandarin Orange Courier · ภาษาจีนแสนสนุก</p>
+   
+                  <!-- Stage Selector -->
+                  <div class="selector-group">
+                     <span class="selector-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                           <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                           <line x1="4" y1="22" x2="4" y2="15" />
+                        </svg>
+                        <span>ระดับด่าน</span>
+                     </span>
+                     <div class="pill-grid" role="group" aria-label="เลือกด่าน">
+                        <button type="button" class="choice-pill stage-select-btn" data-stage="1" aria-pressed="true" aria-label="ด่าน 1">
+                           <svg width="24" height="24" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true">
+                              <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
+                           </svg>
+                           <span>ด่าน 1</span>
+                        </button>
+                        <button type="button" class="choice-pill stage-select-btn" data-stage="2" aria-pressed="false" aria-label="ด่าน 2">
+                           <svg width="36" height="24" viewBox="0 0 40 24" fill="#f59e0b" aria-hidden="true">
+                              <polygon points="11,3 13.5,9 20,9 15,13 17,19 11,15.5 5,19 7,13 2,9 8.5,9" />
+                              <polygon points="29,3 31.5,9 38,9 33,13 35,19 29,15.5 23,19 25,13 20,9 26.5,9" />
+                           </svg>
+                           <span>ด่าน 2</span>
+                        </button>
+                        <button type="button" class="choice-pill stage-select-btn" data-stage="3" aria-pressed="false" aria-label="ด่าน 3">
+                           <svg width="48" height="24" viewBox="0 0 54 24" fill="#f59e0b" aria-hidden="true">
+                              <polygon points="9,4 11,9 16,9 12,12.5 13.5,18 9,15 4.5,18 6,12.5 2,9 7,9" />
+                              <polygon points="27,3 29.5,9 36,9 31,13 33,19 27,15.5 21,19 23,13 18,9 24.5,9" />
+                              <polygon points="45,4 47,9 52,9 48,12.5 49.5,18 45,15 40.5,18 42,12.5 38,9 43,9" />
+                           </svg>
+                           <span>ด่าน 3</span>
+                        </button>
+                     </div>
+                  </div>
+   
+                  <!-- Vocabulary Set Selector -->
+                  <div class="selector-group">
+                     <span class="selector-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                           <circle cx="9" cy="7" r="4" />
+                           <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                           <circle cx="17" cy="9" r="3" />
+                           <path d="M21 21v-2a3 3 0 0 0-2-2.8" />
+                        </svg>
+                        <span>ชุดคำศัพท์</span>
+                     </span>
+                     <div class="pill-grid" role="group" aria-label="เลือกชุดคำศัพท์">
+                        <button type="button" class="choice-pill vocab-select-btn" data-vocab="all" aria-pressed="true" aria-label="รวมทั้งหมด 8 คำ">
+                           <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                              <circle cx="14" cy="14" r="10" />
+                              <path d="M9 14h10M14 9v10" />
+                           </svg>
+                           <span>全家 (8)</span>
+                        </button>
+                        <button type="button" class="choice-pill vocab-select-btn" data-vocab="elders" aria-pressed="false" aria-label="ปู่ ย่า ตา ยาย">
+                           <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                              <circle cx="10" cy="14" r="4" />
+                              <circle cx="18" cy="14" r="4" />
+                           </svg>
+                           <span>长辈 (4)</span>
+                        </button>
+                        <button type="button" class="choice-pill vocab-select-btn" data-vocab="nuclear" aria-pressed="false" aria-label="พ่อ แม่ พี่ชาย พี่สาว">
+                           <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                              <path d="M4 13L14 5l10 8v10H4V13z" />
+                           </svg>
+                           <span>家人 (4)</span>
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Primary Action Buttons -->
+               <div class="start-actions">
+                  <button id="btn-start-game" type="button" class="btn-play-big">
+                     <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true">
+                        <polygon points="8,5 24,14 8,23" />
+                     </svg>
+                     <span>เริ่มเล่น</span>
+                  </button>
+
+                  <button id="btn-start-a11y" type="button" class="btn-secondary" aria-label="ตั้งค่าเกมและการเข้าถึง">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                           d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                     </svg>
+                     <span>ตั้งค่า</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- ========================================================================
+         6. INCLUSIVE ACCESSIBILITY & GAME SETTINGS MODAL
+         ======================================================================== -->
+         <div id="a11y-overlay" class="overlay-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="a11y-modal-title">
+            <div class="modal-card">
+               <div class="settings-header">
+                  <h2 id="a11y-modal-title" class="settings-title">
+                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--crimson)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                           d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                     </svg>
+                     <span>ตั้งค่า (Settings)</span>
+                  </h2>
+                  <button id="btn-close-a11y" type="button" class="icon-btn" aria-label="ปิดหน้าต่างตั้งค่า">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true">
+                        <path d="M6 6 L18 18 M18 6 L6 18" />
+                     </svg>
+                  </button>
+               </div>
+
+               <!-- 1. High Contrast Mode -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                           <circle cx="12" cy="12" r="9" />
+                           <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">ความต่างสีสูง (High Contrast)</span>
+                     </div>
+                  </div>
+                  <button id="toggle-high-contrast" type="button" class="toggle-switch" role="switch" aria-checked="false" aria-label="โหมดความต่างสีสูง">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 2. Text Size -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <path d="M4 7V5h16v2M12 5v14M9 19h6" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">ขนาดตัวอักษร</span>
+                     </div>
+                  </div>
+                  <div class="segment-group" role="group" aria-label="เลือกขนาดตัวอักษร">
+                     <button type="button" class="segment-btn text-size-btn" data-size="normal" aria-pressed="true">ปกติ</button>
+                     <button type="button" class="segment-btn text-size-btn" data-size="large" aria-pressed="false">ใหญ่</button>
+                     <button type="button" class="segment-btn text-size-btn" data-size="xlarge" aria-pressed="false">ใหญ่มาก</button>
+                  </div>
+               </div>
+
+               <!-- 3. Reduce Motion & Distractions -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <rect x="6" y="5" width="4" height="14" rx="1" />
+                           <rect x="14" y="5" width="4" height="14" rx="1" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">ลดการเคลื่อนไหว (Reduce Motion)</span>
+                     </div>
+                  </div>
+                  <button id="toggle-reduce-motion" type="button" class="toggle-switch" role="switch" aria-checked="false" aria-label="ลดการเคลื่อนไหวและสิ่งเร้า">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 4. Untimed / Wait at House -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <circle cx="12" cy="12" r="9" />
+                           <path d="M12 7v5l3 2" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">หยุดรอหน้าบ้าน (ไม่จับเวลา)</span>
+                     </div>
+                  </div>
+                  <button id="toggle-wait-house" type="button" class="toggle-switch" role="switch" aria-checked="true" aria-label="หยุดรอหน้าบ้าน">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 5. Auto Read Aloud -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                           <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">อ่านออกเสียงภาษาจีน</span>
+                     </div>
+                  </div>
+                  <button id="toggle-read-aloud" type="button" class="toggle-switch" role="switch" aria-checked="true" aria-label="อ่านออกเสียงอัตโนมัติ">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 6. Sound Effects -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <path d="M9 18V5l12-2v13" />
+                           <circle cx="6" cy="18" r="3" />
+                           <circle cx="18" cy="16" r="3" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">เสียงเอฟเฟกต์</span>
+                     </div>
+                  </div>
+                  <button id="toggle-sfx" type="button" class="toggle-switch" role="switch" aria-checked="true" aria-label="เสียงดนตรีและเอฟเฟกต์">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 7. Single-Switch Auto-Scan Mode -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <rect x="4" y="8" width="16" height="8" rx="4" />
+                           <circle cx="15" cy="12" r="2" fill="currentColor" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">โหมดกดปุ่มเดียว (Single-Switch)</span>
+                     </div>
+                  </div>
+                  <button id="toggle-single-switch" type="button" class="toggle-switch" role="switch" aria-checked="false" aria-label="โหมดกดปุ่มเดียว">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 8. Show Labels Under Icons -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <rect x="3" y="5" width="18" height="14" rx="3" />
+                           <path d="M7 15h10" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">ข้อความกำกับใต้ไอคอน</span>
+                     </div>
+                  </div>
+                  <button id="toggle-icon-labels" type="button" class="toggle-switch" role="switch" aria-checked="true" aria-label="แสดงข้อความกำกับใต้ปุ่มไอคอน">
+                     <span class="toggle-knob"></span>
+                  </button>
+               </div>
+
+               <!-- 9. Pedaling Speed -->
+               <div class="setting-row">
+                  <div class="setting-lead">
+                     <div class="setting-icon-box" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                           <circle cx="6.5" cy="17.5" r="3.5" />
+                           <circle cx="17.5" cy="17.5" r="3.5" />
+                           <path d="M6.5 17.5L11 9h4l2.5 8.5M11 9l-2 8.5" />
+                        </svg>
+                     </div>
+                     <div class="setting-info">
+                        <span class="setting-name">ความเร็วในการปั่น</span>
+                     </div>
+                  </div>
+                  <div class="segment-group" role="group" aria-label="เลือกความเร็วในการปั่น">
+                     <button type="button" class="segment-btn speed-btn" data-speed="0.6" aria-pressed="false">ช้า</button>
+                     <button type="button" class="segment-btn speed-btn" data-speed="1.0" aria-pressed="true">ปกติ</button>
+                     <button type="button" class="segment-btn speed-btn" data-speed="1.4" aria-pressed="false">เร็ว</button>
+                  </div>
+               </div>
+
+               <div style="margin-top: 18px; text-align: center">
+                  <button id="btn-done-a11y" type="button" class="btn-play-big" style="min-height: 54px; padding: 10px 30px">
+                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                        <path d="M5 13l4 4L19 7" />
+                     </svg>
+                     <span>ตกลง</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- ========================================================================
+         7. PAUSE MODAL
+         ======================================================================== -->
+         <div id="pause-overlay" class="overlay-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+            <div class="modal-card" style="max-width: 420px; text-align: center">
+               <h2 id="pause-title" class="game-title-th" style="margin-bottom: 18px">พักการปั่นชั่วคราว</h2>
+               <div style="display: flex; flex-direction: column; gap: 12px">
+                  <button id="btn-resume" type="button" class="btn-play-big">
+                     <span>ปั่นต่อ</span>
+                  </button>
+                  <button id="btn-restart-stage" type="button" class="btn-secondary">
+                     <span>เริ่มด่านนี้ใหม่</span>
+                  </button>
+                  <button id="btn-back-home" type="button" class="btn-secondary">
+                     <span>กลับหน้าหลัก</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- ========================================================================
+         8. STAGE COMPLETE & VOCABULARY RECAP MODAL
+         ======================================================================== -->
+         <div id="complete-overlay" class="overlay-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="complete-title">
+            <div class="modal-card" style="text-align: center">
+               <svg width="72" height="72" viewBox="0 0 72 72" style="margin: 0 auto 6px; display: block" aria-hidden="true">
+                  <rect x="16" y="8" width="40" height="56" rx="8" fill="#dc2626" stroke="#f59e0b" stroke-width="3.5" />
+                  <path d="M16 24 Q36 40 56 24" fill="none" stroke="#f59e0b" stroke-width="3" />
+                  <circle cx="36" cy="38" r="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2.5" />
+                  <text x="36" y="44" text-anchor="middle" font-size="16" font-weight="900" fill="#b91c1c">福</text>
+               </svg>
+
+               <div class="game-title-cn">恭喜发财 · ส่งส้มสำเร็จครบ!</div>
+               <h2 id="complete-title" class="game-title-th">ได้รับอั่งเปาครบ 8 ซอง!</h2>
+
+               <div style="display: flex; justify-content: center; gap: 16px; margin: 10px 0">
+                  <div class="hud-pill">
+                     <span>คะแนน:</span>
+                     <strong id="summary-score" class="hud-stat-value">800</strong>
+                  </div>
+                  <div class="hud-pill">
+                     <span>ความแม่นยำ:</span>
+                     <strong id="summary-accuracy" class="hud-stat-value">100%</strong>
+                  </div>
+               </div>
+
+               <p style="font-size: calc(0.95rem * var(--font-scale)); color: var(--text-secondary); font-weight: 700; margin-top: 8px">แตะที่การ์ดคำศัพท์ด้านล่างเพื่อฟังเสียงทบทวน:</p>
+
+               <div id="vocab-recap-grid" class="vocab-recap-grid"></div>
+
+               <div class="start-actions">
+                  <button id="btn-next-stage" type="button" class="btn-play-big">
+                     <span>เล่นด่านถัดไป</span>
+                  </button>
+                  <button id="btn-replay-stage" type="button" class="btn-secondary">
+                     <span>เล่นด่านนี้อีกครั้ง</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * ==========================================================================
+          * MANDARIN ORANGE COURIER (ปั่นส่งส้ม รับอั่งเปา)
+          * Complete Inclusive Educational Game Engine (Zero External Dependencies)
+          * ==========================================================================
+          */
+
+         /* --------------------------------------------------------------------------
+       1. CURRICULUM DATA: CHINESE FAMILY MEMBERS & GREETING STRUCTURE (给 + ญาติ)
+       -------------------------------------------------------------------------- */
+         const FAMILY_VOCAB = [
+            {
+               id: 'baba',
+               hanzi: '爸爸',
+               pinyin: 'bàba',
+               thai: 'พ่อ',
+               group: 'nuclear',
+               confusableWith: 'mama',
+               hairColor: '#1e293b',
+               shirtColor: '#2563eb',
+               glasses: true,
+               hat: false,
+               gender: 'male',
+               age: 'adult',
+            },
+            {
+               id: 'mama',
+               hanzi: '妈妈',
+               pinyin: 'māma',
+               thai: 'แม่',
+               group: 'nuclear',
+               confusableWith: 'baba',
+               hairColor: '#1e293b',
+               shirtColor: '#e11d48',
+               glasses: false,
+               hat: false,
+               gender: 'female',
+               age: 'adult',
+            },
+            {
+               id: 'gege',
+               hanzi: '哥哥',
+               pinyin: 'gēge',
+               thai: 'พี่ชาย',
+               group: 'nuclear',
+               confusableWith: 'jiejie',
+               hairColor: '#1e293b',
+               shirtColor: '#059669',
+               glasses: false,
+               hat: false,
+               gender: 'male',
+               age: 'youth',
+            },
+            {
+               id: 'jiejie',
+               hanzi: '姐姐',
+               pinyin: 'jiějie',
+               thai: 'พี่สาว',
+               group: 'nuclear',
+               confusableWith: 'gege',
+               hairColor: '#1e293b',
+               shirtColor: '#d97706',
+               glasses: false,
+               hat: false,
+               gender: 'female',
+               age: 'youth',
+            },
+            {
+               id: 'yeye',
+               hanzi: '爷爷',
+               pinyin: 'yéye',
+               thai: 'ปู่',
+               group: 'elders',
+               confusableWith: 'waigong',
+               hairColor: '#e2e8f0',
+               shirtColor: '#991b1b',
+               glasses: true,
+               hat: 'mandarin',
+               gender: 'male',
+               age: 'elder',
+            },
+            {
+               id: 'nainai',
+               hanzi: '奶奶',
+               pinyin: 'nǎinai',
+               thai: 'ย่า',
+               group: 'elders',
+               confusableWith: 'waipo',
+               hairColor: '#e2e8f0',
+               shirtColor: '#b91c1c',
+               glasses: true,
+               hat: 'bun',
+               gender: 'female',
+               age: 'elder',
+            },
+            {
+               id: 'waigong',
+               hanzi: '外公',
+               pinyin: 'wàigōng',
+               thai: 'ตา',
+               group: 'elders',
+               confusableWith: 'yeye',
+               hairColor: '#cbd5e1',
+               shirtColor: '#78350f',
+               glasses: false,
+               hat: 'cap',
+               gender: 'male',
+               age: 'elder',
+            },
+            {
+               id: 'waipo',
+               hanzi: '外婆',
+               pinyin: 'wàipó',
+               thai: 'ยาย',
+               group: 'elders',
+               confusableWith: 'nainai',
+               hairColor: '#f1f5f9',
+               shirtColor: '#0f766e',
+               glasses: false,
+               hat: 'curly',
+               gender: 'female',
+               age: 'elder',
+            },
+         ];
+
+         /* --------------------------------------------------------------------------
+       2. CUSTOM SVG PORTRAIT GENERATOR FOR ALL 8 CHARACTERS
+       -------------------------------------------------------------------------- */
+         function buildCharacterSVG(member) {
+            const skin = member.age === 'elder' ? '#fde68a' : '#fed7aa';
+            let hairBack = '';
+            let hairFront = '';
+            let headwear = '';
+            let facialExtra = '';
+
+            if (member.gender === 'female') {
+               if (member.age === 'adult') {
+                  hairBack = `<path d="M-32 -8 Q-36 32 -22 44 L22 44 Q36 32 32 -8 Z" fill="${member.hairColor}" />`;
+                  hairFront = `<path d="M-28 -14 Q0 -34 28 -14 Q16 -22 0 -16 Q-16 -22 -28 -14 Z" fill="${member.hairColor}" />`;
+                  headwear = `<circle cx="22" cy="-22" r="6" fill="#dc2626" stroke="#f59e0b" stroke-width="2" />`;
+               } else if (member.age === 'youth') {
+                  headwear = `
+            <circle cx="-26" cy="-24" r="11" fill="${member.hairColor}" />
+            <circle cx="26" cy="-24" r="11" fill="${member.hairColor}" />
+            <circle cx="-26" cy="-24" r="4" fill="#dc2626" />
+            <circle cx="26" cy="-24" r="4" fill="#dc2626" />
+          `;
+                  hairFront = `<path d="M-28 -10 Q0 -32 28 -10 Z" fill="${member.hairColor}" />`;
+               } else if (member.hat === 'bun') {
+                  headwear = `
+            <circle cx="0" cy="-35" r="13" fill="${member.hairColor}" stroke="#94a3b8" stroke-width="1.5" />
+            <line x1="-16" y1="-35" x2="16" y2="-35" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" />
+          `;
+                  hairFront = `<path d="M-28 -10 Q0 -32 28 -10 Z" fill="${member.hairColor}" />`;
+               } else {
+                  hairFront = `
+            <circle cx="-22" cy="-18" r="11" fill="${member.hairColor}" />
+            <circle cx="-8" cy="-26" r="12" fill="${member.hairColor}" />
+            <circle cx="8" cy="-26" r="12" fill="${member.hairColor}" />
+            <circle cx="22" cy="-18" r="11" fill="${member.hairColor}" />
+          `;
+               }
+            } else {
+               if (member.hat === 'mandarin') {
+                  headwear = `
+            <path d="M-28 -14 C-28 -38 28 -38 28 -14 Z" fill="#991b1b" stroke="#f59e0b" stroke-width="2" />
+            <circle cx="0" cy="-34" r="5" fill="#f59e0b" />
+          `;
+                  facialExtra = `<path d="M-14 14 Q0 8 14 14" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />`;
+               } else if (member.hat === 'cap') {
+                  headwear = `
+            <path d="M-28 -16 Q0 -36 30 -16 L34 -10 L-28 -10 Z" fill="#78350f" stroke="#451a03" stroke-width="2" />
+          `;
+                  facialExtra = `<path d="M-12 -10 L-5 -12 M5 -12 L12 -10" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" />`;
+               } else {
+                  hairFront = `<path d="M-28 -10 C-26 -34 26 -34 28 -10 Q14 -20 0 -18 Q-14 -20 -28 -10 Z" fill="${member.hairColor}" />`;
+               }
+            }
+
+            const glassesSVG = member.glasses
+               ? `
+        <circle cx="-11" cy="-2" r="8.5" fill="none" stroke="#1e293b" stroke-width="2.2" />
+        <circle cx="11" cy="-2" r="8.5" fill="none" stroke="#1e293b" stroke-width="2.2" />
+        <line x1="-2.5" y1="-2" x2="2.5" y2="-2" stroke="#1e293b" stroke-width="2.2" />
+      `
+               : '';
+
+            return `
+        ${hairBack}
+        <path d="M-44 58 C-40 24 40 24 44 58 Z" fill="${member.shirtColor}" stroke="#f59e0b" stroke-width="2" />
+        <path d="M-10 26 L0 36 L10 26" fill="none" stroke="#fef3c7" stroke-width="2.5" />
+        <rect x="-8" y="14" width="16" height="14" rx="4" fill="${skin}" />
+        <circle cx="0" cy="-2" r="26" fill="${skin}" stroke="#d97706" stroke-width="1.5" />
+        ${hairFront}
+        ${headwear}
+        <circle cx="-16" cy="6" r="4.5" fill="#fb7185" opacity="0.45" />
+        <circle cx="16" cy="6" r="4.5" fill="#fb7185" opacity="0.45" />
+        <circle cx="-11" cy="-2" r="3" fill="#1e293b" />
+        <circle cx="11" cy="-2" r="3" fill="#1e293b" />
+        ${glassesSVG}
+        ${facialExtra}
+        <path d="M-9 11 Q0 20 9 11" fill="none" stroke="#991b1b" stroke-width="2.8" stroke-linecap="round" />
+      `;
+         }
+
+         /* --------------------------------------------------------------------------
+       3. WEB AUDIO API PENTATONIC SOUND SYNTHESIZER (GENTLE & SENSORY-SAFE)
+       -------------------------------------------------------------------------- */
+         class GentleSoundEngine {
+            constructor() {
+               this.ctx = null;
+            }
+
+            ensureContext() {
+               if (!this.ctx) {
+                  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                  if (AudioCtx) {
+                     this.ctx = new AudioCtx();
+                  }
+               }
+               if (this.ctx && this.ctx.state === 'suspended') {
+                  this.ctx.resume().catch(() => {});
+               }
+            }
+
+            playTone(freq, startOffset, duration, type = 'sine', peakGain = 0.14) {
+               if (!gameState.settings.sfx) return;
+               this.ensureContext();
+               if (!this.ctx) return;
+
+               try {
+                  const now = this.ctx.currentTime + startOffset;
+                  const osc = this.ctx.createOscillator();
+                  const gain = this.ctx.createGain();
+                  osc.type = type;
+                  osc.frequency.setValueAtTime(freq, now);
+
+                  gain.gain.setValueAtTime(0.0001, now);
+                  gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.03);
+                  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                  osc.connect(gain);
+                  gain.connect(this.ctx.destination);
+
+                  osc.start(now);
+                  osc.stop(now + duration + 0.02);
+               } catch (err) {}
+            }
+
+            playToss() {
+               if (!gameState.settings.sfx) return;
+               this.ensureContext();
+               if (!this.ctx) return;
+               try {
+                  const now = this.ctx.currentTime;
+                  const osc = this.ctx.createOscillator();
+                  const gain = this.ctx.createGain();
+                  osc.type = 'sine';
+                  osc.frequency.setValueAtTime(260, now);
+                  osc.frequency.exponentialRampToValueAtTime(480, now + 0.24);
+                  gain.gain.setValueAtTime(0.001, now);
+                  gain.gain.exponentialRampToValueAtTime(0.11, now + 0.05);
+                  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+                  osc.connect(gain);
+                  gain.connect(this.ctx.destination);
+                  osc.start(now);
+                  osc.stop(now + 0.28);
+               } catch (err) {}
+            }
+
+            playSuccess() {
+               const notes = [523.25, 587.33, 659.25, 783.99, 880.0];
+               notes.forEach((n, idx) => {
+                  this.playTone(n, idx * 0.075, 0.34, 'triangle', 0.13);
+               });
+            }
+
+            playGentleRetry() {
+               this.playTone(329.63, 0, 0.22, 'sine', 0.11);
+               this.playTone(261.63, 0.16, 0.28, 'sine', 0.11);
+            }
+
+            playStageComplete() {
+               const melody = [523.25, 659.25, 783.99, 1046.5, 880.0, 1046.5];
+               melody.forEach((n, idx) => {
+                  this.playTone(n, idx * 0.11, 0.45, 'triangle', 0.15);
+               });
+            }
+         }
+
+         const soundEngine = new GentleSoundEngine();
+
+         /* --------------------------------------------------------------------------
+       4. SPEECH SYNTHESIS (CHINESE zh-CN WITH SAFE FALLBACK)
+       -------------------------------------------------------------------------- */
+         function speakChinesePhrase(hanziText, slow = false) {
+            const speakBtn = document.getElementById('btn-speak');
+            if (speakBtn) {
+               speakBtn.classList.add('speaking');
+               setTimeout(() => speakBtn.classList.remove('speaking'), 1300);
+            }
+
+            if (!gameState.settings.readAloud) return;
+            if (!('speechSynthesis' in window)) return;
+
+            try {
+               window.speechSynthesis.cancel();
+               const utter = new SpeechSynthesisUtterance(hanziText);
+               utter.lang = 'zh-CN';
+               utter.rate = slow ? 0.68 : 0.88;
+               utter.pitch = 1.05;
+
+               const voices = window.speechSynthesis.getVoices();
+               const zhVoice = voices.find((v) => v.lang.toLowerCase().includes('zh'));
+               if (zhVoice) utter.voice = zhVoice;
+
+               utter.onend = () => speakBtn && speakBtn.classList.remove('speaking');
+               utter.onerror = () => speakBtn && speakBtn.classList.remove('speaking');
+               window.speechSynthesis.speak(utter);
+            } catch (err) {}
+         }
+
+         /* --------------------------------------------------------------------------
+       5. CENTRAL GAME STATE MACHINE & PERSISTENT SETTINGS
+       -------------------------------------------------------------------------- */
+         const STORAGE_KEY = 'mandarin_orange_courier_v2';
+
+         const gameState = {
+            screen: 'START_SCREEN', // START_SCREEN | PLAYING_APPROACH | WAITING_DELIVERY | TOSSING | PAUSED | STAGE_COMPLETE
+            previousScreen: 'WAITING_DELIVERY',
+            stage: 1,
+            vocabFilter: 'all',
+            queue: [],
+            currentIndex: 0,
+            currentRound: null,
+            score: 0,
+            streak: 0,
+            totalAttempts: 0,
+            firstTryHits: 0,
+
+            // Approach & Animation Physics
+            approachProgress: 0.15,
+            pedalPhase: 0,
+            roadOffset: 0,
+
+            // Single-Switch Auto-Scan State
+            scanSide: 'left',
+            scanTimer: 0,
+
+            // Inclusive Accessibility Settings
+            settings: {
+               highContrast: false,
+               textSize: 'normal', // 'normal' | 'large' | 'xlarge'
+               reduceMotion: false,
+               waitAtHouse: true,
+               readAloud: true,
+               sfx: true,
+               singleSwitch: false,
+               showLabels: true,
+               speedMultiplier: 1.0,
+            },
+         };
+
+         function loadSettings() {
+            try {
+               const raw = localStorage.getItem(STORAGE_KEY);
+               if (raw) {
+                  const parsed = JSON.parse(raw);
+                  if (parsed && typeof parsed === 'object') {
+                     gameState.settings = Object.assign({}, gameState.settings, parsed);
+                  }
+               }
+            } catch (err) {}
+         }
+
+         function saveSettings() {
+            try {
+               localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState.settings));
+            } catch (err) {}
+         }
+
+         /* --------------------------------------------------------------------------
+       6. CACHED DOM REFERENCES
+       -------------------------------------------------------------------------- */
+         const dom = {
+            srAnnouncer: document.getElementById('sr-announcer'),
+            sceneryDistant: document.getElementById('scenery-distant'),
+            roadStripesGroup: document.getElementById('road-stripes-group'),
+
+            leftHouseGroup: document.getElementById('left-house-group'),
+            rightHouseGroup: document.getElementById('right-house-group'),
+            leftElderPortrait: document.getElementById('left-elder-portrait'),
+            rightElderPortrait: document.getElementById('right-elder-portrait'),
+            leftHousePrimary: document.getElementById('left-house-primary'),
+            leftHouseSecondary: document.getElementById('left-house-secondary'),
+            rightHousePrimary: document.getElementById('right-house-primary'),
+            rightHouseSecondary: document.getElementById('right-house-secondary'),
+            leftResultBadge: document.getElementById('left-result-badge'),
+            rightResultBadge: document.getElementById('right-result-badge'),
+
+            cyclistGroup: document.getElementById('cyclist-group'),
+            leftLeg: document.getElementById('left-leg'),
+            rightLeg: document.getElementById('right-leg'),
+            wheelSpoke1: document.getElementById('wheel-spoke-1'),
+            wheelSpoke2: document.getElementById('wheel-spoke-2'),
+            basketLeft: document.getElementById('basket-left'),
+            basketRight: document.getElementById('basket-right'),
+
+            flyingOranges: document.getElementById('flying-oranges'),
+            flyingHongbao: document.getElementById('flying-hongbao'),
+            sparklesLayer: document.getElementById('sparkles-layer'),
+
+            hudProgress: document.getElementById('hud-progress'),
+            hudStageBadge: document.getElementById('hud-stage-badge'),
+            hudScore: document.getElementById('hud-score'),
+            missionInstruction: document.getElementById('mission-instruction'),
+            mysteryBadge: document.getElementById('mystery-badge'),
+            missionHanzi: document.getElementById('mission-hanzi'),
+            missionPinyin: document.getElementById('mission-pinyin'),
+            statusModeText: document.getElementById('status-mode-text'),
+
+            feedbackBanner: document.getElementById('feedback-banner'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackText: document.getElementById('feedback-text'),
+
+            btnTossLeft: document.getElementById('btn-toss-left'),
+            btnTossRight: document.getElementById('btn-toss-right'),
+            btnSpeak: document.getElementById('btn-speak'),
+            btnOpenA11y: document.getElementById('btn-open-a11y'),
+            btnPause: document.getElementById('btn-pause'),
+
+            startOverlay: document.getElementById('start-overlay'),
+            btnStartGame: document.getElementById('btn-start-game'),
+            btnStartA11y: document.getElementById('btn-start-a11y'),
+
+            a11yOverlay: document.getElementById('a11y-overlay'),
+            btnCloseA11y: document.getElementById('btn-close-a11y'),
+            btnDoneA11y: document.getElementById('btn-done-a11y'),
+
+            pauseOverlay: document.getElementById('pause-overlay'),
+            btnResume: document.getElementById('btn-resume'),
+            btnRestartStage: document.getElementById('btn-restart-stage'),
+            btnBackHome: document.getElementById('btn-back-home'),
+
+            completeOverlay: document.getElementById('complete-overlay'),
+            summaryScore: document.getElementById('summary-score'),
+            summaryAccuracy: document.getElementById('summary-accuracy'),
+            vocabRecapGrid: document.getElementById('vocab-recap-grid'),
+            btnNextStage: document.getElementById('btn-next-stage'),
+            btnReplayStage: document.getElementById('btn-replay-stage'),
+         };
+
+         function announceScreenReader(text) {
+            if (dom.srAnnouncer) {
+               dom.srAnnouncer.textContent = '';
+               setTimeout(() => {
+                  dom.srAnnouncer.textContent = text;
+               }, 40);
+            }
+         }
+
+         function applySettingsToUI() {
+            const s = gameState.settings;
+            document.body.classList.toggle('high-contrast', s.highContrast);
+            document.body.classList.toggle('reduce-motion', s.reduceMotion);
+            document.body.classList.toggle('show-labels', s.showLabels);
+
+            document.body.classList.remove('text-large', 'text-xlarge');
+            if (s.textSize === 'large') document.body.classList.add('text-large');
+            if (s.textSize === 'xlarge') document.body.classList.add('text-xlarge');
+
+            if (dom.sceneryDistant) {
+               dom.sceneryDistant.style.display = s.reduceMotion ? 'none' : 'block';
+            }
+
+            // Sync Toggle Switches
+            const toggleMap = [
+               ['toggle-high-contrast', s.highContrast],
+               ['toggle-reduce-motion', s.reduceMotion],
+               ['toggle-wait-house', s.waitAtHouse],
+               ['toggle-read-aloud', s.readAloud],
+               ['toggle-sfx', s.sfx],
+               ['toggle-single-switch', s.singleSwitch],
+               ['toggle-icon-labels', s.showLabels],
+            ];
+            toggleMap.forEach(([id, val]) => {
+               const el = document.getElementById(id);
+               if (el) el.setAttribute('aria-checked', String(Boolean(val)));
+            });
+
+            // Sync Text Size Segment Buttons
+            document.querySelectorAll('.text-size-btn').forEach((btn) => {
+               btn.setAttribute('aria-pressed', String(btn.dataset.size === s.textSize));
+            });
+
+            // Sync Speed Segment Buttons
+            document.querySelectorAll('.speed-btn').forEach((btn) => {
+               btn.setAttribute('aria-pressed', String(parseFloat(btn.dataset.speed) === s.speedMultiplier));
+            });
+
+            // Update bottom status pill
+            if (dom.statusModeText) {
+               if (s.singleSwitch) {
+                  dom.statusModeText.textContent = 'โหมดกดปุ่มเดียว (Space)';
+               } else if (s.waitAtHouse) {
+                  dom.statusModeText.textContent = 'โหมดหยุดรอหน้าบ้าน';
+               } else {
+                  dom.statusModeText.textContent = 'โหมดปั่นต่อเนื่อง';
+               }
+            }
+
+            if (!s.singleSwitch) {
+               dom.btnTossLeft.classList.remove('scan-active');
+               dom.btnTossRight.classList.remove('scan-active');
+               dom.leftHouseGroup.classList.remove('house-scan-highlight');
+               dom.rightHouseGroup.classList.remove('house-scan-highlight');
+            }
+         }
+
+         /* --------------------------------------------------------------------------
+       7. ROUND GENERATION & STAGE PROGRESSION
+       -------------------------------------------------------------------------- */
+         function shuffleArray(arr) {
+            const copy = arr.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+               const j = Math.floor(Math.random() * (i + 1));
+               const tmp = copy[i];
+               copy[i] = copy[j];
+               copy[j] = tmp;
+            }
+            return copy;
+         }
+
+         function buildStageQueue() {
+            let pool = FAMILY_VOCAB.slice();
+            if (gameState.vocabFilter === 'elders') {
+               pool = FAMILY_VOCAB.filter((m) => m.group === 'elders');
+            } else if (gameState.vocabFilter === 'nuclear') {
+               pool = FAMILY_VOCAB.filter((m) => m.group === 'nuclear');
+            }
+
+            const sequence = [];
+            while (sequence.length < 8) {
+               const batch = shuffleArray(pool);
+               for (let i = 0; i < batch.length && sequence.length < 8; i++) {
+                  sequence.push(batch[i]);
+               }
+            }
+
+            return sequence.map((target, idx) => {
+               // Choose a confusable distractor when available
+               let distractor = pool.find((m) => m.id === target.confusableWith);
+               if (!distractor || distractor.id === target.id) {
+                  const others = pool.filter((m) => m.id !== target.id);
+                  distractor = others[Math.floor(Math.random() * others.length)];
+               }
+
+               const targetOnLeft = Math.random() < 0.5;
+               // Stage 3 includes 2 Mystery Audio-Only rounds (index 3 and 7)
+               const isMysteryAudio = gameState.stage === 3 && (idx === 3 || idx === 7);
+
+               return {
+                  target,
+                  leftMember: targetOnLeft ? target : distractor,
+                  rightMember: targetOnLeft ? distractor : target,
+                  correctSide: targetOnLeft ? 'left' : 'right',
+                  isMysteryAudio,
+                  madeMistakeThisRound: false,
+               };
+            });
+         }
+
+         function prepareRound(index) {
+            gameState.currentIndex = index;
+            gameState.currentRound = gameState.queue[index];
+            const target = gameState.currentRound.target;
+            const isMysteryAudio = gameState.currentRound.isMysteryAudio;
+
+            gameState.approachProgress = 0.14;
+            gameState.screen = 'PLAYING_APPROACH';
+
+            renderRoundVisuals();
+            updateHUD();
+
+            // Auto-speak Chinese greeting phrase
+            speakChinesePhrase(`给${target.hanzi}`, false);
+
+            announceScreenReader(
+               isMysteryAudio ? `ภารกิจฟังเสียง ข้อที่ ${index + 1} จาก 8 กดฟังเสียงแล้วเลือกบ้านซ้ายหรือขวา` : `ข้อที่ ${index + 1} จาก 8 ส่งส้มให้ ${target.hanzi} พินอิน ${target.pinyin}`,
+            );
+         }
+
+         function renderRoundVisuals() {
+            const round = gameState.currentRound;
+            if (!round) return;
+
+            // Reset result badges & highlights
+            dom.leftResultBadge.setAttribute('opacity', '0');
+            dom.rightResultBadge.setAttribute('opacity', '0');
+            dom.leftHouseGroup.classList.remove('house-scan-highlight');
+            dom.rightHouseGroup.classList.remove('house-scan-highlight');
+
+            // Render SVG Portraits
+            dom.leftElderPortrait.innerHTML = buildCharacterSVG(round.leftMember);
+            dom.rightElderPortrait.innerHTML = buildCharacterSVG(round.rightMember);
+
+            // Update House Nameplates based on Stage (True gameplay: no Chinese spoilers on houses!)
+            if (gameState.stage === 2) {
+               dom.leftHousePrimary.textContent = 'บ้านฝั่งซ้าย';
+               dom.leftHouseSecondary.textContent = 'สังเกตภาพญาติ';
+               dom.rightHousePrimary.textContent = 'บ้านฝั่งขวา';
+               dom.rightHouseSecondary.textContent = 'สังเกตภาพญาติ';
+            } else {
+               dom.leftHousePrimary.textContent = round.leftMember.thai;
+               dom.leftHouseSecondary.textContent = 'บ้านฝั่งซ้าย';
+               dom.rightHousePrimary.textContent = round.rightMember.thai;
+               dom.rightHouseSecondary.textContent = 'บ้านฝั่งขวา';
+            }
+
+            // Update Mission Plaque (No Thai translation spoiler!)
+            if (round.isMysteryAudio) {
+               dom.mysteryBadge.style.display = 'inline-block';
+               dom.missionInstruction.textContent = 'ฟังเสียงแล้วเลือกบ้านที่ถูกต้อง';
+               dom.missionHanzi.textContent = '给 ???';
+               dom.missionPinyin.textContent = 'แตะปุ่มลำโพงเพื่อฟังซ้ำ';
+            } else {
+               dom.mysteryBadge.style.display = 'none';
+               dom.missionInstruction.textContent = 'ส่งส้มคู่นี้ให้...';
+               dom.missionHanzi.textContent = `给${round.target.hanzi}`;
+               if (gameState.stage === 3) {
+                  dom.missionPinyin.textContent = '（อ่านอักษรจีน หรือกดฟังเสียง）';
+               } else {
+                  dom.missionPinyin.textContent = `gěi ${round.target.pinyin}`;
+               }
+            }
+
+            dom.btnTossLeft.disabled = false;
+            dom.btnTossRight.disabled = false;
+         }
+
+         function updateHUD() {
+            dom.hudProgress.textContent = `${gameState.currentIndex}/8`;
+            dom.hudStageBadge.textContent = `ด่าน ${gameState.stage}`;
+            dom.hudScore.textContent = String(gameState.score);
+         }
+
+         /* --------------------------------------------------------------------------
+       8. FEEDBACK BANNER & CELEBRATORY SPARKLES
+       -------------------------------------------------------------------------- */
+         let bannerTimeout = null;
+
+         function showFeedbackBanner(type, text) {
+            if (bannerTimeout) clearTimeout(bannerTimeout);
+            dom.feedbackBanner.className = `feedback-banner visible ${type}`;
+            dom.feedbackText.textContent = text;
+            dom.feedbackIcon.innerHTML =
+               type === 'success'
+                  ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>`
+                  : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
+         }
+
+         function hideFeedbackBanner() {
+            dom.feedbackBanner.classList.remove('visible');
+         }
+
+         function spawnSparkles(cx, cy) {
+            if (gameState.settings.reduceMotion) return;
+            dom.sparklesLayer.innerHTML = '';
+            const count = 10;
+            for (let i = 0; i < count; i++) {
+               const angle = (Math.PI * 2 * i) / count;
+               const dist = 45 + Math.random() * 45;
+               const star = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+               star.setAttribute('points', '0,-8 2.5,-2.5 8,0 2.5,2.5 0,8 -2.5,2.5 -8,0 -2.5,-2.5');
+               star.setAttribute('fill', i % 2 === 0 ? '#f59e0b' : '#fde047');
+               star.setAttribute('transform', `translate(${cx}, ${cy})`);
+               dom.sparklesLayer.appendChild(star);
+
+               const startTime = performance.now();
+               const animStar = (now) => {
+                  const t = Math.min(1, (now - startTime) / 550);
+                  const ease = 1 - Math.pow(1 - t, 3);
+                  const x = cx + Math.cos(angle) * dist * ease;
+                  const y = cy + Math.sin(angle) * dist * ease - 18 * ease;
+                  star.setAttribute('transform', `translate(${x}, ${y}) scale(${1 - t * 0.4})`);
+                  star.setAttribute('opacity', String(1 - t));
+                  if (t < 1) {
+                     requestAnimationFrame(animStar);
+                  } else if (star.parentNode) {
+                     star.parentNode.removeChild(star);
+                  }
+               };
+               requestAnimationFrame(animStar);
+            }
+         }
+
+         /* --------------------------------------------------------------------------
+       9. PROJECTILE & HOUSE PERSPECTIVE RENDERING
+       -------------------------------------------------------------------------- */
+         function getHouseCoordinates(progress) {
+            // Smooth perspective interpolation from horizon (0) to foreground delivery zone (0.88)
+            const p = Math.max(0.05, Math.min(1, progress));
+            const ease = Math.pow(p, 1.35);
+            const scale = 0.22 + 0.76 * ease;
+            const y = 305 + 135 * ease;
+            const leftX = 485 - 265 * ease;
+            const rightX = 715 + 265 * ease;
+            return { scale, y, leftX, rightX };
+         }
+
+         function updateHousePerspective(progress) {
+            const { scale, y, leftX, rightX } = getHouseCoordinates(progress);
+            dom.leftHouseGroup.setAttribute('transform', `translate(${leftX.toFixed(1)}, ${y.toFixed(1)}) scale(${scale.toFixed(3)})`);
+            dom.rightHouseGroup.setAttribute('transform', `translate(${rightX.toFixed(1)}, ${y.toFixed(1)}) scale(${scale.toFixed(3)})`);
+         }
+
+         function animateProjectile(el, startX, startY, endX, endY, durationMs, onComplete) {
+            el.setAttribute('opacity', '1');
+            const startTime = performance.now();
+
+            function step(now) {
+               const t = Math.min(1, (now - startTime) / durationMs);
+               const x = startX + (endX - startX) * t;
+               const arcHeight = gameState.settings.reduceMotion ? 30 : 120;
+               const y = startY + (endY - startY) * t - Math.sin(Math.PI * t) * arcHeight;
+               const scale = 1 - 0.18 * t;
+               const spin = gameState.settings.reduceMotion ? 0 : t * 360;
+
+               el.setAttribute('transform', `translate(${x.toFixed(1)}, ${y.toFixed(1)}) scale(${scale.toFixed(2)}) rotate(${spin.toFixed(0)})`);
+
+               if (t < 1) {
+                  requestAnimationFrame(step);
+               } else {
+                  el.setAttribute('opacity', '0');
+                  if (typeof onComplete === 'function') onComplete();
+               }
+            }
+
+            requestAnimationFrame(step);
+         }
+
+         /* --------------------------------------------------------------------------
+       10. CORE GAMEPLAY: TOSSING MANDARIN ORANGES & RECEIVING RED ENVELOPES
+       -------------------------------------------------------------------------- */
+         function handleToss(chosenSide) {
+            if (gameState.screen !== 'PLAYING_APPROACH' && gameState.screen !== 'WAITING_DELIVERY') return;
+            if (!gameState.currentRound) return;
+
+            gameState.screen = 'TOSSING';
+            gameState.totalAttempts += 1;
+            dom.btnTossLeft.disabled = true;
+            dom.btnTossRight.disabled = true;
+
+            soundEngine.playToss();
+
+            const { y: houseY, leftX, rightX } = getHouseCoordinates(gameState.approachProgress);
+            const startX = chosenSide === 'left' ? 534 : 666;
+            const startY = 610;
+            const targetX = chosenSide === 'left' ? leftX : rightX;
+            const targetY = houseY - 12;
+
+            animateProjectile(dom.flyingOranges, startX, startY, targetX, targetY, 340, () => {
+               evaluateDelivery(chosenSide, targetX, targetY);
+            });
+         }
+
+         function evaluateDelivery(chosenSide, houseX, houseY) {
+            const round = gameState.currentRound;
+            if (!round) return;
+
+            if (chosenSide === round.correctSide) {
+               soundEngine.playSuccess();
+               spawnSparkles(houseX, houseY);
+
+               // Show Green Checkmark on Correct House
+               const winBadge = chosenSide === 'left' ? dom.leftResultBadge : dom.rightResultBadge;
+               winBadge.innerHTML = `
+          <circle cx="0" cy="0" r="24" fill="#16a34a" stroke="#ffffff" stroke-width="3" />
+          <path d="M-10 0 L-3 8 L11 -7" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+        `;
+               winBadge.setAttribute('opacity', '1');
+
+               // Score & Streak Calculation
+               if (!round.madeMistakeThisRound) {
+                  gameState.firstTryHits += 1;
+                  gameState.streak += 1;
+               } else {
+                  gameState.streak = 1;
+               }
+
+               const mysteryMultiplier = round.isMysteryAudio ? 2 : 1;
+               const streakBonus = gameState.streak >= 2 ? 50 : 0;
+               const gained = (100 + streakBonus) * mysteryMultiplier;
+               gameState.score += gained;
+
+               const praiseText = `太棒了！ส่งให้${round.target.thai} (${round.target.hanzi}) รับอั่งเปา +${gained}`;
+               showFeedbackBanner('success', praiseText);
+               announceScreenReader(praiseText);
+
+               // Animate Red Envelope (红包) flying back from Elder to Player's Basket
+               animateProjectile(dom.flyingHongbao, houseX, houseY, 666, 610, 440, () => {
+                  gameState.currentIndex += 1;
+                  updateHUD();
+
+                  setTimeout(() => {
+                     hideFeedbackBanner();
+                     if (gameState.currentIndex >= 8) {
+                        completeStage();
+                     } else {
+                        prepareRound(gameState.currentIndex);
+                     }
+                  }, 650);
+               });
+            } else {
+               // Gentle, Non-Spoiling Retry Feedback
+               soundEngine.playGentleRetry();
+               round.madeMistakeThisRound = true;
+               gameState.streak = 0;
+
+               const wrongBadge = chosenSide === 'left' ? dom.leftResultBadge : dom.rightResultBadge;
+               wrongBadge.innerHTML = `
+          <circle cx="0" cy="0" r="24" fill="#d97706" stroke="#ffffff" stroke-width="3" />
+          <path d="M-8 -8 L8 8 M8 -8 L-8 8" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+        `;
+               wrongBadge.setAttribute('opacity', '1');
+
+               const teachMsg = 'ยังไม่ใช่นะ ลองฟังเสียงภาษาจีนแล้วเลือกใหม่อีกครั้ง!';
+               showFeedbackBanner('retry', teachMsg);
+               announceScreenReader(teachMsg);
+
+               speakChinesePhrase(`给${round.target.hanzi}`, true);
+
+               gameState.screen = 'WAITING_DELIVERY';
+               dom.btnTossLeft.disabled = false;
+               dom.btnTossRight.disabled = false;
+            }
+         }
+
+         function completeStage() {
+            gameState.screen = 'STAGE_COMPLETE';
+            soundEngine.playStageComplete();
+
+            const accuracy = gameState.totalAttempts > 0 ? Math.round((8 / gameState.totalAttempts) * 100) : 100;
+
+            dom.summaryScore.textContent = String(gameState.score);
+            dom.summaryAccuracy.textContent = `${accuracy}%`;
+
+            // Build Interactive Vocabulary Recap Cards
+            const uniqueMembers = [];
+            const seen = new Set();
+            gameState.queue.forEach((r) => {
+               if (!seen.has(r.target.id)) {
+                  seen.add(r.target.id);
+                  uniqueMembers.push(r.target);
+               }
+            });
+
+            dom.vocabRecapGrid.innerHTML = '';
+            uniqueMembers.forEach((member) => {
+               const card = document.createElement('button');
+               card.type = 'button';
+               card.className = 'vocab-card';
+               card.setAttribute('aria-label', `ฟังเสียง ${member.hanzi} ${member.pinyin} แปลว่า ${member.thai}`);
+               card.innerHTML = `
+          <span class="vocab-card-cn">${member.hanzi}</span>
+          <span class="vocab-card-py">${member.pinyin}</span>
+          <span class="vocab-card-th">${member.thai}</span>
+        `;
+               card.addEventListener('click', () => {
+                  speakChinesePhrase(`给${member.hanzi}`, false);
+               });
+               dom.vocabRecapGrid.appendChild(card);
+            });
+
+            dom.completeOverlay.classList.remove('hidden');
+            announceScreenReader(`ยินดีด้วย! จบด่านที่ ${gameState.stage} ได้คะแนน ${gameState.score} ความแม่นยำ ${accuracy} เปอร์เซ็นต์`);
+         }
+
+         /* --------------------------------------------------------------------------
+       11. ANIMATION LOOP (CYCLIST PEDALING, ROAD PERSPECTIVE & AUTO-SCAN)
+       -------------------------------------------------------------------------- */
+         const STRIPE_COUNT = 6;
+         const stripeElements = [];
+
+         function initRoadStripes() {
+            dom.roadStripesGroup.innerHTML = '';
+            stripeElements.length = 0;
+            for (let i = 0; i < STRIPE_COUNT; i++) {
+               const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+               poly.setAttribute('fill', 'var(--road-stripe)');
+               poly.setAttribute('opacity', '0.82');
+               dom.roadStripesGroup.appendChild(poly);
+               stripeElements.push(poly);
+            }
+         }
+
+         function renderRoadStripes() {
+            for (let i = 0; i < STRIPE_COUNT; i++) {
+               const t1 = ((i + gameState.roadOffset) % STRIPE_COUNT) / STRIPE_COUNT;
+               const t2 = Math.min(1, t1 + 0.075);
+               if (t2 <= t1) continue;
+
+               const p1 = Math.pow(t1, 1.6);
+               const p2 = Math.pow(t2, 1.6);
+               const y1 = 298 + p1 * 452;
+               const y2 = 298 + p2 * 452;
+               const w1 = 2 + p1 * 12;
+               const w2 = 2 + p2 * 12;
+
+               stripeElements[i].setAttribute(
+                  'points',
+                  `${(600 - w1).toFixed(1)},${y1.toFixed(1)} ${(600 + w1).toFixed(1)},${y1.toFixed(1)} ${(600 + w2).toFixed(1)},${y2.toFixed(1)} ${(600 - w2).toFixed(1)},${y2.toFixed(1)}`,
+               );
+            }
+         }
+
+         let lastFrameTime = performance.now();
+
+         function gameLoop(now) {
+            const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+
+            const isActivelyPedaling = gameState.screen === 'PLAYING_APPROACH' || (gameState.screen === 'WAITING_DELIVERY' && !gameState.settings.waitAtHouse);
+
+            if (isActivelyPedaling && !gameState.settings.reduceMotion) {
+               const speed = gameState.settings.speedMultiplier;
+               gameState.pedalPhase += dt * 8.5 * speed;
+               gameState.roadOffset = (gameState.roadOffset + dt * 2.2 * speed) % STRIPE_COUNT;
+
+               // Animate Cyclist Pedaling Legs & Spokes
+               const leftY = 18 + Math.sin(gameState.pedalPhase) * 8;
+               const rightY = 18 - Math.sin(gameState.pedalPhase) * 8;
+               dom.leftLeg.setAttribute('transform', `translate(-24, ${leftY.toFixed(1)})`);
+               dom.rightLeg.setAttribute('transform', `translate(24, ${rightY.toFixed(1)})`);
+
+               const spokeScale = Math.cos(gameState.pedalPhase * 2);
+               dom.wheelSpoke1.setAttribute('y1', (-34 * spokeScale).toFixed(1));
+               dom.wheelSpoke1.setAttribute('y2', (34 * spokeScale).toFixed(1));
+            }
+
+            renderRoadStripes();
+
+            // Approach Logic during Active Gameplay
+            if (gameState.screen === 'PLAYING_APPROACH') {
+               const approachRate = 0.24 * gameState.settings.speedMultiplier;
+               gameState.approachProgress += dt * approachRate;
+
+               if (gameState.approachProgress >= 0.88) {
+                  gameState.approachProgress = 0.88;
+                  gameState.screen = 'WAITING_DELIVERY';
+               }
+            }
+
+            updateHousePerspective(gameState.approachProgress);
+
+            // Single-Switch Auto-Scan Mode (Alternates Left / Right every 1.6s)
+            if (gameState.settings.singleSwitch && (gameState.screen === 'PLAYING_APPROACH' || gameState.screen === 'WAITING_DELIVERY')) {
+               gameState.scanTimer += dt;
+               if (gameState.scanTimer >= 1.6) {
+                  gameState.scanTimer = 0;
+                  gameState.scanSide = gameState.scanSide === 'left' ? 'right' : 'left';
+               }
+
+               const isLeft = gameState.scanSide === 'left';
+               dom.btnTossLeft.classList.toggle('scan-active', isLeft);
+               dom.btnTossRight.classList.toggle('scan-active', !isLeft);
+               dom.leftHouseGroup.classList.toggle('house-scan-highlight', isLeft);
+               dom.rightHouseGroup.classList.toggle('house-scan-highlight', !isLeft);
+            }
+
+            requestAnimationFrame(gameLoop);
+         }
+
+         /* --------------------------------------------------------------------------
+       12. NAVIGATION & EVENT BINDINGS
+       -------------------------------------------------------------------------- */
+         function startNewRun() {
+            soundEngine.ensureContext();
+            gameState.queue = buildStageQueue();
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.totalAttempts = 0;
+            gameState.firstTryHits = 0;
+
+            dom.startOverlay.classList.add('hidden');
+            dom.pauseOverlay.classList.add('hidden');
+            dom.completeOverlay.classList.add('hidden');
+            hideFeedbackBanner();
+
+            prepareRound(0);
+         }
+
+         function openSettingsModal() {
+            if (gameState.screen !== 'PAUSED' && gameState.screen !== 'START_SCREEN') {
+               gameState.previousScreen = gameState.screen;
+               gameState.screen = 'PAUSED';
+            }
+            dom.a11yOverlay.classList.remove('hidden');
+         }
+
+         function closeSettingsModal() {
+            dom.a11yOverlay.classList.add('hidden');
+            if (dom.startOverlay.classList.contains('hidden') && dom.pauseOverlay.classList.contains('hidden') && dom.completeOverlay.classList.contains('hidden')) {
+               gameState.screen = gameState.previousScreen || 'WAITING_DELIVERY';
+            }
+         }
+
+         function pauseGame() {
+            if (gameState.screen === 'PLAYING_APPROACH' || gameState.screen === 'WAITING_DELIVERY') {
+               gameState.previousScreen = gameState.screen;
+               gameState.screen = 'PAUSED';
+               dom.pauseOverlay.classList.remove('hidden');
+            }
+         }
+
+         function resumeGame() {
+            dom.pauseOverlay.classList.add('hidden');
+            gameState.screen = gameState.previousScreen || 'WAITING_DELIVERY';
+         }
+
+         function bindEvents() {
+            // Stage Selection Pills
+            document.querySelectorAll('.stage-select-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  gameState.stage = parseInt(btn.dataset.stage, 10) || 1;
+                  document.querySelectorAll('.stage-select-btn').forEach((b) => {
+                     b.setAttribute('aria-pressed', String(b === btn));
+                  });
+               });
+            });
+
+            // Vocabulary Set Selection Pills
+            document.querySelectorAll('.vocab-select-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  gameState.vocabFilter = btn.dataset.vocab || 'all';
+                  document.querySelectorAll('.vocab-select-btn').forEach((b) => {
+                     b.setAttribute('aria-pressed', String(b === btn));
+                  });
+               });
+            });
+
+            // Start & Settings Buttons
+            dom.btnStartGame.addEventListener('click', startNewRun);
+            dom.btnStartA11y.addEventListener('click', openSettingsModal);
+            dom.btnOpenA11y.addEventListener('click', openSettingsModal);
+            dom.btnCloseA11y.addEventListener('click', closeSettingsModal);
+            dom.btnDoneA11y.addEventListener('click', closeSettingsModal);
+
+            // Pause & Resume Buttons
+            dom.btnPause.addEventListener('click', pauseGame);
+            dom.btnResume.addEventListener('click', resumeGame);
+            dom.btnRestartStage.addEventListener('click', startNewRun);
+            dom.btnBackHome.addEventListener('click', () => {
+               dom.pauseOverlay.classList.add('hidden');
+               dom.completeOverlay.classList.add('hidden');
+               hideFeedbackBanner();
+               gameState.screen = 'START_SCREEN';
+               dom.startOverlay.classList.remove('hidden');
+            });
+
+            // Stage Complete Actions
+            dom.btnNextStage.addEventListener('click', () => {
+               gameState.stage = gameState.stage < 3 ? gameState.stage + 1 : 1;
+               document.querySelectorAll('.stage-select-btn').forEach((b) => {
+                  b.setAttribute('aria-pressed', String(parseInt(b.dataset.stage, 10) === gameState.stage));
+               });
+               startNewRun();
+            });
+            dom.btnReplayStage.addEventListener('click', startNewRun);
+
+            // Toss Controls (Bottom Buttons + Direct House SVG Click/Tap)
+            dom.btnTossLeft.addEventListener('click', () => handleToss('left'));
+            dom.btnTossRight.addEventListener('click', () => handleToss('right'));
+            dom.leftHouseGroup.addEventListener('click', () => handleToss('left'));
+            dom.rightHouseGroup.addEventListener('click', () => handleToss('right'));
+
+            // Audio Replay Button
+            dom.btnSpeak.addEventListener('click', () => {
+               if (gameState.currentRound) {
+                  speakChinesePhrase(`给${gameState.currentRound.target.hanzi}`, false);
+               }
+            });
+
+            // Accessibility Settings Toggles
+            const bindToggle = (id, key) => {
+               const el = document.getElementById(id);
+               if (!el) return;
+               el.addEventListener('click', () => {
+                  gameState.settings[key] = !gameState.settings[key];
+                  applySettingsToUI();
+                  saveSettings();
+               });
+            };
+
+            bindToggle('toggle-high-contrast', 'highContrast');
+            bindToggle('toggle-reduce-motion', 'reduceMotion');
+            bindToggle('toggle-wait-house', 'waitAtHouse');
+            bindToggle('toggle-read-aloud', 'readAloud');
+            bindToggle('toggle-sfx', 'sfx');
+            bindToggle('toggle-single-switch', 'singleSwitch');
+            bindToggle('toggle-icon-labels', 'showLabels');
+
+            // Text Size Segments
+            document.querySelectorAll('.text-size-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  gameState.settings.textSize = btn.dataset.size;
+                  applySettingsToUI();
+                  saveSettings();
+               });
+            });
+
+            // Speed Segments
+            document.querySelectorAll('.speed-btn').forEach((btn) => {
+               btn.addEventListener('click', () => {
+                  gameState.settings.speedMultiplier = parseFloat(btn.dataset.speed) || 1.0;
+                  applySettingsToUI();
+                  saveSettings();
+               });
+            });
+
+            // Global Keyboard Controls (ArrowLeft/A, ArrowRight/D, R/Space, Esc/P)
+            window.addEventListener('keydown', (e) => {
+               if (e.key === 'Escape') {
+                  if (!dom.a11yOverlay.classList.contains('hidden')) {
+                     closeSettingsModal();
+                  } else if (!dom.pauseOverlay.classList.contains('hidden')) {
+                     resumeGame();
+                  } else if (gameState.screen === 'PLAYING_APPROACH' || gameState.screen === 'WAITING_DELIVERY') {
+                     pauseGame();
+                  }
+                  return;
+               }
+
+               if (gameState.screen !== 'PLAYING_APPROACH' && gameState.screen !== 'WAITING_DELIVERY') {
+                  return;
+               }
+
+               if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                  e.preventDefault();
+                  handleToss('left');
+               } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                  e.preventDefault();
+                  handleToss('right');
+               } else if (e.key === 'r' || e.key === 'R') {
+                  e.preventDefault();
+                  if (gameState.currentRound) {
+                     speakChinesePhrase(`给${gameState.currentRound.target.hanzi}`, false);
+                  }
+               } else if (e.key === ' ' && gameState.settings.singleSwitch) {
+                  e.preventDefault();
+                  handleToss(gameState.scanSide);
+               } else if (e.key === 'p' || e.key === 'P') {
+                  e.preventDefault();
+                  pauseGame();
+               }
+            });
+         }
+
+         /* --------------------------------------------------------------------------
+       13. INITIALIZATION ON WINDOW LOAD
+       -------------------------------------------------------------------------- */
+         function init() {
+            loadSettings();
+            applySettingsToUI();
+            initRoadStripes();
+            renderRoadStripes();
+
+            // Populate decorative start screen portraits
+            dom.leftElderPortrait.innerHTML = buildCharacterSVG(FAMILY_VOCAB[4]); // Yeye
+            dom.rightElderPortrait.innerHTML = buildCharacterSVG(FAMILY_VOCAB[5]); // Nainai
+            dom.leftHousePrimary.textContent = FAMILY_VOCAB[4].thai;
+            dom.rightHousePrimary.textContent = FAMILY_VOCAB[5].thai;
+            updateHousePerspective(0.65);
+
+            bindEvents();
+            requestAnimationFrame(gameLoop);
+         }
+
+         if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+         } else {
+            init();
+         }
+      </script>
+   </body>
+</html>

@@ -1,0 +1,3427 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน — สายพานสุขภาพของเชฟเหมียว</title>
+      <style>
+         /* =========================================================================
+       1. DESIGN TOKENS & ACCESSIBILITY THEME VARIABLES
+       ========================================================================= */
+         :root {
+            --bg-wall: #faf7f2;
+            --bg-tile-line: #e6dfd3;
+            --bg-counter: #f3e2c7;
+            --bg-counter-edge: #dfc39d;
+            --bg-signboard: #e0f2fe;
+            --border-signboard: #38bdf8;
+            --ink-dark: #26211d;
+            --ink-muted: #5c534a;
+            --belt-surface: #3f464e;
+            --belt-stripe: #555e68;
+            --cardboard: #c69863;
+            --cardboard-dark: #a57846;
+            --tape-blue: #38bdf8;
+            --accent-yellow: #facc15;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --accent-blue: #0ea5e9;
+            --tray-bg: #ffffff;
+            --tray-border: #26211d;
+            --panel-bg: #ffffff;
+            --sign-scale: 1;
+            --filter-mode: none;
+         }
+
+         /* High Contrast Mode for Low Vision */
+         body.high-contrast {
+            --bg-wall: #0a0a0a;
+            --bg-tile-line: #262626;
+            --bg-counter: #171717;
+            --bg-counter-edge: #facc15;
+            --bg-signboard: #000000;
+            --border-signboard: #facc15;
+            --ink-dark: #ffffff;
+            --ink-muted: #fde047;
+            --belt-surface: #111827;
+            --belt-stripe: #facc15;
+            --cardboard: #000000;
+            --cardboard-dark: #facc15;
+            --tape-blue: #00ffff;
+            --tray-bg: #000000;
+            --tray-border: #facc15;
+            --panel-bg: #0a0a0a;
+         }
+
+         /* Sensory Calm Mode for Autism Spectrum */
+         body.sensory-calm {
+            --filter-mode: saturate(0.68) contrast(0.94);
+            --bg-wall: #f3f1ed;
+            --bg-signboard: #e6eef2;
+            --border-signboard: #7ca5b8;
+            --accent-yellow: #e5c158;
+            --accent-red: #d96b6b;
+            --accent-green: #5fa87d;
+         }
+
+         /* Focus Mode for ADHD (Stops non-essential background motion) */
+         body.focus-mode .bg-animated {
+            animation: none !important;
+         }
+
+         * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+         }
+
+         html,
+         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family:
+               'Segoe UI',
+               'Trebuchet MS',
+               'Tahoma',
+               system-ui,
+               -apple-system,
+               sans-serif;
+            background-color: var(--bg-wall);
+            color: var(--ink-dark);
+            filter: var(--filter-mode);
+         }
+
+         /* =========================================================================
+       2. FULLSCREEN HEALTH LAB VIEWPORT & TILED WALL
+       ========================================================================= */
+         #game-app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            background-color: var(--bg-wall);
+            background-image: linear-gradient(to right, var(--bg-tile-line) 2px, transparent 2px), linear-gradient(to bottom, var(--bg-tile-line) 2px, transparent 2px);
+            background-size: 64px 42px;
+            transition: opacity 0.22s ease;
+         }
+
+         #game-app.scene-fade-pulse {
+            opacity: 0.72;
+         }
+
+         #kitchen-backdrop {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+         }
+
+         /* =========================================================================
+       3. TOP HUD (HOME, UNDO, VISUAL CAUSE-AND-EFFECT SIGNBOARD, SETTINGS)
+       ========================================================================= */
+         #top-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: clamp(8px, 1.5vh, 16px) clamp(10px, 2vw, 24px);
+            gap: 10px;
+            pointer-events: none;
+         }
+
+         .hud-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+         }
+
+         .circle-btn {
+            width: clamp(48px, 6.2vw, 62px);
+            height: clamp(48px, 6.2vw, 62px);
+            border-radius: 50%;
+            border: 3.5px solid var(--ink-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               box-shadow 0.1s ease,
+               background-color 0.2s;
+            position: relative;
+         }
+
+         .circle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--ink-dark);
+         }
+
+         .circle-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .circle-btn:focus-visible,
+         .tray-card:focus-visible,
+         .gauge-play-btn:focus-visible,
+         .modal-btn:focus-visible {
+            outline: 4px solid #38bdf8;
+            outline-offset: 3px;
+         }
+
+         .btn-home {
+            background-color: var(--accent-yellow);
+         }
+
+         .btn-undo {
+            background-color: #475569;
+         }
+
+         .btn-undo:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 3px 0 var(--ink-dark);
+         }
+
+         .btn-undo.btn-undo-attention {
+            background-color: #0284c7;
+            animation: undoPulse 0.9s ease-in-out infinite alternate;
+         }
+
+         @keyframes undoPulse {
+            0% {
+               transform: scale(1);
+            }
+            100% {
+               transform: scale(1.1);
+            }
+         }
+
+         .btn-settings {
+            background-color: var(--accent-red);
+         }
+
+         body.high-contrast .circle-btn {
+            border-color: #facc15;
+            box-shadow: 0 4px 0 #facc15;
+         }
+
+         .key-pill {
+            position: absolute;
+            bottom: -8px;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 8px;
+            letter-spacing: 0.4px;
+         }
+
+         body.high-contrast .key-pill {
+            background: #facc15;
+            color: #000000;
+         }
+
+         /* Visual Sequence Signboard (Top Center) */
+         #recipe-signboard-wrap {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(var(--sign-scale));
+            transform-origin: top center;
+            transition: transform 0.2s ease;
+            max-width: 72vw;
+         }
+
+         .sign-straps {
+            width: 66%;
+            height: 12px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 18px;
+         }
+
+         .sign-strap {
+            width: 8px;
+            height: 14px;
+            background: #94a3b8;
+            border-left: 2.5px solid var(--ink-dark);
+            border-right: 2.5px solid var(--ink-dark);
+         }
+
+         #recipe-signboard {
+            background: var(--bg-signboard);
+            border: 4px solid var(--ink-dark);
+            outline: 4px solid var(--border-signboard);
+            outline-offset: -8px;
+            border-radius: 22px;
+            padding: 10px 18px 12px;
+            box-shadow: 0 7px 0 rgba(38, 33, 29, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: clamp(260px, 42vw, 560px);
+            transition:
+               background-color 0.25s,
+               transform 0.2s;
+         }
+
+         body.high-contrast #recipe-signboard {
+            border-color: #facc15;
+         }
+
+         #recipe-signboard.sign-error-flash {
+            animation: signShake 0.4s ease;
+            background-color: #fee2e2;
+         }
+
+         @keyframes signShake {
+            0%,
+            100% {
+               transform: translateX(0);
+            }
+            25% {
+               transform: translateX(-8px);
+            }
+            50% {
+               transform: translateX(8px);
+            }
+            75% {
+               transform: translateX(-5px);
+            }
+         }
+
+         .sign-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: clamp(12px, 1.5vw, 15px);
+            font-weight: 800;
+            color: var(--ink-dark);
+         }
+
+         .sign-badge {
+            background: #0284c7;
+            color: #ffffff;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+         }
+
+         body.high-contrast .sign-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         .speak-btn {
+            background: #ffffff;
+            border: 2px solid var(--ink-dark);
+            border-radius: 999px;
+            padding: 2px 9px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink-dark);
+            cursor: pointer;
+            white-space: nowrap;
+         }
+
+         body.high-contrast .speak-btn {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         .sign-sequence-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(6px, 1.2vw, 12px);
+         }
+
+         .recipe-step-slot {
+            position: relative;
+            width: clamp(50px, 6.4vw, 68px);
+            height: clamp(50px, 6.4vw, 68px);
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition:
+               transform 0.2s,
+               border-color 0.2s,
+               box-shadow 0.2s;
+         }
+
+         body.high-contrast .recipe-step-slot {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .recipe-step-slot.step-done {
+            background: #dcfce7;
+            border-color: #16a34a;
+            opacity: 0.9;
+         }
+
+         .recipe-step-slot.step-wrong {
+            background: #fee2e2;
+            border-color: #ef4444;
+         }
+
+         .recipe-step-slot.step-active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.45);
+            transform: scale(1.08);
+         }
+
+         body.high-contrast .recipe-step-slot.step-active {
+            border-color: #00ffff;
+            box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.45);
+         }
+
+         .step-order-num {
+            position: absolute;
+            top: -7px;
+            left: -7px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .recipe-step-slot.step-done .step-order-num {
+            background: #16a34a;
+         }
+
+         .step-check-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            background: #22c55e;
+            border: 2px solid var(--ink-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .step-wrong-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            background: #ef4444;
+            border: 2px solid var(--ink-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .sign-plate-target {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-left: 4px;
+         }
+
+         /* =========================================================================
+       4. MIDDLE STAGE: CHEF WHISKERS (HEALTH DETECTIVE) & CONVEYOR BELT
+       ========================================================================= */
+         #conveyor-stage {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            width: 100%;
+            min-height: 175px;
+         }
+
+         #chef-whiskers-container {
+            position: absolute;
+            right: clamp(16px, 6vw, 90px);
+            bottom: clamp(82px, 13vh, 118px);
+            width: clamp(120px, 15vw, 175px);
+            height: clamp(135px, 17vw, 195px);
+            z-index: 6;
+            pointer-events: none;
+            transform-origin: bottom center;
+            animation: chefIdleBob 2.8s ease-in-out infinite;
+         }
+
+         @keyframes chefIdleBob {
+            0%,
+            100% {
+               transform: translateY(0) rotate(0deg);
+            }
+            50% {
+               transform: translateY(-4px) rotate(1deg);
+            }
+         }
+
+         #chef-whiskers-container.chef-happy {
+            animation: chefJump 0.55s ease infinite alternate;
+         }
+
+         @keyframes chefJump {
+            0% {
+               transform: translateY(0) scale(1);
+            }
+            100% {
+               transform: translateY(-16px) scale(1.04);
+            }
+         }
+
+         #chef-whiskers-container.chef-oops {
+            animation: chefTilt 0.45s ease;
+         }
+
+         #chef-whiskers-container.chef-inspecting {
+            animation: chefInspectBob 0.52s ease-in-out infinite alternate;
+         }
+
+         @keyframes chefInspectBob {
+            0% {
+               transform: translateY(0) rotate(-2deg) scale(1);
+            }
+            100% {
+               transform: translateY(-6px) rotate(3deg) scale(1.04);
+            }
+         }
+
+         #chef-lens-arm {
+            transform-origin: 54px 175px;
+            animation: chefLensWave 0.65s ease-in-out infinite alternate;
+         }
+
+         @keyframes chefLensWave {
+            0% {
+               transform: rotate(8deg) translateY(4px);
+            }
+            100% {
+               transform: rotate(-12deg) translateY(-6px);
+            }
+         }
+
+         #chef-yum-effects {
+            animation: yumFloat 0.9s ease-in-out infinite alternate;
+         }
+
+         @keyframes yumFloat {
+            0% {
+               transform: translateY(2px);
+               opacity: 0.75;
+            }
+            100% {
+               transform: translateY(-7px);
+               opacity: 1;
+            }
+         }
+
+         body.focus-mode #chef-whiskers-container.chef-inspecting,
+         body.focus-mode #chef-yum-effects {
+            animation: none !important;
+         }
+
+         @keyframes chefTilt {
+            0%,
+            100% {
+               transform: rotate(0deg);
+            }
+            30% {
+               transform: rotate(-7deg);
+            }
+            70% {
+               transform: rotate(5deg);
+            }
+         }
+
+         /* Visual Sound & Fact Cue Banner */
+         #visual-cue-banner {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 22px;
+            padding: 7px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(12.5px, 1.45vw, 15.5px);
+            font-weight: 800;
+            color: var(--ink-dark);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition:
+               opacity 0.2s ease,
+               transform 0.2s ease;
+            max-width: 90vw;
+            text-align: center;
+         }
+
+         body.high-contrast #visual-cue-banner {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         #visual-cue-banner.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
+         }
+
+         /* Conveyor Belt Assembly */
+         #belt-assembly {
+            position: relative;
+            width: 100%;
+            height: clamp(86px, 13vh, 118px);
+            z-index: 12;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+         }
+
+         #plate-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: clamp(44px, 7vh, 62px);
+            height: 155px;
+            pointer-events: none;
+            z-index: 15;
+         }
+
+         #moving-plate-group {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 230px;
+            height: 150px;
+            transform: translateX(120px);
+            will-change: transform;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+         }
+
+         #moving-plate-group.plate-pop {
+            animation: plateBump 0.22s ease;
+         }
+
+         @keyframes plateBump {
+            0% {
+               transform: translateX(var(--plate-x, 120px)) scale(1);
+            }
+            50% {
+               transform: translateX(var(--plate-x, 120px)) scale(1.07, 0.94);
+            }
+            100% {
+               transform: translateX(var(--plate-x, 120px)) scale(1);
+            }
+         }
+
+         .belt-rail-top {
+            height: 14px;
+            width: 100%;
+            background: var(--cardboard);
+            border-top: 3px solid var(--ink-dark);
+            border-bottom: 2.5px solid var(--ink-dark);
+            position: relative;
+         }
+
+         .belt-rubber {
+            height: clamp(32px, 5vh, 46px);
+            width: 100%;
+            background-color: var(--belt-surface);
+            border-bottom: 3px solid var(--ink-dark);
+            position: relative;
+            overflow: hidden;
+         }
+
+         #belt-stripes {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -64px;
+            right: -64px;
+            background-image: repeating-linear-gradient(-55deg, transparent 0px, transparent 31.458px, var(--belt-stripe) 31.458px, var(--belt-stripe) 52.43px);
+            transform: translate3d(-64px, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform;
+         }
+
+         .belt-rail-bottom {
+            height: clamp(26px, 4vh, 36px);
+            width: 100%;
+            background: var(--cardboard-dark);
+            border-bottom: 3.5px solid var(--ink-dark);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+         }
+
+         .blue-tape-strip {
+            width: 44px;
+            height: 112%;
+            background: var(--tape-blue);
+            border-left: 2.5px solid var(--ink-dark);
+            border-right: 2.5px solid var(--ink-dark);
+            opacity: 0.92;
+            transform: rotate(-3deg);
+         }
+
+         .blue-tape-strip:nth-child(even) {
+            transform: rotate(4deg);
+         }
+
+         /* 3-Color Speed Gauge Mounted on Left Front of Belt */
+         #speed-gauge-widget {
+            position: absolute;
+            left: clamp(10px, 2.5vw, 34px);
+            bottom: clamp(14px, 2.5vh, 24px);
+            width: clamp(128px, 15vw, 162px);
+            height: clamp(82px, 10vw, 104px);
+            z-index: 25;
+            pointer-events: auto;
+         }
+
+         .gauge-sector {
+            cursor: pointer;
+            outline: none;
+            transition:
+               filter 0.15s ease,
+               opacity 0.15s ease;
+         }
+
+         .gauge-sector:hover {
+            filter: brightness(1.1);
+         }
+
+         .gauge-sector:active {
+            filter: brightness(0.92);
+         }
+
+         .gauge-sector:focus,
+         .gauge-sector:focus-visible {
+            outline: none;
+            filter: brightness(1.12);
+         }
+
+         #gauge-needle {
+            pointer-events: none;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .gauge-play-btn {
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            transform: translateX(-50%);
+            width: clamp(42px, 5vw, 52px);
+            height: clamp(42px, 5vw, 52px);
+            border-radius: 50%;
+            background: #0ea5e9;
+            border: 3.5px solid var(--ink-dark);
+            box-shadow: 0 3px 0 var(--ink-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.1s ease;
+         }
+
+         .gauge-play-btn:hover {
+            transform: translateX(-50%) scale(1.06);
+         }
+
+         .gauge-play-btn:active {
+            transform: translateX(-50%) translateY(2px);
+         }
+
+         /* =========================================================================
+       5. BOTTOM COUNTERTOP: 9-ITEM HEALTH LAB STATION + VERTICAL STAR METER
+       ========================================================================= */
+         #countertop-area {
+            position: relative;
+            z-index: 18;
+            background: var(--bg-counter);
+            border-top: 4px solid var(--bg-counter-edge);
+            padding: clamp(8px, 1.4vh, 14px) clamp(10px, 2vw, 24px) clamp(10px, 1.8vh, 18px);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: clamp(8px, 1.5vw, 18px);
+            min-height: clamp(195px, 33vh, 275px);
+         }
+
+         #prep-station {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(8px, 1.3vh, 12px);
+            max-width: calc(100% - 92px);
+         }
+
+         .tray-row {
+            display: grid;
+            gap: clamp(6px, 1.1vw, 12px);
+            justify-content: center;
+         }
+
+         .tray-row-top {
+            grid-template-columns: repeat(4, minmax(64px, 144px));
+         }
+
+         .tray-row-bottom {
+            grid-template-columns: repeat(5, minmax(60px, 136px));
+         }
+
+         .tray-card {
+            position: relative;
+            background: var(--tray-bg);
+            border: 3.5px solid var(--tray-border);
+            border-radius: 18px;
+            padding: 6px 6px 5px;
+            min-height: clamp(78px, 13vh, 108px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--tray-border);
+            transition:
+               transform 0.12s ease,
+               box-shadow 0.12s ease,
+               border-color 0.2s;
+         }
+
+         .tray-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 var(--tray-border);
+         }
+
+         .tray-card:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--tray-border);
+         }
+
+         .tray-num-badge {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         body.high-contrast .tray-num-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         body.hide-numbers .tray-num-badge {
+            display: none;
+         }
+
+         .tray-svg-box {
+            width: 100%;
+            height: clamp(50px, 8.5vh, 72px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .tray-label {
+            font-size: clamp(10px, 1.15vw, 12.5px);
+            font-weight: 800;
+            color: var(--ink-dark);
+            text-align: center;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+         }
+
+         /* Bottom-Right Vertical Star Gauge & Order Counter (1/5) */
+         #star-progress-widget {
+            width: clamp(68px, 7.5vw, 84px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            background: #fffbeb;
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 8px 6px;
+            box-shadow: 0 5px 0 var(--ink-dark);
+         }
+
+         body.high-contrast #star-progress-widget {
+            background: #000000;
+            border-color: #facc15;
+            box-shadow: 0 5px 0 #facc15;
+         }
+
+         .star-tube-wrap {
+            position: relative;
+            width: 26px;
+            flex: 1;
+            min-height: 110px;
+            background: #e2e8f0;
+            border: 3px solid var(--ink-dark);
+            border-radius: 999px;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin: 4px 0;
+         }
+
+         #star-tube-fill {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, #facc15 0%, #f59e0b 100%);
+            border-radius: 999px;
+            transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .tube-star-marker {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.35s ease;
+         }
+
+         .tube-star-marker.earned {
+            transform: translate(-50%, 50%) scale(1.18);
+         }
+
+         #order-counter-badge {
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: clamp(13px, 1.5vw, 16px);
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+         }
+
+         body.high-contrast #order-counter-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         /* =========================================================================
+       6. FLYING ITEM ANIMATION LAYER
+       ========================================================================= */
+         .flying-item {
+            position: fixed;
+            z-index: 60;
+            pointer-events: none;
+            width: 72px;
+            height: 72px;
+            transition:
+               transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+               opacity 0.34s ease;
+         }
+
+         /* =========================================================================
+       7. MODALS: START MENU, SETTINGS (ACCESSIBILITY), VICTORY / SUMMARY
+       ========================================================================= */
+         .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(250, 247, 242, 0.78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(10px, 2vw, 20px);
+            backdrop-filter: blur(5px);
+         }
+
+         body.high-contrast .modal-backdrop {
+            background: rgba(0, 0, 0, 0.85);
+         }
+
+         .modal-backdrop.hidden {
+            display: none;
+         }
+
+         .modal-card {
+            background: #fffdf9;
+            border: 4px solid var(--ink-dark);
+            border-radius: 30px;
+            box-shadow: 0 10px 0 var(--ink-dark);
+            width: 100%;
+            max-width: 700px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: clamp(16px, 2.6vw, 24px);
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+         }
+
+         body.high-contrast .modal-card {
+            background: #0a0a0a;
+            border-color: #facc15;
+            box-shadow: 0 10px 0 #facc15;
+         }
+
+         .game-hero-banner {
+            background: linear-gradient(180deg, #fee2e2 0%, #fecaca 100%);
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 24px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            position: relative;
+            box-shadow: 0 5px 0 rgba(38, 33, 29, 0.16);
+         }
+
+         body.high-contrast .game-hero-banner {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .hero-title-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+         }
+
+         .hero-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            background: #facc15;
+            color: #26211d;
+            border: 2.5px solid var(--ink-dark);
+            border-radius: 999px;
+            padding: 2px 12px;
+            font-size: 12px;
+            font-weight: 900;
+         }
+
+         .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #e0f2fe;
+            border: 3px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 10px 16px;
+         }
+
+         body.high-contrast .modal-header {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .modal-title {
+            margin: 0;
+            font-size: clamp(18px, 2.5vw, 25px);
+            font-weight: 900;
+            color: var(--ink-dark);
+            line-height: 1.22;
+         }
+
+         .modal-subtitle {
+            margin: 2px 0 0;
+            font-size: clamp(12.5px, 1.5vw, 14.5px);
+            font-weight: 800;
+            color: var(--ink-muted);
+         }
+
+         .visual-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+         }
+
+         .visual-guide-card {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 0 var(--ink-dark);
+            text-align: center;
+         }
+
+         body.high-contrast .visual-guide-card {
+            background: #141414;
+            border-color: #facc15;
+            box-shadow: 0 4px 0 #facc15;
+         }
+
+         .visual-guide-caption {
+            font-size: clamp(11.5px, 1.35vw, 13.5px);
+            font-weight: 900;
+            color: var(--ink-dark);
+         }
+
+         .modal-btn {
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-size: clamp(16px, 1.9vw, 19px);
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               box-shadow 0.1s ease;
+         }
+
+         .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--ink-dark);
+         }
+
+         .modal-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .btn-primary {
+            background: #22c55e;
+            color: #ffffff;
+         }
+
+         .btn-secondary {
+            background: #ef4444;
+            color: #ffffff;
+         }
+
+         .btn-warning {
+            background: #facc15;
+            color: #26211d;
+         }
+
+         .order-select-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+         }
+
+         .order-pill-btn {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 18px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-weight: 900;
+            color: var(--ink-dark);
+            box-shadow: 0 4px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+         }
+
+         .order-pill-btn:hover {
+            transform: translateY(-2px);
+         }
+
+         body.high-contrast .order-pill-btn {
+            background: #111111;
+            border-color: #facc15;
+            color: #facc15;
+         }
+
+         .order-pill-btn.active {
+            background: #fef08a;
+            border-color: #0284c7;
+            box-shadow: 0 4px 0 #0284c7;
+            transform: translateY(-2px);
+         }
+
+         .layer-dots {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .layer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 1.5px solid var(--ink-dark);
+         }
+
+         /* Takeaway Knowledge List in Victory Modal */
+         .takeaway-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            background: #f0f9ff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 12px 16px;
+         }
+
+         body.high-contrast .takeaway-list {
+            background: #141414;
+            border-color: #facc15;
+         }
+
+         .takeaway-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: clamp(12.5px, 1.45vw, 14.5px);
+            font-weight: 800;
+            color: var(--ink-dark);
+            line-height: 1.35;
+         }
+
+         .takeaway-badge {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0284c7;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--ink-dark);
+         }
+
+         .takeaway-badge.good {
+            background: #22c55e;
+         }
+
+         .a11y-section {
+            background: #f3e2c7;
+            border: 3px solid var(--ink-dark);
+            border-radius: 22px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+         }
+
+         body.high-contrast .a11y-section {
+            background: #141414;
+            border-color: #facc15;
+         }
+
+         .a11y-section-title {
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.3px;
+            color: var(--ink-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+         }
+
+         .speed-segment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+         }
+
+         .speed-chip {
+            padding: 8px 6px;
+            border-radius: 16px;
+            border: 3px solid var(--ink-dark);
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--ink-dark);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 3px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+         }
+
+         .speed-chip.selected {
+            background: #38bdf8;
+            color: #ffffff;
+            transform: translateY(-2px);
+         }
+
+         body.high-contrast .speed-chip {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         body.high-contrast .speed-chip.selected {
+            background: #facc15;
+            color: #000000;
+         }
+
+         .a11y-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+         }
+
+         .a11y-icon-tile {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 18px;
+            padding: 10px 6px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+            text-align: center;
+         }
+
+         .a11y-icon-tile:hover {
+            transform: translateY(-2px);
+         }
+
+         .a11y-icon-tile:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .a11y-icon-tile[aria-pressed='true'] {
+            background: #dcfce7;
+            border-color: #16a34a;
+            box-shadow: 0 4px 0 #16a34a;
+         }
+
+         body.high-contrast .a11y-icon-tile {
+            background: #0a0a0a;
+            border-color: #facc15;
+            color: #ffffff;
+         }
+
+         body.high-contrast .a11y-icon-tile[aria-pressed='true'] {
+            background: #1e293b;
+            border-color: #00ffff;
+            box-shadow: 0 4px 0 #00ffff;
+         }
+
+         .tile-title {
+            font-size: 11.5px;
+            font-weight: 900;
+            color: var(--ink-dark);
+            line-height: 1.15;
+         }
+
+         .tile-state-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            border: 2px solid var(--ink-dark);
+            background: #e2e8f0;
+            color: #475569;
+         }
+
+         .a11y-icon-tile[aria-pressed='true'] .tile-state-pill {
+            background: #22c55e;
+            color: #ffffff;
+         }
+
+         body.high-contrast .a11y-icon-tile[aria-pressed='true'] .tile-state-pill {
+            background: #facc15;
+            color: #000000;
+         }
+
+         .source-credit {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink-muted);
+            text-align: center;
+            margin-top: 2px;
+         }
+
+         @media (max-width: 680px) {
+            #recipe-signboard {
+               min-width: 210px;
+               padding: 7px 10px 8px;
+            }
+            .tray-row-top {
+               grid-template-columns: repeat(4, minmax(54px, 1fr));
+            }
+            .tray-row-bottom {
+               grid-template-columns: repeat(5, minmax(48px, 1fr));
+            }
+            #chef-whiskers-container {
+               right: 8px;
+               width: 105px;
+               height: 120px;
+            }
+            .order-select-grid {
+               grid-template-columns: repeat(5, 1fr);
+               gap: 5px;
+            }
+            .a11y-icon-grid {
+               grid-template-columns: repeat(2, 1fr);
+            }
+            .speed-segment-grid {
+               grid-template-columns: repeat(2, 1fr);
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <div id="game-app" role="application" aria-label="เกมสายพานเรียนรู้สุขภาพ: กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน">
+         <!-- =====================================================================
+         BACKGROUND HEALTH LAB & SUNSHINE PROPS (HOT WEATHER & HYDRATION CONTEXT)
+         ===================================================================== -->
+         <svg id="kitchen-backdrop" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <!-- Left: Water Cooler / Hydration Dispenser ("กินน้ำเปล่าดีต่อร่างกาย") -->
+            <g opacity="0.72">
+               <rect x="52" y="345" width="140" height="165" rx="16" fill="#E2E8F0" stroke="#94A3B8" stroke-width="4" />
+               <rect x="76" y="220" width="92" height="125" rx="22" fill="#BAE6FD" stroke="#38BDF8" stroke-width="4" />
+               <path d="M80 275 Q122 265 164 275 V338 H80 Z" fill="#7DD3FC" opacity="0.75" />
+               <rect x="98" y="370" width="48" height="58" rx="8" fill="#CBD5E1" stroke="#94A3B8" stroke-width="3" />
+               <circle cx="110" cy="360" r="6" fill="#38BDF8" />
+               <circle cx="134" cy="360" r="6" fill="#EF4444" />
+            </g>
+
+            <!-- Center-Left: Hanging Nutrition Chart ("0% SUGAR = ?") -->
+            <g opacity="0.62">
+               <line x1="295" y1="0" x2="295" y2="155" stroke="#94A3B8" stroke-width="4" />
+               <rect x="235" y="155" width="120" height="90" rx="14" fill="#FEF9C3" stroke="#94A3B8" stroke-width="4" />
+               <text x="295" y="195" text-anchor="middle" font-size="22" font-weight="900" fill="#64748B">0% SUGAR</text>
+               <text x="295" y="225" text-anchor="middle" font-size="16" font-weight="800" fill="#94A3B8">VS น้ำเปล่า</text>
+            </g>
+
+            <!-- Right: Window with Bright Sun ("อากาศร้อน ทำให้คนกินน้ำหวาน") -->
+            <g opacity="0.72">
+               <rect x="1125" y="140" width="215" height="190" rx="18" fill="#E0F2FE" stroke="#94A3B8" stroke-width="4" />
+               <circle cx="1275" cy="205" r="34" fill="#FDE047" stroke="#FACC15" stroke-width="4" />
+               <line x1="1275" y1="156" x2="1275" y2="164" stroke="#FACC15" stroke-width="4" stroke-linecap="round" />
+               <line x1="1275" y1="246" x2="1275" y2="254" stroke="#FACC15" stroke-width="4" stroke-linecap="round" />
+               <line x1="1226" y1="205" x2="1234" y2="205" stroke="#FACC15" stroke-width="4" stroke-linecap="round" />
+               <line x1="1316" y1="205" x2="1324" y2="205" stroke="#FACC15" stroke-width="4" stroke-linecap="round" />
+               <line x1="1232" y1="140" x2="1232" y2="330" stroke="#94A3B8" stroke-width="4" />
+               <line x1="1125" y1="235" x2="1340" y2="235" stroke="#94A3B8" stroke-width="4" />
+            </g>
+         </svg>
+
+         <!-- =====================================================================
+         TOP HUD: HOME, UNDO, VISUAL CAUSE-AND-EFFECT SIGNBOARD, SETTINGS
+         ===================================================================== -->
+         <header id="top-hud">
+            <div class="hud-btn-group">
+               <button id="btn-home" class="circle-btn btn-home" type="button" aria-label="กลับหน้าหลัก (Home)">
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path
+                        d="M5 15L16 5.5L27 15V26.5C27 27.3 26.3 28 25.5 28H19.5V20.5H12.5V28H6.5C5.7 28 5 27.3 5 26.5V15Z"
+                        fill="#FFFFFF"
+                        stroke="#26211D"
+                        stroke-width="2.6"
+                        stroke-linejoin="round" />
+                  </svg>
+               </button>
+
+               <button id="btn-undo" class="circle-btn btn-undo" type="button" aria-label="หยิบรายการล่าสุดออก (Backspace)" disabled>
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path d="M12 8L5 15L12 22" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+                     <path d="M6 15H20C24.4 15 27 17.6 27 21.5C27 24.5 25 26.5 22 26.5H17" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" />
+                  </svg>
+                  <span class="key-pill">⌫</span>
+               </button>
+            </div>
+
+            <div id="recipe-signboard-wrap">
+               <div class="sign-straps" aria-hidden="true">
+                  <div class="sign-strap"></div>
+                  <div class="sign-strap"></div>
+               </div>
+               <div id="recipe-signboard" role="region" aria-label="ป้ายโจทย์ลำดับความรู้สุขภาพ">
+                  <div class="sign-header">
+                     <span id="sign-order-label" class="sign-badge">ด่านที่ 1 / 5</span>
+                     <span id="sign-order-title">รู้จักน้ำอัดลมและก๊าซ CO₂</span>
+                     <button id="btn-speak-order" class="speak-btn" type="button" aria-label="ฟังเสียงอ่านโจทย์">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M4 9V15H8L14 20V4L8 9H4Z" fill="#0284C7" stroke="#26211D" stroke-width="2" />
+                           <path d="M18 8C19.8 10 19.8 14 18 16" stroke="#26211D" stroke-width="2.2" stroke-linecap="round" />
+                        </svg>
+                        <span>ฟัง</span>
+                     </button>
+                  </div>
+                  <div id="sign-sequence-row" class="sign-sequence-row"></div>
+               </div>
+            </div>
+
+            <div class="hud-btn-group">
+               <button id="btn-settings" class="circle-btn btn-settings" type="button" aria-label="ตั้งค่าการเข้าถึง (Settings)">
+                  <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path
+                        d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                        fill="#FFFFFF"
+                        stroke="#26211D"
+                        stroke-width="2.4"
+                        stroke-linejoin="round" />
+                     <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                  </svg>
+               </button>
+            </div>
+         </header>
+
+         <!-- =====================================================================
+         MIDDLE STAGE: CHEF WHISKERS (HEALTH DETECTIVE) + CONVEYOR + SPEED GAUGE
+         ===================================================================== -->
+         <main id="conveyor-stage">
+            <div id="visual-cue-banner" role="status" aria-live="polite">
+               <svg id="cue-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"></svg>
+               <span id="cue-text">พร้อมเรียนรู้เรื่องน้ำหวาน 0% แล้ว!</span>
+            </div>
+
+            <!-- Chef Whiskers Health Detective Cat Mascot -->
+            <div id="chef-whiskers-container" aria-hidden="true">
+               <svg viewBox="0 0 200 225" width="100%" height="100%">
+                  <path d="M62 66 C46 62, 44 38, 64 34 C66 16, 94 12, 102 26 C112 12, 140 16, 140 35 C158 39, 156 62, 138 66 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.2" />
+                  <rect x="64" y="60" width="72" height="15" rx="5" fill="#F8FAFC" stroke="#26211D" stroke-width="4.2" />
+                  <!-- Green Health Cross Badge on Hat -->
+                  <rect x="96" y="34" width="8" height="20" rx="2" fill="#22C55E" />
+                  <rect x="90" y="40" width="20" height="8" rx="2" fill="#22C55E" />
+                  <polygon points="56,82 44,44 82,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" stroke-linejoin="round" />
+                  <polygon points="59,77 51,53 74,69" fill="#FACC15" />
+                  <polygon points="144,82 156,44 118,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" stroke-linejoin="round" />
+                  <polygon points="141,77 149,53 126,69" fill="#FACC15" />
+                  <path d="M54 152 C50 185, 52 215, 52 220 H148 C148 215, 150 185, 146 152 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.2" />
+                  <path d="M84 154 L100 170 L116 154" fill="none" stroke="#38BDF8" stroke-width="4" />
+                  <ellipse cx="100" cy="112" rx="52" ry="44" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" />
+                  <path d="M56 116 C56 100, 144 100, 144 116 C144 140, 124 153, 100 153 C76 153, 56 140, 56 116 Z" fill="#FFFFFF" />
+                  <g id="chef-eyes-normal">
+                     <circle cx="80" cy="105" r="7" fill="#1E293B" />
+                     <circle cx="82" cy="102" r="2.5" fill="#FFFFFF" />
+                     <circle cx="120" cy="105" r="7" fill="#1E293B" />
+                     <circle cx="122" cy="102" r="2.5" fill="#FFFFFF" />
+                  </g>
+                  <g id="chef-eyes-happy" style="display: none">
+                     <path d="M72 108 Q80 97 88 108" fill="none" stroke="#1E293B" stroke-width="4.2" stroke-linecap="round" />
+                     <path d="M112 108 Q120 97 128 108" fill="none" stroke="#1E293B" stroke-width="4.2" stroke-linecap="round" />
+                  </g>
+                  <ellipse cx="66" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                  <ellipse cx="134" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                  <polygon points="95,116 105,116 100,122" fill="#F472B6" />
+                  <path id="chef-mouth-normal" d="M90 127 Q95 133 100 126 Q105 133 110 127" fill="none" stroke="#26211D" stroke-width="3.2" stroke-linecap="round" />
+                  <line x1="36" y1="112" x2="58" y2="115" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="36" y1="123" x2="58" y2="122" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="142" y1="115" x2="164" y2="112" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="142" y1="122" x2="164" y2="123" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+
+                  <!-- Magnifying Glass / Health Check Arm when Inspecting Completed Formula -->
+                  <g id="chef-utensils" style="display: none">
+                     <g id="chef-lens-arm">
+                        <rect x="41" y="132" width="7" height="36" rx="3" fill="#92400E" stroke="#26211D" stroke-width="2.4" />
+                        <circle cx="44.5" cy="116" r="18" fill="#BAE6FD" stroke="#26211D" stroke-width="3.4" />
+                        <path d="M36 116 L42 122 L54 110" fill="none" stroke="#16A34A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                        <ellipse cx="46" cy="166" rx="14" ry="12" fill="#FFFFFF" stroke="#26211D" stroke-width="3.2" />
+                     </g>
+                  </g>
+
+                  <g id="chef-yum-effects" style="display: none">
+                     <path d="M26 76 C22 70, 14 73, 16 80 C18 85, 26 90, 26 90 C26 90, 34 85, 36 80 C38 73, 30 70, 26 76 Z" fill="#22C55E" stroke="#26211D" stroke-width="2" />
+                     <polygon points="174,64 177,71 184,72 178,77 180,84 174,80 168,84 170,77 164,72 171,71" fill="#FACC15" stroke="#26211D" stroke-width="2" stroke-linejoin="round" />
+                  </g>
+               </svg>
+            </div>
+
+            <!-- Conveyor Belt & Moving Analysis Tray Track -->
+            <div id="belt-assembly">
+               <div id="plate-track">
+                  <div id="moving-plate-group">
+                     <svg viewBox="0 0 240 155" width="230" height="145" aria-label="ถาดทดลองสุขภาพบนสายพาน">
+                        <!-- Sleek Lab Tray Base -->
+                        <rect x="14" y="124" width="212" height="22" rx="11" fill="#CBD5E1" stroke="#26211D" stroke-width="3.2" />
+                        <rect x="18" y="119" width="204" height="18" rx="9" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <rect x="34" y="124" width="172" height="8" rx="4" fill="#E0F2FE" />
+                        <g id="plate-food-layers"></g>
+                     </svg>
+                  </div>
+               </div>
+
+               <div class="belt-rail-top"></div>
+               <div class="belt-rubber">
+                  <div id="belt-stripes" class="bg-animated"></div>
+               </div>
+               <div class="belt-rail-bottom">
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+               </div>
+
+               <!-- 3-Color Speed Gauge (Red = Slow, Yellow = Medium, Green = Fast) + Blue Play/Pause Button -->
+               <div id="speed-gauge-widget" role="group" aria-label="แผงควบคุมความเร็วสายพาน">
+                  <svg viewBox="0 0 180 112" width="100%" height="100%">
+                     <path d="M 12 98 A 78 78 0 0 1 168 98 Z" fill="#C69863" stroke="#26211D" stroke-width="4.5" stroke-linejoin="round" />
+                     <path
+                        id="gauge-zone-slow"
+                        class="gauge-sector"
+                        data-speed-mode="slow"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วช้า (สีแดง)"
+                        d="M 24 98 A 66 66 0 0 1 57 41 L 90 98 Z"
+                        fill="#EF4444"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <path
+                        id="gauge-zone-normal"
+                        class="gauge-sector"
+                        data-speed-mode="normal"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วปานกลาง (สีเหลือง)"
+                        d="M 57 41 A 66 66 0 0 1 123 41 L 90 98 Z"
+                        fill="#FACC15"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <path
+                        id="gauge-zone-fast"
+                        class="gauge-sector"
+                        data-speed-mode="fast"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วเร็ว (สีเขียว)"
+                        d="M 123 41 A 66 66 0 0 1 156 98 L 90 98 Z"
+                        fill="#22C55E"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <g id="gauge-needle" transform="rotate(0 90 98)">
+                        <polygon points="86,98 94,98 90,34" fill="#26211D" />
+                     </g>
+                  </svg>
+                  <button id="btn-belt-toggle" class="gauge-play-btn" type="button" aria-label="หยุดหรือเดินสายพาน (Spacebar)">
+                     <svg id="icon-belt-pause" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="6" y="5" width="4.5" height="14" rx="1.5" fill="#FFFFFF" />
+                        <rect x="13.5" y="5" width="4.5" height="14" rx="1.5" fill="#FFFFFF" />
+                     </svg>
+                     <svg id="icon-belt-play" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display: none" aria-hidden="true">
+                        <polygon points="7,5 19,12 7,19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round" />
+                     </svg>
+                  </button>
+               </div>
+            </div>
+         </main>
+
+         <!-- =====================================================================
+         BOTTOM COUNTERTOP: 9-ITEM HEALTH LAB TRAY + VERTICAL 3-STAR PROGRESS GAUGE
+         ===================================================================== -->
+         <section id="countertop-area" aria-label="แผงบัตรภาพเรียนรู้สุขภาพ 9 รายการ">
+            <div id="prep-station">
+               <div id="tray-row-top" class="tray-row tray-row-top"></div>
+               <div id="tray-row-bottom" class="tray-row tray-row-bottom"></div>
+            </div>
+
+            <aside id="star-progress-widget" aria-label="ความคืบหน้าดาวและลำดับด่าน">
+               <div class="star-tube-wrap">
+                  <div id="star-tube-fill"></div>
+                  <div id="star-marker-3" class="tube-star-marker" style="bottom: 92%"></div>
+                  <div id="star-marker-2" class="tube-star-marker" style="bottom: 54%"></div>
+                  <div id="star-marker-1" class="tube-star-marker" style="bottom: 18%"></div>
+               </div>
+               <div id="order-counter-badge">1 / 5</div>
+            </aside>
+         </section>
+
+         <!-- =====================================================================
+         MODAL 1: GAME-STYLED VISUAL START SCREEN
+         ===================================================================== -->
+         <div id="modal-start" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="start-title">
+            <div class="modal-card">
+               <div class="game-hero-banner">
+                  <div class="hero-title-stack">
+                     <span class="hero-pill-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <circle cx="12" cy="12" r="9" fill="#EF4444" stroke="#26211D" stroke-width="2" />
+                           <path d="M12 7V13M12 16.5H12.01" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+                        </svg>
+                        <span>รู้ทันน้ำหวาน 0%</span>
+                     </span>
+                     <h1 id="start-title" class="modal-title">กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน</h1>
+                     <p class="modal-subtitle">สายพานไขความลับสุขภาพของเชฟเหมียว (ครบ 5 บทเรียน)</p>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0" aria-hidden="true">
+                     <svg width="78" height="78" viewBox="0 0 200 200">
+                        <path d="M62 66 C46 62, 44 38, 64 34 C66 16, 94 12, 102 26 C112 12, 140 16, 140 35 C158 39, 156 62, 138 66 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.5" />
+                        <rect x="64" y="60" width="72" height="15" rx="5" fill="#F8FAFC" stroke="#26211D" stroke-width="4.5" />
+                        <rect x="96" y="34" width="8" height="20" rx="2" fill="#22C55E" />
+                        <rect x="90" y="40" width="20" height="8" rx="2" fill="#22C55E" />
+                        <polygon points="56,82 44,44 82,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <polygon points="59,77 51,53 74,69" fill="#FACC15" />
+                        <polygon points="144,82 156,44 118,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <polygon points="141,77 149,53 126,69" fill="#FACC15" />
+                        <ellipse cx="100" cy="112" rx="52" ry="44" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <path d="M56 116 C56 100, 144 100, 144 116 C144 140, 124 153, 100 153 C76 153, 56 140, 56 116 Z" fill="#FFFFFF" />
+                        <path d="M72 108 Q80 97 88 108" fill="none" stroke="#1E293B" stroke-width="4.5" stroke-linecap="round" />
+                        <path d="M112 108 Q120 97 128 108" fill="none" stroke="#1E293B" stroke-width="4.5" stroke-linecap="round" />
+                        <ellipse cx="66" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                        <ellipse cx="134" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                        <polygon points="95,116 105,116 100,122" fill="#F472B6" />
+                        <path d="M90 127 Q95 133 100 126 Q105 133 110 127" fill="none" stroke="#26211D" stroke-width="3.5" stroke-linecap="round" />
+                     </svg>
+                  </div>
+               </div>
+
+               <div class="visual-guide-grid" aria-label="วิธีเล่น 3 ขั้นตอน">
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <rect x="8" y="8" width="74" height="44" rx="12" fill="#E0F2FE" stroke="#26211D" stroke-width="3" />
+                        <rect x="20" y="18" width="16" height="24" rx="4" fill="#1E293B" stroke="#26211D" stroke-width="2" />
+                        <text x="28" y="34" text-anchor="middle" font-size="9" font-weight="900" fill="#38BDF8">0%</text>
+                        <path d="M44 30 H64 M64 30 L58 24 M64 30 L58 36" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="72" cy="48" r="11" fill="#FFFFFF" stroke="#26211D" stroke-width="2.5" />
+                        <circle cx="72" cy="48" r="4.5" fill="#0284C7" />
+                     </svg>
+                     <span class="visual-guide-caption">1. ดูโจทย์สุขภาพ</span>
+                  </div>
+
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <rect x="11" y="42" width="68" height="12" rx="6" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8" />
+                        <circle cx="32" cy="28" r="11" fill="#FDA4AF" stroke="#26211D" stroke-width="2.2" />
+                        <circle cx="58" cy="28" r="11" fill="#FACC15" stroke="#26211D" stroke-width="2.2" />
+                        <path d="M45 6 V17 M39 12 L45 18 L51 12" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                     </svg>
+                     <span class="visual-guide-caption">2. เรียงลำดับเหตุ-ผล</span>
+                  </div>
+
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <path d="M32 14 H58 L54 50 H36 Z" fill="#BAE6FD" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round" />
+                        <path d="M35 28 H55 L53 48 H37 Z" fill="#38BDF8" />
+                        <circle cx="66" cy="44" r="12" fill="#22C55E" stroke="#26211D" stroke-width="2.5" />
+                        <path d="M61 44 L64.5 47.5 L71.5 40.5" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                     </svg>
+                     <span class="visual-guide-caption">3. น้ำเปล่าดีต่อร่างกาย</span>
+                  </div>
+               </div>
+
+               <div class="order-select-grid" id="start-order-grid" aria-label="เลือกด่านเรียนรู้ 1 ถึง 5"></div>
+
+               <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 2px">
+                  <button id="btn-open-a11y-from-start" class="modal-btn btn-secondary" type="button" aria-label="ตั้งค่าการเข้าถึง (Settings)">
+                     <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                        <path
+                           d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                           fill="#FFFFFF"
+                           stroke="#26211D"
+                           stroke-width="2.4"
+                           stroke-linejoin="round" />
+                        <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                     </svg>
+                     <span>ตั้งค่า</span>
+                  </button>
+
+                  <button id="btn-start-play" class="modal-btn btn-primary" type="button" style="flex: 1; font-size: clamp(18px, 2.2vw, 22px)">
+                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                        <circle cx="14" cy="14" r="12" fill="#FFFFFF" stroke="#26211D" stroke-width="2.5" />
+                        <polygon points="11,8.5 20.5,14 11,19.5" fill="#22C55E" stroke="#26211D" stroke-width="2" stroke-linejoin="round" />
+                     </svg>
+                     <span>เริ่มเล่น (PLAY)</span>
+                  </button>
+               </div>
+
+               <div class="source-credit">เนื้อหาอ้างอิง: "กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน" โดย พัศวีร์ณัฐ เบญจวงศ์ (CC-BY-ND)</div>
+            </div>
+         </div>
+
+         <!-- =====================================================================
+         MODAL 2: ICON-DRIVEN SETTINGS & ACCESSIBILITY
+         ===================================================================== -->
+         <div id="modal-settings" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="modal-card">
+               <div class="modal-header">
+                  <div style="display: flex; align-items: center; gap: 10px">
+                     <div
+                        style="
+                           width: 42px;
+                           height: 42px;
+                           border-radius: 50%;
+                           background: #ef4444;
+                           border: 3px solid #26211d;
+                           display: flex;
+                           align-items: center;
+                           justify-content: center;
+                           flex-shrink: 0;
+                        "
+                        aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                           <path
+                              d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                              fill="#FFFFFF"
+                              stroke="#26211D"
+                              stroke-width="2.4" />
+                           <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                        </svg>
+                     </div>
+                     <div>
+                        <h2 id="settings-title" class="modal-title">ตั้งค่า (Settings)</h2>
+                        <p class="modal-subtitle">ปรับความเร็วสายพานและตัวช่วยการเล่น</p>
+                     </div>
+                  </div>
+
+                  <button id="btn-close-settings" class="modal-btn btn-primary" type="button" style="padding: 10px 18px">
+                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M5 13L9.5 17.5L19 7" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+                     </svg>
+                     <span>ตกลง</span>
+                  </button>
+               </div>
+
+               <div class="a11y-section">
+                  <h3 class="a11y-section-title">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 17A9 9 0 0 1 21 17Z" fill="#FACC15" stroke="#26211D" stroke-width="2.2" />
+                        <line x1="12" y1="17" x2="16" y2="10" stroke="#26211D" stroke-width="2.4" stroke-linecap="round" />
+                     </svg>
+                     <span>จังหวะสายพาน</span>
+                  </h3>
+                  <div class="speed-segment-grid" role="group" aria-label="เลือกความเร็วสายพาน">
+                     <button type="button" class="speed-chip" data-speed-mode="manual">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <rect x="8" y="4" width="9" height="22" rx="3" fill="#0EA5E9" stroke="#26211D" stroke-width="2.4" />
+                           <rect x="23" y="4" width="9" height="22" rx="3" fill="#0EA5E9" stroke="#26211D" stroke-width="2.4" />
+                        </svg>
+                        <span>หยุดรอ</span>
+                     </button>
+
+                     <button type="button" class="speed-chip" data-speed-mode="slow">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#EF4444" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="17,10 26,15 17,20" fill="#FFFFFF" />
+                        </svg>
+                        <span>ช้า</span>
+                     </button>
+
+                     <button type="button" class="speed-chip selected" data-speed-mode="normal">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#FACC15" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="13,10 21,15 13,20" fill="#26211D" />
+                           <polygon points="21,10 29,15 21,20" fill="#26211D" />
+                        </svg>
+                        <span>ปานกลาง</span>
+                     </button>
+
+                     <button type="button" class="speed-chip" data-speed-mode="fast">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#22C55E" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="11,10 18,15 11,20" fill="#FFFFFF" />
+                           <polygon points="18,10 25,15 18,20" fill="#FFFFFF" />
+                           <polygon points="25,10 32,15 25,20" fill="#FFFFFF" />
+                        </svg>
+                        <span>เร็ว</span>
+                     </button>
+                  </div>
+               </div>
+
+               <div class="a11y-icon-grid" role="group" aria-label="ตัวช่วยการเข้าถึง">
+                  <button id="toggle-high-contrast" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="22" cy="22" r="16" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <path d="M22 6 A16 16 0 0 1 22 38 Z" fill="#26211D" />
+                     </svg>
+                     <span class="tile-title">สีคมชัดสูง</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-large-sign" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="20" cy="20" r="12" fill="#E0F2FE" stroke="#26211D" stroke-width="3" />
+                        <path d="M20 14V26M14 20H26" stroke="#0284C7" stroke-width="3" stroke-linecap="round" />
+                        <line x1="29" y1="29" x2="38" y2="38" stroke="#26211D" stroke-width="4" stroke-linecap="round" />
+                     </svg>
+                     <span class="tile-title">ขยายป้าย</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-tts" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M8 17V27H15L24 34V10L15 17H8Z" fill="#38BDF8" stroke="#26211D" stroke-width="2.8" stroke-linejoin="round" />
+                        <path d="M29 16C32 19 32 25 29 28" stroke="#26211D" stroke-width="3" stroke-linecap="round" />
+                        <path d="M34 12C39 17 39 27 34 32" stroke="#26211D" stroke-width="3" stroke-linecap="round" />
+                     </svg>
+                     <span class="tile-title">เสียงอ่าน</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-visual-cues" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M22 8C16 8 12 12 12 18V26L8 30H36L32 26V18C32 12 28 8 22 8Z" fill="#FACC15" stroke="#26211D" stroke-width="2.8" stroke-linejoin="round" />
+                        <circle cx="22" cy="34" r="3.5" fill="#26211D" />
+                        <circle cx="34" cy="11" r="5" fill="#22C55E" stroke="#26211D" stroke-width="2" />
+                     </svg>
+                     <span class="tile-title">ภาพแทนเสียง</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-sfx" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M18 30V13L33 10V27" stroke="#26211D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="14" cy="30" r="4.5" fill="#FACC15" stroke="#26211D" stroke-width="2.6" />
+                        <circle cx="29" cy="27" r="4.5" fill="#38BDF8" stroke="#26211D" stroke-width="2.6" />
+                     </svg>
+                     <span class="tile-title">เสียงเอฟเฟกต์</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-tray-numbers" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <rect x="8" y="8" width="28" height="28" rx="8" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <text x="22" y="28" text-anchor="middle" font-size="18" font-weight="900" fill="#26211D">1-9</text>
+                     </svg>
+                     <span class="tile-title">เลข 1–9</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-sensory-calm" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path
+                           d="M13 31C8.5 31 6 27.5 7.5 23.5C8.5 18 14.5 16 19 19C22 14.5 29.5 15.5 31 21C35.5 21.5 37.5 26 35 29.5C33.5 31 31 31 28 31H13Z"
+                           fill="#BAE6FD"
+                           stroke="#26211D"
+                           stroke-width="2.8"
+                           stroke-linejoin="round" />
+                     </svg>
+                     <span class="tile-title">โหมดสบายตา</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-focus-mode" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="22" cy="22" r="15" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8" />
+                        <circle cx="22" cy="22" r="9" fill="#FCA5A5" stroke="#26211D" stroke-width="2.4" />
+                        <circle cx="22" cy="22" r="3.5" fill="#EF4444" />
+                     </svg>
+                     <span class="tile-title">โหมดโฟกัส</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- =====================================================================
+         MODAL 3: VICTORY & HEALTH KNOWLEDGE SUMMARY
+         ===================================================================== -->
+         <div id="modal-victory" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title">
+            <div class="modal-card" style="text-align: center; align-items: center">
+               <div id="victory-stars-row" style="display: flex; gap: 14px; justify-content: center; margin-top: 2px"></div>
+               <h2 id="victory-title" class="modal-title">ยอดเยี่ยม! คุณเข้าใจความจริงเรื่องน้ำหวาน 0% แล้ว!</h2>
+               <p id="victory-summary-text" class="modal-subtitle">สรุปความรู้สำคัญจากบทเรียน:</p>
+
+               <div class="takeaway-list" aria-label="สรุปความรู้สำคัญ 4 ข้อ">
+                  <div class="takeaway-item">
+                     <span class="takeaway-badge">1</span>
+                     <span><b>น้ำตาลเทียม 0% หลอกลิ้นว่าหวาน</b> แต่สมองไม่ได้รับน้ำตาลจริง จึงกระตุ้นให้อยากกินหวานมากขึ้น</span>
+                  </div>
+                  <div class="takeaway-item">
+                     <span class="takeaway-badge">2</span>
+                     <span><b>กินข้าวกับน้ำอัดลมสูตรไม่มีน้ำตาล</b> ทำให้น้ำตาลและอินซูลินในเลือดสูงกว่ากินข้าวกับน้ำเปล่า ส่งผลให้สะสมไขมันและอ้วนได้</span>
+                  </div>
+                  <div class="takeaway-item">
+                     <span class="takeaway-badge">3</span>
+                     <span><b>ก๊าซคาร์บอนไดออกไซด์ (CO₂)</b> ในน้ำอัดลมทำให้แน่นท้อง จุกเสียด และท้องอืด</span>
+                  </div>
+                  <div class="takeaway-item">
+                     <span class="takeaway-badge good">✓</span>
+                     <span><b>กินน้ำเปล่าดีต่อร่างกาย</b> สดชื่น ปลอดภัย ไม่ทำให้อ้วน และลดความเสี่ยงโรคเบาหวาน</span>
+                  </div>
+               </div>
+
+               <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 4px">
+                  <button id="btn-replay-all" class="modal-btn btn-warning" type="button">ทบทวนใหม่อีกครั้ง (1/5)</button>
+                  <button id="btn-endless-chef" class="modal-btn btn-primary" type="button">ด่านท้าทายต่อเนื่อง</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * =========================================================================
+          * กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน — HEALTH CONVEYOR EDUCATIONAL GAME ENGINE
+          * Offline 100% | Procedural SVG Art | Web Audio API | Web Speech API
+          * Content grounded in: "กินน้ำหวานสูตรน้ำตาล 0% ทำให้อ้วน" by พัศวีร์ณัฐ เบญจวงศ์
+          * =========================================================================
+          */
+         (function () {
+            'use strict';
+
+            /* -----------------------------------------------------------------------
+             * 1. 9 HEALTH LAB CARDS & PROCEDURAL 2D VECTOR SVG GENERATORS
+             * ----------------------------------------------------------------------- */
+            const INGREDIENTS = {
+               sweetener: {
+                  id: 'sweetener',
+                  keyNum: 1,
+                  row: 'top',
+                  nameTh: 'น้ำตาลเทียม 0%',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <rect x="18" y="14" width="54" height="38" rx="8" fill="#E0F2FE" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M18 20 L23 14 M30 14 L34 18 M56 18 L60 14 M67 14 L72 20" stroke="#26211D" stroke-width="2" stroke-linecap="round"/>
+              <rect x="25" y="22" width="40" height="14" rx="4" fill="#0284C7"/>
+              <text x="45" y="32" text-anchor="middle" font-size="9.5" font-weight="900" fill="#FFFFFF">0% SUGAR</text>
+              <text x="45" y="46" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1E293B">น้ำตาลเทียม</text>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="14" y="16" width="82" height="44" rx="10" fill="#BAE6FD" stroke="#26211D" stroke-width="2.8" transform="rotate(-4 55 38)"/>
+              <rect x="20" y="14" width="74" height="44" rx="10" fill="#F0F9FF" stroke="#26211D" stroke-width="2.8"/>
+              <rect x="28" y="21" width="58" height="17" rx="5" fill="#0284C7"/>
+              <text x="57" y="33" text-anchor="middle" font-size="11" font-weight="900" fill="#FFFFFF">0% SUGAR</text>
+              <circle cx="40" cy="47" r="2.2" fill="#38BDF8"/>
+              <circle cx="50" cy="45" r="2.2" fill="#38BDF8"/>
+              <circle cx="60" cy="48" r="2.2" fill="#38BDF8"/>
+              <circle cx="70" cy="45" r="2.2" fill="#38BDF8"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 26}, ${cy - 22})">
+              <rect x="4" y="6" width="44" height="32" rx="7" fill="#E0F2FE" stroke="#26211D" stroke-width="2.4"/>
+              <rect x="9" y="12" width="34" height="12" rx="3" fill="#0284C7"/>
+              <text x="26" y="21" text-anchor="middle" font-size="8" font-weight="900" fill="#FFFFFF">0% หวานเทียม</text>
+              <circle cx="18" cy="31" r="2" fill="#0284C7"/>
+              <circle cx="26" cy="31" r="2" fill="#0284C7"/>
+              <circle cx="34" cy="31" r="2" fill="#0284C7"/>
+            </g>`,
+               },
+
+               brain_crave: {
+                  id: 'brain_crave',
+                  keyNum: 2,
+                  row: 'top',
+                  nameTh: 'สมองอยากหวาน',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M26 38 C18 38, 17 26, 25 23 C25 14, 37 11, 45 16 C53 11, 65 14, 65 23 C73 26, 72 38, 64 38 C66 47, 56 53, 45 50 C34 53, 24 47, 26 38 Z" fill="#FDA4AF" stroke="#26211D" stroke-width="2.5"/>
+              <path d="M45 16 V49" stroke="#F43F5E" stroke-width="2"/>
+              <circle cx="37" cy="31" r="2.5" fill="#26211D"/>
+              <circle cx="53" cy="31" r="2.5" fill="#26211D"/>
+              <path d="M40 39 Q45 44 50 39" fill="none" stroke="#26211D" stroke-width="2.2" stroke-linecap="round"/>
+              <rect x="64" y="8" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#26211D" stroke-width="2"/>
+              <text x="20" y="16" font-size="13" font-weight="900" fill="#EF4444">?</text>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <path d="M30 43 C20 43, 19 29, 29 25 C29 14, 44 10, 54 16 C64 10, 79 14, 79 25 C89 29, 88 43, 78 43 C81 54, 69 61, 54 57 C39 61, 27 54, 30 43 Z" fill="#FDA4AF" stroke="#26211D" stroke-width="2.8"/>
+              <path d="M54 16 V56" stroke="#F43F5E" stroke-width="2.2"/>
+              <path d="M36 28 Q42 23 47 28" fill="none" stroke="#26211D" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M61 28 Q66 23 72 28" fill="none" stroke="#26211D" stroke-width="2.4" stroke-linecap="round"/>
+              <ellipse cx="54" cy="41" rx="7" ry="5" fill="#991B1B"/>
+              <rect x="81" y="9" width="15" height="15" rx="3" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+              <text x="15" y="19" font-size="15" font-weight="900" fill="#EF4444">+30%</text>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 26}, ${cy - 24})">
+              <path d="M12 28 C5 28, 4 17, 11 14 C11 6, 21 4, 27 8 C33 4, 43 6, 43 14 C50 17, 49 28, 42 28 C44 36, 35 41, 27 38 C19 41, 10 36, 12 28 Z" fill="#FDA4AF" stroke="#26211D" stroke-width="2.4"/>
+              <circle cx="21" cy="21" r="2.2" fill="#26211D"/>
+              <circle cx="33" cy="21" r="2.2" fill="#26211D"/>
+              <path d="M22 28 Q27 33 32 28" fill="none" stroke="#26211D" stroke-width="2" stroke-linecap="round"/>
+              <rect x="37" y="2" width="11" height="11" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="1.8"/>
+            </g>`,
+               },
+
+               insulin_spike: {
+                  id: 'insulin_spike',
+                  keyNum: 3,
+                  row: 'top',
+                  nameTh: 'อินซูลิน & น้ำตาลพุ่ง',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <rect x="18" y="12" width="38" height="44" rx="10" fill="#94A3B8" stroke="#26211D" stroke-width="2.5"/>
+              <rect x="24" y="18" width="26" height="17" rx="4" fill="#FEF2F2" stroke="#26211D" stroke-width="1.8"/>
+              <text x="37" y="30" text-anchor="middle" font-size="11" font-weight="900" fill="#DC2626">240</text>
+              <path d="M62 46 V18 M62 18 L55 25 M62 18 L69 25" stroke="#EF4444" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="67" y="36" width="11" height="11" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="2"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="18" y="11" width="44" height="50" rx="12" fill="#94A3B8" stroke="#26211D" stroke-width="2.8"/>
+              <rect x="25" y="18" width="30" height="20" rx="4" fill="#FEF2F2" stroke="#26211D" stroke-width="2"/>
+              <text x="40" y="32" text-anchor="middle" font-size="13" font-weight="900" fill="#DC2626">240</text>
+              <circle cx="33" cy="48" r="4" fill="#E2E8F0" stroke="#26211D" stroke-width="1.8"/>
+              <circle cx="47" cy="48" r="4" fill="#E2E8F0" stroke="#26211D" stroke-width="1.8"/>
+              <path d="M74 54 V18 M74 18 L66 26 M74 18 L82 26" stroke="#EF4444" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="82" y="34" width="12" height="12" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="2"/>
+              <rect x="85" y="48" width="12" height="12" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="2"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 26}, ${cy - 24})">
+              <rect x="4" y="4" width="30" height="36" rx="8" fill="#94A3B8" stroke="#26211D" stroke-width="2.4"/>
+              <rect x="9" y="9" width="20" height="14" rx="3" fill="#FEF2F2" stroke="#26211D" stroke-width="1.6"/>
+              <text x="19" y="19" text-anchor="middle" font-size="9" font-weight="900" fill="#DC2626">240</text>
+              <path d="M42 36 V10 M42 10 L36 16 M42 10 L48 16" stroke="#EF4444" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>`,
+               },
+
+               co2_bloat: {
+                  id: 'co2_bloat',
+                  keyNum: 4,
+                  row: 'top',
+                  nameTh: 'ก๊าซ CO₂ ท้องอืด',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <circle cx="45" cy="34" r="21" fill="#FDE68A" stroke="#26211D" stroke-width="2.6"/>
+              <text x="45" y="39" text-anchor="middle" font-size="13" font-weight="900" fill="#B45309">CO₂</text>
+              <circle cx="22" cy="19" r="6" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+              <circle cx="69" cy="21" r="7" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+              <circle cx="66" cy="47" r="5" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+              <path d="M22 34 H15 M68 34 H75" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <ellipse cx="55" cy="38" rx="28" ry="23" fill="#FDE68A" stroke="#26211D" stroke-width="2.8"/>
+              <text x="55" y="43" text-anchor="middle" font-size="15" font-weight="900" fill="#B45309">CO₂</text>
+              <circle cx="24" cy="20" r="7" fill="#BAE6FD" stroke="#0284C7" stroke-width="2.2"/>
+              <circle cx="86" cy="20" r="8" fill="#BAE6FD" stroke="#0284C7" stroke-width="2.2"/>
+              <circle cx="83" cy="52" r="6" fill="#BAE6FD" stroke="#0284C7" stroke-width="2.2"/>
+              <path d="M23 38 L14 34 M23 42 L14 46 M87 38 L96 34 M87 42 L96 46" stroke="#EF4444" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 26}, ${cy - 24})">
+              <circle cx="26" cy="22" r="17" fill="#FDE68A" stroke="#26211D" stroke-width="2.4"/>
+              <text x="26" y="26" text-anchor="middle" font-size="11" font-weight="900" fill="#B45309">CO₂</text>
+              <circle cx="9" cy="10" r="5" fill="#BAE6FD" stroke="#0284C7" stroke-width="1.8"/>
+              <circle cx="43" cy="11" r="5.5" fill="#BAE6FD" stroke="#0284C7" stroke-width="1.8"/>
+            </g>`,
+               },
+
+               zero_soda: {
+                  id: 'zero_soda',
+                  keyNum: 5,
+                  row: 'bottom',
+                  nameTh: 'น้ำอัดลม 0%',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <rect x="30" y="10" width="30" height="46" rx="6" fill="#1E293B" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="10" rx="15" ry="3.5" fill="#CBD5E1" stroke="#26211D" stroke-width="2"/>
+              <rect x="31" y="22" width="28" height="18" fill="#EF4444"/>
+              <text x="45" y="35" text-anchor="middle" font-size="12" font-weight="900" fill="#FFFFFF">0%</text>
+              <circle cx="23" cy="18" r="3" fill="#38BDF8"/>
+              <circle cx="67" cy="15" r="3.5" fill="#38BDF8"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="37" y="10" width="36" height="52" rx="7" fill="#1E293B" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="55" cy="10" rx="18" ry="4" fill="#CBD5E1" stroke="#26211D" stroke-width="2.2"/>
+              <rect x="38" y="23" width="34" height="21" fill="#EF4444"/>
+              <text x="55" y="38" text-anchor="middle" font-size="14" font-weight="900" fill="#FFFFFF">0%</text>
+              <text x="55" y="54" text-anchor="middle" font-size="7.5" font-weight="800" fill="#38BDF8">NO SUGAR</text>
+              <circle cx="28" cy="18" r="3.5" fill="#38BDF8"/>
+              <circle cx="82" cy="16" r="4" fill="#38BDF8"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 22}, ${cy - 25})">
+              <rect x="8" y="4" width="28" height="38" rx="6" fill="#1E293B" stroke="#26211D" stroke-width="2.4"/>
+              <ellipse cx="22" cy="4" rx="14" ry="3" fill="#CBD5E1" stroke="#26211D" stroke-width="1.8"/>
+              <rect x="9" y="15" width="26" height="15" fill="#EF4444"/>
+              <text x="22" y="26" text-anchor="middle" font-size="10.5" font-weight="900" fill="#FFFFFF">0%</text>
+            </g>`,
+               },
+
+               regular_soda: {
+                  id: 'regular_soda',
+                  keyNum: 6,
+                  row: 'bottom',
+                  nameTh: 'น้ำหวาน/น้ำอัดลม',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <rect x="24" y="11" width="28" height="44" rx="6" fill="#DC2626" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="38" cy="11" rx="14" ry="3.2" fill="#E2E8F0" stroke="#26211D" stroke-width="2"/>
+              <path d="M36 15 C42 26, 32 38, 40 52" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+              <rect x="57" y="34" width="12" height="12" rx="2.5" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+              <rect x="63" y="21" width="12" height="12" rx="2.5" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="26" y="11" width="34" height="50" rx="7" fill="#DC2626" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="43" cy="11" rx="17" ry="3.8" fill="#E2E8F0" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M40 16 C48 28, 36 42, 46 57" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+              <rect x="66" y="44" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+              <rect x="74" y="28" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+              <rect x="65" y="16" width="13" height="13" rx="3" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 24}, ${cy - 25})">
+              <rect x="6" y="4" width="26" height="38" rx="6" fill="#DC2626" stroke="#26211D" stroke-width="2.4"/>
+              <path d="M17 8 C23 18, 14 28, 21 39" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"/>
+              <rect x="34" y="28" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="1.8"/>
+              <rect x="36" y="16" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#26211D" stroke-width="1.8"/>
+            </g>`,
+               },
+
+               rice_meal: {
+                  id: 'rice_meal',
+                  keyNum: 7,
+                  row: 'bottom',
+                  nameTh: 'จานข้าว (มื้ออาหาร)',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <ellipse cx="45" cy="40" rx="34" ry="16" fill="#475569" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="37" rx="30" ry="13" fill="#D97706"/>
+              <circle cx="31" cy="36" r="4" fill="#22C55E"/>
+              <circle cx="59" cy="36" r="4" fill="#EF4444"/>
+              <ellipse cx="45" cy="35" rx="13" ry="8" fill="#FFFFFF" stroke="#26211D" stroke-width="2"/>
+              <circle cx="45" cy="35" r="5" fill="#FACC15"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <ellipse cx="55" cy="42" rx="40" ry="19" fill="#475569" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="55" cy="38" rx="35" ry="15" fill="#D97706"/>
+              <circle cx="35" cy="37" r="5" fill="#22C55E"/>
+              <circle cx="75" cy="37" r="5" fill="#EF4444"/>
+              <ellipse cx="55" cy="36" rx="16" ry="10" fill="#FFFFFF" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="55" cy="36" r="6" fill="#FACC15"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 28}, ${cy - 22})">
+              <ellipse cx="28" cy="24" rx="25" ry="13" fill="#475569" stroke="#26211D" stroke-width="2.4"/>
+              <ellipse cx="28" cy="22" rx="21" ry="10" fill="#D97706"/>
+              <ellipse cx="28" cy="21" rx="10" ry="6.5" fill="#FFFFFF" stroke="#26211D" stroke-width="1.8"/>
+              <circle cx="28" cy="21" r="4" fill="#FACC15"/>
+            </g>`,
+               },
+
+               fat_gain: {
+                  id: 'fat_gain',
+                  keyNum: 8,
+                  row: 'bottom',
+                  nameTh: 'สะสมไขมัน (อ้วน)',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <circle cx="34" cy="35" r="13" fill="#FACC15" stroke="#26211D" stroke-width="2.5"/>
+              <circle cx="56" cy="35" r="13" fill="#FBBF24" stroke="#26211D" stroke-width="2.5"/>
+              <circle cx="45" cy="23" r="13" fill="#FDE047" stroke="#26211D" stroke-width="2.5"/>
+              <text x="45" y="45" text-anchor="middle" font-size="10" font-weight="900" fill="#78350F">FAT</text>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <circle cx="40" cy="40" r="15" fill="#FACC15" stroke="#26211D" stroke-width="2.6"/>
+              <circle cx="68" cy="40" r="15" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <circle cx="54" cy="25" r="15" fill="#FDE047" stroke="#26211D" stroke-width="2.6"/>
+              <circle cx="54" cy="47" r="13" fill="#F59E0B" stroke="#26211D" stroke-width="2.6"/>
+              <text x="54" y="44" text-anchor="middle" font-size="11" font-weight="900" fill="#26211D">FAT +</text>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 25}, ${cy - 24})">
+              <circle cx="17" cy="26" r="11" fill="#FACC15" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="34" cy="26" r="11" fill="#FBBF24" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="25" cy="15" r="11" fill="#FDE047" stroke="#26211D" stroke-width="2.2"/>
+              <text x="25" y="29" text-anchor="middle" font-size="9" font-weight="900" fill="#78350F">FAT</text>
+            </g>`,
+               },
+
+               plain_water: {
+                  id: 'plain_water',
+                  keyNum: 9,
+                  row: 'bottom',
+                  nameTh: 'น้ำเปล่าสะอาด',
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M30 14 H60 L55 52 H35 Z" fill="#E0F2FE" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <path d="M33 28 H57 L54 50 H36 Z" fill="#38BDF8"/>
+              <path d="M37 33 Q45 30 53 33" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+              <polygon points="66,14 68,19 73,20 69,23 70,28 66,25 62,28 63,23 59,20 64,19" fill="#22C55E" stroke="#26211D" stroke-width="1.5"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="26" y="18" width="22" height="42" rx="6" fill="#BAE6FD" stroke="#26211D" stroke-width="2.6"/>
+              <rect x="31" y="11" width="12" height="7" rx="2" fill="#0284C7" stroke="#26211D" stroke-width="2.2"/>
+              <rect x="28" y="33" width="18" height="25" rx="4" fill="#38BDF8"/>
+              <path d="M55 24 H84 L79 60 H60 Z" fill="#E0F2FE" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <path d="M58 37 H81 L78 58 H61 Z" fill="#38BDF8"/>
+              <polygon points="88,12 90,17 95,18 91,21 92,26 88,23 84,26 85,21 81,18 86,17" fill="#22C55E" stroke="#26211D" stroke-width="1.5"/>
+            </svg>`,
+                  drawOnTray: (cx, cy) => `
+            <g transform="translate(${cx - 24}, ${cy - 25})">
+              <path d="M10 6 H38 L34 40 H14 Z" fill="#E0F2FE" stroke="#26211D" stroke-width="2.4" stroke-linejoin="round"/>
+              <path d="M12 19 H36 L33 38 H15 Z" fill="#38BDF8"/>
+              <path d="M16 24 Q24 21 32 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+            </g>`,
+               },
+            };
+
+            const INGREDIENT_LIST = Object.values(INGREDIENTS);
+
+            /* -----------------------------------------------------------------------
+             * 2. FIVE STRUCTURED LEARNING UNITS GROUNDED IN THE SOURCE DOCUMENT
+             * ----------------------------------------------------------------------- */
+            const ORDERS = [
+               {
+                  id: 1,
+                  title: 'รู้จักน้ำอัดลมและก๊าซ CO₂',
+                  factSummary: 'น้ำอัดลมมีน้ำ น้ำตาล สี กลิ่น กรดฟอสฟอริก และก๊าซคาร์บอนไดออกไซด์ ทำให้แน่นท้อง จุกเสียด และท้องอืดได้!',
+                  recipe: ['regular_soda', 'co2_bloat'],
+               },
+               {
+                  id: 2,
+                  title: 'น้ำตาลเทียม 0% หลอกสมอง',
+                  factSummary: 'น้ำอัดลมสูตร 0% มีน้ำตาลเทียมหลอกลิ้นว่าหวาน สมองไม่ได้รับน้ำตาลจริง จึงกระตุ้นให้อยากกินหวานมากขึ้น!',
+                  recipe: ['zero_soda', 'sweetener', 'brain_crave'],
+               },
+               {
+                  id: 3,
+                  title: 'กินข้าวกับน้ำอัดลม 0%',
+                  factSummary: 'กินข้าวกับน้ำอัดลมสูตรไม่มีน้ำตาล จะทำให้น้ำตาลและอินซูลินในเลือดสูงกว่ากินข้าวกับน้ำเปล่า!',
+                  recipe: ['rice_meal', 'zero_soda', 'insulin_spike'],
+               },
+               {
+                  id: 4,
+                  title: 'ทำไมน้ำหวาน 0% ทำให้อ้วน?',
+                  factSummary: 'สมองอยากน้ำตาลจริงทำให้อยากกินหวานเพิ่ม อินซูลินหลั่งมาก พลังงานใช้ไม่หมดจึงสะสมไขมันทำให้อ้วน!',
+                  recipe: ['zero_soda', 'brain_crave', 'insulin_spike', 'fat_gain'],
+               },
+               {
+                  id: 5,
+                  title: 'ทางเลือกสุขภาพ: กินน้ำเปล่าดีที่สุด',
+                  factSummary: 'ยอดเยี่ยม! กินข้าวกับน้ำเปล่าช่วยคุมระดับน้ำตาลและอินซูลินในเลือด กินน้ำเปล่าดีต่อร่างกาย!',
+                  recipe: ['rice_meal', 'plain_water'],
+               },
+            ];
+
+            const ENDLESS_SCENARIOS = [
+               {
+                  title: 'กลไกน้ำตาลเทียมหลอกสมอง',
+                  factSummary: 'น้ำตาลเทียมหลอกลิ้นว่าหวาน ทำให้สมองอยากกินหวานมากขึ้นและสะสมไขมัน!',
+                  recipe: ['sweetener', 'brain_crave', 'fat_gain'],
+               },
+               {
+                  title: 'มื้ออาหารสุขภาพดีกับน้ำเปล่า',
+                  factSummary: 'กินข้าวกับน้ำเปล่าดีต่อร่างกาย ไม่ทำให้น้ำตาลและอินซูลินพุ่งสูง!',
+                  recipe: ['rice_meal', 'plain_water'],
+               },
+               {
+                  title: 'ผลของก๊าซคาร์บอนไดออกไซด์',
+                  factSummary: 'น้ำอัดลมสูตร 0% ก็มีก๊าซ CO₂ ที่ทำให้แน่นท้อง จุกเสียด และท้องอืดได้เช่นกัน!',
+                  recipe: ['zero_soda', 'co2_bloat'],
+               },
+               {
+                  title: 'กินหวานมากพลังงานเหลือทำให้อ้วน',
+                  factSummary: 'กินหวานมากร่างกายใช้พลังงานไม่หมด ทำให้อ้วนและเสี่ยงโรคเบาหวาน!',
+                  recipe: ['regular_soda', 'insulin_spike', 'fat_gain'],
+               },
+            ];
+
+            function generateRandomOrder(num) {
+               const tpl = ENDLESS_SCENARIOS[(num - 1) % ENDLESS_SCENARIOS.length];
+               return {
+                  id: num,
+                  title: `${tpl.title} #${num}`,
+                  factSummary: tpl.factSummary,
+                  recipe: [...tpl.recipe],
+               };
+            }
+
+            /* -----------------------------------------------------------------------
+             * 3. GAME & ACCESSIBILITY STATE + SAFE LOCALSTORAGE PERSISTENCE
+             * ----------------------------------------------------------------------- */
+            const STORAGE_KEY = 'zero_sugar_obesity_conveyor_v1';
+
+            const state = {
+               screen: 'start',
+               orderIndex: 0,
+               endlessMode: false,
+               currentOrder: ORDERS[0],
+               placedItems: [],
+               completedOrdersCount: 0,
+               starsEarned: 0,
+
+               beltPaused: false,
+               speedMode: 'normal',
+               currentBeltVelocity: 0,
+               plateX: 120,
+               beltStripeOffset: 0,
+               plateDeliveredLock: false,
+
+               a11y: {
+                  highContrast: false,
+                  largeSign: false,
+                  tts: true,
+                  visualCues: true,
+                  sfx: true,
+                  trayNumbers: true,
+                  sensoryCalm: false,
+                  focusMode: false,
+               },
+            };
+
+            const SPEED_CONFIG = {
+               manual: { pxPerSec: 0, angle: -60, label: 'หยุดรอผู้เล่น' },
+               slow: { pxPerSec: 46, angle: -60, label: 'ช้า (สีแดง)' },
+               normal: { pxPerSec: 86, angle: 0, label: 'ปานกลาง (สีเหลือง)' },
+               fast: { pxPerSec: 138, angle: 60, label: 'เร็ว (สีเขียว)' },
+            };
+
+            let deliveryAnimFrameId = null;
+            let deliveryTimers = [];
+            let cueTimeoutId = null;
+
+            function clearDeliverySequence() {
+               if (deliveryAnimFrameId !== null) {
+                  cancelAnimationFrame(deliveryAnimFrameId);
+                  deliveryAnimFrameId = null;
+               }
+               deliveryTimers.forEach((timerId) => clearTimeout(timerId));
+               deliveryTimers = [];
+            }
+
+            function saveProgressAndSettings() {
+               try {
+                  const payload = {
+                     completedOrdersCount: state.completedOrdersCount,
+                     starsEarned: state.starsEarned,
+                     speedMode: state.speedMode,
+                     a11y: state.a11y,
+                  };
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+               } catch (err) {
+                  // Safely ignore storage errors in restricted contexts
+               }
+            }
+
+            function loadProgressAndSettings() {
+               try {
+                  const raw = localStorage.getItem(STORAGE_KEY);
+                  if (!raw) return;
+                  const parsed = JSON.parse(raw);
+                  if (typeof parsed.completedOrdersCount === 'number') {
+                     state.completedOrdersCount = Math.max(0, parsed.completedOrdersCount);
+                  }
+                  if (typeof parsed.starsEarned === 'number') {
+                     state.starsEarned = Math.min(3, Math.max(0, parsed.starsEarned));
+                  }
+                  if (parsed.speedMode && SPEED_CONFIG[parsed.speedMode]) {
+                     state.speedMode = parsed.speedMode;
+                  }
+                  if (parsed.a11y && typeof parsed.a11y === 'object') {
+                     Object.assign(state.a11y, parsed.a11y);
+                  }
+               } catch (err) {
+                  // Fallback cleanly to default settings
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 4. WEB AUDIO API (OFFLINE SOUND EFFECTS) & WEB SPEECH API (THAI TTS)
+             * ----------------------------------------------------------------------- */
+            let audioCtx = null;
+
+            function ensureAudio() {
+               try {
+                  if (!audioCtx) {
+                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                     if (AudioContextClass) {
+                        audioCtx = new AudioContextClass();
+                     }
+                  }
+                  if (audioCtx && audioCtx.state === 'suspended') {
+                     audioCtx.resume();
+                  }
+               } catch (err) {
+                  // Audio unavailable
+               }
+            }
+
+            function playTone(type) {
+               if (!state.a11y.sfx) return;
+               try {
+                  ensureAudio();
+                  if (!audioCtx) return;
+
+                  const now = audioCtx.currentTime;
+                  const baseGain = state.a11y.sensoryCalm ? 0.05 : 0.12;
+
+                  const playNote = (freqStart, freqEnd, startTime, duration, wave = 'sine') => {
+                     const osc = audioCtx.createOscillator();
+                     const gain = audioCtx.createGain();
+                     osc.type = wave;
+                     osc.frequency.setValueAtTime(freqStart, startTime);
+                     if (freqEnd !== freqStart) {
+                        osc.frequency.exponentialRampToValueAtTime(freqEnd, startTime + duration);
+                     }
+                     gain.gain.setValueAtTime(0.001, startTime);
+                     gain.gain.linearRampToValueAtTime(baseGain, startTime + 0.015);
+                     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                     osc.connect(gain);
+                     gain.connect(audioCtx.destination);
+                     osc.start(startTime);
+                     osc.stop(startTime + duration + 0.02);
+                  };
+
+                  if (type === 'place') {
+                     playNote(440, 660, now, 0.12, 'triangle');
+                  } else if (type === 'undo') {
+                     playNote(520, 310, now, 0.14, 'sine');
+                  } else if (type === 'error') {
+                     playNote(230, 175, now, 0.2, 'sawtooth');
+                  } else if (type === 'inspect') {
+                     playNote(587.33, 880, now, 0.14, 'sine');
+                  } else if (type === 'success') {
+                     playNote(523.25, 523.25, now, 0.12, 'triangle');
+                     playNote(659.25, 659.25, now + 0.1, 0.12, 'triangle');
+                     playNote(783.99, 783.99, now + 0.2, 0.14, 'triangle');
+                     playNote(1046.5, 1046.5, now + 0.32, 0.28, 'triangle');
+                  }
+               } catch (err) {
+                  // Ignore audio playback errors
+               }
+            }
+
+            function speakThai(text) {
+               if (!state.a11y.tts) return;
+               try {
+                  if ('speechSynthesis' in window) {
+                     window.speechSynthesis.cancel();
+                     const utter = new SpeechSynthesisUtterance(text);
+                     utter.lang = 'th-TH';
+                     utter.rate = state.a11y.sensoryCalm ? 0.9 : 1.02;
+                     window.speechSynthesis.speak(utter);
+                  }
+               } catch (err) {
+                  // Ignore speech synthesis errors
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 5. VISUAL CUES, CHEF MOOD & SPEED GAUGE UI
+             * ----------------------------------------------------------------------- */
+            function showVisualCue(message, type = 'info', durationMs = 2800) {
+               const banner = document.getElementById('visual-cue-banner');
+               const iconEl = document.getElementById('cue-icon');
+               const textEl = document.getElementById('cue-text');
+               if (!banner || !iconEl || !textEl) return;
+
+               if (!state.a11y.visualCues) {
+                  banner.classList.remove('visible');
+                  return;
+               }
+
+               const icons = {
+                  success: `<circle cx="12" cy="12" r="10" fill="#22C55E" stroke="#26211D" stroke-width="2"/><path d="M7.5 12.5L10.5 15.5L16.5 9" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+                  error: `<circle cx="12" cy="12" r="10" fill="#EF4444" stroke="#26211D" stroke-width="2"/><path d="M8.5 8.5L15.5 15.5M15.5 8.5L8.5 15.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>`,
+                  info: `<circle cx="12" cy="12" r="10" fill="#38BDF8" stroke="#26211D" stroke-width="2"/><circle cx="12" cy="8" r="1.4" fill="#FFFFFF"/><path d="M12 11.5V16.5" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>`,
+               };
+
+               iconEl.innerHTML = icons[type] || icons.info;
+               textEl.textContent = message;
+               banner.classList.add('visible');
+
+               if (cueTimeoutId) clearTimeout(cueTimeoutId);
+               cueTimeoutId = setTimeout(() => {
+                  banner.classList.remove('visible');
+               }, durationMs);
+            }
+
+            function setChefMood(mood) {
+               const container = document.getElementById('chef-whiskers-container');
+               const eyesNormal = document.getElementById('chef-eyes-normal');
+               const eyesHappy = document.getElementById('chef-eyes-happy');
+               const utensils = document.getElementById('chef-utensils');
+               const yumEffects = document.getElementById('chef-yum-effects');
+               if (!container) return;
+
+               container.classList.remove('chef-happy', 'chef-oops', 'chef-inspecting');
+
+               if (eyesNormal) eyesNormal.style.display = mood === 'happy' || mood === 'inspecting' ? 'none' : 'block';
+               if (eyesHappy) eyesHappy.style.display = mood === 'happy' || mood === 'inspecting' ? 'block' : 'none';
+               if (utensils) utensils.style.display = mood === 'inspecting' ? 'block' : 'none';
+               if (yumEffects) yumEffects.style.display = mood === 'inspecting' ? 'block' : 'none';
+
+               if (mood === 'happy') {
+                  container.classList.add('chef-happy');
+               } else if (mood === 'inspecting') {
+                  container.classList.add('chef-inspecting');
+               } else if (mood === 'oops') {
+                  container.classList.add('chef-oops');
+                  setTimeout(() => {
+                     if (!state.plateDeliveredLock) {
+                        setChefMood('idle');
+                     }
+                  }, 750);
+               }
+            }
+
+            function updateBeltToggleIcon() {
+               const pauseIcon = document.getElementById('icon-belt-pause');
+               const playIcon = document.getElementById('icon-belt-play');
+               const toggleBtn = document.getElementById('btn-belt-toggle');
+               const isStopped = state.beltPaused || state.speedMode === 'manual';
+
+               if (pauseIcon) pauseIcon.style.display = isStopped ? 'none' : 'block';
+               if (playIcon) playIcon.style.display = isStopped ? 'block' : 'none';
+               if (toggleBtn) toggleBtn.setAttribute('aria-pressed', isStopped ? 'true' : 'false');
+            }
+
+            function setBeltSpeedMode(mode, announce = false) {
+               const validMode = SPEED_CONFIG[mode] ? mode : 'normal';
+               state.speedMode = validMode;
+               state.beltPaused = validMode === 'manual';
+
+               const cfg = SPEED_CONFIG[validMode];
+               const needle = document.getElementById('gauge-needle');
+               if (needle) {
+                  needle.setAttribute('transform', `rotate(${cfg.angle} 90 98)`);
+               }
+
+               document.querySelectorAll('.speed-chip').forEach((chip) => {
+                  chip.classList.toggle('selected', chip.dataset.speedMode === validMode);
+               });
+
+               updateBeltToggleIcon();
+               saveProgressAndSettings();
+
+               if (announce) {
+                  playTone('place');
+                  showVisualCue(`ความเร็วสายพาน: ${cfg.label}`, 'info');
+                  speakThai(`ความเร็วสายพาน ${cfg.label}`);
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 6. HEALTH LAB TRAYS, VISUAL SIGNBOARD & CONVEYOR TRAY RENDERING
+             * ----------------------------------------------------------------------- */
+            function buildPrepTrays() {
+               const topRow = document.getElementById('tray-row-top');
+               const bottomRow = document.getElementById('tray-row-bottom');
+               if (!topRow || !bottomRow) return;
+
+               topRow.innerHTML = '';
+               bottomRow.innerHTML = '';
+
+               INGREDIENT_LIST.forEach((item) => {
+                  const card = document.createElement('button');
+                  card.type = 'button';
+                  card.id = `tray-${item.id}`;
+                  card.className = 'tray-card';
+                  card.setAttribute('aria-label', `${item.nameTh} (ปุ่มเลข ${item.keyNum})`);
+                  card.innerHTML = `
+            <span class="tray-num-badge">${item.keyNum}</span>
+            <div class="tray-svg-box" aria-hidden="true">${item.drawTray()}</div>
+            <span class="tray-label">${item.nameTh}</span>
+          `;
+
+                  card.addEventListener('click', () => {
+                     handleSelectIngredient(item.id, card);
+                  });
+
+                  if (item.row === 'top') {
+                     topRow.appendChild(card);
+                  } else {
+                     bottomRow.appendChild(card);
+                  }
+               });
+            }
+
+            function renderSignboard() {
+               const order = state.currentOrder;
+               const labelEl = document.getElementById('sign-order-label');
+               const titleEl = document.getElementById('sign-order-title');
+               const rowEl = document.getElementById('sign-sequence-row');
+               if (!labelEl || !titleEl || !rowEl) return;
+
+               labelEl.textContent = state.endlessMode ? `ด่านท้าทาย #${order.id}` : `ด่านที่ ${order.id} / ${ORDERS.length}`;
+               titleEl.textContent = order.title;
+
+               let html = '';
+               order.recipe.forEach((ingId, idx) => {
+                  const ing = INGREDIENTS[ingId];
+                  const isPlaced = idx < state.placedItems.length;
+                  const isMatch = isPlaced && state.placedItems[idx] === ingId;
+                  const isWrong = isPlaced && state.placedItems[idx] !== ingId;
+                  const isActive = idx === state.placedItems.length;
+
+                  let slotClass = 'recipe-step-slot';
+                  if (isMatch) slotClass += ' step-done';
+                  else if (isWrong) slotClass += ' step-wrong';
+                  else if (isActive) slotClass += ' step-active';
+
+                  let statusBadge = '';
+                  if (isMatch) {
+                     statusBadge = `
+              <span class="step-check-badge" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>`;
+                  } else if (isWrong) {
+                     statusBadge = `
+              <span class="step-wrong-badge" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <path d="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </span>`;
+                  }
+
+                  html += `
+            <div class="${slotClass}" title="${idx + 1}. ${ing.nameTh}" aria-label="ลำดับที่ ${idx + 1}: ${ing.nameTh}">
+              <span class="step-order-num">${idx + 1}</span>
+              <div style="width:82%; height:82%;">${ing.drawIcon()}</div>
+              ${statusBadge}
+            </div>
+          `;
+
+                  if (idx < order.recipe.length - 1) {
+                     html += `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            `;
+                  }
+               });
+
+               html += `
+          <div class="sign-plate-target" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg width="44" height="32" viewBox="0 0 60 44" fill="none">
+              <rect x="6" y="25" width="48" height="10" rx="5" fill="#FFFFFF" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M30 5V18M24 13L30 19L36 13" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        `;
+
+               rowEl.innerHTML = html;
+            }
+
+            /**
+             * Renders placed cause-and-effect cards side-by-side (and tiered if 4 items)
+             * on the 240x155 conveyor lab tray so every step remains clearly visible.
+             */
+            function renderPlateLayers() {
+               const layersGroup = document.getElementById('plate-food-layers');
+               if (!layersGroup) return;
+
+               const count = state.placedItems.length;
+               if (count === 0) {
+                  layersGroup.innerHTML = '';
+                  updateUndoButtonState();
+                  return;
+               }
+
+               const layouts = {
+                  1: [{ x: 120, y: 96 }],
+                  2: [
+                     { x: 82, y: 96 },
+                     { x: 158, y: 96 },
+                  ],
+                  3: [
+                     { x: 58, y: 96 },
+                     { x: 120, y: 96 },
+                     { x: 182, y: 96 },
+                  ],
+                  4: [
+                     { x: 66, y: 98 },
+                     { x: 174, y: 98 },
+                     { x: 84, y: 46 },
+                     { x: 156, y: 46 },
+                  ],
+               };
+
+               const slots = layouts[count] || layouts[4];
+               let svgLayers = '';
+
+               state.placedItems.forEach((ingId, idx) => {
+                  const ing = INGREDIENTS[ingId];
+                  const pos = slots[idx] || { x: 120, y: 96 };
+                  if (!ing) return;
+
+                  // Pedestal card backing for crisp legibility
+                  svgLayers += `
+            <rect x="${pos.x - 27}" y="${pos.y - 26}" width="54" height="44" rx="11" fill="#FFFDF9" stroke="#26211D" stroke-width="2.4"/>
+            ${ing.drawOnTray(pos.x, pos.y)}
+            <circle cx="${pos.x - 23}" cy="${pos.y - 23}" r="8.5" fill="#0284C7" stroke="#26211D" stroke-width="1.8"/>
+            <text x="${pos.x - 23}" y="${pos.y - 19.5}" text-anchor="middle" font-size="10" font-weight="900" fill="#FFFFFF">${idx + 1}</text>
+          `;
+               });
+
+               layersGroup.innerHTML = svgLayers;
+               updateUndoButtonState();
+            }
+
+            function updateUndoButtonState() {
+               const undoBtn = document.getElementById('btn-undo');
+               if (!undoBtn) return;
+
+               const hasItems = state.placedItems.length > 0;
+               const canGoPrevOrder = !state.endlessMode && state.orderIndex > 0;
+               const hasWrongItem = state.placedItems.some((id, idx) => id !== state.currentOrder.recipe[idx]);
+
+               undoBtn.disabled = state.plateDeliveredLock || (!hasItems && !canGoPrevOrder);
+               undoBtn.classList.toggle('btn-undo-attention', !state.plateDeliveredLock && hasWrongItem);
+            }
+
+            function animateIngredientToPlate(ingredientId, sourceEl) {
+               if (state.a11y.focusMode || !sourceEl) return;
+               const plateEl = document.getElementById('moving-plate-group');
+               const ing = INGREDIENTS[ingredientId];
+               if (!plateEl || !ing) return;
+
+               const srcRect = sourceEl.getBoundingClientRect();
+               const dstRect = plateEl.getBoundingClientRect();
+
+               const flyer = document.createElement('div');
+               flyer.className = 'flying-item';
+               flyer.innerHTML = ing.drawIcon();
+               flyer.style.left = `${srcRect.left + srcRect.width / 2 - 36}px`;
+               flyer.style.top = `${srcRect.top + srcRect.height / 2 - 36}px`;
+               document.body.appendChild(flyer);
+
+               requestAnimationFrame(() => {
+                  const dx = dstRect.left + dstRect.width / 2 - (srcRect.left + srcRect.width / 2);
+                  const dy = dstRect.top + dstRect.height * 0.65 - (srcRect.top + srcRect.height / 2);
+                  flyer.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(0.85)`;
+                  flyer.style.opacity = '0.2';
+               });
+
+               setTimeout(() => {
+                  if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+               }, 360);
+            }
+
+            function handleSelectIngredient(ingredientId, sourceEl) {
+               if (state.screen !== 'playing' || state.plateDeliveredLock) return;
+               ensureAudio();
+
+               const recipe = state.currentOrder.recipe;
+               if (state.placedItems.length >= recipe.length) {
+                  playTone('error');
+                  showVisualCue('ถาดเต็มแล้ว กดปุ่มย้อนกลับหากต้องการเปลี่ยนรายการ', 'error');
+                  return;
+               }
+
+               const stepIdx = state.placedItems.length;
+               const expectedId = recipe[stepIdx];
+               const ing = INGREDIENTS[ingredientId];
+
+               state.placedItems.push(ingredientId);
+               animateIngredientToPlate(ingredientId, sourceEl);
+               renderPlateLayers();
+               renderSignboard();
+
+               const plateGroup = document.getElementById('moving-plate-group');
+               if (plateGroup) {
+                  plateGroup.classList.remove('plate-pop');
+                  void plateGroup.offsetWidth;
+                  plateGroup.classList.add('plate-pop');
+               }
+
+               const allSoFarCorrect = state.placedItems.every((id, idx) => id === recipe[idx]);
+
+               if (ingredientId === expectedId && allSoFarCorrect) {
+                  if (state.placedItems.length === recipe.length) {
+                     completeCurrentOrder();
+                  } else {
+                     playTone('place');
+                     setChefMood('happy');
+                     setTimeout(() => {
+                        if (!state.plateDeliveredLock) setChefMood('idle');
+                     }, 600);
+                     showVisualCue(`ถูกต้อง! "${ing.nameTh}" (${state.placedItems.length}/${recipe.length})`, 'success');
+                     speakThai(ing.nameTh);
+                  }
+               } else {
+                  playTone('error');
+                  setChefMood('oops');
+                  const signboard = document.getElementById('recipe-signboard');
+                  if (signboard) {
+                     signboard.classList.remove('sign-error-flash');
+                     void signboard.offsetWidth;
+                     signboard.classList.add('sign-error-flash');
+                  }
+                  showVisualCue(`"${ing.nameTh}" ยังไม่ตรงลำดับบนป้าย กดปุ่มย้อนกลับเพื่อนำออก`, 'error');
+                  speakThai(`${ing.nameTh} ยังไม่ตรงลำดับ กดปุ่มย้อนกลับเพื่อนำออก`);
+               }
+            }
+
+            function handleUndoLastItem() {
+               if (state.screen !== 'playing' || state.plateDeliveredLock) return;
+               ensureAudio();
+
+               if (state.placedItems.length > 0) {
+                  const removedId = state.placedItems.pop();
+                  const ing = INGREDIENTS[removedId];
+                  renderPlateLayers();
+                  renderSignboard();
+                  playTone('undo');
+                  showVisualCue(`นำ "${ing ? ing.nameTh : 'รายการ'}" ออกจากถาดแล้ว`, 'info');
+                  if (ing) speakThai(`นำ${ing.nameTh}ออก`);
+               } else if (!state.endlessMode && state.orderIndex > 0) {
+                  state.orderIndex -= 1;
+                  state.currentOrder = ORDERS[state.orderIndex];
+                  playTone('undo');
+                  triggerAccessibleSceneTransition();
+                  resetPlateForOrder();
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 7. TRANSITIONS, ORDER COMPLETION & HEALTH FACT INSPECTION ANIMATION
+             * ----------------------------------------------------------------------- */
+            function triggerAccessibleSceneTransition() {
+               const app = document.getElementById('game-app');
+               if (!app || state.a11y.focusMode) return;
+               app.classList.add('scene-fade-pulse');
+               setTimeout(() => {
+                  app.classList.remove('scene-fade-pulse');
+               }, 230);
+            }
+
+            function advanceBeltStripes(deltaPx) {
+               state.beltStripeOffset = (((state.beltStripeOffset + deltaPx) % 64) + 64) % 64;
+               const stripesEl = document.getElementById('belt-stripes');
+               if (stripesEl) {
+                  stripesEl.style.transform = `translate3d(${(state.beltStripeOffset - 64).toFixed(3)}px, 0, 0)`;
+               }
+            }
+
+            function setPlatePositionX(x) {
+               state.plateX = x;
+               const plateEl = document.getElementById('moving-plate-group');
+               if (plateEl) {
+                  const roundedX = x.toFixed(2);
+                  plateEl.style.setProperty('--plate-x', `${roundedX}px`);
+                  plateEl.style.transform = `translate3d(${roundedX}px, 0, 0)`;
+               }
+            }
+
+            function completeCurrentOrder() {
+               clearDeliverySequence();
+               state.plateDeliveredLock = true;
+               updateUndoButtonState();
+               playTone('success');
+               setChefMood('happy');
+
+               state.completedOrdersCount += 1;
+               state.starsEarned = Math.min(3, Math.ceil((state.completedOrdersCount / ORDERS.length) * 3));
+               updateStarGauge();
+               saveProgressAndSettings();
+
+               const factMsg = state.currentOrder.factSummary;
+               showVisualCue(factMsg, 'success', 4800);
+               speakThai(`ถูกต้อง! ${factMsg}`);
+
+               // Step 1: Pause 550ms so player can admire the completed chain
+               const t1 = setTimeout(() => {
+                  const chefEl = document.getElementById('chef-whiskers-container');
+                  const chefRect = chefEl ? chefEl.getBoundingClientRect() : null;
+                  const targetX = chefRect ? Math.max(200, Math.min(window.innerWidth - 290, chefRect.left - 115)) : Math.max(220, window.innerWidth - 340);
+
+                  let lastSlideTime = performance.now();
+                  const maxSlideSpeed = state.a11y.sensoryCalm ? 165 : 225;
+
+                  function slideToChef(now) {
+                     const dt = Math.min(0.05, (now - lastSlideTime) / 1000);
+                     lastSlideTime = now;
+
+                     const dist = targetX - state.plateX;
+                     if (Math.abs(dist) > 1.5) {
+                        const dir = dist > 0 ? 1 : -1;
+                        const easedSpeed = Math.max(48, Math.min(maxSlideSpeed, Math.abs(dist) * 4.2));
+                        let stepDx = dir * easedSpeed * dt;
+                        if (Math.abs(stepDx) > Math.abs(dist)) {
+                           stepDx = dist;
+                        }
+                        setPlatePositionX(state.plateX + stepDx);
+                        advanceBeltStripes(stepDx);
+                        deliveryAnimFrameId = requestAnimationFrame(slideToChef);
+                     } else {
+                        // Step 2: Tray arrives at Chef Whiskers -> Health Inspection & Fact Review
+                        setPlatePositionX(targetX);
+                        deliveryAnimFrameId = null;
+                        setChefMood('inspecting');
+                        playTone('inspect');
+
+                        const inspectHoldMs = state.a11y.sensoryCalm ? 2100 : 1750;
+                        const tFinishInspect = setTimeout(() => {
+                           setChefMood('happy');
+                           playTone('place');
+
+                           let lastExitTime = performance.now();
+                           const exitTargetX = window.innerWidth + 180;
+                           const exitSpeed = state.a11y.sensoryCalm ? 220 : 300;
+
+                           function slideTrayOut(nowExit) {
+                              const dtExit = Math.min(0.05, (nowExit - lastExitTime) / 1000);
+                              lastExitTime = nowExit;
+
+                              if (state.plateX < exitTargetX) {
+                                 const stepExit = exitSpeed * dtExit;
+                                 setPlatePositionX(state.plateX + stepExit);
+                                 advanceBeltStripes(stepExit);
+                                 deliveryAnimFrameId = requestAnimationFrame(slideTrayOut);
+                              } else {
+                                 deliveryAnimFrameId = null;
+                                 setChefMood('idle');
+                                 triggerAccessibleSceneTransition();
+
+                                 if (!state.endlessMode && state.orderIndex + 1 >= ORDERS.length) {
+                                    openVictoryModal();
+                                 } else if (state.endlessMode) {
+                                    state.orderIndex += 1;
+                                    state.currentOrder = generateRandomOrder(state.orderIndex + 1);
+                                    resetPlateForOrder();
+                                 } else {
+                                    state.orderIndex += 1;
+                                    state.currentOrder = ORDERS[state.orderIndex];
+                                    resetPlateForOrder();
+                                 }
+                              }
+                           }
+
+                           deliveryAnimFrameId = requestAnimationFrame(slideTrayOut);
+                        }, inspectHoldMs);
+                        deliveryTimers.push(tFinishInspect);
+                     }
+                  }
+
+                  deliveryAnimFrameId = requestAnimationFrame(slideToChef);
+               }, 550);
+
+               deliveryTimers.push(t1);
+            }
+
+            function resetPlateForOrder() {
+               clearDeliverySequence();
+               state.placedItems = [];
+               state.plateDeliveredLock = false;
+               state.currentBeltVelocity = 0;
+               setPlatePositionX(100);
+               renderPlateLayers();
+               renderSignboard();
+               updateStarGauge();
+               setChefMood('idle');
+
+               const order = state.currentOrder;
+               const stepNames = order.recipe.map((id) => INGREDIENTS[id].nameTh).join(' ตามด้วย ');
+               showVisualCue(`ด่านใหม่: ${order.title}`, 'info');
+               speakThai(`ด่านที่ ${order.id} ${order.title} เรียง ${stepNames}`);
+            }
+
+            function updateStarGauge() {
+               const fillEl = document.getElementById('star-tube-fill');
+               const counterEl = document.getElementById('order-counter-badge');
+               const pct = state.endlessMode ? 100 : Math.min(100, Math.round((state.completedOrdersCount / ORDERS.length) * 100));
+
+               if (fillEl) fillEl.style.height = `${pct}%`;
+               if (counterEl) {
+                  counterEl.textContent = state.endlessMode ? `★ ${state.completedOrdersCount}` : `${state.currentOrder.id} / ${ORDERS.length}`;
+               }
+
+               const thresholds = [20, 60, 100];
+               [1, 2, 3].forEach((starNum, idx) => {
+                  const marker = document.getElementById(`star-marker-${starNum}`);
+                  if (!marker) return;
+                  const earned = pct >= thresholds[idx];
+                  marker.classList.toggle('earned', earned);
+                  marker.innerHTML = `
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <polygon points="16,3 20,11.5 29.5,12.5 22.5,19 24.5,28.5 16,23.8 7.5,28.5 9.5,19 2.5,12.5 12,11.5"
+                fill="${earned ? '#FACC15' : '#CBD5E1'}"
+                stroke="#26211D"
+                stroke-width="2.5"
+                stroke-linejoin="round"/>
+            </svg>`;
+               });
+            }
+
+            /* -----------------------------------------------------------------------
+             * 8. MODALS, START ORDER SELECTOR & ACCESSIBILITY CONTROLS
+             * ----------------------------------------------------------------------- */
+            function buildStartOrderSelector() {
+               const grid = document.getElementById('start-order-grid');
+               if (!grid) return;
+               grid.innerHTML = '';
+
+               ORDERS.forEach((order, idx) => {
+                  const btn = document.createElement('button');
+                  btn.type = 'button';
+                  btn.className = `order-pill-btn ${idx === state.orderIndex ? 'active' : ''}`;
+                  btn.setAttribute('aria-label', `เริ่มที่ด่านที่ ${order.id}: ${order.title}`);
+
+                  const dotsHtml = order.recipe.map(() => `<span class="layer-dot"></span>`).join('');
+                  btn.innerHTML = `
+            <span style="font-size:15px;">${order.id} / 5</span>
+            <div class="layer-dots" aria-hidden="true">${dotsHtml}</div>
+          `;
+
+                  btn.addEventListener('click', () => {
+                     state.orderIndex = idx;
+                     state.currentOrder = ORDERS[idx];
+                     document.querySelectorAll('.order-pill-btn').forEach((el, i) => {
+                        el.classList.toggle('active', i === idx);
+                     });
+                     playTone('place');
+                  });
+
+                  grid.appendChild(btn);
+               });
+            }
+
+            function startOrder(index, endless = false) {
+               ensureAudio();
+               state.endlessMode = endless;
+               state.orderIndex = index;
+               state.currentOrder = endless ? generateRandomOrder(1) : ORDERS[index];
+               state.screen = 'playing';
+
+               document.getElementById('modal-start').classList.add('hidden');
+               document.getElementById('modal-victory').classList.add('hidden');
+               document.getElementById('modal-settings').classList.add('hidden');
+
+               resetPlateForOrder();
+            }
+
+            function openVictoryModal() {
+               state.screen = 'victory';
+               const row = document.getElementById('victory-stars-row');
+               row.innerHTML = [1, 2, 3]
+                  .map(
+                     () => `
+            <svg width="52" height="52" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <polygon points="16,3 20,11.5 29.5,12.5 22.5,19 24.5,28.5 16,23.8 7.5,28.5 9.5,19 2.5,12.5 12,11.5"
+                fill="#FACC15" stroke="#26211D" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg>`,
+                  )
+                  .join('');
+
+               document.getElementById('modal-victory').classList.remove('hidden');
+               speakThai('ยอดเยี่ยมมาก คุณเรียนรู้ครบทั้ง 5 บทเรียนแล้ว กินน้ำเปล่าดีต่อร่างกาย');
+            }
+
+            function applyAccessibilityClasses() {
+               document.body.classList.toggle('high-contrast', state.a11y.highContrast);
+               document.body.classList.toggle('sensory-calm', state.a11y.sensoryCalm);
+               document.body.classList.toggle('focus-mode', state.a11y.focusMode);
+               document.body.classList.toggle('hide-numbers', !state.a11y.trayNumbers);
+               document.documentElement.style.setProperty('--sign-scale', state.a11y.largeSign ? '1.14' : '1');
+
+               const toggleMap = [
+                  ['toggle-high-contrast', 'highContrast'],
+                  ['toggle-large-sign', 'largeSign'],
+                  ['toggle-tts', 'tts'],
+                  ['toggle-visual-cues', 'visualCues'],
+                  ['toggle-sfx', 'sfx'],
+                  ['toggle-tray-numbers', 'trayNumbers'],
+                  ['toggle-sensory-calm', 'sensoryCalm'],
+                  ['toggle-focus-mode', 'focusMode'],
+               ];
+
+               toggleMap.forEach(([elId, key]) => {
+                  const btn = document.getElementById(elId);
+                  if (!btn) return;
+                  const active = Boolean(state.a11y[key]);
+                  btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                  const pill = btn.querySelector('.tile-state-pill');
+                  if (pill) pill.textContent = active ? 'เปิด' : 'ปิด';
+               });
+            }
+
+            function bindModalAndHudEvents() {
+               // Top HUD buttons
+               document.getElementById('btn-home').addEventListener('click', () => {
+                  clearDeliverySequence();
+                  state.plateDeliveredLock = false;
+                  state.screen = 'start';
+                  buildStartOrderSelector();
+                  document.getElementById('modal-start').classList.remove('hidden');
+                  playTone('place');
+               });
+
+               document.getElementById('btn-undo').addEventListener('click', handleUndoLastItem);
+
+               document.getElementById('btn-speak-order').addEventListener('click', () => {
+                  ensureAudio();
+                  const order = state.currentOrder;
+                  const stepNames = order.recipe.map((id) => INGREDIENTS[id].nameTh).join(' ตามด้วย ');
+                  speakThai(`ด่านที่ ${order.id} ${order.title} เรียง ${stepNames}`);
+               });
+
+               // Settings open/close
+               let screenBeforeSettings = 'start';
+               const openSettings = () => {
+                  if (state.screen !== 'paused') {
+                     screenBeforeSettings = state.screen;
+                  }
+                  state.screen = 'paused';
+                  document.getElementById('modal-settings').classList.remove('hidden');
+                  playTone('place');
+               };
+
+               document.getElementById('btn-settings').addEventListener('click', openSettings);
+               document.getElementById('btn-open-a11y-from-start').addEventListener('click', openSettings);
+
+               document.getElementById('btn-close-settings').addEventListener('click', () => {
+                  document.getElementById('modal-settings').classList.add('hidden');
+                  state.screen = screenBeforeSettings;
+                  playTone('place');
+               });
+
+               // Start & Victory buttons
+               document.getElementById('btn-start-play').addEventListener('click', () => {
+                  startOrder(state.orderIndex, false);
+               });
+
+               document.getElementById('btn-replay-all').addEventListener('click', () => {
+                  state.completedOrdersCount = 0;
+                  state.starsEarned = 0;
+                  saveProgressAndSettings();
+                  startOrder(0, false);
+               });
+
+               document.getElementById('btn-endless-chef').addEventListener('click', () => {
+                  startOrder(0, true);
+               });
+
+               // Speed Gauge 3 color zones + Play/Pause toggle
+               document.querySelectorAll('.gauge-sector').forEach((sector) => {
+                  const chooseSpeed = () => {
+                     ensureAudio();
+                     setBeltSpeedMode(sector.dataset.speedMode, true);
+                     sector.blur();
+                  };
+                  sector.addEventListener('click', chooseSpeed);
+                  sector.addEventListener('keydown', (e) => {
+                     if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        chooseSpeed();
+                     }
+                  });
+               });
+
+               document.getElementById('btn-belt-toggle').addEventListener('click', () => {
+                  ensureAudio();
+                  if (state.speedMode === 'manual') {
+                     setBeltSpeedMode('normal', true);
+                     return;
+                  }
+                  state.beltPaused = !state.beltPaused;
+                  updateBeltToggleIcon();
+                  playTone('place');
+                  showVisualCue(state.beltPaused ? 'หยุดสายพานชั่วคราว' : 'เดินสายพานต่อ', 'info');
+               });
+
+               // Settings speed chips
+               document.querySelectorAll('.speed-chip').forEach((chip) => {
+                  chip.addEventListener('click', () => {
+                     ensureAudio();
+                     setBeltSpeedMode(chip.dataset.speedMode, true);
+                  });
+               });
+
+               // 8 Accessibility toggles
+               const togglePairs = [
+                  ['toggle-high-contrast', 'highContrast'],
+                  ['toggle-large-sign', 'largeSign'],
+                  ['toggle-tts', 'tts'],
+                  ['toggle-visual-cues', 'visualCues'],
+                  ['toggle-sfx', 'sfx'],
+                  ['toggle-tray-numbers', 'trayNumbers'],
+                  ['toggle-sensory-calm', 'sensoryCalm'],
+                  ['toggle-focus-mode', 'focusMode'],
+               ];
+
+               togglePairs.forEach(([btnId, prop]) => {
+                  const btn = document.getElementById(btnId);
+                  if (!btn) return;
+                  btn.addEventListener('click', () => {
+                     state.a11y[prop] = !state.a11y[prop];
+                     applyAccessibilityClasses();
+                     saveProgressAndSettings();
+                     playTone('place');
+                  });
+               });
+
+               // Keyboard shortcuts: 1-9 cards, Spacebar pause/play, Backspace undo
+               window.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape') {
+                     const settingsModal = document.getElementById('modal-settings');
+                     if (!settingsModal.classList.contains('hidden')) {
+                        settingsModal.classList.add('hidden');
+                        state.screen = screenBeforeSettings;
+                     }
+                     return;
+                  }
+
+                  if (state.screen !== 'playing') return;
+
+                  if (e.key >= '1' && e.key <= '9') {
+                     const num = parseInt(e.key, 10);
+                     const found = INGREDIENT_LIST.find((it) => it.keyNum === num);
+                     if (found) {
+                        e.preventDefault();
+                        const el = document.getElementById(`tray-${found.id}`);
+                        handleSelectIngredient(found.id, el);
+                     }
+                  } else if (e.key === 'Backspace') {
+                     e.preventDefault();
+                     handleUndoLastItem();
+                  } else if (e.code === 'Space' && document.activeElement.tagName !== 'BUTTON') {
+                     e.preventDefault();
+                     document.getElementById('btn-belt-toggle').click();
+                  }
+               });
+            }
+
+            /* -----------------------------------------------------------------------
+             * 9. MAIN CONVEYOR BELT & TRAY LOOP
+             * ----------------------------------------------------------------------- */
+            function startGameLoop() {
+               let lastTime = performance.now();
+
+               function loop(now) {
+                  const dt = Math.min(0.05, (now - lastTime) / 1000);
+                  lastTime = now;
+
+                  if (state.screen === 'playing' && !state.plateDeliveredLock) {
+                     const cfg = SPEED_CONFIG[state.speedMode] || SPEED_CONFIG.normal;
+                     const targetSpeed = state.beltPaused ? 0 : cfg.pxPerSec;
+
+                     const accelFactor = Math.min(1, dt * 10);
+                     state.currentBeltVelocity += (targetSpeed - state.currentBeltVelocity) * accelFactor;
+                     if (Math.abs(targetSpeed - state.currentBeltVelocity) < 0.15) {
+                        state.currentBeltVelocity = targetSpeed;
+                     }
+
+                     if (state.currentBeltVelocity > 0.01) {
+                        const moveDx = state.currentBeltVelocity * dt;
+                        advanceBeltStripes(moveDx);
+
+                        let nextPlateX = state.plateX + moveDx;
+                        const rightExitEdge = window.innerWidth + 110;
+                        if (nextPlateX > rightExitEdge) {
+                           nextPlateX = -180;
+                           showVisualCue('ถาดวนกลับมาเริ่มรอบใหม่แล้ว เรียงลำดับต่อได้เลย!', 'info');
+                        }
+
+                        setPlatePositionX(nextPlateX);
+                     }
+                  }
+
+                  requestAnimationFrame(loop);
+               }
+
+               requestAnimationFrame(loop);
+            }
+
+            /* -----------------------------------------------------------------------
+             * 10. INITIALIZATION
+             * ----------------------------------------------------------------------- */
+            function init() {
+               loadProgressAndSettings();
+               applyAccessibilityClasses();
+               setBeltSpeedMode(state.speedMode, false);
+               buildPrepTrays();
+               buildStartOrderSelector();
+               renderSignboard();
+               renderPlateLayers();
+               updateStarGauge();
+               bindModalAndHudEvents();
+               startGameLoop();
+            }
+
+            if (document.readyState === 'loading') {
+               window.addEventListener('DOMContentLoaded', init);
+            } else {
+               init();
+            }
+         })();
+      </script>
+   </body>
+</html>

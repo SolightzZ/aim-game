@@ -1,0 +1,3938 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ฮิปโปงับงับ ปิกนิกหรรษา — Boom Play · ลานเกมสายรุ้ง</title>
+  <style>
+    :root {
+      --font-thai: 'Sarabun', 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
+      --base-font-size: 16px;
+      --bg-cream: #FFFFFF;
+      --card-cream: #FDF9F0;
+      --ink-plum: #4A304D;
+      --ink-muted: #6E5472;
+      --peach-light: #FCE1EE;
+      --peach-deep: #FF9B85;
+      --butter-yellow: #FFD166;
+      --mochi-sky: #6EC1E4;
+      --mochi-deep: #1D8AB8;
+      --buay-lilac: #B993D6;
+      --buay-deep: #8A3FFC;
+      --mint-soft: #D8F3DC;
+      --focus-ring: #FF5400;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: var(--base-font-size);
+      font-family: var(--font-thai);
+      background-color: #FDF9F0;
+      color: var(--ink-plum);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html[data-text-size="large"] {
+      --base-font-size: 18px;
+    }
+
+    html[data-text-size="xlarge"] {
+      --base-font-size: 20px;
+    }
+
+    html[data-contrast="high"] {
+      --bg-cream: #121212;
+      --card-cream: #1E1E1E;
+      --ink-plum: #FFFFFF;
+      --ink-muted: #E0E0E0;
+      background-color: #000000;
+    }
+
+    body {
+      height: 100dvh;
+      max-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #FBD9EE 0%, #FFF7EE 48%, #D6F5E8 100%);
+      overflow: hidden;
+    }
+
+    html[data-contrast="high"] body {
+      background: #000000;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1120px;
+      height: 100dvh;
+      max-height: 100dvh;
+      padding: 0.3rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.3rem;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF8FD 100%);
+      border: 3px solid var(--ink-plum);
+      border-radius: 20px;
+      box-shadow: 0 3.5px 0 rgba(74, 48, 77, 0.28);
+      padding: 0.32rem 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    html[data-contrast="high"] .top-bar {
+      background: #121212;
+    }
+
+    .brand-cluster,
+    .top-actions,
+    .pinned-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-pill {
+      background: linear-gradient(135deg, #FF99C8, #C77DFF);
+      border: 2px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.16rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .stage-title-text {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--ink-plum);
+    }
+
+    .toy-btn {
+      appearance: none;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #4A304D;
+      background: #FFF9FC;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 14px;
+      box-shadow: 0 2.5px 0 var(--ink-plum);
+      padding: 0.26rem 0.62rem;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .toy-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .toy-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 var(--ink-plum);
+    }
+
+    #uiPromptText:focus { outline: none; }
+
+    .toy-btn:focus-visible,
+    #mojiHitArea:focus-visible,
+    #buayHitArea:focus-visible {
+      outline: 3.5px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    #mojiHitArea:focus,
+    #buayHitArea:focus,
+    #mojiHitArea:focus-visible,
+    #buayHitArea:focus-visible {
+      outline: none;
+    }
+
+    .hippo-focus-halo {
+      pointer-events: none;
+    }
+
+    #mojiHitArea:focus-visible .hippo-focus-halo,
+    #buayHitArea:focus-visible .hippo-focus-halo,
+    .hippo-focus-halo.is-drop-target {
+      opacity: 1;
+    }
+
+    @media (hover: hover) {
+      .is-pointer-hover:hover .hippo-focus-halo {
+        opacity: 1;
+      }
+    }
+
+    .btn-butter { background: #FFD166; color: #3D2342; }
+    .btn-peach  { background: #FFCAD4; color: #3D2342; }
+    .btn-mochi  { background: #B8E2F8; color: #1D3557; }
+    .btn-buay   { background: #E2CCF5; color: #3C096C; }
+    .btn-mint   { background: #B7E4C7; color: #1B4332; }
+
+    .game-hud-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .hippo-meter-pill {
+      border: 2px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.12rem 0.52rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #3D2342;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .combo-badge {
+      background: linear-gradient(135deg, #FF7B00, #FF4D6D);
+      color: #FFFFFF;
+      border: 2px solid var(--ink-plum);
+      border-radius: 999px;
+      padding: 0.12rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 900;
+      box-shadow: 0 2px 0 var(--ink-plum);
+    }
+
+    .combo-badge.bump {
+      animation: comboPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes comboPop {
+      0% { transform: scale(0.75); }
+      60% { transform: scale(1.16); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes bellyInflateBoing {
+      0% { transform: scale(1, 1); }
+      30% { transform: scale(1.24, 0.88); }
+      62% { transform: scale(0.94, 1.16); }
+      82% { transform: scale(1.07, 0.97); }
+      100% { transform: scale(1, 1); }
+    }
+
+    .belly-inflate-anim {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: bellyInflateBoing 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popStarBurst {
+      0% { opacity: 0; transform: scale(0.7) translateY(6px); }
+      25% { opacity: 1; transform: scale(1.06) translateY(0); }
+      85% { opacity: 1; transform: scale(1) translateY(-4px); }
+      100% { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    }
+
+    @keyframes gentleHaloPulse {
+      0%, 100% {
+        opacity: 0.72;
+        transform: scale(0.97);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes gentleFoodBob {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-3.5px);
+      }
+    }
+
+    @keyframes plateFoodEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(-16px) scale(0.76);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(2px) scale(1.04);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0px) scale(1);
+      }
+    }
+
+    @keyframes promptTextFade {
+      0% {
+        opacity: 0.25;
+        transform: translateY(4px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes tapRippleWave {
+      0% {
+        opacity: 0.9;
+        transform: scale(0.65);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.75);
+      }
+    }
+
+    @keyframes tapFingerBob {
+      0%, 100% {
+        transform: translate(18px, -16px) scale(1);
+      }
+      50% {
+        transform: translate(12px, -10px) scale(0.88);
+      }
+    }
+
+    .tap-ripple-anim {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: tapRippleWave 2.1s ease-out infinite;
+    }
+
+    .tap-finger-anim {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: tapFingerBob 1.5s ease-in-out infinite;
+    }
+
+    .plate-food-enter {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: plateFoodEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .prompt-text-fade {
+      animation: promptTextFade 0.32s ease-out both;
+    }
+
+    .feedback-strip {
+      transition: opacity 0.28s ease, transform 0.28s ease, background-color 0.28s ease;
+    }
+
+    .food-halo-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: gentleHaloPulse 3.2s ease-in-out infinite;
+    }
+
+    .biscuit-float-anim {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: gentleFoodBob 2.8s ease-in-out infinite;
+    }
+
+    /* Sticker Printer & Album Panel */
+    .sticker-side-card {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF7FB 100%);
+      border: 3px solid var(--ink-plum);
+      border-radius: 22px;
+      box-shadow: 0 4px 0 rgba(74, 48, 77, 0.25);
+      padding: 0.55rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    html[data-contrast="high"] .sticker-side-card {
+      background: #1E1E1E;
+    }
+
+    .printer-slot-box {
+      background: #FCE8F3;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 16px;
+      padding: 0.45rem 0.55rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    html[data-contrast="high"] .printer-slot-box {
+      background: #1A1A1A;
+    }
+
+    .printer-mouth {
+      width: 88%;
+      height: 10px;
+      background: var(--ink-plum);
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .latest-sticker-preview {
+      width: 100%;
+      background: #FFFFFF;
+      border: 2.5px dashed var(--ink-plum);
+      border-radius: 14px;
+      padding: 0.35rem;
+      text-align: center;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html[data-contrast="high"] .latest-sticker-preview {
+      background: #111111;
+    }
+
+    .sticker-thumbs-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.3rem;
+    }
+
+    .sticker-slot-cell {
+      aspect-ratio: 1;
+      border: 2px solid var(--ink-plum);
+      border-radius: 10px;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      overflow: hidden;
+      padding: 2px;
+    }
+
+    html[data-contrast="high"] .sticker-slot-cell {
+      background: #1A1A1A;
+    }
+
+    .sticker-slot-cell.earned {
+      background: #FFF3B0;
+      border-style: solid;
+    }
+
+    /* ==========================================================================
+       2. STAGE GRID & HIGH-VISIBILITY STORY QUESTION BANNER
+       ========================================================================== */
+    .play-grid {
+      display: grid;
+      grid-template-columns: 1fr 205px;
+      gap: 0.4rem;
+      align-items: stretch;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .table-stage-card {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F9FCFF 100%);
+      border: 3px solid var(--ink-plum);
+      border-radius: 22px;
+      box-shadow: 0 4px 0 rgba(74, 48, 77, 0.25);
+      padding: 0.4rem 0.45rem 0.35rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.26rem;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    html[data-contrast="high"] .table-stage-card {
+      background: #121212;
+    }
+
+    .table-prompt-banner {
+      width: 100%;
+      background: linear-gradient(180deg, #FFFDF4 0%, #FFF3CD 100%);
+      border: 3.5px solid #3D2342;
+      border-radius: 18px;
+      padding: 0.42rem 0.65rem;
+      height: 82px;
+      min-height: 82px;
+      max-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.55rem;
+      box-shadow: 0 3px 0 rgba(61, 35, 66, 0.26);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    html[data-contrast="high"] .table-prompt-banner {
+      background: #1F1F1F;
+      border-color: #FFD166;
+    }
+
+    .prompt-thumb-box {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      border: 2.5px solid #3D2342;
+      background: #FFFFFF;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .prompt-text-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.16rem;
+    }
+
+    .prompt-step-pill {
+      display: inline-block;
+      width: fit-content;
+      background: #FF7B00;
+      color: #FFFFFF;
+      border: 2px solid #3D2342;
+      border-radius: 999px;
+      padding: 0.04rem 0.5rem;
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .table-prompt-banner .prompt-headline {
+      font-size: 1.18rem;
+      font-weight: 900;
+      color: #2B172F;
+      line-height: 1.32;
+      min-width: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    html[data-contrast="high"] .table-prompt-banner .prompt-headline {
+      color: #FFFFFF;
+    }
+
+    .prompt-banner-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .table-svg-wrap {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .table-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    /* ==========================================================================
+       3. BOTTOM CONTROL & CAPTION CARD
+       ========================================================================== */
+    .control-card {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF9F3 100%);
+      border: 3px solid var(--ink-plum);
+      border-radius: 20px;
+      box-shadow: 0 3.5px 0 rgba(74, 48, 77, 0.25);
+      padding: 0.32rem 0.55rem;
+      height: 68px;
+      min-height: 68px;
+      max-height: 68px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.25rem;
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: opacity 0.22s ease;
+    }
+
+    .control-card.is-passive {
+      opacity: 0.94;
+    }
+
+    .passive-guide-pill {
+      width: 100%;
+      text-align: center;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--ink-muted);
+      padding: 0.38rem 0.6rem;
+      background: #FFF9F0;
+      border: 2px dashed rgba(74, 48, 77, 0.35);
+      border-radius: 14px;
+    }
+
+    .feedback-strip {
+      background: #FFF3B0;
+      border: 2.5px solid var(--ink-plum);
+      border-radius: 14px;
+      padding: 0.38rem 0.65rem;
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #4A304D;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: 100%;
+    }
+
+    .feedback-strip.is-success {
+      background: #D8F3DC;
+      color: #1B4332;
+    }
+
+    html[data-contrast="high"] .feedback-strip,
+    html[data-contrast="high"] .feedback-strip.is-success {
+      background: #1F1F1F;
+      color: #FFD166;
+    }
+
+    .action-btn-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.55rem;
+    }
+
+    .action-btn-row.single-col {
+      grid-template-columns: 1fr;
+    }
+
+    .action-btn-row.three-col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .feed-choice-btn {
+      min-height: 54px;
+      font-size: 1.02rem;
+      padding: 0.4rem 0.75rem;
+      justify-content: center;
+    }
+
+    /* Single-Switch Scan Highlight */
+    .scan-focus {
+      outline: 4.5px solid #FF5400 !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 6px rgba(255, 209, 102, 0.85), 0 4px 0 var(--ink-plum) !important;
+      transform: scale(1.02);
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(74, 48, 77, 0.68);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-cream);
+      border: 3.5px solid var(--ink-plum);
+      border-radius: 24px;
+      box-shadow: 0 8px 0 var(--ink-plum);
+      padding: 1rem 1.15rem;
+      width: 100%;
+      max-width: 660px;
+      max-height: 90dvh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .setting-row {
+      background: var(--card-cream);
+      border: 2px solid var(--ink-plum);
+      border-radius: 14px;
+      padding: 0.45rem 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 820px) {
+      .play-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+      }
+
+      .sticker-side-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.3rem 0.5rem;
+        border-radius: 16px;
+        gap: 0.45rem;
+      }
+
+      .printer-slot-box {
+        flex-direction: row;
+        padding: 0.25rem 0.45rem;
+        border-radius: 12px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .printer-slot-box .printer-title-label,
+      .printer-slot-box .printer-mouth {
+        display: none;
+      }
+
+      .latest-sticker-preview {
+        padding: 0.2rem 0.35rem;
+        border-radius: 10px;
+        text-align: left;
+      }
+
+      .latest-sticker-preview svg {
+        height: 40px !important;
+        width: auto !important;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .sticker-album-mini {
+        flex: 0 0 auto;
+        min-width: 128px !important;
+      }
+
+      .table-prompt-banner .prompt-headline {
+        font-size: 1.08rem;
+      }
+
+      .control-card {
+        padding: 0.32rem 0.42rem;
+        gap: 0.28rem;
+        border-radius: 16px;
+      }
+
+      .feed-choice-btn {
+        min-height: 44px;
+        font-size: 0.96rem;
+        padding: 0.28rem 0.65rem;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-shell {
+        padding: 0.2rem 0.3rem 0.4rem;
+        gap: 0.25rem;
+      }
+
+      .top-bar {
+        padding: 0.18rem 0.3rem;
+        border-radius: 14px;
+      }
+
+      .brand-pill {
+        font-size: 0.72rem;
+        padding: 0.12rem 0.42rem;
+      }
+
+      .stage-title-text {
+        font-size: 0.78rem;
+      }
+
+      .toy-btn {
+        padding: 0.2rem 0.46rem;
+        font-size: 0.8rem;
+        border-radius: 12px;
+      }
+
+      .table-stage-card {
+        padding: 0.2rem;
+        border-radius: 18px;
+      }
+
+      .prompt-thumb-box {
+        width: 48px;
+        height: 48px;
+      }
+
+      .table-prompt-banner .prompt-headline {
+        font-size: 1rem;
+      }
+
+      .control-card {
+        padding: 0.28rem 0.4rem;
+        gap: 0.24rem;
+        border-radius: 14px;
+      }
+
+      .feed-choice-btn {
+        min-height: 42px;
+        font-size: 0.9rem;
+        padding: 0.24rem 0.48rem;
+      }
+    }
+
+    html[data-text-size="large"] .action-btn-row,
+    html[data-text-size="xlarge"] .action-btn-row {
+      grid-template-columns: 1fr;
+    }
+
+    html[data-reduced-motion="true"] * {
+      transition: none !important;
+      animation: none !important;
+    }
+  </style>
+  <style>
+    #game-rules {
+      --rules-accent: #e8dbfa;
+      --rules-ink: #432744;
+      box-sizing: border-box;
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(44rem, calc(100% - 1.5rem));
+      max-height: calc(100% - 1.5rem);
+      padding: 0;
+      overflow: hidden;
+      border: 2px solid var(--rules-ink);
+      border-radius: 24px;
+      background: #fffdf7;
+      color: var(--rules-ink);
+      box-shadow: 0 6px 0 var(--rules-ink), 0 20px 52px #2d1a3059;
+      font: clamp(1.125rem, 1.05rem + .35vw, 1.375rem)/1.5 "Leelawadee UI", Tahoma, sans-serif;
+    }
+    #game-rules[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+    #game-rules::backdrop { background: #27172cbd; }
+    #game-rules .rules-content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+    #game-rules .rules-heading {
+      padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2.25rem);
+      border-bottom: 1px solid #4327443d;
+      background: var(--rules-accent);
+    }
+    #game-rules .rules-label { margin: 0; font-weight: 800; }
+    #game-rules h2 {
+      margin: .25rem 0 0;
+      font-size: clamp(1.625rem, 1.4rem + 1.3vw, 2.5rem);
+      line-height: 1.25;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    #game-rules ol {
+      counter-reset: rule;
+      list-style: none;
+      margin: 0;
+      padding: .4rem clamp(.9rem, 4vw, 2.25rem) 0;
+    }
+    #game-rules li {
+      counter-increment: rule;
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      align-items: start;
+      gap: .7rem;
+      padding-block: clamp(.5rem, 1.3vw, .85rem);
+    }
+    #game-rules li + li { border-top: 1px solid #e6dce5; }
+    #game-rules li::before {
+      content: counter(rule);
+      display: grid;
+      place-items: center;
+      min-height: 2rem;
+      border-radius: 10px;
+      background: var(--rules-accent);
+      font-weight: 800;
+    }
+    #game-rules .rules-switch {
+      margin: .35rem clamp(.9rem, 4vw, 2.25rem) .8rem;
+      padding: .55rem .8rem;
+      border-inline-start: 3px solid var(--rules-ink);
+      border-radius: 8px;
+      background: #f4eef7;
+      overflow-wrap: anywhere;
+    }
+    #game-rules .rules-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .3rem .7rem;
+      padding: .65rem clamp(.9rem, 4vw, 2.25rem);
+      border-top: 1px solid #e6dce5;
+      background: #fffdf7;
+    }
+    #game-rules button, #game-rules a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: .35rem .75rem;
+      font: inherit;
+      font-weight: 800;
+      color: inherit;
+    }
+    #game-rules button {
+      flex: 1;
+      background: #ffd166;
+      border: 2px solid var(--rules-ink);
+      border-radius: 12px;
+      box-shadow: 0 3px 0 var(--rules-ink);
+      cursor: pointer;
+    }
+    #game-rules button:hover { background: #ffe192; }
+    #game-rules a { text-decoration: underline; text-underline-offset: .2em; }
+    #game-rules :focus-visible { outline: 3px solid #6c2aa3; outline-offset: 2px; }
+    #game-rules .rules-content:focus-visible { outline-offset: -4px; }
+    @media (forced-colors: active) {
+      #game-rules li::before { border: 1px solid CanvasText; }
+    }
+  </style>
+</head>
+<body>
+  <dialog id="game-rules" aria-labelledby="game-rules-title">
+    <div class="rules-content" role="region" aria-label="กติกาและการควบคุม" tabindex="0">
+      <div class="rules-heading">
+        <p class="rules-label">วิธีเล่น</p>
+        <h2 id="game-rules-title">ฮิปโปงับงับ ปิกนิกหรรษา</h2>
+      </div>
+      <ol role="list">
+        <li><span>ลากแตงโมไปป้อน หรือแตะตัวฮิปโป แล้วกด <strong>เริ่มปิกนิก</strong></span></li>
+        <li><span>อ่านหรือฟังเรื่องสั้น แล้วป้อนฮิปโปที่มีคำตอบที่ต้องการ</span></li>
+        <li><span>อ่านคำใบ้แล้วลองใหม่ได้ ตอบถูกแล้วกดไปจุดถัดไป</span></li>
+      </ol>
+      <p class="rules-switch">เปิด <strong>โหมด Space ปุ่มเดียว</strong> ในตั้งค่าการเล่น แล้วกด Space ตอนกรอบอยู่ที่ปุ่มที่ต้องการ</p>
+    </div>
+    <form method="dialog" class="rules-actions">
+      <button type="submit" autofocus>เข้าเกม</button>
+      <a href="./index.html">กลับลานเกม</a>
+    </form>
+  </dialog>
+  <div class="app-shell">
+    <!-- 1. TOP BAR: Pause & Repeat stay in the exact same spot across every state -->
+    <header class="top-bar">
+      <div class="brand-cluster">
+        <a href="./index.html" class="toy-btn btn-peach" aria-label="กลับลานเกมสายรุ้ง">← ลานเกม</a>
+        <span class="brand-pill">🦛 Boom Play · เกมที่ 3</span>
+        <span class="stage-title-text" id="uiStageStatus">ฮิปโปงับงับ ปิกนิกหรรษา</span>
+      </div>
+
+      <div class="top-actions">
+        <div class="pinned-controls">
+          <button type="button" id="btnRepeatAudio" class="toy-btn btn-butter" aria-label="ฟังอีกครั้ง">
+            <span>🔊 ฟังอีกครั้ง</span>
+          </button>
+          <button type="button" id="btnPause" class="toy-btn btn-peach" aria-pressed="false" aria-label="พักเกม">
+            <span id="uiPauseText">⏸️ พัก</span>
+          </button>
+        </div>
+        <button type="button" id="btnStickersModal" class="toy-btn" aria-label="สมุดสติกเกอร์">
+          <span>📒 สติกเกอร์ (<span id="uiStickerCountTop">0</span>/<span id="uiStickerTotalTop">5</span>)</span>
+        </button>
+        <button type="button" id="btnTeacher" class="toy-btn" aria-label="เมนูสำหรับครู">
+          <span>📖 สำหรับครู</span>
+        </button>
+        <button type="button" id="btnSettings" class="toy-btn" aria-label="ตั้งค่าการเล่น">
+          <span>⚙️ ตั้งค่า</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. MAIN PLAY STAGE: High-Contrast Prompt Banner + Oval Toy Table + Compact Sticker Strip -->
+    <main class="play-grid">
+      <!-- Oval Toy Table Stage -->
+      <section class="table-stage-card" aria-label="โต๊ะของเล่นปิกนิกของน้องฟ้าและน้องม่วง">
+        <!-- Mini Arcade HUD: Tummy Happiness & Streak Combo -->
+        <div class="game-hud-row" aria-hidden="true">
+          <div class="hippo-meter-pill" style="background:#DFF3FC;">
+            <span>🔵 น้องฟ้า</span>
+            <span class="meter-hearts" id="uiMojiHearts">🤍🤍🤍</span>
+          </div>
+          <span class="combo-badge" id="uiComboBadge" hidden>🔥 คอมโบ x2!</span>
+          <div class="hippo-meter-pill" style="background:#F1E4FA;">
+            <span>🟣 น้องม่วง</span>
+            <span class="meter-hearts" id="uiBuayHearts">🤍🤍🤍</span>
+          </div>
+        </div>
+
+        <!-- Enlarged High-Contrast Prompt Banner with Situation Thumbnail & Zoom Button -->
+        <div class="table-prompt-banner">
+          <div class="prompt-thumb-box" id="uiPromptThumbBox" hidden aria-hidden="true"></div>
+          <div class="prompt-text-col">
+            <span class="prompt-step-pill" id="uiPromptStepPill">🍉 ช่วงลองเล่น</span>
+            <p class="prompt-headline" id="uiPromptText" aria-live="polite" aria-atomic="true" tabindex="-1">
+              ลากแตงโมไปป้อนน้องฟ้าหรือน้องม่วงเลย!
+            </p>
+          </div>
+          <div class="prompt-banner-actions">
+            <button type="button" id="btnListenScene" class="toy-btn btn-mochi" hidden>
+              <span>🎧 ฟังโจทย์</span>
+            </button>
+            <button type="button" id="btnZoomScene" class="toy-btn btn-butter" hidden>
+              <span>🔍 ดูภาพชัด ๆ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Decision Consequence Overlay Card (Shows WHY the choice worked before sticker/next) -->
+        <div id="uiConsequenceCard" hidden style="position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.45rem; z-index: 20; background: linear-gradient(180deg, rgba(232, 248, 238, 0.97) 0%, rgba(255, 253, 245, 0.97) 100%); border: 3px solid #2D6A4F; border-radius: 18px; padding: 0.45rem 0.65rem; display: flex; align-items: center; gap: 0.65rem; box-shadow: 0 4px 12px rgba(45, 106, 79, 0.28);">
+          <div id="uiConsequenceArtwork" style="width: 112px; flex-shrink: 0;"></div>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem;">
+            <span style="display: inline-block; width: fit-content; background: #2D6A4F; color: #FFFFFF; font-size: 0.74rem; font-weight: 800; padding: 0.1rem 0.5rem; border-radius: 999px;">✨ ผลของการตัดสินใจ</span>
+            <p id="uiConsequenceText" style="font-size: 0.96rem; font-weight: 800; color: #1B4332; line-height: 1.32;"></p>
+            <p id="uiConsequenceSubtext" style="font-size: 0.82rem; font-weight: 700; color: #4A304D; line-height: 1.28;"></p>
+          </div>
+        </div>
+
+        <!-- Zoomed Scene Card (Opens when child clicks 🔍 ดูภาพชัด ๆ) -->
+        <div id="uiSceneZoomCard" hidden style="position: absolute; left: 0.5rem; right: 0.5rem; top: 5.4rem; z-index: 22; background: rgba(255, 253, 248, 0.98); border: 3.5px solid #3D2342; border-radius: 18px; padding: 0.5rem 0.65rem; display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; box-shadow: 0 6px 16px rgba(61, 35, 66, 0.3);">
+          <div id="uiSceneZoomArtwork" style="width: 118px; height: 118px; border-radius: 16px; border: 2.5px solid #3D2342; overflow: hidden; flex-shrink: 0;"></div>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.35rem;">
+            <span style="display: inline-block; width: fit-content; background: #1D8AB8; color: #FFFFFF; font-size: 0.76rem; font-weight: 800; padding: 0.1rem 0.55rem; border-radius: 999px;">🔍 ภาพขยายชัดเจน</span>
+            <p id="uiSceneZoomCaption" style="font-size: 1.04rem; font-weight: 800; color: #2B172F; line-height: 1.32;"></p>
+            <button type="button" id="btnCloseSceneZoom" class="toy-btn btn-peach" style="width: fit-content;">
+              <span>✕ ปิดภาพขยาย</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-svg-wrap" id="tableStageWrap">
+          <svg id="hippoTableSvg" viewBox="0 0 560 385" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ฉากสวนปิกนิกสีพาสเทล มีโต๊ะของเล่นทรงรี น้องฟ้าด้านบน น้องม่วงด้านล่าง และจานผลไม้ตรงกลาง">
+            <defs>
+              <linearGradient id="parkSkyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#BDE6FA" />
+                <stop offset="55%" stop-color="#E7F6D5" />
+                <stop offset="100%" stop-color="#B5E48C" />
+              </linearGradient>
+              <radialGradient id="tableTopGrad" cx="50%" cy="46%" r="54%">
+                <stop offset="0%" stop-color="#FFFDF8" />
+                <stop offset="68%" stop-color="#FFE3C4" />
+                <stop offset="100%" stop-color="#FFB997" />
+              </radialGradient>
+              <linearGradient id="peachRimGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFA686" />
+                <stop offset="100%" stop-color="#F6846A" />
+              </linearGradient>
+              <radialGradient id="plateGrad" cx="45%" cy="42%" r="55%">
+                <stop offset="0%" stop-color="#FFFFFF" />
+                <stop offset="80%" stop-color="#F4F9F9" />
+                <stop offset="100%" stop-color="#D4E8E3" />
+              </radialGradient>
+              <radialGradient id="foodGlowGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(255, 209, 102, 0.92)" />
+                <stop offset="65%" stop-color="rgba(255, 179, 71, 0.42)" />
+                <stop offset="100%" stop-color="rgba(255, 179, 71, 0)" />
+              </radialGradient>
+              <radialGradient id="toyShadow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(61, 35, 66, 0.3)" />
+                <stop offset="100%" stop-color="rgba(61, 35, 66, 0)" />
+              </radialGradient>
+              <clipPath id="biscuitSceneClip">
+                <circle cx="0" cy="0" r="56" />
+              </clipPath>
+            </defs>
+
+            <!-- ==================== RICH PASTEL PICNIC PARK BACKDROP ==================== -->
+            <rect x="0" y="0" width="560" height="385" rx="18" fill="url(#parkSkyGrad)" />
+            <!-- Fluffy Clouds -->
+            <g fill="#FFFFFF" opacity="0.88">
+              <circle cx="56" cy="24" r="14" /><circle cx="72" cy="21" r="17" /><circle cx="89" cy="25" r="13" />
+              <circle cx="472" cy="22" r="13" /><circle cx="489" cy="19" r="16" /><circle cx="505" cy="24" r="12" />
+            </g>
+            <!-- Rolling Pastel Hills -->
+            <path d="M 0 130 Q 140 90 280 125 Q 420 155 560 115 L 560 385 L 0 385 Z" fill="#99D98C" />
+            <path d="M 0 220 Q 180 185 350 220 Q 470 245 560 210 L 560 385 L 0 385 Z" fill="#76C893" />
+            <!-- Cute Pastel Bushes -->
+            <g fill="#52B788" opacity="0.65">
+              <circle cx="24" cy="115" r="22" /><circle cx="48" cy="122" r="18" />
+              <circle cx="534" cy="112" r="24" /><circle cx="508" cy="120" r="18" />
+            </g>
+            <!-- Little Wildflowers on Lawn -->
+            <g>
+              <circle cx="34" cy="348" r="6" fill="#FF8FA3" /><circle cx="34" cy="348" r="2.5" fill="#FFD166" />
+              <circle cx="62" cy="364" r="5" fill="#FFFFFF" /><circle cx="62" cy="364" r="2" fill="#FF9F1C" />
+              <circle cx="524" cy="352" r="6" fill="#FFD166" /><circle cx="524" cy="352" r="2.5" fill="#FF7096" />
+              <circle cx="496" cy="368" r="5" fill="#CDB4DB" /><circle cx="496" cy="368" r="2" fill="#FFFFFF" />
+            </g>
+
+            <!-- ==================== OVAL TOY TABLE (Rich Pastel Peach & Cream) ==================== -->
+            <ellipse cx="280" cy="212" rx="258" ry="154" fill="rgba(61, 35, 66, 0.2)" />
+            <ellipse cx="280" cy="202" rx="254" ry="150" fill="url(#peachRimGrad)" stroke="#3D2342" stroke-width="4" />
+            <ellipse cx="280" cy="192" rx="242" ry="138" fill="url(#tableTopGrad)" stroke="#3D2342" stroke-width="3.5" />
+            <ellipse cx="280" cy="192" rx="224" ry="124" fill="none" stroke="#F6846A" stroke-width="2.2" stroke-dasharray="10 8" />
+
+            <!-- Center Toy Plate -->
+            <ellipse cx="280" cy="199" rx="84" ry="60" fill="rgba(61, 35, 66, 0.2)" />
+            <ellipse cx="280" cy="193" rx="82" ry="58" fill="url(#plateGrad)" stroke="#3D2342" stroke-width="3" />
+            <ellipse cx="280" cy="193" rx="66" ry="46" fill="none" stroke="#FFA686" stroke-width="2.2" />
+
+            <!-- ==================== TOP HIPPO: น้องฟ้า (Chubby Sky-Blue Hippo + Picnic Hat) ==================== -->
+            <g id="mojiHitArea" role="button" tabindex="0" aria-label="ป้อนน้องฟ้า พักตรงนี้" style="cursor: pointer;">
+              <ellipse id="mojiDropHalo" class="hippo-focus-halo" cx="280" cy="76" rx="82" ry="58" fill="rgba(110, 193, 228, 0.35)" stroke="#FF5400" stroke-width="4.5" stroke-dasharray="9 5" opacity="0" />
+              <ellipse id="mojiTableShadow" cx="280" cy="96" rx="76" ry="28" fill="url(#toyShadow)" />
+
+              <g id="mojiCharacterGroup" transform="translate(280, 68)">
+                <g id="mojiTorsoGroup">
+                  <ellipse id="mojiSideFlabL" cx="-54" cy="10" rx="14" ry="12" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" opacity="0" />
+                  <ellipse id="mojiSideFlabR" cx="54" cy="10" rx="14" ry="12" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" opacity="0" />
+                  <ellipse id="mojiBodyOuter" cx="0" cy="8" rx="64" ry="36" fill="#6EC1E4" stroke="#3D2342" stroke-width="3.4" />
+                  <ellipse id="mojiBodyInner" cx="0" cy="6" rx="46" ry="20" fill="#9AD9F5" stroke="#5CB4D8" stroke-width="1.6" opacity="0.9" />
+                  <circle id="mojiFoodLump" cx="0" cy="8" r="10" fill="#FFE082" opacity="0" />
+                  <g id="mojiBellyRolls" stroke="#3D2342" stroke-width="2.4" stroke-linecap="round" fill="none">
+                    <path id="mojiRoll1" d="M -36 12 Q 0 21 36 12" opacity="0" />
+                    <path id="mojiRoll2" d="M -46 3 Q 0 13 46 3" opacity="0" />
+                    <path id="mojiRoll3" d="M -42 -6 Q 0 3 42 -6" opacity="0" />
+                  </g>
+                  <circle id="mojiBellyButton" cx="0" cy="8" r="4.5" fill="#7AC3E3" stroke="#3D2342" stroke-width="2" opacity="0" />
+                  <path id="mojiBellySwirl" d="M -7 7 Q 0 12 7 7" fill="none" stroke="#3D2342" stroke-width="2" stroke-linecap="round" opacity="0" />
+                  <ellipse id="mojiPawL" cx="-48" cy="25" rx="16" ry="11" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" />
+                  <path d="M -52 29 L -52 33 M -45 30 L -45 34" stroke="#3D2342" stroke-width="2" stroke-linecap="round" />
+                  <ellipse id="mojiPawR" cx="48" cy="25" rx="16" ry="11" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" />
+                  <path d="M 45 30 L 45 34 M 52 29 L 52 33" stroke="#3D2342" stroke-width="2" stroke-linecap="round" />
+                </g>
+
+                <rect id="mojiNeckBar" x="-26" y="0" width="52" height="22" rx="16" fill="#5CB4D8" stroke="#3D2342" stroke-width="3.2" />
+
+                <g id="mojiHeadGroup" transform="translate(0, 14)">
+                  <ellipse cx="0" cy="28" rx="42" ry="15" fill="rgba(61, 35, 66, 0.25)" />
+                  <circle cx="-30" cy="-22" r="11" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" />
+                  <circle cx="-30" cy="-22" r="5.5" fill="#FF99B6" />
+                  <circle cx="30" cy="-22" r="11" fill="#6EC1E4" stroke="#3D2342" stroke-width="3" />
+                  <circle cx="30" cy="-22" r="5.5" fill="#FF99B6" />
+
+                  <ellipse id="mojiHeadBase" cx="0" cy="-5" rx="42" ry="29" fill="#6EC1E4" stroke="#3D2342" stroke-width="3.3" />
+
+                  <g transform="translate(-15, -12)">
+                    <circle cx="0" cy="0" r="9" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.5" />
+                    <circle id="mojiPupilL" cx="1.8" cy="3" r="4.5" fill="#3D2342" />
+                    <circle cx="0.5" cy="1.5" r="1.6" fill="#FFFFFF" />
+                  </g>
+                  <g transform="translate(15, -12)">
+                    <circle cx="0" cy="0" r="9" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.5" />
+                    <circle id="mojiPupilR" cx="-1.8" cy="3" r="4.5" fill="#3D2342" />
+                    <circle cx="-2.8" cy="1.5" r="1.6" fill="#FFFFFF" />
+                  </g>
+
+                  <g id="mojiMouthGroup" transform="translate(0, 15)">
+                    <ellipse id="mojiMouthCavity" cx="0" cy="4" rx="27" ry="6" fill="#FF6685" stroke="#3D2342" stroke-width="2.8" />
+                    <rect id="mojiToothL" x="-14" y="1" width="6.5" height="5.5" rx="2" fill="#FFFFFF" stroke="#3D2342" stroke-width="1.8" />
+                    <rect id="mojiToothR" x="7.5" y="1" width="6.5" height="5.5" rx="2" fill="#FFFFFF" stroke="#3D2342" stroke-width="1.8" />
+                  </g>
+
+                  <ellipse cx="0" cy="9" rx="38" ry="21" fill="#8CD0EE" stroke="#3D2342" stroke-width="3.3" />
+                  <ellipse cx="0" cy="4" rx="28" ry="10" fill="#BBE5F8" opacity="0.8" />
+                  <g id="mojiNostrils">
+                    <ellipse cx="-13" cy="8" rx="5" ry="3.5" fill="#3D2342" />
+                    <ellipse cx="13" cy="8" rx="5" ry="3.5" fill="#3D2342" />
+                  </g>
+
+                  <circle id="mojiCheekL" cx="-31" cy="7" r="9.5" fill="#FF7597" opacity="0.88" />
+                  <circle id="mojiCheekR" cx="31" cy="7" r="9.5" fill="#FF7597" opacity="0.88" />
+
+                  <g id="mojiHatGroup" transform="translate(0, -25) rotate(0)">
+                    <ellipse cx="0" cy="4" rx="32" ry="9.5" fill="#FFC43D" stroke="#3D2342" stroke-width="2.6" />
+                    <path d="M -18 3 Q -16 -14 0 -14 Q 16 -14 18 3 Z" fill="#FFE082" stroke="#3D2342" stroke-width="2.6" />
+                    <path d="M -17 0 Q 0 3 17 0" fill="none" stroke="#FF5C8A" stroke-width="3.5" />
+                  </g>
+                </g>
+              </g>
+
+              <!-- NONG FAH'S SIGN -->
+              <g id="mojiSignBoard" transform="translate(22, 28)">
+                <rect x="64" y="54" width="8" height="28" rx="4" fill="#D48C46" stroke="#3D2342" stroke-width="2.5" />
+                <rect x="0" y="0" width="138" height="58" rx="16" fill="#B8E2F8" stroke="#3D2342" stroke-width="3.2" />
+                <rect x="5" y="5" width="128" height="48" rx="12" fill="#FFFFFF" stroke="#6EC1E4" stroke-width="2.2" />
+                <g id="mojiSignIcon" transform="translate(24, 29)">
+                  <polygon points="-14,8 -8,-8 12,-8 16,8" fill="#FFC43D" stroke="#3D2342" stroke-width="2" stroke-linejoin="round" />
+                  <line x1="-2" y1="-8" x2="-4" y2="8" stroke="#FF5C8A" stroke-width="2" />
+                  <line x1="6" y1="-8" x2="5" y2="8" stroke="#FF5C8A" stroke-width="2" />
+                  <line x1="-11" y1="0" x2="14" y2="0" stroke="#52B788" stroke-width="2" />
+                </g>
+                <text id="mojiSignText" x="85" y="34" text-anchor="middle" font-size="14.5" font-weight="800" fill="#3D2342">พักตรงนี้</text>
+              </g>
+            </g>
+
+            <!-- ==================== BOTTOM HIPPO: น้องม่วง (Roly-Poly Lilac Hippo + 1 Cute Tooth) ==================== -->
+            <g id="buayHitArea" role="button" tabindex="0" aria-label="ป้อนน้องม่วง ชวนผู้ใหญ่ย้ายจุด" style="cursor: pointer;">
+              <ellipse id="buayDropHalo" class="hippo-focus-halo" cx="280" cy="316" rx="84" ry="56" fill="rgba(185, 147, 214, 0.38)" stroke="#FF5400" stroke-width="4.5" stroke-dasharray="9 5" opacity="0" />
+              <ellipse id="buayTableShadow" cx="280" cy="340" rx="76" ry="25" fill="url(#toyShadow)" />
+
+              <g id="buayCharacterGroup" transform="translate(280, 324)">
+                <g id="buayTorsoGroup">
+                  <ellipse id="buaySideFlabL" cx="-56" cy="9" rx="14" ry="12" fill="#B993D6" stroke="#3D2342" stroke-width="3" opacity="0" />
+                  <ellipse id="buaySideFlabR" cx="56" cy="9" rx="14" ry="12" fill="#B993D6" stroke="#3D2342" stroke-width="3" opacity="0" />
+                  <ellipse id="buayBodyOuter" cx="0" cy="10" rx="66" ry="31" fill="#B993D6" stroke="#3D2342" stroke-width="3.4" />
+                  <ellipse id="buayBodyInner" cx="0" cy="11" rx="48" ry="18" fill="#E2CCF5" stroke="#A67EC8" stroke-width="1.6" opacity="0.9" />
+                  <circle id="buayFoodLump" cx="0" cy="10" r="10" fill="#FFE082" opacity="0" />
+                  <g id="buayBellyRolls" stroke="#3D2342" stroke-width="2.4" stroke-linecap="round" fill="none">
+                    <path id="buayRoll1" d="M -38 5 Q 0 -4 38 5" opacity="0" />
+                    <path id="buayRoll2" d="M -48 14 Q 0 4 48 14" opacity="0" />
+                    <path id="buayRoll3" d="M -44 23 Q 0 14 44 23" opacity="0" />
+                  </g>
+                  <circle id="buayBellyButton" cx="0" cy="10" r="4.5" fill="#CFAEEB" stroke="#3D2342" stroke-width="2" opacity="0" />
+                  <path id="buayBellySwirl" d="M -7 10 Q 0 5 7 10" fill="none" stroke="#3D2342" stroke-width="2" stroke-linecap="round" opacity="0" />
+                  <ellipse id="buayPawL" cx="-48" cy="-11" rx="16" ry="10.5" fill="#B993D6" stroke="#3D2342" stroke-width="3" />
+                  <path d="M -52 -16 L -52 -20 M -45 -17 L -45 -21" stroke="#3D2342" stroke-width="2" stroke-linecap="round" />
+                  <ellipse id="buayPawR" cx="48" cy="-11" rx="16" ry="10.5" fill="#B993D6" stroke="#3D2342" stroke-width="3" />
+                  <path d="M 45 -17 L 45 -21 M 52 -16 L 52 -20" stroke="#3D2342" stroke-width="2" stroke-linecap="round" />
+                </g>
+
+                <rect id="buayNeckBar" x="-26" y="-18" width="52" height="22" rx="16" fill="#A67EC8" stroke="#3D2342" stroke-width="3.2" />
+
+                <g id="buayHeadGroup" transform="translate(0, -10)">
+                  <ellipse cx="0" cy="-24" rx="42" ry="14" fill="rgba(61, 35, 66, 0.24)" />
+                  <circle cx="-30" cy="19" r="10.5" fill="#B993D6" stroke="#3D2342" stroke-width="3" />
+                  <circle cx="-30" cy="19" r="5" fill="#FF99B6" />
+                  <circle cx="30" cy="19" r="10.5" fill="#B993D6" stroke="#3D2342" stroke-width="3" />
+                  <circle cx="30" cy="19" r="5" fill="#FF99B6" />
+
+                  <ellipse id="buayHeadBase" cx="0" cy="6" rx="43" ry="27" fill="#B993D6" stroke="#3D2342" stroke-width="3.3" />
+
+                  <g transform="translate(-15, 10)">
+                    <circle cx="0" cy="0" r="9" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.5" />
+                    <circle id="buayPupilL" cx="1.8" cy="-3" r="4.5" fill="#3D2342" />
+                    <circle cx="0.5" cy="-4.6" r="1.6" fill="#FFFFFF" />
+                  </g>
+                  <g transform="translate(15, 10)">
+                    <circle cx="0" cy="0" r="9" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.5" />
+                    <circle id="buayPupilR" cx="-1.8" cy="-3" r="4.5" fill="#3D2342" />
+                    <circle cx="-2.8" cy="-4.6" r="1.6" fill="#FFFFFF" />
+                  </g>
+
+                  <g id="buayMouthGroup" transform="translate(0, -14)">
+                    <ellipse id="buayMouthCavity" cx="0" cy="-3" rx="27" ry="6" fill="#FF6685" stroke="#3D2342" stroke-width="2.8" />
+                  </g>
+
+                  <ellipse cx="0" cy="-7" rx="39" ry="20" fill="#D19CE8" stroke="#3D2342" stroke-width="3.3" />
+                  <ellipse cx="0" cy="-2" rx="29" ry="9" fill="#E6C2F5" opacity="0.8" />
+                  <rect id="buaySingleTooth" x="-5.5" y="-28" width="11" height="8.5" rx="3" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.4" />
+
+                  <g id="buayRindGag" visibility="hidden" transform="translate(0, -28)">
+                    <path d="M -24 2 Q 0 -13 24 2 L 18 7 Q 0 -4 -18 7 Z" fill="#40916C" stroke="#3D2342" stroke-width="2.3" />
+                    <path d="M -18 2 Q 0 -7 18 2" fill="none" stroke="#FF6685" stroke-width="3" />
+                  </g>
+
+                  <g id="buayNostrils">
+                    <ellipse cx="-13" cy="-7" rx="5" ry="3.5" fill="#3D2342" />
+                    <ellipse cx="13" cy="-7" rx="5" ry="3.5" fill="#3D2342" />
+                  </g>
+
+                  <circle id="buayCheekL" cx="-31" cy="-5" r="9.5" fill="#FF7597" opacity="0.88" />
+                  <circle id="buayCheekR" cx="31" cy="-5" r="9.5" fill="#FF7597" opacity="0.88" />
+                </g>
+              </g>
+
+              <!-- NONG MUANG'S SIGN -->
+              <g id="buaySignBoard" transform="translate(382, 300)">
+                <rect x="72" y="54" width="8" height="24" rx="4" fill="#D48C46" stroke="#3D2342" stroke-width="2.5" />
+                <rect x="0" y="0" width="154" height="58" rx="16" fill="#E2CCF5" stroke="#3D2342" stroke-width="3.2" />
+                <rect x="5" y="5" width="144" height="48" rx="12" fill="#FFFFFF" stroke="#B993D6" stroke-width="2.2" />
+                <g id="buaySignIcon" transform="translate(22, 29)">
+                  <circle cx="-4" cy="-9" r="4.5" fill="#FFC43D" stroke="#3D2342" stroke-width="1.8" />
+                  <path d="M -8 -2 L -8 10 M -1 -2 L -1 10" stroke="#3D2342" stroke-width="2.4" stroke-linecap="round" />
+                  <circle cx="8" cy="-5" r="3.5" fill="#FF7597" stroke="#3D2342" stroke-width="1.8" />
+                  <path d="M 5 1 L 5 10 M 10 1 L 10 10 M -1 3 L 5 4" stroke="#3D2342" stroke-width="2.2" stroke-linecap="round" />
+                </g>
+                <text id="buaySignText" x="92" y="34" text-anchor="middle" font-size="13.5" font-weight="800" fill="#3D2342">ชวนผู้ใหญ่ย้ายจุด</text>
+              </g>
+            </g>
+
+            <!-- ==================== CENTER PLATE FOOD / SITUATION BISCUIT LAYER ==================== -->
+            <g id="centerFoodLayer" transform="translate(280, 193)"></g>
+
+            <!-- ==================== FUN ANIMATION FX LAYER ==================== -->
+            <g id="stageFxLayer" pointer-events="none"></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Side Sticker Printer & Mini Album -->
+      <aside class="sticker-side-card" aria-label="เครื่องพิมพ์สติกเกอร์ผลลัพธ์">
+        <div class="printer-slot-box">
+          <div class="printer-title-label" style="font-size: 0.86rem; font-weight: 800; color: var(--ink-plum);">
+            🖨️ ช่องพิมพ์สติกเกอร์ข้างโต๊ะ
+          </div>
+          <div class="printer-mouth" aria-hidden="true"></div>
+          <div class="latest-sticker-preview" id="uiLatestStickerBox">
+            <p style="font-size: 0.8rem; color: var(--ink-muted); font-weight: 700;">
+              ป้อนถูกคำตอบ สติกเกอร์จะพิมพ์ตรงนี้!
+            </p>
+          </div>
+        </div>
+
+        <div class="sticker-album-mini" style="flex: 1; min-width: 150px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+            <span style="font-size: 0.82rem; font-weight: 800;">สมุดสติกเกอร์</span>
+            <span style="font-size: 0.78rem; font-weight: 700;" id="uiStickerProgressLabel">0 / 5</span>
+          </div>
+          <div class="sticker-thumbs-grid" id="uiStickerThumbsGrid"></div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- 3. BOTTOM FEEDING GUIDANCE & FEEDBACK STRIP -->
+    <section class="control-card" aria-label="คำแนะนำและสถานะการป้อนฮิปโป" id="uiBottomControlCard">
+      <div class="action-btn-row" id="uiActionButtons"></div>
+    </section>
+  </div>
+
+  <!-- MODAL 1: PAUSE -->
+  <div class="modal-backdrop" id="modalPause" role="dialog" aria-modal="true" aria-labelledby="pauseModalTitle" hidden>
+    <div class="modal-card" style="max-width: 440px;">
+      <h2 id="pauseModalTitle" style="font-size: 1.25rem; font-weight: 800;">⏸️ พักเกมชั่วคราว</h2>
+      <p>หยุดเสียง ท่าทาง และการสแกนไว้ที่จุดเดิมเรียบร้อย กดเล่นต่อได้ทันที</p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" id="btnResumeGame" class="toy-btn btn-butter" style="flex: 1;">
+          <span>▶️ เล่นต่อ</span>
+        </button>
+        <button type="button" id="btnRestartFromPause" class="toy-btn btn-peach">
+          <span>🔄 เริ่มใหม่</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SETTINGS -->
+  <div class="modal-backdrop" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" hidden>
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2 id="settingsModalTitle" style="font-size: 1.2rem; font-weight: 800;">⚙️ ตั้งค่าการเล่นและการเข้าถึง</h2>
+        <button type="button" id="btnCloseSettings" class="toy-btn btn-peach">✕ ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>⌨️ โหมด Space ปุ่มเดียว</strong></span>
+        <button type="button" id="setSwitchMode" class="toy-btn" aria-pressed="false">ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>⏱️ ความเร็วการวนปุ่ม</strong></span>
+        <button type="button" id="setScanSpeed" class="toy-btn">กลาง (2.4 วิ)</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🗣️ เสียงบรรยายของเกม (แยกจากโปรแกรมอ่านหน้าจอ)</strong></span>
+        <button type="button" id="setNarration" class="toy-btn" aria-pressed="true">เปิดเสียงพูด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔔 เสียงเอฟเฟกต์งับขนม</strong></span>
+        <button type="button" id="setSfx" class="toy-btn" aria-pressed="true">เปิดเสียง</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🔠 ขนาดตัวอักษร</strong></span>
+        <button type="button" id="setTextSize" class="toy-btn">ปกติ</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🌗 คอนทราสต์สูง</strong></span>
+        <button type="button" id="setContrast" class="toy-btn" aria-pressed="false">ปิด</button>
+      </div>
+
+      <div class="setting-row">
+        <span><strong>🌿 ลดการเคลื่อนไหว</strong></span>
+        <button type="button" id="setReducedMotion" class="toy-btn" aria-pressed="false">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: STICKER ALBUM GALLERY -->
+  <div class="modal-backdrop" id="modalStickers" role="dialog" aria-modal="true" aria-labelledby="stickersModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="stickersModalTitle" style="font-size: 1.2rem; font-weight: 800;">📒 สมุดสติกเกอร์ปิกนิกของน้องฟ้าและน้องม่วง</h2>
+        <button type="button" id="btnCloseStickers" class="toy-btn btn-peach">✕ ปิด</button>
+      </div>
+      <div id="uiStickerGalleryList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: TEACHER MENU & DYNAMIC SOURCE CREDITS FROM ACTIVE LESSONPACK -->
+  <div class="modal-backdrop" id="modalTeacher" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle" hidden>
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header">
+        <h2 id="teacherModalTitle" style="font-size: 1.2rem; font-weight: 800;">📖 เมนูสำหรับครู · ข้อมูลแหล่งอ้างอิงบทเรียน</h2>
+        <button type="button" id="btnCloseTeacher" class="toy-btn btn-peach">✕ ปิด</button>
+      </div>
+
+      <div id="uiTeacherSourceBox" style="background: var(--card-cream); border: 2px solid var(--ink-plum); border-radius: 14px; padding: 0.75rem; font-size: 0.92rem; display: flex; flex-direction: column; gap: 0.35rem;"></div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. LESSON PACKS
+     * =========================================================================
+     */
+    const DEFAULT_LESSON_PACK = {
+      packId: "okrp-secondhand-smoke-03",
+      title: "ฮิปโปงับงับ ปิกนิกหรรษา — หลีกเลี่ยงควันบุหรี่มือสอง",
+      sourceRef: {
+        mediaTitle: "เรื่องง่าย ๆ เกี่ยวกับมะเร็งปอด (OKRP)",
+        pdfPages: [3, 8],
+        author: "นายณัฐพล แสงสวัสดิ์",
+        school: "โรงเรียนพิจิตรปัญญานุกูล",
+        url: "https://www.okrp.in.th/home/detail?type=media&id=32f05266-2287-4d24-8f8c-cbfc2cafa88f"
+      },
+      categories: {
+        stay_here: { label: "พักตรงนี้", icon: "mat" },
+        move_with_adult: { label: "ชวนผู้ใหญ่ย้ายจุด", icon: "hand" }
+      },
+      rounds: [
+        {
+          roundName: "รอบที่ 1: ลานปิกนิกปลอดบุหรี่",
+          stops: [
+            {
+              id: "H1",
+              stopName: "ลูกเป็ดกับคุณป้า",
+              sceneId: "duck_mat_clean",
+              stickerId: "duck_footprints",
+              actionType: "stay_here",
+              question: "ลูกเป็ดกับคุณป้ามาถึงลานปิกนิกปลอดบุหรี่แล้ว",
+              options: [
+                { id: "stay_here", label: "พักตรงนี้", icon: "🧺", isCorrect: true },
+                { id: "move_with_adult", label: "ชวนผู้ใหญ่ย้ายจุด", icon: "🤝", isCorrect: false }
+              ],
+              hint: "สังเกตในภาพสิ ลูกเป็ดถือเสื่อมาถึงลานปิกนิกปลอดบุหรี่แล้ว ไม่มีคนสูบบุหรี่อยู่เลย",
+              consequenceText: "ตรงนี้เป็นลานปลอดบุหรี่ ไม่มีคนสูบบุหรี่ ลูกเป็ดกับคุณป้าเลยคลี่เสื่อนั่งพักได้สบายใจ",
+              explanation: "ทั้งคู่คลี่เสื่อ ลายบนเสื่อเป็นรอยเท้าเป็ดน่ารักเชียว",
+              grapeBonus: false
+            }
+          ]
+        },
+        {
+          roundName: "รอบที่ 2: ม้านั่งในสวน",
+          stops: [
+            {
+              id: "H2",
+              stopName: "กระต่ายกับคุณพ่อ",
+              sceneId: "rabbit_bench_smoke",
+              stickerId: "rabbit_lunchbox_move",
+              actionType: "move_with_adult",
+              question: "ข้างม้านั่งที่กระต่ายจะนั่ง มีคนกำลังสูบบุหรี่",
+              options: [
+                { id: "stay_here", label: "พักตรงนี้", icon: "🧺", isCorrect: false },
+                { id: "move_with_adult", label: "ชวนผู้ใหญ่ย้ายจุด", icon: "🤝", isCorrect: true }
+              ],
+              hint: "ดูข้างม้านั่งในภาพนะ มีคนถือบุหรี่และมีมวนบุหรี่อยู่ใกล้ที่นั่ง",
+              consequenceText: "ตรงม้านั่งมีคนสูบบุหรี่ กระต่ายเลยจูงมือชวนพ่อถือกล่องข้าวไปปูเสื่อที่อื่น",
+              explanation: "กระต่ายชวนคุณพ่อถือกล่องข้าวไปปูเสื่อจุดใหม่ที่อากาศสดชื่น",
+              grapeBonus: false
+            }
+          ]
+        },
+        {
+          roundName: "รอบที่ 3: จุดชมขบวน",
+          stops: [
+            {
+              id: "H3",
+              stopName: "คาปิกับคุณป้า",
+              sceneId: "capi_parade_smoke",
+              stickerId: "capi_parade_clean",
+              actionType: "move_with_adult",
+              question: "ตอนแรกคาปินั่งดูขบวนอยู่ ตอนนี้มีคนมาเริ่มสูบบุหรี่ข้าง ๆ",
+              options: [
+                { id: "stay_here", label: "พักตรงนี้", icon: "🧺", isCorrect: false },
+                { id: "move_with_adult", label: "ชวนผู้ใหญ่ย้ายจุด", icon: "🤝", isCorrect: true }
+              ],
+              hint: "สถานการณ์เปลี่ยนไปแล้ว ตอนนี้มีคนมายืนสูบบุหรี่ข้าง ๆ คาปิ",
+              consequenceText: "มีคนมาเริ่มสูบบุหรี่ข้าง ๆ คาปิเลยรีบบอกคุณป้าให้พาย้ายไปดูขบวนที่ลานปลอดบุหรี่",
+              explanation: "คุณป้าพาคาปิย้ายไปดูขบวนที่ลานปลอดบุหรี่ สนุกปลอดภัยทั้งคู่",
+              grapeBonus: false
+            }
+          ]
+        },
+        {
+          roundName: "รอบที่ 4: โต๊ะในลานปลอดบุหรี่",
+          stops: [
+            {
+              id: "H4",
+              stopName: "กบกับคุณพ่อ",
+              sceneId: "frog_grapes_clean",
+              stickerId: "frog_grape_roll",
+              actionType: "stay_here",
+              question: "เพื่อนนัดกบกับคุณพ่อที่โต๊ะในลานปลอดบุหรี่ ทั้งคู่มาถึงแล้ว",
+              options: [
+                { id: "stay_here", label: "พักตรงนี้", icon: "🧺", isCorrect: true },
+                { id: "move_with_adult", label: "ชวนผู้ใหญ่ย้ายจุด", icon: "🤝", isCorrect: false }
+              ],
+              hint: "ดูที่โต๊ะในลานปลอดบุหรี่สิ เพื่อนโบกมือรออยู่และไม่มีคนสูบบุหรี่เลย",
+              consequenceText: "โต๊ะนี้อยู่ในลานปลอดบุหรี่ ปลอดภัยไร้ควัน กบกับคุณพ่อเลยนั่งพักกับเพื่อนตรงนี้ได้ทันที",
+              explanation: "กบยกตะกร้าองุ่นขึ้นโต๊ะ องุ่นหนึ่งลูกกลิ้งมาทางฮิปโป",
+              grapeBonus: true
+            }
+          ]
+        },
+        {
+          roundName: "รอบที่ 5: โต๊ะขนมหน้าร้าน",
+          stops: [
+            {
+              id: "H5",
+              stopName: "ลูกแมวกับคุณแม่",
+              sceneId: "kitten_cafe_smoke",
+              stickerId: "kitten_cafe_clean",
+              actionType: "move_with_adult",
+              question: "มีคนกำลังสูบบุหรี่ติดกับโต๊ะที่ลูกแมวจะนั่ง",
+              options: [
+                { id: "stay_here", label: "พักตรงนี้", icon: "🧺", isCorrect: false },
+                { id: "move_with_adult", label: "ชวนผู้ใหญ่ย้ายจุด", icon: "🤝", isCorrect: true }
+              ],
+              hint: "สังเกตคนข้างโต๊ะหน้าร้านในภาพ มีคนกำลังสูบบุหรี่อยู่ติดกับโต๊ะเลย",
+              consequenceText: "มีคนสูบบุหรี่ติดกับโต๊ะหน้าร้าน ลูกแมวเลยจูงมือคุณแม่ย้ายไปกินขนมที่ลานปลอดบุหรี่",
+              explanation: "ลูกแมวจูงมือคุณแม่ไปกินขนมที่ลานปลอดบุหรี่ อร่อยและปลอดภัย",
+              grapeBonus: false
+            }
+          ]
+        }
+      ]
+    };
+
+    /**
+     * =========================================================================
+     * 2. SYNTHESIZED TOY AUDIO & THAI SPEECH ENGINE (100% Offline)
+     * =========================================================================
+     */
+    const HippoAudio = {
+      ctx: null,
+      sfxEnabled: true,
+      narrationEnabled: true,
+      paused: false,
+      lastSpeechQueue: [],
+
+      ensureCtx() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume().catch(() => {});
+        }
+      },
+
+      tone(freq, dur = 0.14, type = "sine", vol = 0.13, slideTo = null) {
+        if (!this.sfxEnabled || this.paused) return;
+        this.ensureCtx();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(vol, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + dur + 0.02);
+        } catch (e) {}
+      },
+
+      playChomp() {
+        this.tone(240, 0.09, "triangle", 0.18, 95);
+        setTimeout(() => this.tone(180, 0.11, "sine", 0.15, 75), 65);
+      },
+
+      playChew() {
+        this.tone(360, 0.07, "sine", 0.08, 420);
+        setTimeout(() => this.tone(390, 0.07, "sine", 0.08, 330), 140);
+      },
+
+      playBoingFlick() {
+        this.tone(280, 0.18, "sine", 0.15, 760);
+        setTimeout(() => this.tone(640, 0.12, "triangle", 0.14, 960), 130);
+      },
+
+      playNudgeBack() {
+        this.tone(330, 0.13, "sine", 0.11, 240);
+        setTimeout(() => this.tone(260, 0.16, "sine", 0.1, 210), 120);
+      },
+
+      playStickerPrint() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+          setTimeout(() => this.tone(f, 0.14, "triangle", 0.13), idx * 80);
+        });
+      },
+
+      playComboFanfare(comboCount) {
+        const boost = Math.min(comboCount, 5) * 35;
+        [587.33 + boost, 739.99 + boost, 880 + boost, 1174.66 + boost].forEach((f, idx) => {
+          setTimeout(() => this.tone(f, 0.13, "sine", 0.14), idx * 65);
+        });
+      },
+
+      playAnticipationOom() {
+        this.tone(320, 0.22, "sine", 0.11, 520);
+        setTimeout(() => this.tone(480, 0.16, "triangle", 0.08, 560), 90);
+      },
+
+      playScanTick() {
+        this.tone(540, 0.05, "sine", 0.05);
+      },
+
+      speakMessages(messages, { interrupt = true } = {}) {
+        const list = Array.isArray(messages) ? messages.filter(Boolean) : [messages].filter(Boolean);
+        if (list.length === 0) return;
+        this.lastSpeechQueue = list;
+
+        if (!this.narrationEnabled || this.paused || !("speechSynthesis" in window)) return;
+        try {
+          if (interrupt) window.speechSynthesis.cancel();
+          list.forEach((msg) => {
+            const utter = new SpeechSynthesisUtterance(msg);
+            utter.lang = "th-TH";
+            utter.rate = 0.96;
+            utter.pitch = 1.06;
+            window.speechSynthesis.speak(utter);
+          });
+        } catch (e) {}
+      },
+
+      repeatLast() {
+        if (this.lastSpeechQueue.length > 0) {
+          this.speakMessages(this.lastSpeechQueue, { interrupt: true });
+        }
+      },
+
+      setPaused(p) {
+        this.paused = p;
+        if (!("speechSynthesis" in window)) return;
+        try {
+          if (p) window.speechSynthesis.pause();
+          else window.speechSynthesis.resume();
+        } catch (e) {}
+      },
+
+      stopAllSpeech() {
+        if ("speechSynthesis" in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+      }
+    };
+
+    /**
+     * =========================================================================
+     * 3. CUSTOM SVG ARTWORK GENERATORS
+     * =========================================================================
+     */
+    function renderSceneSvgContent(sceneId) {
+      if (sceneId === "duck_mat_clean") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#E9F5DB" />
+          <rect x="-50" y="14" width="100" height="36" fill="#95D5B2" />
+          <line x1="-30" y1="-16" x2="-30" y2="16" stroke="#4A304D" stroke-width="2.5" />
+          <circle cx="-30" cy="-22" r="10" fill="#FFFFFF" stroke="#E63946" stroke-width="2.5" />
+          <line x1="-36" y1="-28" x2="-24" y2="-16" stroke="#E63946" stroke-width="2.2" />
+          <circle cx="-4" cy="-8" r="8" fill="#FFD166" stroke="#4A304D" stroke-width="2" />
+          <path d="M -13 18 Q -4 2 5 18 Z" fill="#FF8FA3" stroke="#4A304D" stroke-width="2" />
+          <circle cx="16" cy="2" r="6.5" fill="#FFE66D" stroke="#4A304D" stroke-width="2" />
+          <polygon points="22,1 28,3 22,5" fill="#FF9F1C" stroke="#4A304D" stroke-width="1.4" />
+          <rect x="7" y="8" width="20" height="7" rx="3.5" fill="#8ECAE6" stroke="#4A304D" stroke-width="2" />
+        `;
+      } else if (sceneId === "rabbit_bench_smoke") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#FFF3E4" />
+          <rect x="-50" y="18" width="100" height="32" fill="#B7E4C7" />
+          <rect x="-26" y="4" width="44" height="6" rx="2" fill="#DDA15E" stroke="#4A304D" stroke-width="2" />
+          <rect x="-26" y="12" width="44" height="5" rx="2" fill="#DDA15E" stroke="#4A304D" stroke-width="2" />
+          <line x1="-22" y1="17" x2="-22" y2="26" stroke="#4A304D" stroke-width="2.5" />
+          <line x1="14" y1="17" x2="14" y2="26" stroke="#4A304D" stroke-width="2.5" />
+          <circle cx="30" cy="-10" r="7" fill="#ADB5BD" stroke="#4A304D" stroke-width="2" />
+          <rect x="23" y="-2" width="14" height="22" rx="5" fill="#6C757D" stroke="#4A304D" stroke-width="2" />
+          <rect x="11" y="-4" width="12" height="3.2" rx="1" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.3" />
+          <rect x="9" y="-4" width="3" height="3.2" fill="#E63946" />
+          <path d="M 10 -7 Q 7 -13 11 -18" fill="none" stroke="#4A304D" stroke-width="1.6" stroke-dasharray="2 2" />
+          <ellipse cx="-26" cy="-16" rx="2.5" ry="8" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.8" />
+          <ellipse cx="-20" cy="-16" rx="2.5" ry="8" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.8" />
+          <circle cx="-23" cy="-6" r="6" fill="#FFFFFF" stroke="#4A304D" stroke-width="2" />
+          <rect x="-14" y="0" width="12" height="10" rx="2.5" fill="#FFD166" stroke="#4A304D" stroke-width="1.8" />
+        `;
+      } else if (sceneId === "capi_parade_smoke") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#FFE5EC" />
+          <rect x="-50" y="18" width="100" height="32" fill="#BDE0FE" />
+          <rect x="-28" y="-2" width="22" height="16" rx="8" fill="#B08968" stroke="#4A304D" stroke-width="2" />
+          <circle cx="-10" cy="-4" r="7" fill="#B08968" stroke="#4A304D" stroke-width="2" />
+          <circle cx="24" cy="-12" r="7" fill="#ADB5BD" stroke="#4A304D" stroke-width="2" />
+          <rect x="17" y="-4" width="14" height="22" rx="5" fill="#6C757D" stroke="#4A304D" stroke-width="2" />
+          <rect x="6" y="-5" width="11" height="3" rx="1" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.3" />
+          <rect x="4" y="-5" width="3" height="3" fill="#E63946" />
+          <path d="M 5 -8 Q 2 -15 6 -20" fill="none" stroke="#4A304D" stroke-width="1.6" stroke-dasharray="2 2" />
+        `;
+      } else if (sceneId === "frog_grapes_clean") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#E9F5DB" />
+          <rect x="-50" y="16" width="100" height="34" fill="#95D5B2" />
+          <line x1="-32" y1="-16" x2="-32" y2="16" stroke="#4A304D" stroke-width="2.5" />
+          <circle cx="-32" cy="-22" r="9.5" fill="#FFFFFF" stroke="#E63946" stroke-width="2.4" />
+          <line x1="-38" y1="-28" x2="-26" y2="-16" stroke="#E63946" stroke-width="2.2" />
+          <rect x="-12" y="8" width="44" height="6" rx="2.5" fill="#DDA15E" stroke="#4A304D" stroke-width="2" />
+          <circle cx="2" cy="-6" r="7.5" fill="#80ED99" stroke="#4A304D" stroke-width="2" />
+          <rect x="14" y="-3" width="14" height="11" rx="3" fill="#F4A261" stroke="#4A304D" stroke-width="1.8" />
+          <circle cx="19" cy="-6" r="3.5" fill="#9D4EDD" />
+          <circle cx="24" cy="-6" r="3.5" fill="#9D4EDD" />
+        `;
+      } else if (sceneId === "kitten_cafe_smoke") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#FFF0F3" />
+          <rect x="-50" y="18" width="100" height="32" fill="#FFCCD5" />
+          <polygon points="-26,-12 -23,-20 -19,-13" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.6" />
+          <polygon points="-16,-13 -12,-20 -9,-12" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.6" />
+          <circle cx="-18" cy="-6" r="7.5" fill="#FFFFFF" stroke="#4A304D" stroke-width="2" />
+          <circle cx="24" cy="-12" r="7" fill="#ADB5BD" stroke="#4A304D" stroke-width="2" />
+          <rect x="17" y="-4" width="14" height="22" rx="5" fill="#6C757D" stroke="#4A304D" stroke-width="2" />
+          <rect x="6" y="-5" width="11" height="3" rx="1" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.3" />
+          <rect x="4" y="-5" width="3" height="3" fill="#E63946" />
+        `;
+      } else if (sceneId === "kafae_cup") {
+        return `
+          <rect x="-50" y="-50" width="100" height="100" fill="#FFF3E4" />
+          <rect x="-18" y="-6" width="36" height="28" rx="8" fill="#FFFFFF" stroke="#4A304D" stroke-width="2.5" />
+          <path d="M 18 -1 C 28 -1 28 16 18 16" fill="none" stroke="#4A304D" stroke-width="2.5" />
+          <ellipse cx="0" cy="-6" rx="18" ry="5" fill="#6F4E37" stroke="#4A304D" stroke-width="2" />
+          <path d="M -6 -16 Q -9 -24 -4 -30 M 6 -16 Q 3 -24 8 -30" fill="none" stroke="#4A304D" stroke-width="2" stroke-linecap="round" />
+        `;
+      }
+      return `
+        <rect x="-50" y="-50" width="100" height="100" fill="#FFF8E8" />
+        <text x="0" y="8" text-anchor="middle" font-size="30">🧺</text>
+      `;
+    }
+
+    function renderFruitSvg(fruitId, showDragTutorial = false, { shareMode = false } = {}) {
+      const highlightBackdrop = shareMode
+        ? `
+        <ellipse cx="0" cy="4" rx="54" ry="36" fill="url(#foodGlowGrad)" />
+        <circle class="tap-ripple-anim" cx="0" cy="2" r="24" fill="none" stroke="#FF5400" stroke-width="2.6" />
+        <text x="-38" y="-26" text-anchor="middle" font-size="11.5" font-weight="900" fill="#1D8AB8" stroke="#FFFFFF" stroke-width="2.6" paint-order="stroke">⬆️ ฟ้า</text>
+        <text x="38" y="-26" text-anchor="middle" font-size="11.5" font-weight="900" fill="#8A3FFC" stroke="#FFFFFF" stroke-width="2.6" paint-order="stroke">⬇️ ม่วง</text>
+        <rect x="-56" y="34" width="112" height="21" rx="10.5" fill="#FF7B00" stroke="#3D2342" stroke-width="2.2" />
+        <text x="0" y="48" text-anchor="middle" font-size="11" font-weight="900" fill="#FFFFFF">👆 จิ้มผ่าแบ่งทั้งคู่!</text>
+      `
+        : `
+        <ellipse class="food-halo-pulse" cx="0" cy="4" rx="48" ry="32" fill="url(#foodGlowGrad)" stroke="#F4A261" stroke-width="2.6" stroke-dasharray="8 6" stroke-linecap="round" />
+        <text x="0" y="-31" text-anchor="middle" font-size="12" font-weight="900" fill="#1D8AB8" stroke="#FFFFFF" stroke-width="2.8" paint-order="stroke">⬆️ น้องฟ้า</text>
+        <text x="0" y="45" text-anchor="middle" font-size="12" font-weight="900" fill="#8A3FFC" stroke="#FFFFFF" stroke-width="2.8" paint-order="stroke">⬇️ น้องม่วง</text>
+      `;
+
+      const tutorialHand = showDragTutorial
+        ? `
+        <g class="tutorial-hand-anim" pointer-events="none">
+          <circle cx="0" cy="0" r="17" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.5" />
+          <text x="0" y="6.5" text-anchor="middle" font-size="20">👆</text>
+          <rect x="20" y="-11" width="76" height="22" rx="11" fill="#FFC43D" stroke="#3D2342" stroke-width="2" />
+          <text x="58" y="3.5" text-anchor="middle" font-size="11" font-weight="900" fill="#3D2342">ลากไปป้อนเลย!</text>
+        </g>
+        `
+        : "";
+
+      const shareSplitOverlay = shareMode
+        ? `
+        <line x1="0" y1="-15" x2="0" y2="22" stroke="#3D2342" stroke-width="2.5" stroke-dasharray="4 3" stroke-linecap="round" />
+        <text x="0" y="-17" text-anchor="middle" font-size="13">✂️</text>
+        <g class="tap-finger-anim" pointer-events="none">
+          <circle cx="0" cy="0" r="14" fill="#FFFFFF" stroke="#3D2342" stroke-width="2.2" />
+          <text x="0" y="5.5" text-anchor="middle" font-size="17">👆</text>
+        </g>
+        `
+        : "";
+
+      let fruitGraphic = "";
+      if (fruitId === "watermelon") {
+        fruitGraphic = `
+          <ellipse cx="0" cy="18" rx="34" ry="10" fill="rgba(61, 35, 66, 0.25)" />
+          <path d="M -36 -6 Q 0 38 36 -6 Z" fill="#40916C" stroke="#3D2342" stroke-width="3" stroke-linejoin="round" />
+          <path d="M -31 -6 Q 0 30 31 -6 Z" fill="#FFFFFF" />
+          <path d="M -27 -6 Q 0 24 27 -6 Z" fill="#FF477E" stroke="#3D2342" stroke-width="2" />
+          <ellipse cx="-10" cy="3" rx="2" ry="3.2" fill="#3D2342" />
+          <ellipse cx="0" cy="8" rx="2" ry="3.2" fill="#3D2342" />
+          <ellipse cx="10" cy="3" rx="2" ry="3.2" fill="#3D2342" />
+        `;
+      } else if (fruitId === "grapes") {
+        fruitGraphic = `
+          <ellipse cx="0" cy="20" rx="28" ry="9" fill="rgba(61, 35, 66, 0.25)" />
+          <path d="M 0 -22 Q 10 -28 16 -20" fill="none" stroke="#40916C" stroke-width="3" stroke-linecap="round" />
+          <circle cx="-11" cy="-8" r="9" fill="#9D4EDD" stroke="#3D2342" stroke-width="2.4" />
+          <circle cx="11" cy="-8" r="9" fill="#9D4EDD" stroke="#3D2342" stroke-width="2.4" />
+          <circle cx="0" cy="-5" r="9" fill="#C77DFF" stroke="#3D2342" stroke-width="2.4" />
+          <circle cx="-6" cy="7" r="9" fill="#7B2CBF" stroke="#3D2342" stroke-width="2.4" />
+          <circle cx="6" cy="7" r="9" fill="#9D4EDD" stroke="#3D2342" stroke-width="2.4" />
+          <circle cx="0" cy="17" r="8.5" fill="#7B2CBF" stroke="#3D2342" stroke-width="2.4" />
+        `;
+      } else if (fruitId === "banana") {
+        fruitGraphic = `
+          <ellipse cx="0" cy="18" rx="30" ry="8" fill="rgba(61, 35, 66, 0.25)" />
+          <path d="M -28 -10 Q -8 24 28 -8 Q 10 10 -28 -10 Z" fill="#FFC43D" stroke="#3D2342" stroke-width="3" stroke-linejoin="round" />
+          <circle cx="-28" cy="-10" r="2.5" fill="#3D2342" />
+          <circle cx="28" cy="-8" r="2.5" fill="#3D2342" />
+        `;
+      } else if (fruitId === "strawberry") {
+        fruitGraphic = `
+          <ellipse cx="0" cy="20" rx="24" ry="8" fill="rgba(61, 35, 66, 0.25)" />
+          <path d="M -18 -8 Q -20 14 0 20 Q 20 14 18 -8 Q 0 -14 -18 -8 Z" fill="#FF477E" stroke="#3D2342" stroke-width="2.8" />
+          <polygon points="-14,-10 -6,-4 0,-12 6,-4 14,-10 0,-16" fill="#40916C" stroke="#3D2342" stroke-width="2" />
+          <circle cx="-6" cy="2" r="1.5" fill="#FFC43D" />
+          <circle cx="6" cy="2" r="1.5" fill="#FFC43D" />
+          <circle cx="0" cy="10" r="1.5" fill="#FFC43D" />
+        `;
+      } else {
+        fruitGraphic = `
+          <ellipse cx="0" cy="20" rx="24" ry="8" fill="rgba(61, 35, 66, 0.25)" />
+          <circle cx="0" cy="2" r="19" fill="#FF9F1C" stroke="#3D2342" stroke-width="2.8" />
+          <path d="M 0 -17 Q 8 -24 14 -17 Q 6 -13 0 -17 Z" fill="#40916C" stroke="#3D2342" stroke-width="2" />
+        `;
+      }
+
+      return `
+        <g class="plate-food-enter">
+          <g id="activeFoodItem" class="${shareMode ? "" : "biscuit-float-anim"}" style="cursor: ${shareMode ? "pointer" : "grab"};">
+            ${highlightBackdrop}
+            ${fruitGraphic}
+            ${shareSplitOverlay}
+            ${tutorialHand}
+          </g>
+        </g>
+      `;
+    }
+
+    function renderOutcomeStickerSvg(stickerId) {
+      if (stickerId === "duck_footprints") {
+        return `
+          <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์ลูกเป็ดและคุณป้าคลี่เสื่อลายรอยเท้าเป็ด">
+            <rect x="2" y="2" width="136" height="80" rx="12" fill="#D8F3DC" stroke="#4A304D" stroke-width="2.5" />
+            <polygon points="28,68 42,38 98,38 112,68" fill="#FFD166" stroke="#4A304D" stroke-width="2.2" />
+            <text x="56" y="57" font-size="14">🐾</text>
+            <text x="76" y="57" font-size="14">🐾</text>
+            <circle cx="48" cy="24" r="9" fill="#FF8FA3" stroke="#4A304D" stroke-width="2" />
+            <circle cx="92" cy="26" r="8" fill="#FFE66D" stroke="#4A304D" stroke-width="2" />
+          </svg>
+        `;
+      } else if (stickerId === "rabbit_lunchbox_move") {
+        return `
+          <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์กระต่ายจูงมือคุณพ่อถือกล่องข้าวไปปูเสื่ออีกจุด">
+            <rect x="2" y="2" width="136" height="80" rx="12" fill="#E0FBFC" stroke="#4A304D" stroke-width="2.5" />
+            <path d="M 14 66 L 126 66" stroke="#52B788" stroke-width="4" stroke-linecap="round" />
+            <circle cx="34" cy="26" r="9.5" fill="#8ECAE6" stroke="#4A304D" stroke-width="2" />
+            <path d="M 24 58 Q 34 38 44 58 Z" fill="#457B9D" stroke="#4A304D" stroke-width="2" />
+            <ellipse cx="56" cy="21" rx="2.5" ry="7" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.6" />
+            <ellipse cx="62" cy="21" rx="2.5" ry="7" fill="#FFFFFF" stroke="#4A304D" stroke-width="1.6" />
+            <circle cx="59" cy="32" r="8" fill="#FFFFFF" stroke="#4A304D" stroke-width="2" />
+            <path d="M 42 44 L 53 44" stroke="#4A304D" stroke-width="2.5" stroke-linecap="round" />
+            <rect x="20" y="45" width="13" height="10" rx="2.5" fill="#FFD166" stroke="#4A304D" stroke-width="1.8" />
+            <polygon points="82,63 92,48 124,48 130,63" fill="#FFD166" stroke="#4A304D" stroke-width="1.8" />
+            <text x="108" y="38" text-anchor="middle" font-size="18">🌳✨</text>
+          </svg>
+        `;
+      } else if (stickerId === "capi_parade_clean") {
+        return `
+          <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์คุณป้าพาคาปิย้ายไปดูขบวนที่ลานปลอดบุหรี่">
+            <rect x="2" y="2" width="136" height="80" rx="12" fill="#FFF3E4" stroke="#4A304D" stroke-width="2.5" />
+            <circle cx="24" cy="20" r="11" fill="#FFFFFF" stroke="#E63946" stroke-width="2.2" />
+            <line x1="17" y1="13" x2="31" y2="27" stroke="#E63946" stroke-width="2" />
+            <circle cx="56" cy="34" r="9.5" fill="#FFAFCC" stroke="#4A304D" stroke-width="2" />
+            <rect x="74" y="38" width="22" height="15" rx="7" fill="#B08968" stroke="#4A304D" stroke-width="2" />
+            <text x="112" y="46" font-size="20">🎺🎉</text>
+          </svg>
+        `;
+      } else if (stickerId === "frog_grape_roll") {
+        return `
+          <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์กบยกตะกร้าองุ่นขึ้นโต๊ะ องุ่นหนึ่งลูกกลิ้งมาทางฮิปโป">
+            <rect x="2" y="2" width="136" height="80" rx="12" fill="#D8F3DC" stroke="#4A304D" stroke-width="2.5" />
+            <rect x="34" y="44" width="72" height="8" rx="3" fill="#DDA15E" stroke="#4A304D" stroke-width="2" />
+            <circle cx="52" cy="28" r="9" fill="#80ED99" stroke="#4A304D" stroke-width="2" />
+            <rect x="68" y="30" width="20" height="14" rx="4" fill="#F4A261" stroke="#4A304D" stroke-width="2" />
+            <circle cx="75" cy="27" r="4.5" fill="#9D4EDD" stroke="#4A304D" stroke-width="1.5" />
+            <circle cx="83" cy="27" r="4.5" fill="#9D4EDD" stroke="#4A304D" stroke-width="1.5" />
+            <circle cx="112" cy="58" r="6" fill="#9D4EDD" stroke="#4A304D" stroke-width="2" />
+            <path d="M 94 48 Q 104 52 108 55" fill="none" stroke="#4A304D" stroke-width="1.8" stroke-dasharray="3 2" />
+          </svg>
+        `;
+      } else if (stickerId === "kitten_cafe_clean") {
+        return `
+          <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์ลูกแมวจูงมือคุณแม่ไปกินขนมที่ลานปลอดบุหรี่">
+            <rect x="2" y="2" width="136" height="80" rx="12" fill="#FFF0F3" stroke="#4A304D" stroke-width="2.5" />
+            <circle cx="48" cy="30" r="10" fill="#FFCAD4" stroke="#4A304D" stroke-width="2" />
+            <circle cx="78" cy="36" r="8.5" fill="#FFFFFF" stroke="#4A304D" stroke-width="2" />
+            <line x1="56" y1="42" x2="70" y2="42" stroke="#4A304D" stroke-width="2.5" stroke-linecap="round" />
+            <text x="108" y="45" font-size="20">🧁🌿</text>
+          </svg>
+        `;
+      }
+      return `
+        <svg viewBox="0 0 140 84" width="100%" height="74" role="img" aria-label="สติกเกอร์รางวัล">
+          <rect x="2" y="2" width="136" height="80" rx="12" fill="#FFF3B0" stroke="#4A304D" stroke-width="2.5" />
+          <text x="70" y="48" text-anchor="middle" font-size="24" font-weight="800" fill="#4A304D">⭐ ผ่านด่าน! ⭐</text>
+        </svg>
+      `;
+    }
+
+    /**
+     * =========================================================================
+     * 4. MAIN GAME CONTROLLER ("ฮิปโปงับงับ ปิกนิกหรรษา")
+     * =========================================================================
+     */
+    class HungryHippoGame {
+      constructor() {
+        this.STORAGE_KEY = "boomplay_hippo_progress_v1";
+        this.lessonPack = JSON.parse(JSON.stringify(DEFAULT_LESSON_PACK));
+
+        this.mode = "OPENING";
+        this.flatStops = [];
+        this.currentStopIdx = 0;
+        this.earnedStickers = [];
+
+        this.busyAnimating = false;
+        this.roundAnswered = false;
+        this.paused = false;
+        this.activeModal = null;
+        this.autoAdvanceTimer = null;
+
+        this.comboStreak = 0;
+        this.mojiFedCount = 0;
+        this.buayFedCount = 0;
+
+        this.grapeTargetHippo = null;
+        this.grapeStep = 0;
+        this.freeFruit = "watermelon";
+
+        this.draggingBiscuit = false;
+        this.hoverTargetHippo = null;
+
+        this.settings = {
+          switchMode: false,
+          scanSpeedMs: 2400,
+          narration: true,
+          sfx: true,
+          textSize: "normal",
+          highContrast: false,
+          reducedMotion: window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        };
+
+        this.scanIndex = 0;
+        this.scanTimer = null;
+        this.spaceHeld = false;
+
+        this.cacheDom();
+        this.loadSavedProgress();
+        this.rebuildFlatStops();
+        this.bindEvents();
+        this.applySettings();
+        this.syncSignsFromPack();
+        this.renderStickerSidebar();
+        this.enterOpeningState(false);
+      }
+
+      cacheDom() {
+        this.dom = {
+          stageStatus: document.getElementById("uiStageStatus"),
+          btnRepeatAudio: document.getElementById("btnRepeatAudio"),
+          btnPause: document.getElementById("btnPause"),
+          pauseText: document.getElementById("uiPauseText"),
+          btnStickersModal: document.getElementById("btnStickersModal"),
+          stickerCountTop: document.getElementById("uiStickerCountTop"),
+          stickerTotalTop: document.getElementById("uiStickerTotalTop"),
+          btnTeacher: document.getElementById("btnTeacher"),
+          btnSettings: document.getElementById("btnSettings"),
+
+          svg: document.getElementById("hippoTableSvg"),
+          mojiHitArea: document.getElementById("mojiHitArea"),
+          buayHitArea: document.getElementById("buayHitArea"),
+          mojiTableShadow: document.getElementById("mojiTableShadow"),
+          mojiTorsoGroup: document.getElementById("mojiTorsoGroup"),
+          mojiSideFlabL: document.getElementById("mojiSideFlabL"),
+          mojiSideFlabR: document.getElementById("mojiSideFlabR"),
+          mojiBodyOuter: document.getElementById("mojiBodyOuter"),
+          mojiBodyInner: document.getElementById("mojiBodyInner"),
+          mojiFoodLump: document.getElementById("mojiFoodLump"),
+          mojiRoll1: document.getElementById("mojiRoll1"),
+          mojiRoll2: document.getElementById("mojiRoll2"),
+          mojiRoll3: document.getElementById("mojiRoll3"),
+          mojiBellyButton: document.getElementById("mojiBellyButton"),
+          mojiBellySwirl: document.getElementById("mojiBellySwirl"),
+          mojiPawL: document.getElementById("mojiPawL"),
+          mojiPawR: document.getElementById("mojiPawR"),
+          mojiHeadBase: document.getElementById("mojiHeadBase"),
+          mojiNeckBar: document.getElementById("mojiNeckBar"),
+          mojiHeadGroup: document.getElementById("mojiHeadGroup"),
+          mojiMouthCavity: document.getElementById("mojiMouthCavity"),
+          mojiCheekL: document.getElementById("mojiCheekL"),
+          mojiCheekR: document.getElementById("mojiCheekR"),
+          mojiHatGroup: document.getElementById("mojiHatGroup"),
+          mojiPupilL: document.getElementById("mojiPupilL"),
+          mojiPupilR: document.getElementById("mojiPupilR"),
+          mojiSignText: document.getElementById("mojiSignText"),
+          mojiDropHalo: document.getElementById("mojiDropHalo"),
+
+          buayTableShadow: document.getElementById("buayTableShadow"),
+          buayTorsoGroup: document.getElementById("buayTorsoGroup"),
+          buaySideFlabL: document.getElementById("buaySideFlabL"),
+          buaySideFlabR: document.getElementById("buaySideFlabR"),
+          buayBodyOuter: document.getElementById("buayBodyOuter"),
+          buayBodyInner: document.getElementById("buayBodyInner"),
+          buayFoodLump: document.getElementById("buayFoodLump"),
+          buayRoll1: document.getElementById("buayRoll1"),
+          buayRoll2: document.getElementById("buayRoll2"),
+          buayRoll3: document.getElementById("buayRoll3"),
+          buayBellyButton: document.getElementById("buayBellyButton"),
+          buayBellySwirl: document.getElementById("buayBellySwirl"),
+          buayPawL: document.getElementById("buayPawL"),
+          buayPawR: document.getElementById("buayPawR"),
+          buayHeadBase: document.getElementById("buayHeadBase"),
+          buayNeckBar: document.getElementById("buayNeckBar"),
+          buayHeadGroup: document.getElementById("buayHeadGroup"),
+          buayMouthCavity: document.getElementById("buayMouthCavity"),
+          buayCheekL: document.getElementById("buayCheekL"),
+          buayCheekR: document.getElementById("buayCheekR"),
+          buayRindGag: document.getElementById("buayRindGag"),
+          buayPupilL: document.getElementById("buayPupilL"),
+          buayPupilR: document.getElementById("buayPupilR"),
+          buaySignText: document.getElementById("buaySignText"),
+          buayDropHalo: document.getElementById("buayDropHalo"),
+
+          centerFoodLayer: document.getElementById("centerFoodLayer"),
+          stageFxLayer: document.getElementById("stageFxLayer"),
+
+          latestStickerBox: document.getElementById("uiLatestStickerBox"),
+          stickerProgressLabel: document.getElementById("uiStickerProgressLabel"),
+          stickerThumbsGrid: document.getElementById("uiStickerThumbsGrid"),
+
+          promptThumbBox: document.getElementById("uiPromptThumbBox"),
+          promptStepPill: document.getElementById("uiPromptStepPill"),
+          promptText: document.getElementById("uiPromptText"),
+          btnListenScene: document.getElementById("btnListenScene"),
+          btnZoomScene: document.getElementById("btnZoomScene"),
+          sceneZoomCard: document.getElementById("uiSceneZoomCard"),
+          sceneZoomArtwork: document.getElementById("uiSceneZoomArtwork"),
+          sceneZoomCaption: document.getElementById("uiSceneZoomCaption"),
+          btnCloseSceneZoom: document.getElementById("btnCloseSceneZoom"),
+
+          consequenceCard: document.getElementById("uiConsequenceCard"),
+          consequenceArtwork: document.getElementById("uiConsequenceArtwork"),
+          consequenceText: document.getElementById("uiConsequenceText"),
+          consequenceSubtext: document.getElementById("uiConsequenceSubtext"),
+
+          mojiHearts: document.getElementById("uiMojiHearts"),
+          buayHearts: document.getElementById("uiBuayHearts"),
+          comboBadge: document.getElementById("uiComboBadge"),
+          bottomControlCard: document.getElementById("uiBottomControlCard"),
+          actionButtons: document.getElementById("uiActionButtons"),
+
+          modalPause: document.getElementById("modalPause"),
+          btnResumeGame: document.getElementById("btnResumeGame"),
+          btnRestartFromPause: document.getElementById("btnRestartFromPause"),
+
+          modalSettings: document.getElementById("modalSettings"),
+          btnCloseSettings: document.getElementById("btnCloseSettings"),
+          setSwitchMode: document.getElementById("setSwitchMode"),
+          setScanSpeed: document.getElementById("setScanSpeed"),
+          setNarration: document.getElementById("setNarration"),
+          setSfx: document.getElementById("setSfx"),
+          setTextSize: document.getElementById("setTextSize"),
+          setContrast: document.getElementById("setContrast"),
+          setReducedMotion: document.getElementById("setReducedMotion"),
+
+          modalStickers: document.getElementById("modalStickers"),
+          btnCloseStickers: document.getElementById("btnCloseStickers"),
+          stickerGalleryList: document.getElementById("uiStickerGalleryList"),
+
+          modalTeacher: document.getElementById("modalTeacher"),
+          btnCloseTeacher: document.getElementById("btnCloseTeacher"),
+          teacherSourceBox: document.getElementById("uiTeacherSourceBox")
+        };
+      }
+
+      loadSavedProgress() {
+        try {
+          const raw = window.localStorage.getItem(this.STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.packId === this.lessonPack.packId && Array.isArray(parsed.earnedStickers)) {
+            this.earnedStickers = parsed.earnedStickers;
+          }
+        } catch (e) {}
+      }
+
+      saveProgress() {
+        try {
+          window.localStorage.setItem(
+            this.STORAGE_KEY,
+            JSON.stringify({
+              packId: this.lessonPack.packId,
+              earnedStickers: this.earnedStickers
+            })
+          );
+        } catch (e) {}
+      }
+
+      rebuildFlatStops() {
+        this.flatStops = [];
+        (this.lessonPack.rounds || []).forEach((r) => {
+          (r.stops || []).forEach((s) => {
+            this.flatStops.push({ ...s, roundName: r.roundName });
+          });
+        });
+        this.dom.stickerTotalTop.textContent = String(this.flatStops.length);
+      }
+
+      getCategoryMapping() {
+        const firstStop = this.flatStops[0];
+        if (!firstStop || !Array.isArray(firstStop.options) || firstStop.options.length < 2) {
+          return {
+            mojiCatId: "stay_here",
+            mojiLabel: "พักตรงนี้",
+            buayCatId: "move_with_adult",
+            buayLabel: "ชวนผู้ใหญ่ย้ายจุด"
+          };
+        }
+        const opt0 = firstStop.options[0];
+        const opt1 = firstStop.options[1];
+        return {
+          mojiCatId: opt0.id,
+          mojiLabel: opt0.label,
+          buayCatId: opt1.id,
+          buayLabel: opt1.label
+        };
+      }
+
+      syncSignsFromPack() {
+        const map = this.getCategoryMapping();
+        this.dom.mojiSignText.textContent = map.mojiLabel;
+        this.dom.buaySignText.textContent = map.buayLabel;
+        this.dom.mojiHitArea.setAttribute("aria-label", `ป้อนน้องฟ้า ${map.mojiLabel}`);
+        this.dom.buayHitArea.setAttribute("aria-label", `ป้อนน้องม่วง ${map.buayLabel}`);
+      }
+
+      bindEvents() {
+        const handleHippoDirectTap = (hippoId) => {
+          if (this.paused || this.busyAnimating || this.activeModal) return;
+          HippoAudio.ensureCtx();
+          if (this.mode === "OPENING" || this.mode === "OPENING_FED") {
+            this.feedOpeningWatermelon(hippoId);
+          } else if (this.mode === "PLAY_ROUND") {
+            const map = this.getCategoryMapping();
+            const chosenId = hippoId === "moji" ? map.mojiCatId : map.buayCatId;
+            this.attemptFeedRoundBiscuit(hippoId, chosenId);
+          } else if (this.mode === "GRAPE_PLAY") {
+            this.handleGrapeBonusTap(hippoId);
+          } else if (this.mode === "FINALE_PICNIC") {
+            this.playSharedWatermelonGag();
+          } else if (this.mode === "FREE_FEED") {
+            this.feedFreeMode(hippoId);
+          }
+        };
+
+        this.dom.mojiHitArea.addEventListener("click", () => handleHippoDirectTap("moji"));
+        this.dom.buayHitArea.addEventListener("click", () => handleHippoDirectTap("buay"));
+
+        this.dom.centerFoodLayer.addEventListener("click", () => {
+          if (this.paused || this.busyAnimating || this.activeModal) return;
+          if (this.mode === "FINALE_PICNIC") {
+            HippoAudio.ensureCtx();
+            this.playSharedWatermelonGag();
+          }
+        });
+
+        [
+          { el: this.dom.mojiHitArea, id: "moji" },
+          { el: this.dom.buayHitArea, id: "buay" }
+        ].forEach(({ el, id }) => {
+          // Closing the rules dialog can put a hippo under a stationary pointer.
+          el.addEventListener("pointermove", (e) => {
+            if (e.pointerType !== "touch") el.classList.add("is-pointer-hover");
+          });
+          el.addEventListener("pointerleave", () => el.classList.remove("is-pointer-hover"));
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.code === "Space" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              if (e.repeat) return;
+              handleHippoDirectTap(id);
+            }
+          });
+        });
+
+        const canDragCenterFood = () =>
+          !this.paused &&
+          !this.busyAnimating &&
+          !this.activeModal &&
+          ["OPENING", "OPENING_FED", "PLAY_ROUND", "GRAPE_PLAY", "FREE_FEED"].includes(this.mode) &&
+          this.dom.centerFoodLayer.innerHTML.trim() !== "";
+
+        this.dom.centerFoodLayer.addEventListener("pointerdown", (e) => {
+          if (!canDragCenterFood()) return;
+          e.preventDefault();
+          HippoAudio.ensureCtx();
+          this.draggingBiscuit = true;
+          this.dom.centerFoodLayer.setPointerCapture(e.pointerId);
+        });
+
+        this.dom.centerFoodLayer.addEventListener("pointermove", (e) => {
+          if (!this.draggingBiscuit) return;
+          const pt = this.clientToSvgPoint(e.clientX, e.clientY);
+          const clampedX = Math.max(150, Math.min(410, pt.x));
+          const clampedY = Math.max(85, Math.min(315, pt.y));
+          this.dom.centerFoodLayer.setAttribute("transform", `translate(${clampedX}, ${clampedY})`);
+
+          const nextHover = pt.y < 148 ? "moji" : pt.y > 242 ? "buay" : null;
+          if (nextHover !== this.hoverTargetHippo) {
+            this.hoverTargetHippo = nextHover;
+            this.applyHoverAnticipation(nextHover);
+          }
+        });
+
+        const endBiscuitDrag = (e) => {
+          if (!this.draggingBiscuit) return;
+          this.draggingBiscuit = false;
+          this.hoverTargetHippo = null;
+          this.applyHoverAnticipation(null);
+          try {
+            if (this.dom.centerFoodLayer.hasPointerCapture(e.pointerId)) {
+              this.dom.centerFoodLayer.releasePointerCapture(e.pointerId);
+            }
+          } catch (err) {}
+
+          const pt = this.clientToSvgPoint(e.clientX, e.clientY);
+          if (pt.y < 148) {
+            handleHippoDirectTap("moji");
+          } else if (pt.y > 242) {
+            handleHippoDirectTap("buay");
+          } else {
+            this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+          }
+        };
+
+        this.dom.centerFoodLayer.addEventListener("pointerup", endBiscuitDrag);
+        this.dom.centerFoodLayer.addEventListener("pointercancel", endBiscuitDrag);
+
+        this.dom.btnRepeatAudio.addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          HippoAudio.repeatLast();
+        });
+
+        this.dom.btnListenScene.addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.speakCurrentRoundPrompt();
+        });
+
+        this.dom.btnZoomScene.addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.toggleSceneZoom(true);
+        });
+
+        this.dom.btnCloseSceneZoom.addEventListener("click", () => {
+          this.toggleSceneZoom(false);
+        });
+
+        this.dom.btnPause.addEventListener("click", () => this.togglePause());
+        this.dom.btnResumeGame.addEventListener("click", () => {
+          if (this.paused) this.togglePause();
+        });
+        this.dom.btnRestartFromPause.addEventListener("click", () => {
+          this.paused = false;
+          this.clearAutoAdvance();
+          this.dom.modalPause.hidden = true;
+          this.dom.pauseText.textContent = "⏸️ พัก";
+          this.dom.btnPause.setAttribute("aria-pressed", "false");
+          this.earnedStickers = [];
+          this.comboStreak = 0;
+          this.mojiFedCount = 0;
+          this.buayFedCount = 0;
+          this.updateGameHud();
+          this.updateHippoPlumpness();
+          this.saveProgress();
+          this.renderStickerSidebar();
+          this.enterOpeningState(true);
+        });
+
+        this.dom.btnStickersModal.addEventListener("click", () => {
+          this.renderStickerModalList();
+          this.openModal("STICKERS");
+        });
+        this.dom.btnCloseStickers.addEventListener("click", () => this.closeModal());
+
+        this.dom.btnTeacher.addEventListener("click", () => {
+          this.renderTeacherSourceCredits(this.lessonPack);
+          this.openModal("TEACHER");
+        });
+        this.dom.btnCloseTeacher.addEventListener("click", () => this.closeModal());
+
+        this.dom.btnSettings.addEventListener("click", () => this.openModal("SETTINGS"));
+        this.dom.btnCloseSettings.addEventListener("click", () => this.closeModal());
+
+        this.dom.setSwitchMode.addEventListener("click", () => {
+          this.settings.switchMode = !this.settings.switchMode;
+          this.applySettings();
+          if (this.settings.switchMode) {
+            this.syncSwitchModeStageUi();
+          }
+          this.restartSwitchScan();
+        });
+
+        this.dom.setScanSpeed.addEventListener("click", () => {
+          const speeds = [3400, 2400, 1600];
+          this.settings.scanSpeedMs = speeds[(speeds.indexOf(this.settings.scanSpeedMs) + 1) % speeds.length];
+          this.applySettings();
+          this.restartSwitchScan();
+        });
+
+        this.dom.setNarration.addEventListener("click", () => {
+          this.settings.narration = !this.settings.narration;
+          HippoAudio.narrationEnabled = this.settings.narration;
+          if (!this.settings.narration) HippoAudio.stopAllSpeech();
+          this.applySettings();
+        });
+
+        this.dom.setSfx.addEventListener("click", () => {
+          this.settings.sfx = !this.settings.sfx;
+          HippoAudio.sfxEnabled = this.settings.sfx;
+          this.applySettings();
+        });
+
+        this.dom.setTextSize.addEventListener("click", () => {
+          const sizes = ["normal", "large", "xlarge"];
+          this.settings.textSize = sizes[(sizes.indexOf(this.settings.textSize) + 1) % sizes.length];
+          this.applySettings();
+        });
+
+        this.dom.setContrast.addEventListener("click", () => {
+          this.settings.highContrast = !this.settings.highContrast;
+          this.applySettings();
+        });
+
+        this.dom.setReducedMotion.addEventListener("click", () => {
+          this.settings.reducedMotion = !this.settings.reducedMotion;
+          this.applySettings();
+        });
+
+        window.addEventListener("keydown", (e) => {
+          if (e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")) return;
+
+          if (e.code === "Space" || e.key === " ") {
+            if (this.settings.switchMode) {
+              e.preventDefault();
+              if (this.spaceHeld || e.repeat) return;
+              this.spaceHeld = true;
+              HippoAudio.ensureCtx();
+              this.triggerCurrentScanTarget();
+            } else {
+              if (this.spaceHeld || e.repeat) {
+                e.preventDefault();
+              }
+              this.spaceHeld = true;
+            }
+          } else if (e.key === "Escape") {
+            if (!this.dom.sceneZoomCard.hidden) this.toggleSceneZoom(false);
+            else if (this.activeModal) this.closeModal();
+            else if (!this.paused) this.togglePause();
+          }
+        });
+
+        window.addEventListener("keyup", (e) => {
+          if (e.code === "Space" || e.key === " ") {
+            this.spaceHeld = false;
+          }
+        });
+      }
+
+      clientToSvgPoint(clientX, clientY) {
+        const rect = this.dom.svg.getBoundingClientRect();
+        if (!rect.width || !rect.height) return { x: 280, y: 193 };
+        const x = ((clientX - rect.left) / rect.width) * 560;
+        const y = ((clientY - rect.top) / rect.height) * 385;
+        return { x, y };
+      }
+
+      applyHoverAnticipation(hippoId) {
+        if (this.dom.mojiDropHalo) {
+          this.dom.mojiDropHalo.classList.toggle("is-drop-target", hippoId === "moji");
+        }
+        if (this.dom.buayDropHalo) {
+          this.dom.buayDropHalo.classList.toggle("is-drop-target", hippoId === "buay");
+        }
+        if (this.busyAnimating) return;
+        if (this.dom.mojiMouthCavity) {
+          this.dom.mojiMouthCavity.setAttribute("ry", hippoId === "moji" ? "13" : "6");
+        }
+        if (this.dom.buayMouthCavity) {
+          this.dom.buayMouthCavity.setAttribute("ry", hippoId === "buay" ? "13" : "6");
+        }
+        if (hippoId === "moji" || hippoId === "buay") {
+          HippoAudio.playAnticipationOom();
+        }
+      }
+
+      applySettings() {
+        document.documentElement.setAttribute("data-text-size", this.settings.textSize);
+        if (this.settings.highContrast) document.documentElement.setAttribute("data-contrast", "high");
+        else document.documentElement.removeAttribute("data-contrast");
+
+        if (this.settings.reducedMotion) document.documentElement.setAttribute("data-reduced-motion", "true");
+        else document.documentElement.removeAttribute("data-reduced-motion");
+
+        this.dom.setSwitchMode.textContent = this.settings.switchMode ? "เปิดใช้งาน" : "ปิด";
+        this.dom.setSwitchMode.setAttribute("aria-pressed", String(this.settings.switchMode));
+
+        const speedLabels = { 3400: "ช้า (3.4 วิ)", 2400: "กลาง (2.4 วิ)", 1600: "เร็ว (1.6 วิ)" };
+        this.dom.setScanSpeed.textContent = speedLabels[this.settings.scanSpeedMs] || "กลาง (2.4 วิ)";
+
+        this.dom.setNarration.textContent = this.settings.narration ? "เปิดเสียงพูด" : "ปิดเสียงพูด";
+        this.dom.setNarration.setAttribute("aria-pressed", String(this.settings.narration));
+
+        this.dom.setSfx.textContent = this.settings.sfx ? "เปิดเสียง" : "ปิดเสียง";
+        this.dom.setSfx.setAttribute("aria-pressed", String(this.settings.sfx));
+
+        const textLabels = { normal: "ปกติ", large: "ใหญ่", xlarge: "ใหญ่มาก" };
+        this.dom.setTextSize.textContent = textLabels[this.settings.textSize];
+
+        this.dom.setContrast.textContent = this.settings.highContrast ? "เปิด" : "ปิด";
+        this.dom.setContrast.setAttribute("aria-pressed", String(this.settings.highContrast));
+
+        this.dom.setReducedMotion.textContent = this.settings.reducedMotion ? "เปิด" : "ปิด";
+        this.dom.setReducedMotion.setAttribute("aria-pressed", String(this.settings.reducedMotion));
+      }
+
+      togglePause() {
+        this.draggingBiscuit = false;
+        this.hoverTargetHippo = null;
+        this.applyHoverAnticipation(null);
+        this.paused = !this.paused;
+        this.dom.modalPause.hidden = !this.paused;
+        this.dom.pauseText.textContent = this.paused ? "▶️ เล่นต่อ" : "⏸️ พัก";
+        this.dom.btnPause.setAttribute("aria-pressed", String(this.paused));
+        HippoAudio.setPaused(this.paused);
+
+        if (this.paused) {
+          this.clearAutoAdvance();
+          this.stopSwitchScan();
+          if (this.settings.switchMode) {
+            this.scanIndex = 0;
+            this.startSwitchScan();
+          } else {
+            this.dom.btnResumeGame.focus({ preventScroll: true });
+          }
+        } else {
+          if (this.settings.switchMode) {
+            this.syncSwitchModeStageUi();
+            this.scanIndex = 0;
+            this.startSwitchScan();
+          }
+        }
+      }
+
+      clearAutoAdvance() {
+        if (this.autoAdvanceTimer) {
+          clearTimeout(this.autoAdvanceTimer);
+          this.autoAdvanceTimer = null;
+        }
+      }
+
+      openModal(name) {
+        this.activeModal = name;
+        this.dom.modalSettings.hidden = name !== "SETTINGS";
+        this.dom.modalStickers.hidden = name !== "STICKERS";
+        this.dom.modalTeacher.hidden = name !== "TEACHER";
+        if (this.settings.switchMode) {
+          this.scanIndex = 0;
+          this.startSwitchScan();
+        }
+      }
+
+      syncSwitchModeStageUi() {
+        if (!this.settings.switchMode) return;
+        if (this.mode === "OPENING") {
+          this.dom.bottomControlCard.hidden = false;
+          this.renderOpeningChoiceButtons();
+        } else if (this.mode === "PLAY_ROUND" && !this.roundAnswered) {
+          this.dom.bottomControlCard.hidden = false;
+          this.renderRoundChoiceButtons();
+        } else if (this.mode === "GRAPE_PLAY" && this.grapeStep === 0) {
+          this.dom.bottomControlCard.hidden = false;
+        }
+      }
+
+      closeModal() {
+        this.activeModal = null;
+        this.dom.modalSettings.hidden = true;
+        this.dom.modalStickers.hidden = true;
+        this.dom.modalTeacher.hidden = true;
+        if (this.settings.switchMode) {
+          this.syncSwitchModeStageUi();
+          this.scanIndex = 0;
+          this.startSwitchScan();
+        }
+      }
+
+      /**
+       * =========================================================================
+       * 6. OPENING SCREEN FLOW
+       * =========================================================================
+       */
+      setBottomBarVisible(isInteractive, passiveHint = "👆 ลากอาหารตรงกลางจานไปป้อนน้องฟ้าหรือน้องม่วงได้เลย") {
+        this.dom.bottomControlCard.hidden = false;
+        this.dom.bottomControlCard.classList.toggle("is-passive", !isInteractive);
+        if (!isInteractive) {
+          this.dom.actionButtons.className = "action-btn-row single-col";
+          this.dom.actionButtons.innerHTML = `<div class="passive-guide-pill">${passiveHint}</div>`;
+        }
+      }
+
+      enterOpeningState(speakNow = true) {
+        this.clearAutoAdvance();
+        this.busyAnimating = false;
+        this.draggingBiscuit = false;
+        this.hoverTargetHippo = null;
+        this.mode = "OPENING";
+        this.currentStopIdx = 0;
+        this.resetHippoExpressions();
+        this.dom.stageFxLayer.innerHTML = "";
+        this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg("watermelon", true);
+
+        this.dom.stageStatus.textContent = "ฮิปโปงับงับ ปิกนิกหรรษา";
+        this.dom.promptThumbBox.hidden = true;
+        this.dom.promptStepPill.textContent = "🍉 ช่วงลองเล่น";
+        this.dom.btnListenScene.hidden = true;
+        this.dom.btnZoomScene.hidden = true;
+        this.dom.sceneZoomCard.hidden = true;
+        this.dom.consequenceCard.hidden = true;
+
+        this.setPrompt("ลากแตงโมไปหาน้องฟ้าหรือน้องม่วงเลย!", speakNow);
+
+        if (this.settings.switchMode) {
+          this.setBottomBarVisible(true);
+          this.renderOpeningChoiceButtons();
+        } else {
+          this.setBottomBarVisible(false, "🍉 ลากแตงโมตรงกลางจานไปหาน้องฟ้าหรือน้องม่วงเลย!");
+        }
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      renderOpeningChoiceButtons() {
+        this.dom.actionButtons.className = "action-btn-row";
+        this.dom.actionButtons.innerHTML = `
+          <button type="button" class="toy-btn btn-mochi feed-choice-btn" id="btnFeedMojiOpen">
+            <span>🔵 ป้อนน้องฟ้า</span>
+          </button>
+          <button type="button" class="toy-btn btn-buay feed-choice-btn" id="btnFeedBuayOpen">
+            <span>🟣 ป้อนน้องม่วง</span>
+          </button>
+        `;
+
+        document.getElementById("btnFeedMojiOpen").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.feedOpeningWatermelon("moji");
+        });
+        document.getElementById("btnFeedBuayOpen").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.feedOpeningWatermelon("buay");
+        });
+      }
+
+      renderRoundChoiceButtons() {
+        const map = this.getCategoryMapping();
+        this.dom.actionButtons.className = "action-btn-row";
+        this.dom.actionButtons.innerHTML = `
+          <button type="button" class="toy-btn btn-mochi feed-choice-btn" id="btnFeedMojiRound" aria-label="ป้อนน้องฟ้า ${map.mojiLabel}">
+            <span>🔵 ป้อนน้องฟ้า (${map.mojiLabel})</span>
+          </button>
+          <button type="button" class="toy-btn btn-buay feed-choice-btn" id="btnFeedBuayRound" aria-label="ป้อนน้องม่วง ${map.buayLabel}">
+            <span>🟣 ป้อนน้องม่วง (${map.buayLabel})</span>
+          </button>
+        `;
+
+        document.getElementById("btnFeedMojiRound").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.attemptFeedRoundBiscuit("moji", map.mojiCatId);
+        });
+
+        document.getElementById("btnFeedBuayRound").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.attemptFeedRoundBiscuit("buay", map.buayCatId);
+        });
+      }
+
+      feedOpeningWatermelon(hippoId) {
+        if (this.busyAnimating) return;
+        this.resetHippoExpressions();
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg("watermelon", false);
+
+        this.animateHippoChomp(hippoId, {
+          onBiteMoment: () => {
+            this.dom.centerFoodLayer.innerHTML = "";
+            if (hippoId === "moji") {
+              this.mojiFedCount += 1;
+              this.dom.mojiCheekL.setAttribute("r", "15");
+              this.dom.mojiCheekR.setAttribute("r", "15");
+              this.dom.mojiHatGroup.setAttribute("transform", "translate(6, -28) rotate(22)");
+            } else {
+              this.buayFedCount += 1;
+              this.dom.buayRindGag.setAttribute("visibility", "visible");
+            }
+            this.updateGameHud();
+            this.updateHippoPlumpness("moji");
+          },
+          onComplete: () => {
+            this.mode = "OPENING_FED";
+            this.setBottomBarVisible(true);
+            const msg = hippoId === "moji"
+              ? "น้องฟ้างับแตงโมแก้มป่องจนหมวกเอียงเลย! ลองลากให้น้องม่วงหรือเริ่มปิกนิกได้เลย"
+              : "น้องม่วงงับคำใหญ่จนเปลือกแตงโมพาดฟันเลย! ลองลากให้น้องฟ้าหรือเริ่มปิกนิกได้เลย";
+            this.setPrompt(msg, true);
+
+            const otherHippo = hippoId === "moji" ? "buay" : "moji";
+            this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+            this.dom.centerFoodLayer.innerHTML = renderFruitSvg("watermelon", true);
+
+            this.dom.actionButtons.className = "action-btn-row";
+            this.dom.actionButtons.innerHTML = `
+              <button type="button" class="toy-btn btn-peach feed-choice-btn" id="btnTryOtherHippo">
+                <span>🔄 ลองป้อนอีกตัว</span>
+              </button>
+              <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnStartPicnicMission">
+                <span>🧺 เริ่มปิกนิก</span>
+              </button>
+            `;
+
+            document.getElementById("btnTryOtherHippo").addEventListener("click", () => {
+              HippoAudio.ensureCtx();
+              this.feedOpeningWatermelon(otherHippo);
+            });
+
+            document.getElementById("btnStartPicnicMission").addEventListener("click", () => {
+              HippoAudio.ensureCtx();
+              this.currentStopIdx = 0;
+              this.mojiFedCount = 0;
+              this.buayFedCount = 0;
+              this.updateGameHud();
+              this.updateHippoPlumpness();
+              this.startRoundStop(0);
+            });
+
+            this.scanIndex = 0;
+            this.restartSwitchScan();
+          }
+        });
+      }
+
+      /**
+       * =========================================================================
+       * 7. MAIN LESSON ROUNDS
+       * =========================================================================
+       */
+      startRoundStop(idx) {
+        this.clearAutoAdvance();
+        if (idx >= this.flatStops.length) {
+          this.enterFinalePicnic();
+          return;
+        }
+
+        this.currentStopIdx = idx;
+        this.mode = "PLAY_ROUND";
+        this.roundAnswered = false;
+        this.busyAnimating = false;
+        this.resetHippoExpressions();
+        this.dom.stageFxLayer.innerHTML = "";
+        this.dom.consequenceCard.hidden = true;
+        this.dom.sceneZoomCard.hidden = true;
+        this.dom.btnListenScene.hidden = false;
+        this.dom.btnZoomScene.hidden = false;
+
+        const stop = this.flatStops[idx];
+
+        this.dom.stageStatus.textContent = `รอบที่ ${idx + 1}/${this.flatStops.length}: ${stop.stopName}`;
+        this.dom.promptStepPill.textContent = `📖 โจทย์ข้อที่ ${idx + 1}/${this.flatStops.length} · ${stop.stopName}`;
+        this.dom.promptThumbBox.hidden = false;
+        this.dom.promptThumbBox.innerHTML = `
+          <svg viewBox="-50 -50 100 100" width="100%" height="100%">
+            ${renderSceneSvgContent(stop.sceneId)}
+          </svg>
+        `;
+
+        this.renderSituationBiscuit(stop.sceneId);
+
+        this.setPrompt(stop.question, false);
+        this.speakCurrentRoundPrompt();
+
+        if (this.settings.switchMode) {
+          this.setBottomBarVisible(true);
+          this.renderRoundChoiceButtons();
+        } else {
+          this.setBottomBarVisible(false, "🍪 ลากคุกกี้ภาพตรงกลางไปป้อนน้องฟ้าหรือน้องม่วง");
+        }
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      renderSituationBiscuit(sceneId) {
+        this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+        this.dom.centerFoodLayer.innerHTML = `
+          <g class="plate-food-enter">
+            <g class="biscuit-float-anim" style="cursor: grab;">
+              <!-- Gentle Breathing Dashed Golden Halo -->
+              <circle class="food-halo-pulse" cx="0" cy="0" r="68" fill="url(#foodGlowGrad)" stroke="#F4A261" stroke-width="2.6" stroke-dasharray="8 6" stroke-linecap="round" />
+              <!-- Biscuit Drop Shadow -->
+              <ellipse cx="0" cy="9" rx="60" ry="50" fill="rgba(61, 35, 66, 0.25)" />
+              <!-- Scalloped Biscuit Cookie Rim -->
+              <circle cx="0" cy="0" r="62" fill="#F4A261" stroke="#3D2342" stroke-width="3.4" />
+              <circle cx="0" cy="0" r="57" fill="#FFE6A7" stroke="#DDA15E" stroke-width="2" />
+              <!-- Clipped Situation Illustration Printed on Biscuit (Scaled 1.15x to fill r=56 cleanly) -->
+              <g clip-path="url(#biscuitSceneClip)">
+                <g transform="scale(1.15)">
+                  ${renderSceneSvgContent(sceneId)}
+                </g>
+              </g>
+              <circle cx="0" cy="0" r="56" fill="none" stroke="#3D2342" stroke-width="2.4" />
+              <!-- Drag Hint Pill -->
+              <rect x="-46" y="48" width="92" height="19" rx="9.5" fill="#FFC43D" stroke="#3D2342" stroke-width="2.2" />
+              <text x="0" y="61" text-anchor="middle" font-size="10.5" font-weight="900" fill="#3D2342">ลากไปป้อนฮิปโป</text>
+            </g>
+          </g>
+        `;
+      }
+
+      toggleSceneZoom(show) {
+        this.draggingBiscuit = false;
+        this.hoverTargetHippo = null;
+        this.applyHoverAnticipation(null);
+        if (!show) {
+          this.dom.sceneZoomCard.hidden = true;
+          if (this.settings.switchMode) {
+            this.scanIndex = 0;
+            this.restartSwitchScan();
+          }
+          return;
+        }
+        const stop = this.flatStops[this.currentStopIdx];
+        if (!stop) return;
+        this.dom.sceneZoomArtwork.innerHTML = `
+          <svg viewBox="-50 -50 100 100" width="100%" height="100%" role="img" aria-label="${this.escapeHtml(stop.question)}">
+            ${renderSceneSvgContent(stop.sceneId)}
+          </svg>
+        `;
+        this.dom.sceneZoomCaption.textContent = stop.question;
+        this.dom.sceneZoomCard.hidden = false;
+        HippoAudio.speakMessages([stop.question], { interrupt: true });
+        if (this.settings.switchMode) {
+          this.scanIndex = 0;
+          this.restartSwitchScan();
+        }
+      }
+
+      speakCurrentRoundPrompt() {
+        const stop = this.flatStops[this.currentStopIdx];
+        if (!stop) return;
+        const map = this.getCategoryMapping();
+        HippoAudio.speakMessages(
+          [
+            stop.question,
+            `ลากไปป้อนน้องฟ้า ${map.mojiLabel}`,
+            `หรือป้อนน้องม่วง ${map.buayLabel}`
+          ],
+          { interrupt: true }
+        );
+      }
+
+      attemptFeedRoundBiscuit(hippoId, chosenCategoryId) {
+        if (this.mode !== "PLAY_ROUND" || this.busyAnimating || this.roundAnswered) return;
+        this.dom.sceneZoomCard.hidden = true;
+        const stop = this.flatStops[this.currentStopIdx];
+        const chosenOpt = stop.options.find((o) => o.id === chosenCategoryId);
+        const isCorrect = Boolean(chosenOpt && chosenOpt.isCorrect);
+
+        if (isCorrect) {
+          this.roundAnswered = true;
+          this.comboStreak += 1;
+          if (hippoId === "moji") this.mojiFedCount += 1;
+          else this.buayFedCount += 1;
+          this.updateGameHud();
+          this.updateHippoPlumpness(hippoId);
+
+          this.animateHippoChomp(hippoId, {
+            onBiteMoment: () => {
+              this.dom.centerFoodLayer.innerHTML = "";
+              const popText = this.comboStreak >= 2 ? `คอมโบ x${this.comboStreak}! งั่ม!` : "งั่ม! ถูกต้อง!";
+              this.spawnCelebrationBurst(hippoId, popText);
+            },
+            onComplete: () => {
+              if (this.comboStreak >= 2) {
+                HippoAudio.playComboFanfare(this.comboStreak);
+              }
+              this.handleCorrectRoundAnswer(stop);
+            }
+          });
+        } else {
+          this.comboStreak = 0;
+          this.updateGameHud();
+          this.animateHippoNudgeBack(hippoId, () => {
+            if (this.settings.switchMode) {
+              this.setBottomBarVisible(true);
+              this.renderRoundChoiceButtons();
+            } else {
+              this.setBottomBarVisible(false, `💡 เบาะแส: ${stop.hint}`);
+            }
+            this.scanIndex = 0;
+            this.restartSwitchScan();
+            HippoAudio.speakMessages([`ลองสังเกตภาพอีกครั้งนะ ${stop.hint}`], { interrupt: true });
+          });
+        }
+      }
+
+      showDecisionConsequenceCard(stop) {
+        const consequence = stop.consequenceText || stop.explanation;
+        this.dom.consequenceArtwork.innerHTML = renderOutcomeStickerSvg(stop.stickerId);
+        this.dom.consequenceText.textContent = consequence;
+        this.dom.consequenceSubtext.textContent = "";
+        this.dom.consequenceSubtext.hidden = true;
+        this.dom.consequenceCard.hidden = false;
+      }
+
+      handleCorrectRoundAnswer(stop) {
+        this.mode = "ROUND_REVIEW";
+        this.dom.btnZoomScene.hidden = true;
+        HippoAudio.playStickerPrint();
+
+        if (!this.earnedStickers.some((s) => s.stopId === stop.id)) {
+          this.earnedStickers.push({
+            stopId: stop.id,
+            stopName: stop.stopName,
+            stickerId: stop.stickerId,
+            explanation: stop.consequenceText || stop.explanation
+          });
+          this.saveProgress();
+        }
+        this.renderStickerSidebar(stop);
+        this.showDecisionConsequenceCard(stop);
+
+        const consequence = stop.consequenceText || stop.explanation;
+        this.setBottomBarVisible(true);
+
+        const isLast = this.currentStopIdx + 1 >= this.flatStops.length;
+        HippoAudio.speakMessages([`ถูกต้อง! ${consequence}`], { interrupt: true });
+
+        const nextLabel = stop.grapeBonus
+          ? "🍇 เล่นมุกองุ่นกลิ้งต่อ!"
+          : isLast
+          ? "🎉 ดูภาพปิกนิกหมู่!"
+          : "➡️ ไปจุดปิกนิกถัดไป";
+
+        this.dom.actionButtons.className = "action-btn-row single-col";
+        this.dom.actionButtons.innerHTML = `
+          <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnNextPicnicStop" style="font-size: 1.08rem;">
+            <span>${nextLabel}</span>
+          </button>
+        `;
+
+        document.getElementById("btnNextPicnicStop").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.dom.consequenceCard.hidden = true;
+          if (stop.grapeBonus) {
+            this.enterGrapeBonusPlay();
+          } else {
+            this.startRoundStop(this.currentStopIdx + 1);
+          }
+        });
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      /**
+       * =========================================================================
+       * 8. PLAYFUL GRAPE BONUS INTERACTION (Round 4 Unlock)
+       * =========================================================================
+       */
+      enterGrapeBonusPlay() {
+        this.mode = "GRAPE_PLAY";
+        this.grapeTargetHippo = null;
+        this.grapeStep = 0;
+        this.dom.btnListenScene.hidden = true;
+        this.dom.btnZoomScene.hidden = true;
+        this.dom.promptThumbBox.hidden = true;
+        this.dom.promptStepPill.textContent = "🍇 รางวัลพิเศษ";
+
+        this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg("grapes", true);
+        this.setHippoEyeFocus("center");
+
+        const msg = "องุ่นลูกนี้ลากป้อนน้องฟ้าหรือน้องม่วงก็ได้!";
+        this.setPrompt(msg, false);
+        HippoAudio.speakMessages(["กบยกตะกร้าองุ่นขึ้นโต๊ะ องุ่นกลิ้งมาตกบนจานจริงแล้ว ลากองุ่นไปป้อนใครก็ได้!"], { interrupt: true });
+
+        if (this.settings.switchMode) {
+          this.setBottomBarVisible(true);
+          this.dom.actionButtons.className = "action-btn-row";
+          this.dom.actionButtons.innerHTML = `
+            <button type="button" class="toy-btn btn-mochi feed-choice-btn" id="btnGrapeMoji">
+              <span>🍇 ป้อนองุ่นให้น้องฟ้า</span>
+            </button>
+            <button type="button" class="toy-btn btn-buay feed-choice-btn" id="btnGrapeBuay">
+              <span>🍇 ป้อนองุ่นให้น้องม่วง</span>
+            </button>
+          `;
+
+          document.getElementById("btnGrapeMoji").addEventListener("click", () => {
+            HippoAudio.ensureCtx();
+            this.handleGrapeBonusTap("moji");
+          });
+          document.getElementById("btnGrapeBuay").addEventListener("click", () => {
+            HippoAudio.ensureCtx();
+            this.handleGrapeBonusTap("buay");
+          });
+        } else {
+          this.setBottomBarVisible(false, "🍇 ลากองุ่นบนจานไปป้อนน้องฟ้าหรือน้องม่วงได้เลย!");
+        }
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      handleGrapeBonusTap(hippoId) {
+        if (this.mode !== "GRAPE_PLAY" || this.busyAnimating) return;
+
+        if (this.grapeStep === 0) {
+          this.grapeTargetHippo = hippoId;
+          this.animateHippoChomp(hippoId, {
+            onBiteMoment: () => {
+              this.dom.centerFoodLayer.innerHTML = "";
+              if (hippoId === "moji") this.mojiFedCount += 1;
+              else this.buayFedCount += 1;
+              this.updateGameHud();
+              this.updateHippoPlumpness(hippoId);
+            },
+            onComplete: () => {
+              this.grapeStep = 1;
+              const noseX = 280;
+              const noseY = hippoId === "moji" ? 86 : 306;
+              this.dom.stageFxLayer.innerHTML = `
+                <g id="balancedNoseGrape" transform="translate(${noseX}, ${noseY})">
+                  <circle cx="0" cy="0" r="8.5" fill="#9D4EDD" stroke="#3D2342" stroke-width="2.4" />
+                  <circle cx="-2.5" cy="-2.5" r="2.2" fill="#E0AAFF" />
+                </g>
+              `;
+
+              const hippoName = hippoId === "moji" ? "น้องฟ้า" : "น้องม่วง";
+              const msg = `ฮั่นแน่! องุ่นลูกที่สามค้างอยู่บนจมูก${hippoName} แตะ${hippoName}อีกครั้งเพื่อให้ดีดเข้าปาก!`;
+              this.setPrompt(msg, true);
+
+              this.setBottomBarVisible(true);
+              this.dom.actionButtons.className = "action-btn-row single-col";
+              this.dom.actionButtons.innerHTML = `
+                <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnFlickNoseGrape">
+                  <span>✨ แตะ${hippoName}ดีดองุ่นเข้าปาก!</span>
+                </button>
+              `;
+
+              document.getElementById("btnFlickNoseGrape").addEventListener("click", () => {
+                HippoAudio.ensureCtx();
+                this.handleGrapeBonusTap(hippoId);
+              });
+
+              this.scanIndex = 0;
+              this.restartSwitchScan();
+            }
+          });
+        } else if (this.grapeStep === 1) {
+          this.grapeStep = 2;
+          HippoAudio.playBoingFlick();
+          this.dom.stageFxLayer.innerHTML = `
+            <text x="280" y="195" text-anchor="middle" font-size="22" font-weight="800" fill="#7B2CBF">งั่ม! อร่อยจัง! 🍇✨</text>
+          `;
+
+          const hippoName = this.grapeTargetHippo === "moji" ? "น้องฟ้า" : "น้องม่วง";
+          const isLast = this.currentStopIdx + 1 >= this.flatStops.length;
+          this.setPrompt(`${hippoName}ดีดองุ่นเข้าปากดังงั่ม! กดปุ่มด้านล่างเพื่อไปต่อได้เลย`, true);
+
+          this.setBottomBarVisible(true);
+          this.dom.actionButtons.className = "action-btn-row single-col";
+          this.dom.actionButtons.innerHTML = `
+            <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnNextAfterGrape" style="font-size: 1.08rem;">
+              <span>${isLast ? "🎉 ดูภาพปิกนิกหมู่!" : "➡️ ไปจุดปิกนิกถัดไป"}</span>
+            </button>
+          `;
+
+          document.getElementById("btnNextAfterGrape").addEventListener("click", () => {
+            HippoAudio.ensureCtx();
+            this.startRoundStop(this.currentStopIdx + 1);
+          });
+
+          this.scanIndex = 0;
+          this.restartSwitchScan();
+        }
+      }
+
+      /**
+       * =========================================================================
+       * 9. FINALE GROUP PICNIC & SHARED WATERMELON + FREE FEED MODE
+       * =========================================================================
+       */
+      enterFinalePicnic() {
+        this.mode = "FINALE_PICNIC";
+        this.resetHippoExpressions();
+        this.dom.btnListenScene.hidden = true;
+        this.dom.btnZoomScene.hidden = true;
+        this.dom.promptThumbBox.hidden = true;
+        this.dom.promptStepPill.textContent = "🎉 ฉลองปิกนิกหมู่";
+        this.dom.stageStatus.textContent = "🎉 ครบทุกภาพแล้ว · ปิกนิกหมู่!";
+        this.setBottomBarVisible(true);
+
+        this.dom.latestStickerBox.innerHTML = `
+          <div style="font-size: 0.85rem; font-weight: 800; color: #7B2CBF; margin-bottom: 0.2rem;">
+            🌟 ภาพปิกนิกหมู่ครบทั้งชุดแล้ว!
+          </div>
+          <svg viewBox="0 0 180 84" width="100%" height="76" role="img" aria-label="ภาพปิกนิกหมู่รวมสติกเกอร์ทั้งหมด">
+            <rect x="2" y="2" width="176" height="80" rx="14" fill="#D8F3DC" stroke="#3D2342" stroke-width="2.5" />
+            <ellipse cx="90" cy="56" rx="74" ry="20" fill="#FFC43D" stroke="#3D2342" stroke-width="2" />
+            <text x="90" y="36" text-anchor="middle" font-size="18">🦆 🐰 🦫 🐸 🐱</text>
+            <text x="90" y="61" text-anchor="middle" font-size="13" font-weight="800" fill="#3D2342">ลานปิกนิกปลอดบุหรี่ 🍉🍇</text>
+          </svg>
+        `;
+
+        this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg("watermelon", false, { shareMode: true });
+
+        const msg = "สติกเกอร์รวมเป็นภาพปิกนิกหมู่แล้ว! แตะที่แตงโมกลางจานเพื่อแบ่งให้ทั้งคู่เลย";
+        this.setPrompt(msg, true);
+        this.showFeedback("success", "🎉 ยินดีด้วย! ผ่านครบทุกข้อแล้ว แตะแตงโมกลางจานหรือกดปุ่มด้านล่างเพื่อแบ่งให้ทั้งคู่เลย");
+
+        this.dom.actionButtons.className = "action-btn-row single-col";
+        this.dom.actionButtons.innerHTML = `
+          <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnShareWatermelonBoth">
+            <span>🍉 แบ่งแตงโมให้ทั้งคู่</span>
+          </button>
+        `;
+
+        document.getElementById("btnShareWatermelonBoth").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.playSharedWatermelonGag();
+        });
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      playSharedWatermelonGag() {
+        if (this.busyAnimating) return;
+
+        this.dom.centerFoodLayer.innerHTML = `
+          <g transform="translate(-26, -6) rotate(-14)">
+            <path d="M -22 -4 Q 0 24 22 -4 Z" fill="#52B788" stroke="#4A304D" stroke-width="2.6" />
+            <path d="M -17 -4 Q 0 16 17 -4 Z" fill="#FF5D8F" />
+          </g>
+          <g transform="translate(26, 6) rotate(14)">
+            <path d="M -22 -4 Q 0 24 22 -4 Z" fill="#52B788" stroke="#4A304D" stroke-width="2.6" />
+            <path d="M -17 -4 Q 0 16 17 -4 Z" fill="#FF5D8F" />
+          </g>
+        `;
+
+        if (this.settings.reducedMotion) {
+          this.dom.centerFoodLayer.innerHTML = "";
+          this.setHippoEyeFocus("eachOther");
+          this.dom.stageFxLayer.innerHTML = `<text x="280" y="198" text-anchor="middle" font-size="22">💕 จมูกแตะกัน! 💕</text>`;
+          this.showEndGameChoices();
+          return;
+        }
+
+        this.busyAnimating = true;
+        this.stopSwitchScan();
+
+        let elapsed = 0;
+        let lastTime = performance.now();
+        let bitDone = false;
+
+        const step = (now) => {
+          if (this.paused) {
+            lastTime = now;
+            requestAnimationFrame(step);
+            return;
+          }
+          const dt = Math.min(0.05, (now - lastTime) / 1000);
+          lastTime = now;
+          elapsed += dt;
+
+          if (elapsed < 0.42) {
+            const p = elapsed / 0.42;
+            const mojiY = 14 + (94 - 14) * p;
+            const buayY = -10 + (-92 - -10) * p;
+            this.dom.mojiHeadGroup.setAttribute("transform", `translate(0, ${mojiY})`);
+            this.dom.buayHeadGroup.setAttribute("transform", `translate(0, ${buayY})`);
+            this.dom.mojiNeckBar.setAttribute("height", String(22 + (mojiY - 14)));
+            this.dom.buayNeckBar.setAttribute("y", String(-18 + (buayY - -10)));
+            this.dom.buayNeckBar.setAttribute("height", String(22 + (-10 - buayY)));
+            this.dom.mojiMouthCavity.setAttribute("ry", String(6 + 10 * p));
+            this.dom.buayMouthCavity.setAttribute("ry", String(6 + 10 * p));
+          } else if (elapsed < 1.15) {
+            this.dom.mojiHeadGroup.setAttribute("transform", "translate(0, 94)");
+            this.dom.buayHeadGroup.setAttribute("transform", "translate(0, -92)");
+            this.dom.mojiNeckBar.setAttribute("height", "102");
+            this.dom.buayNeckBar.setAttribute("y", "-100");
+            this.dom.buayNeckBar.setAttribute("height", "104");
+            this.dom.mojiMouthCavity.setAttribute("ry", "4");
+            this.dom.buayMouthCavity.setAttribute("ry", "4");
+            if (!bitDone) {
+              bitDone = true;
+              HippoAudio.playChomp();
+              this.dom.centerFoodLayer.innerHTML = "";
+              this.setHippoEyeFocus("eachOther");
+              this.dom.stageFxLayer.innerHTML = `<text x="280" y="198" text-anchor="middle" font-size="22">💕 จมูกแตะกัน! 💕</text>`;
+            }
+          } else if (elapsed < 1.65) {
+            const p = (elapsed - 1.15) / 0.5;
+            const mojiY = 94 + (14 - 94) * p;
+            const buayY = -92 + (-10 - -92) * p;
+            this.dom.mojiHeadGroup.setAttribute("transform", `translate(0, ${mojiY})`);
+            this.dom.buayHeadGroup.setAttribute("transform", `translate(0, ${buayY})`);
+            this.dom.mojiNeckBar.setAttribute("height", String(22 + Math.max(0, mojiY - 14)));
+            this.dom.buayNeckBar.setAttribute("y", String(-18 + Math.min(0, buayY - -10)));
+            this.dom.buayNeckBar.setAttribute("height", String(22 + Math.max(0, -10 - buayY)));
+          } else {
+            this.dom.mojiHeadGroup.setAttribute("transform", "translate(0, 14)");
+            this.dom.buayHeadGroup.setAttribute("transform", "translate(0, -10)");
+            this.dom.mojiNeckBar.setAttribute("height", "22");
+            this.dom.buayNeckBar.setAttribute("y", "-18");
+            this.dom.buayNeckBar.setAttribute("height", "22");
+            this.dom.mojiMouthCavity.setAttribute("ry", "6");
+            this.dom.buayMouthCavity.setAttribute("ry", "6");
+            this.dom.stageFxLayer.innerHTML = "";
+            this.setHippoEyeFocus("center");
+            HippoAudio.playChew();
+            this.busyAnimating = false;
+            this.showEndGameChoices();
+            return;
+          }
+
+          requestAnimationFrame(step);
+        };
+
+        requestAnimationFrame(step);
+      }
+
+      showEndGameChoices() {
+        const msg = "ฮ่า ๆ น้องฟ้ากับน้องม่วงงับแตงโมพร้อมกันจนจมูกแตะกันเลย! เลือกเล่นต่อด้านล่างได้นะ";
+        this.setPrompt(msg, true);
+
+        this.dom.actionButtons.className = "action-btn-row three-col";
+        this.dom.actionButtons.innerHTML = `
+          <button type="button" class="toy-btn btn-butter feed-choice-btn" id="btnEnterFreeFeed">
+            <span>🍉 ป้อนเล่นอิสระ</span>
+          </button>
+          <button type="button" class="toy-btn btn-mint feed-choice-btn" id="btnReplayMission">
+            <span>🔄 เล่นภารกิจอีกครั้ง</span>
+          </button>
+          <a href="./index.html" class="toy-btn btn-peach feed-choice-btn">
+            <span>🌈 กลับศูนย์รวมเกม</span>
+          </a>
+        `;
+
+        document.getElementById("btnEnterFreeFeed").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.enterFreeFeedMode();
+        });
+
+        document.getElementById("btnReplayMission").addEventListener("click", () => {
+          HippoAudio.ensureCtx();
+          this.earnedStickers = [];
+          this.comboStreak = 0;
+          this.mojiFedCount = 0;
+          this.buayFedCount = 0;
+          this.updateGameHud();
+          this.updateHippoPlumpness();
+          this.saveProgress();
+          this.renderStickerSidebar();
+          this.startRoundStop(0);
+        });
+
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      /**
+       * =========================================================================
+       * 9B. HIPPO ARTICULATED ANIMATIONS & HUD HELPERS
+       * =========================================================================
+       */
+      updateGameHud() {
+        const renderHearts = (count) => {
+          const filled = Math.min(3, count);
+          return "💖".repeat(filled) + "🤍".repeat(3 - filled);
+        };
+        if (this.dom.mojiHearts) this.dom.mojiHearts.textContent = renderHearts(this.mojiFedCount);
+        if (this.dom.buayHearts) this.dom.buayHearts.textContent = renderHearts(this.buayFedCount);
+
+        if (this.dom.comboBadge) {
+          if (this.comboStreak >= 2) {
+            this.dom.comboBadge.hidden = false;
+            this.dom.comboBadge.textContent = `🔥 คอมโบ x${this.comboStreak}!`;
+            this.dom.comboBadge.classList.remove("bump");
+            void this.dom.comboBadge.offsetWidth;
+            this.dom.comboBadge.classList.add("bump");
+          } else {
+            this.dom.comboBadge.hidden = true;
+          }
+        }
+      }
+
+      spawnCelebrationBurst(hippoId, labelText = "งั่ม! ถูกต้อง!") {
+        const yPos = hippoId === "moji" ? 115 : 275;
+        this.dom.stageFxLayer.innerHTML = `
+          <g style="animation: popStarBurst 0.9s ease-out forwards; transform-origin: 280px ${yPos}px;">
+            <text x="220" y="${yPos - 10}" font-size="22">⭐</text>
+            <text x="330" y="${yPos - 10}" font-size="22">💖</text>
+            <rect x="210" y="${yPos - 18}" width="140" height="30" rx="15" fill="#FFC43D" stroke="#3D2342" stroke-width="2.5" />
+            <text x="280" y="${yPos + 2}" text-anchor="middle" font-size="14" font-weight="900" fill="#3D2342">${labelText}</text>
+          </g>
+        `;
+      }
+
+      setHippoEyeFocus(target) {
+        if (target === "eachOther") {
+          this.dom.mojiPupilL.setAttribute("cx", "2.5");
+          this.dom.mojiPupilL.setAttribute("cy", "4");
+          this.dom.mojiPupilR.setAttribute("cx", "-2.5");
+          this.dom.mojiPupilR.setAttribute("cy", "4");
+          this.dom.buayPupilL.setAttribute("cx", "2.5");
+          this.dom.buayPupilL.setAttribute("cy", "-4");
+          this.dom.buayPupilR.setAttribute("cx", "-2.5");
+          this.dom.buayPupilR.setAttribute("cy", "-4");
+        } else {
+          this.dom.mojiPupilL.setAttribute("cx", "1.8");
+          this.dom.mojiPupilL.setAttribute("cy", "3");
+          this.dom.mojiPupilR.setAttribute("cx", "-1.8");
+          this.dom.mojiPupilR.setAttribute("cy", "3");
+          this.dom.buayPupilL.setAttribute("cx", "1.8");
+          this.dom.buayPupilL.setAttribute("cy", "-3");
+          this.dom.buayPupilR.setAttribute("cx", "-1.8");
+          this.dom.buayPupilR.setAttribute("cy", "-3");
+        }
+      }
+
+      resetHippoExpressions() {
+        this.dom.mojiHeadGroup.setAttribute("transform", "translate(0, 14)");
+        this.dom.mojiNeckBar.setAttribute("height", "22");
+        this.dom.mojiMouthCavity.setAttribute("ry", "6");
+        this.dom.mojiCheekL.setAttribute("r", "9.5");
+        this.dom.mojiCheekR.setAttribute("r", "9.5");
+        this.dom.mojiHatGroup.setAttribute("transform", "translate(0, -25) rotate(0)");
+        this.dom.mojiPupilL.setAttribute("r", "4.5");
+        this.dom.mojiPupilR.setAttribute("r", "4.5");
+
+        this.dom.buayHeadGroup.setAttribute("transform", "translate(0, -10)");
+        this.dom.buayNeckBar.setAttribute("y", "-18");
+        this.dom.buayNeckBar.setAttribute("height", "22");
+        this.dom.buayMouthCavity.setAttribute("ry", "6");
+        this.dom.buayCheekL.setAttribute("r", "9.5");
+        this.dom.buayCheekR.setAttribute("r", "9.5");
+        this.dom.buayRindGag.setAttribute("visibility", "hidden");
+        this.dom.buayPupilL.setAttribute("r", "4.5");
+        this.dom.buayPupilR.setAttribute("r", "4.5");
+        this.setHippoEyeFocus("center");
+      }
+
+      animateHippoChomp(hippoId, { onBiteMoment, onComplete } = {}) {
+        const isMoji = hippoId === "moji";
+        const headEl = isMoji ? this.dom.mojiHeadGroup : this.dom.buayHeadGroup;
+        const neckEl = isMoji ? this.dom.mojiNeckBar : this.dom.buayNeckBar;
+        const mouthEl = isMoji ? this.dom.mojiMouthCavity : this.dom.buayMouthCavity;
+        const restY = isMoji ? 14 : -10;
+        const reachY = isMoji ? 104 : -102;
+
+        if (this.settings.reducedMotion) {
+          HippoAudio.playChomp();
+          if (onBiteMoment) onBiteMoment();
+          HippoAudio.playChew();
+          if (onComplete) onComplete();
+          return;
+        }
+
+        this.busyAnimating = true;
+        this.stopSwitchScan();
+
+        let elapsed = 0;
+        let lastTime = performance.now();
+        let bitTriggered = false;
+        let chewPlayed = false;
+
+        const updateNeckStretch = (y) => {
+          if (isMoji) {
+            neckEl.setAttribute("height", String(22 + Math.max(0, y - restY)));
+          } else {
+            const delta = Math.max(0, restY - y);
+            neckEl.setAttribute("y", String(-18 - delta));
+            neckEl.setAttribute("height", String(22 + delta));
+          }
+        };
+
+        const tick = (now) => {
+          if (this.paused) {
+            lastTime = now;
+            requestAnimationFrame(tick);
+            return;
+          }
+          const dt = Math.min(0.05, (now - lastTime) / 1000);
+          lastTime = now;
+          elapsed += dt;
+
+          if (elapsed < 0.34) {
+            const p = elapsed / 0.34;
+            const y = restY + (reachY - restY) * p;
+            headEl.setAttribute("transform", `translate(0, ${y})`);
+            updateNeckStretch(y);
+            mouthEl.setAttribute("ry", String(6 + 12 * p));
+          } else if (elapsed < 0.54) {
+            headEl.setAttribute("transform", `translate(0, ${reachY})`);
+            updateNeckStretch(reachY);
+            mouthEl.setAttribute("ry", "3");
+            if (!bitTriggered) {
+              bitTriggered = true;
+              HippoAudio.playChomp();
+              if (onBiteMoment) onBiteMoment();
+            }
+          } else if (elapsed < 1.15) {
+            const p = (elapsed - 0.54) / 0.61;
+            const y = reachY + (restY - reachY) * Math.min(1, p * 1.45);
+            const chewWave = Math.sin(p * Math.PI * 6);
+            const chewBob = chewWave * 3.5;
+            const chewTilt = Math.cos(p * Math.PI * 6) * 3.2;
+            headEl.setAttribute("transform", `translate(0, ${y + chewBob}) rotate(${chewTilt})`);
+            updateNeckStretch(y);
+            mouthEl.setAttribute("ry", String(5 + Math.abs(chewWave) * 4.5));
+
+            const cheekL = isMoji ? this.dom.mojiCheekL : this.dom.buayCheekL;
+            const cheekR = isMoji ? this.dom.mojiCheekR : this.dom.buayCheekR;
+            const cheekRadius = 11.5 + Math.abs(chewWave) * 3.2;
+            cheekL.setAttribute("r", cheekRadius.toFixed(1));
+            cheekR.setAttribute("r", cheekRadius.toFixed(1));
+
+            if (!chewPlayed && p > 0.15) {
+              chewPlayed = true;
+              HippoAudio.playChew();
+              setTimeout(() => HippoAudio.playChew(), 210);
+              const fxY = isMoji ? 114 : 276;
+              this.dom.stageFxLayer.innerHTML = `
+                <g style="animation: popStarBurst 0.85s ease-out forwards; transform-origin: 280px ${fxY}px;">
+                  <circle cx="236" cy="${fxY - 6}" r="3.5" fill="#FFC43D" stroke="#3D2342" stroke-width="1.5" />
+                  <circle cx="324" cy="${fxY - 4}" r="3.5" fill="#FF7597" stroke="#3D2342" stroke-width="1.5" />
+                  <circle cx="248" cy="${fxY + 12}" r="2.8" fill="#95D5B2" stroke="#3D2342" stroke-width="1.4" />
+                  <text x="218" y="${fxY - 14}" font-size="16">🎵</text>
+                  <text x="330" y="${fxY - 14}" font-size="16">✨</text>
+                  <rect x="226" y="${fxY - 16}" width="108" height="26" rx="13" fill="#FFF3B0" stroke="#3D2342" stroke-width="2.4" />
+                  <text x="280" y="${fxY + 2}" text-anchor="middle" font-size="13.5" font-weight="900" fill="#3D2342">งั่ม ๆ! 😋</text>
+                </g>
+              `;
+            }
+          } else {
+            headEl.setAttribute("transform", `translate(0, ${restY})`);
+            updateNeckStretch(restY);
+            mouthEl.setAttribute("ry", "6");
+            const cheekL = isMoji ? this.dom.mojiCheekL : this.dom.buayCheekL;
+            const cheekR = isMoji ? this.dom.mojiCheekR : this.dom.buayCheekR;
+            cheekL.setAttribute("r", "9.5");
+            cheekR.setAttribute("r", "9.5");
+            this.busyAnimating = false;
+            if (onComplete) onComplete();
+            return;
+          }
+
+          requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+      }
+
+      animateHippoNudgeBack(hippoId, onComplete) {
+        const isMoji = hippoId === "moji";
+        const headEl = isMoji ? this.dom.mojiHeadGroup : this.dom.buayHeadGroup;
+        const neckEl = isMoji ? this.dom.mojiNeckBar : this.dom.buayNeckBar;
+        const restY = isMoji ? 14 : -10;
+        const nudgeY = isMoji ? 78 : -76;
+
+        const updateNeckStretch = (y) => {
+          if (isMoji) {
+            neckEl.setAttribute("height", String(22 + Math.max(0, y - restY)));
+          } else {
+            const delta = Math.max(0, restY - y);
+            neckEl.setAttribute("y", String(-18 - delta));
+            neckEl.setAttribute("height", String(22 + delta));
+          }
+        };
+
+        if (this.settings.reducedMotion) {
+          HippoAudio.playNudgeBack();
+          this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+          if (onComplete) onComplete();
+          return;
+        }
+
+        this.busyAnimating = true;
+        this.stopSwitchScan();
+
+        let elapsed = 0;
+        let lastTime = performance.now();
+        let soundPlayed = false;
+
+        const tick = (now) => {
+          if (this.paused) {
+            lastTime = now;
+            requestAnimationFrame(tick);
+            return;
+          }
+          const dt = Math.min(0.05, (now - lastTime) / 1000);
+          lastTime = now;
+          elapsed += dt;
+
+          if (elapsed < 0.28) {
+            const p = elapsed / 0.28;
+            const y = restY + (nudgeY - restY) * p;
+            headEl.setAttribute("transform", `translate(0, ${y})`);
+            updateNeckStretch(y);
+          } else if (elapsed < 0.52) {
+            if (!soundPlayed) {
+              soundPlayed = true;
+              HippoAudio.playNudgeBack();
+            }
+            const p = (elapsed - 0.28) / 0.24;
+            const pushOffset = (isMoji ? 16 : -16) * Math.sin(p * Math.PI);
+            this.dom.centerFoodLayer.setAttribute("transform", `translate(280, ${193 + pushOffset})`);
+          } else if (elapsed < 0.8) {
+            const p = (elapsed - 0.52) / 0.28;
+            const y = nudgeY + (restY - nudgeY) * p;
+            headEl.setAttribute("transform", `translate(0, ${y})`);
+            updateNeckStretch(y);
+            this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+          } else {
+            headEl.setAttribute("transform", `translate(0, ${restY})`);
+            updateNeckStretch(restY);
+            this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+            this.busyAnimating = false;
+            if (onComplete) onComplete();
+            return;
+          }
+
+          requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+      }
+
+      /**
+       * =========================================================================
+       * 10. FREE-FEED DISCOVERY MODE
+       * =========================================================================
+       */
+      enterFreeFeedMode() {
+        this.mode = "FREE_FEED";
+        this.freeFruit = "watermelon";
+        this.resetHippoExpressions();
+        this.dom.stageFxLayer.innerHTML = "";
+        this.dom.bottomControlCard.hidden = false;
+        this.dom.promptStepPill.textContent = "🍉 โหมดป้อนเล่นอิสระ";
+        this.dom.stageStatus.textContent = "🍉 โหมดป้อนเล่นอิสระ";
+
+        this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg(this.freeFruit, true);
+
+        this.setPrompt("เลือกผลไม้ด้านล่าง แล้วลากไปป้อนน้องฟ้าหรือน้องม่วงได้เลย!", true);
+
+        this.renderFreeFeedControls();
+        this.scanIndex = 0;
+        this.restartSwitchScan();
+      }
+
+      renderFreeFeedControls() {
+        const fruits = [
+          { id: "watermelon", label: "🍉 แตงโม" },
+          { id: "grapes", label: "🍇 องุ่น" },
+          { id: "banana", label: "🍌 กล้วย" },
+          { id: "strawberry", label: "🍓 สตรอว์เบอร์รี" },
+          { id: "orange", label: "🍊 ส้ม" }
+        ];
+
+        this.dom.actionButtons.className = "action-btn-row single-col";
+        this.dom.actionButtons.innerHTML = `
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: center;">
+            ${fruits
+              .map(
+                (f) => `
+              <button type="button" class="toy-btn ${this.freeFruit === f.id ? "btn-butter" : ""}" data-free-fruit="${f.id}">
+                <span>${f.label}</span>
+              </button>
+            `
+              )
+              .join("")}
+            <a href="./index.html" class="toy-btn btn-peach">
+              <span>🌈 กลับลานเกม</span>
+            </a>
+          </div>
+        `;
+
+        this.dom.actionButtons.querySelectorAll("[data-free-fruit]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            HippoAudio.ensureCtx();
+            this.freeFruit = btn.getAttribute("data-free-fruit");
+            this.resetHippoExpressions();
+            this.dom.stageFxLayer.innerHTML = "";
+            this.dom.centerFoodLayer.innerHTML = renderFruitSvg(this.freeFruit, false);
+            this.renderFreeFeedControls();
+          });
+        });
+      }
+
+      feedFreeMode(hippoId) {
+        if (this.busyAnimating) return;
+        this.resetHippoExpressions();
+        this.dom.stageFxLayer.innerHTML = "";
+        this.dom.centerFoodLayer.innerHTML = renderFruitSvg(this.freeFruit, false);
+
+        const gags = {
+          moji: {
+            watermelon: "น้องฟ้าเคี้ยวแตงโมแก้มป่องจนหมวกปิกนิกเอียง 22 องศา!",
+            grapes: "น้องฟ้าเป่าองุ่นปุ๊บ ลูกโป่งองุ่นสีม่วงลอยฟูฟ่อง!",
+            banana: "น้องฟ้างับกล้วยแล้วหมวกปิกนิกหมุนติ้ว ๆ อย่างอารมณ์ดี!",
+            strawberry: "น้องฟ้ากินสตรอว์เบอร์รีแก้มแดงระเรื่อเป็นรูปหัวใจ!",
+            orange: "น้องฟ้างับส้มแล้วทำแก้มกลมเหมือนลูกส้มเป๊ะเลย!"
+          },
+          buay: {
+            watermelon: "น้องม่วงงับแตงโมคำใหญ่จนเปลือกแตงโมพาดฟันซี่เดียว!",
+            grapes: "น้องม่วงทำองุ่นเด้งดึ๋งบนปลายจมูกแล้วงับเข้าปากดังงั่ม!",
+            banana: "น้องม่วงงับกล้วยเหลือเปลือกกล้วยทำเป็นหมวกบนหัว!",
+            strawberry: "น้องม่วงเคี้ยวสตรอว์เบอร์รีแล้วยิ้มโชว์ฟันซี่เดียวสุดเท่!",
+            orange: "น้องม่วงวางส้มไว้บนจมูกเหมือนนักกายกรรมฮิปโป!"
+          }
+        };
+
+        this.animateHippoChomp(hippoId, {
+          onBiteMoment: () => {
+            this.dom.centerFoodLayer.innerHTML = "";
+            if (hippoId === "moji") {
+              this.mojiFedCount += 1;
+              this.dom.mojiCheekL.setAttribute("r", "14.5");
+              this.dom.mojiCheekR.setAttribute("r", "14.5");
+              this.dom.mojiHatGroup.setAttribute("transform", "translate(5, -28) rotate(18)");
+            } else {
+              this.buayFedCount += 1;
+              if (this.freeFruit === "watermelon") {
+                this.dom.buayRindGag.setAttribute("visibility", "visible");
+              } else {
+                this.dom.buayCheekL.setAttribute("r", "14");
+                this.dom.buayCheekR.setAttribute("r", "14");
+              }
+            }
+            this.updateGameHud();
+            this.updateHippoPlumpness(hippoId);
+          },
+          onComplete: () => {
+            const gagText = (gags[hippoId] && gags[hippoId][this.freeFruit]) || "อร่อยจังเลย!";
+            this.setPrompt(gagText, true);
+            this.dom.centerFoodLayer.setAttribute("transform", "translate(280, 193)");
+            this.dom.centerFoodLayer.innerHTML = renderFruitSvg(this.freeFruit, false);
+          }
+        });
+      }
+
+      /**
+       * =========================================================================
+       * 11. STICKER PRINTER & SIDEBAR UPDATES
+       * =========================================================================
+       */
+      renderStickerSidebar(latestStop = null) {
+        const total = this.flatStops.length;
+        const count = this.earnedStickers.length;
+        this.dom.stickerCountTop.textContent = String(count);
+        this.dom.stickerTotalTop.textContent = String(total);
+        this.dom.stickerProgressLabel.textContent = `${count} / ${total}`;
+
+        if (latestStop) {
+          const consequence = latestStop.consequenceText || latestStop.explanation;
+          this.dom.latestStickerBox.innerHTML = `
+            <div style="font-size: 0.78rem; font-weight: 800; color: #1B4332; margin-bottom: 0.2rem;">
+              🖨️ พิมพ์สติกเกอร์ใหม่!
+            </div>
+            ${renderOutcomeStickerSvg(latestStop.stickerId)}
+            <p style="font-size: 0.8rem; font-weight: 700; margin-top: 0.2rem;">${consequence}</p>
+          `;
+        } else if (count === 0) {
+          this.dom.latestStickerBox.innerHTML = `
+            <p style="font-size: 0.82rem; color: var(--ink-muted); font-weight: 700;">
+              ป้อนขนมถูกคำตอบ สติกเกอร์จะพิมพ์ออกมาตรงนี้!
+            </p>
+          `;
+        }
+
+        this.dom.stickerThumbsGrid.innerHTML = this.flatStops
+          .map((stop, i) => {
+            const earned = this.earnedStickers.some((s) => s.stopId === stop.id);
+            return `
+              <div class="sticker-slot-cell ${earned ? "earned" : ""}" title="${stop.stopName}">
+                ${earned ? "🌟" : i + 1}
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      renderStickerModalList() {
+        this.dom.stickerGalleryList.innerHTML = this.flatStops
+          .map((stop, idx) => {
+            const earned = this.earnedStickers.find((s) => s.stopId === stop.id);
+            return `
+              <div style="background: var(--card-cream); border: 2.5px solid var(--ink-plum); border-radius: 16px; padding: 0.55rem; opacity: ${earned ? "1" : "0.52"};">
+                <div style="font-size: 0.86rem; font-weight: 800; margin-bottom: 0.25rem;">
+                  ${idx + 1}. ${stop.stopName}
+                </div>
+                ${
+                  earned
+                    ? `${renderOutcomeStickerSvg(stop.stickerId)}<p style="font-size: 0.82rem; font-weight: 700; margin-top: 0.25rem;">${stop.explanation}</p>`
+                    : `<div style="height: 68px; border: 2px dashed var(--ink-plum); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem;">ยังไม่ได้ปลดล็อก</div>`
+                }
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      /**
+       * =========================================================================
+       * 9B. HIPPO ARTICULATED ANIMATIONS & HUD HELPERS
+       * =========================================================================
+       */
+      triggerBellySwallowEffect(hippoId) {
+        const torsoEl = hippoId === "moji" ? this.dom.mojiTorsoGroup : this.dom.buayTorsoGroup;
+        const lumpEl = hippoId === "moji" ? this.dom.mojiFoodLump : this.dom.buayFoodLump;
+        if (torsoEl && !this.settings.reducedMotion) {
+          torsoEl.classList.remove("belly-inflate-anim");
+          void torsoEl.offsetWidth;
+          torsoEl.classList.add("belly-inflate-anim");
+        }
+        if (lumpEl) {
+          const startY = hippoId === "moji" ? 24 : -14;
+          const endY = hippoId === "moji" ? 7 : 11;
+          lumpEl.setAttribute("cy", String(startY));
+          lumpEl.setAttribute("r", "12");
+          lumpEl.setAttribute("opacity", "0.95");
+          let t = 0;
+          const slide = () => {
+            t += 0.08;
+            if (t >= 1) {
+              lumpEl.setAttribute("opacity", "0");
+              return;
+            }
+            const curY = startY + (endY - startY) * t;
+            const curR = 12 + Math.sin(t * Math.PI) * 7;
+            lumpEl.setAttribute("cy", curY.toFixed(1));
+            lumpEl.setAttribute("r", curR.toFixed(1));
+            lumpEl.setAttribute("opacity", String((1 - t * 0.65).toFixed(2)));
+            requestAnimationFrame(slide);
+          };
+          requestAnimationFrame(slide);
+        }
+      }
+
+      updateHippoPlumpness(justFedHippo = null) {
+        if (justFedHippo) {
+          this.triggerBellySwallowEffect(justFedHippo);
+        }
+
+        const mojiLevel = Math.min(this.mojiFedCount, 6);
+        if (this.dom.mojiBodyOuter) {
+          this.dom.mojiBodyOuter.setAttribute("rx", String(64 + mojiLevel * 9.5));
+          this.dom.mojiBodyOuter.setAttribute("ry", String(36 + mojiLevel * 5.8));
+        }
+        if (this.dom.mojiBodyInner) {
+          this.dom.mojiBodyInner.setAttribute("rx", String(46 + mojiLevel * 8));
+          this.dom.mojiBodyInner.setAttribute("ry", String(20 + mojiLevel * 5.2));
+        }
+        if (this.dom.mojiSideFlabL && this.dom.mojiSideFlabR) {
+          const flabX = 56 + mojiLevel * 8.5;
+          const flabRx = 14 + mojiLevel * 3.2;
+          const flabRy = 12 + mojiLevel * 2.8;
+          this.dom.mojiSideFlabL.setAttribute("cx", String(-flabX));
+          this.dom.mojiSideFlabL.setAttribute("rx", String(flabRx));
+          this.dom.mojiSideFlabL.setAttribute("ry", String(flabRy));
+          this.dom.mojiSideFlabL.setAttribute("opacity", mojiLevel >= 1 ? "1" : "0");
+          this.dom.mojiSideFlabR.setAttribute("cx", String(flabX));
+          this.dom.mojiSideFlabR.setAttribute("rx", String(flabRx));
+          this.dom.mojiSideFlabR.setAttribute("ry", String(flabRy));
+          this.dom.mojiSideFlabR.setAttribute("opacity", mojiLevel >= 1 ? "1" : "0");
+        }
+        if (this.dom.mojiBellyButton) {
+          this.dom.mojiBellyButton.setAttribute("r", String(4 + mojiLevel * 1.1));
+          this.dom.mojiBellyButton.setAttribute("opacity", mojiLevel >= 1 ? "0.95" : "0");
+        }
+        if (this.dom.mojiRoll1) {
+          const w1 = 38 + mojiLevel * 6.5;
+          this.dom.mojiRoll1.setAttribute("d", `M ${-w1} ${12 + mojiLevel * 1.6} Q 0 ${23 + mojiLevel * 2.5} ${w1} ${12 + mojiLevel * 1.6}`);
+          this.dom.mojiRoll1.setAttribute("opacity", mojiLevel >= 1 ? "0.9" : "0");
+        }
+        if (this.dom.mojiRoll2) {
+          const w2 = 46 + mojiLevel * 7.2;
+          this.dom.mojiRoll2.setAttribute("d", `M ${-w2} 3 Q 0 ${14 + mojiLevel * 1.8} ${w2} 3`);
+          this.dom.mojiRoll2.setAttribute("opacity", mojiLevel >= 2 ? "0.9" : "0");
+        }
+        if (this.dom.mojiRoll3) {
+          const w3 = 42 + mojiLevel * 6.8;
+          this.dom.mojiRoll3.setAttribute("d", `M ${-w3} ${-5 - mojiLevel * 1.4} Q 0 ${5 - mojiLevel * 0.6} ${w3} ${-5 - mojiLevel * 1.4}`);
+          this.dom.mojiRoll3.setAttribute("opacity", mojiLevel >= 3 ? "0.9" : "0");
+        }
+        if (this.dom.mojiBellySwirl) {
+          this.dom.mojiBellySwirl.setAttribute("opacity", "0");
+        }
+        if (this.dom.mojiTableShadow) {
+          this.dom.mojiTableShadow.setAttribute("rx", String(76 + mojiLevel * 9.5));
+          this.dom.mojiTableShadow.setAttribute("ry", String(28 + mojiLevel * 3));
+        }
+        if (this.dom.mojiPawL) this.dom.mojiPawL.setAttribute("cx", String(-48 - mojiLevel * 6.5));
+        if (this.dom.mojiPawR) this.dom.mojiPawR.setAttribute("cx", String(48 + mojiLevel * 6.5));
+        if (this.dom.mojiHeadBase) {
+          this.dom.mojiHeadBase.setAttribute("rx", String(42 + mojiLevel * 1.5));
+          this.dom.mojiHeadBase.setAttribute("ry", String(29 + mojiLevel * 0.9));
+        }
+
+        const buayLevel = Math.min(this.buayFedCount, 6);
+        if (this.dom.buayBodyOuter) {
+          this.dom.buayBodyOuter.setAttribute("rx", String(66 + buayLevel * 9.5));
+          this.dom.buayBodyOuter.setAttribute("ry", String(31 + buayLevel * 5.8));
+        }
+        if (this.dom.buayBodyInner) {
+          this.dom.buayBodyInner.setAttribute("rx", String(48 + buayLevel * 8));
+          this.dom.buayBodyInner.setAttribute("ry", String(18 + buayLevel * 5.2));
+        }
+        if (this.dom.buaySideFlabL && this.dom.buaySideFlabR) {
+          const flabX = 58 + buayLevel * 8.5;
+          const flabRx = 14 + buayLevel * 3.2;
+          const flabRy = 12 + buayLevel * 2.8;
+          this.dom.buaySideFlabL.setAttribute("cx", String(-flabX));
+          this.dom.buaySideFlabL.setAttribute("rx", String(flabRx));
+          this.dom.buaySideFlabL.setAttribute("ry", String(flabRy));
+          this.dom.buaySideFlabL.setAttribute("opacity", buayLevel >= 1 ? "1" : "0");
+          this.dom.buaySideFlabR.setAttribute("cx", String(flabX));
+          this.dom.buaySideFlabR.setAttribute("rx", String(flabRx));
+          this.dom.buaySideFlabR.setAttribute("ry", String(flabRy));
+          this.dom.buaySideFlabR.setAttribute("opacity", buayLevel >= 1 ? "1" : "0");
+        }
+        if (this.dom.buayBellyButton) {
+          this.dom.buayBellyButton.setAttribute("r", String(4 + buayLevel * 1.1));
+          this.dom.buayBellyButton.setAttribute("opacity", buayLevel >= 1 ? "0.95" : "0");
+        }
+        if (this.dom.buayRoll1) {
+          const w1 = 38 + buayLevel * 6.5;
+          this.dom.buayRoll1.setAttribute("d", `M ${-w1} ${5 - buayLevel * 1.6} Q 0 ${-6 - buayLevel * 2.5} ${w1} ${5 - buayLevel * 1.6}`);
+          this.dom.buayRoll1.setAttribute("opacity", buayLevel >= 1 ? "0.9" : "0");
+        }
+        if (this.dom.buayRoll2) {
+          const w2 = 46 + buayLevel * 7.2;
+          this.dom.buayRoll2.setAttribute("d", `M ${-w2} 14 Q 0 ${3 - buayLevel * 1.8} ${w2} 14`);
+          this.dom.buayRoll2.setAttribute("opacity", buayLevel >= 2 ? "0.9" : "0");
+        }
+        if (this.dom.buayRoll3) {
+          const w3 = 42 + buayLevel * 6.8;
+          this.dom.buayRoll3.setAttribute("d", `M ${-w3} ${22 + buayLevel * 1.4} Q 0 ${12 + buayLevel * 0.6} ${w3} ${22 + buayLevel * 1.4}`);
+          this.dom.buayRoll3.setAttribute("opacity", buayLevel >= 3 ? "0.9" : "0");
+        }
+        if (this.dom.buayBellySwirl) {
+          this.dom.buayBellySwirl.setAttribute("opacity", "0");
+        }
+        if (this.dom.buayTableShadow) {
+          this.dom.buayTableShadow.setAttribute("rx", String(76 + buayLevel * 9.5));
+          this.dom.buayTableShadow.setAttribute("ry", String(25 + buayLevel * 3));
+        }
+        if (this.dom.buayPawL) this.dom.buayPawL.setAttribute("cx", String(-48 - buayLevel * 6.5));
+        if (this.dom.buayPawR) this.dom.buayPawR.setAttribute("cx", String(48 + buayLevel * 6.5));
+        if (this.dom.buayHeadBase) {
+          this.dom.buayHeadBase.setAttribute("rx", String(43 + buayLevel * 1.5));
+          this.dom.buayHeadBase.setAttribute("ry", String(27 + buayLevel * 0.9));
+        }
+      }
+
+      showFeedback(type, text) {
+        this.setBottomBarVisible(false, `${type === "success" ? "🎉" : "💡"} ${text}`);
+      }
+
+      setPrompt(text, speakNow = false) {
+        if (this.dom.promptText) {
+          this.dom.promptText.textContent = text;
+          this.dom.promptText.classList.remove("prompt-text-fade");
+          void this.dom.promptText.offsetWidth;
+          this.dom.promptText.classList.add("prompt-text-fade");
+        }
+        if (speakNow) {
+          HippoAudio.speakMessages([text], { interrupt: true });
+        }
+      }
+
+      renderTeacherSourceCredits(pack) {
+        if (!this.dom.teacherSourceBox || !pack || !pack.sourceRef) return;
+        const ref = pack.sourceRef;
+        const pages = Array.isArray(ref.pdfPages) ? ref.pdfPages.join(", ") : "-";
+        this.dom.teacherSourceBox.innerHTML = `
+          <div><strong>ชื่อชุดบทเรียน:</strong> ${this.escapeHtml(pack.title)}</div>
+          <div><strong>สื่อต้นฉบับ:</strong> ${this.escapeHtml(ref.mediaTitle)} (หน้า ${this.escapeHtml(pages)})</div>
+          <div><strong>ผู้จัดทำสื่อ:</strong> ${this.escapeHtml(ref.author)}</div>
+          <div><strong>หน่วยงาน:</strong> ${this.escapeHtml(ref.school)}</div>
+          <div><strong>ลิงก์อ้างอิง:</strong> <a href="${this.escapeHtml(ref.url)}" target="_blank" rel="noopener noreferrer" style="color: #1D8AB8; text-decoration: underline;">เปิดหน้าสื่อ OKRP</a></div>
+        `;
+      }
+
+      escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      /**
+       * =========================================================================
+       * 13. SINGLE-SWITCH ACCESSIBILITY
+       * =========================================================================
+       */
+      getScanTargets() {
+        let scope = document.querySelector(".app-shell");
+        if (this.paused) scope = this.dom.modalPause;
+        else if (this.activeModal === "SETTINGS") scope = this.dom.modalSettings;
+        else if (this.activeModal === "STICKERS") scope = this.dom.modalStickers;
+        else if (this.activeModal === "TEACHER") scope = this.dom.modalTeacher;
+
+        const candidates = Array.from(scope.querySelectorAll("button, a.toy-btn")).filter((el) => {
+          if (el.disabled) return false;
+          if (el.closest("[hidden]")) return false;
+          return el.offsetParent !== null;
+        });
+
+        const bottomBtns = candidates.filter((el) => el.closest("#uiActionButtons") || el.id === "btnListenScene" || el.id === "btnCloseSceneZoom");
+        const topBtns = candidates.filter((el) => !bottomBtns.includes(el));
+        return [...bottomBtns, ...topBtns];
+      }
+
+      stopSwitchScan() {
+        if (this.scanTimer) {
+          clearInterval(this.scanTimer);
+          this.scanTimer = null;
+        }
+        document.querySelectorAll(".scan-focus").forEach((el) => el.classList.remove("scan-focus"));
+      }
+
+      startSwitchScan() {
+        this.stopSwitchScan();
+        if (!this.settings.switchMode) return;
+        if (this.busyAnimating && !this.paused && !this.activeModal) return;
+
+        const highlightStep = () => {
+          const targets = this.getScanTargets();
+          document.querySelectorAll(".scan-focus").forEach((el) => el.classList.remove("scan-focus"));
+          if (targets.length === 0) return;
+          if (this.scanIndex >= targets.length) this.scanIndex = 0;
+
+          const activeEl = targets[this.scanIndex];
+          activeEl.classList.add("scan-focus");
+          activeEl.focus({ preventScroll: true });
+          HippoAudio.playScanTick();
+
+          const spokenLabel = activeEl.getAttribute("aria-label") || activeEl.textContent.trim();
+          HippoAudio.speakMessages([spokenLabel], { interrupt: false });
+        };
+
+        highlightStep();
+        this.scanTimer = setInterval(() => {
+          const targets = this.getScanTargets();
+          if (targets.length === 0) return;
+          this.scanIndex = (this.scanIndex + 1) % targets.length;
+          highlightStep();
+        }, this.settings.scanSpeedMs);
+      }
+
+      restartSwitchScan() {
+        this.stopSwitchScan();
+        if (this.settings.switchMode) {
+          this.startSwitchScan();
+        }
+      }
+
+      triggerCurrentScanTarget() {
+        if (!this.settings.switchMode) return;
+        const targets = this.getScanTargets();
+        if (targets.length === 0) return;
+        const chosen = targets[this.scanIndex % targets.length];
+        if (chosen) chosen.click();
+      }
+    }
+
+    const gameRules = document.getElementById("game-rules");
+    gameRules.addEventListener("close", () => {
+      window.hungryHippoApp = new HungryHippoGame();
+      window.hungryHippoApp.dom.promptText.focus({ preventScroll: true });
+    }, { once: true });
+    gameRules.showModal();
+  </script>
+</body>
+</html>

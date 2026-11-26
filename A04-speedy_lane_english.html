@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="th" data-profile="adhd">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Speedy Lane: English 5 - Simple Present Tense</title>
+<style>
+:root{--bg:#ffe1ec;--ink:#2d1f45;--card:#fff;--pur:#7c3aed;--pur-s:#ede4ff;--pink:#ec4899;--amb:#fff1c2;--grn:#10b981;--line:#d9c8f5}
+body.blue{--bg:#dff1ff}body.white{--bg:#f8fafc}
+body.hc{--bg:#000;--ink:#ffe600;--card:#111;--pur:#ffe600;--pur-s:#222;--amb:#222;--line:#ffe600}
+@media(prefers-color-scheme:dark){body:not(.hc){--ink:#2d1f45}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Sarabun","Noto Sans Thai","Tahoma",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:10px;padding:10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom));user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:4px solid #2563eb;outline-offset:3px}
+body.hc :focus-visible{outline-color:#fff}
+header{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:4px 8px 4px 14px}
+h1{font-size:clamp(14px,2.2vw,20px);margin:0;font-weight:800;color:var(--pink);flex:1;min-width:110px}
+body.hc h1{color:var(--ink)}
+.chip{display:flex;align-items:center;gap:4px;background:var(--amb);border:2px solid #f5d77a;border-radius:999px;padding:2px 8px;font-weight:800;font-size:clamp(12px,1.6vw,14px)}
+body.hc .chip{border-color:var(--ink)}
+.ib{min-width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--pur-s);font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 6px;gap:4px}
+.ib.help{background:#38bdf8;color:#fff;border-color:#0ea5e9}
+#main-card{flex:1;min-height:0;background:var(--card);border:4px solid var(--pur);border-radius:24px;box-shadow:0 8px 24px rgba(124,58,237,.18);display:flex;flex-direction:column;overflow:hidden}
+body.hc #main-card{border-color:var(--ink)}
+#topbox{padding:6px 12px 6px;display:none;flex-direction:column;gap:4px;border-bottom:3px solid var(--line);background:var(--card)}
+#topbox.on{display:flex}
+#topbox header{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-bottom:6px;border-bottom:2px dashed var(--line);border-top:0;border-left:0;border-right:0;border-radius:0}
+#qcard{text-align:center}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.tag{background:var(--pur-s);border:2px solid var(--line);border-radius:999px;padding:2px 10px;font-weight:700;font-size:12px}
+#q{font-size:clamp(15px,2.3vw,22px);font-weight:800;margin:4px 0;line-height:1.35;word-break:break-word}
+#hint{display:none;background:var(--pur-s);border-radius:12px;padding:4px 12px;font-weight:700;font-size:13px;margin-top:2px}
+#hint.on{display:inline-block}
+.pill{background:var(--pur);color:#fff;border:0;border-radius:999px;padding:4px 10px;font-weight:700;font-size:12px;cursor:pointer}
+body.hc .pill{color:#000}
+#stage{position:relative;flex:1;min-height:180px;overflow:hidden;background:#bfe3ff}
+canvas{width:100%;height:100%;display:block}
+#toast{position:absolute;left:50%;top:12%;transform:translateX(-50%) scale(.9);opacity:0;pointer-events:none;background:var(--card);border:4px solid var(--grn);border-radius:26px;padding:12px 24px;text-align:center;max-width:92%;transition:.25s;box-shadow:0 8px 20px rgba(0,0,0,.15);z-index:4}
+#toast.on{opacity:1;transform:translateX(-50%) scale(1)}
+#toast.bad{border-color:#f59e0b}
+#toast b{display:block;font-size:clamp(22px,4.5vw,36px);font-weight:800;color:var(--grn)}
+#toast.bad b{color:#d97706}
+#toast span{font-weight:700;font-size:clamp(14px,2.4vw,18px);display:block;margin-top:4px;line-height:1.4}
+body.rm *{transition:none!important}
+.ov{position:fixed;inset:0;background:rgba(45,31,69,.55);display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+.ov.on{display:flex}
+.box{background:var(--card);border:5px solid var(--pur);border-radius:32px;padding:20px 22px;max-width:560px;width:100%;max-height:92vh;overflow:auto;text-align:center}
+.box h2{margin:0 0 8px;font-size:26px}
+.box p,.box li{font-size:16px;line-height:1.55;font-weight:600}
+.box ul{text-align:left;padding-left:22px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;font-weight:700;margin:8px 0}
+.row select{border:3px solid var(--line);border-radius:14px;padding:6px 8px;background:var(--card)}
+.big{background:var(--pink);color:#fff;border:0;border-radius:999px;padding:12px 30px;font-weight:800;font-size:20px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.2);margin-top:8px}
+body.hc .big{color:#000}
+.keys kbd{background:var(--pur-s);border:2px solid var(--line);border-radius:8px;padding:1px 8px;font-weight:800}
+#start{position:absolute;inset:0;z-index:5;background:linear-gradient(#ffe1ecee,#ede4ffee);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px;overflow-y:auto}
+#start.off{display:none}
+#start h2{font-size:clamp(22px,4.5vw,38px);margin:0}
+#start p{margin:0;font-weight:700;font-size:clamp(14px,2.5vw,18px)}
+.howto-card{background:var(--card);border:4px solid var(--pur);border-radius:26px;padding:12px 18px;max-width:540px;width:96%;text-align:left;box-shadow:0 6px 0 var(--line);margin:2px 0}
+.howto-card h3{margin:0 0 6px;font-size:clamp(17px,3vw,22px);text-align:center}
+.howto-card ul{margin:0;padding-left:20px}
+.howto-card li{font-size:clamp(13px,2.2vw,15px);line-height:1.5;font-weight:700;margin:2px 0}
+.adhd-badge{background:var(--amb);border:3px solid #f59e0b;border-radius:18px;padding:8px 14px;margin:0 0 8px;font-size:clamp(13px,2.3vw,16px);font-weight:800;line-height:1.45;text-align:left;box-shadow:0 3px 0 rgba(245,158,11,.2)}
+body.hc .adhd-badge{border-color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="main-card">
+  <div id="topbox">
+    <header>
+      <h1>Speedy Lane • English 5</h1>
+      <div class="chip">🎯 <span id="vp">1/10</span></div>
+      <div class="chip">⭐ <span id="vs">0</span></div>
+      <div class="chip">🏆 <span id="vc">0</span></div>
+      <div class="chip" id="vm" hidden>x2</div>
+      <button class="ib" id="bsnd" aria-label="เปิดหรือปิดเสียงพากย์">🔊</button>
+      <button class="ib" id="bset" aria-label="ตั้งค่าครูและผู้ปกครอง">⚙️</button>
+      <button class="ib help" id="bhelp" aria-label="วิธีเล่น">?</button>
+      <button class="ib" id="bpause" aria-label="พัก (P)">⏸ พัก</button>
+    </header>
+
+    <section id="qcard" aria-live="polite">
+      <div class="qtop">
+        <span class="tag" id="tag">Unit 1 • Simple Present Tense</span>
+        <div style="display:flex;gap:6px">
+          <button class="pill" id="bhint" style="background:#f59e0b">💡 คำใบ้ (H)</button>
+          <button class="pill" id="brep">📢 ฟังโจทย์ซ้ำ (R)</button>
+        </div>
+      </div>
+      <div id="q" class="question-prompt">...</div>
+      <div id="hint">💡 <span id="ht"></span></div>
+    </section>
+  </div>
+
+  <div id="stage" tabindex="0" aria-label="พื้นที่เล่นเกม ใช้ลูกศรซ้ายขวาเปลี่ยนเลน">
+    <canvas id="cv"></canvas>
+    <div id="toast" role="status"><b id="tt"></b><span id="td"></span></div>
+    <div id="start">
+      <div style="font-size:44px;line-height:1">🐱📚</div>
+      <h2>Speedy Lane: English 5 (Unit 1)</h2>
+      <div class="howto-card">
+        <div class="adhd-badge">🌟 บทเรียน: Press the Star to Repeat (Simple Present Tense, Frequency Adverbs & Call Centers) — ไม่มีตัวจับเวลา ลองตอบใหม่ได้เสมอ</div>
+        <h3>📖 วิธีเล่น</h3>
+        <ul class="keys">
+          <li>เปลี่ยนเลนคำตอบ: กด <kbd>◀</kbd> <kbd>▶</kbd> หรือ <kbd>A</kbd> <kbd>D</kbd> หรือเลข <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></li>
+          <li>วิ่งผ่านประตู: กด <kbd>Enter</kbd> หรือ <kbd>Space</kbd> (หรือแตะซ้ำที่เลนที่เลือก)</li>
+          <li>ฟังโจทย์ซ้ำ <kbd>R</kbd> · ฟังเลนนี้ <kbd>O</kbd> · ขอคำใบ้ <kbd>H</kbd> · พัก <kbd>P</kbd></li>
+          <li>บนมือถือ/แท็บเล็ต: ปัดซ้าย-ขวาบนฉาก หรือแตะเลือกประตูโดยตรง</li>
+        </ul>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:4px">
+        <button class="pill" id="bintro" style="padding:12px 20px;font-size:16px">🔊 ฟังวิธีเล่น</button>
+        <button class="big" id="bstart" style="margin-top:0">▶ เริ่มเล่น</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="m-help" role="dialog" aria-modal="true"><div class="box">
+  <div class="adhd-badge">🌟 เหมาะสำหรับผู้มีภาวะสมาธิสั้น: ฉากสีนุ่มนวล ไม่มีสิ่งกีดขวางหรือตัวจับเวลา ลดสิ่งเร้ารบกวนสมาธิ</div>
+  <h2>📖 วิธีเล่น</h2>
+  <ul class="keys">
+    <li>เปลี่ยนเลน: <kbd>◀</kbd> <kbd>▶</kbd> หรือ <kbd>A</kbd> <kbd>D</kbd> หรือกด <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></li>
+    <li>วิ่งผ่านประตู: <kbd>Enter</kbd> หรือ <kbd>Space</kbd></li>
+    <li>ฟังโจทย์ซ้ำ <kbd>R</kbd> · ฟังเลนนี้ซ้ำ <kbd>O</kbd> · ตัวช่วย <kbd>H</kbd> · พัก <kbd>P</kbd></li>
+    <li>บนมือถือ/แท็บเล็ต: ปัดซ้าย-ขวาบนฉาก หรือแตะเลือกเลนโดยตรง</li>
+    <li>ตอบไม่ตรง เจ้าเหมียวจะหยุดหน้าประตู ไม่เสียคะแนน ลองใหม่ได้</li>
+  </ul>
+  <button class="big" data-close>เข้าใจแล้ว</button>
+</div></div>
+
+<div class="ov" id="m-pause" role="dialog" aria-modal="true"><div class="box">
+  <div style="font-size:60px">☕</div><h2>พักสักครู่นะ</h2><p>พร้อมแล้วค่อยกดเล่นต่อ</p>
+  <button class="big" id="bresume">เล่นต่อ</button>
+</div></div>
+
+<div class="ov" id="m-set" role="dialog" aria-modal="true"><div class="box">
+  <h2>⚙️ ตั้งค่าครู / ผู้ปกครอง</h2>
+  <div class="row">รูปแบบ <select id="s-mode"><option value="wait">ประตูหยุดรอ (ผ่อนคลาย)</option><option value="run">วิ่งต่อเนื่อง</option></select></div>
+  <div class="row">ความเร็ว <select id="s-spd"><option value="0.5">ช้ามาก</option><option value="1" selected>ปานกลาง</option><option value="1.7">เร็ว</option></select></div>
+  <div class="row">สีพื้นหลัง <select id="s-bg"><option value="">ชมพูพาสเทล</option><option value="blue">ฟ้าพาสเทล</option><option value="white">ขาวนวล</option><option value="hc">คอนทราสต์สูง</option></select></div>
+  <div class="row">ลดการเคลื่อนไหว <input type="checkbox" id="s-rm"></div>
+  <div class="row">ยืนยันอัตโนมัติเมื่อหยุดเลือก 2 วินาที <input type="checkbox" id="s-auto"></div>
+  <div class="row">ตัวคูณคะแนน (x2) <input type="checkbox" id="s-mul" checked></div>
+  <button class="pill" id="blog">📋 คัดลอกบันทึกการเล่น (IEP)</button>
+  <br><button class="big" id="bapply">ใช้ค่าตั้งและเริ่มใหม่</button>
+  <button class="pill" data-close style="margin-left:6px">ปิด</button>
+</div></div>
+
+<div class="ov" id="m-end" role="dialog" aria-modal="true"><div class="box">
+  <div style="font-size:60px">🎉</div><h2>จบรอบแล้ว เก่งมาก!</h2>
+  <div class="row"><span>⭐ ดาวที่ได้</span><span id="e-s"></span></div>
+  <div class="row"><span>🏆 คะแนน</span><span id="e-c"></span></div>
+  <div class="row"><span>🎯 ตอบถูกตั้งแต่ครั้งแรก</span><span id="e-a"></span></div>
+  <p>พักสายตาสักครู่ก่อนเล่นต่อก็ได้นะ</p>
+  <button class="big" id="bagain">เล่นรอบใหม่</button>
+</div></div>
+
+<script>
+// ชุดคำถามจากเอกสาร English 5 (Unit 1: Press the Star to Repeat)
+var Q = [
+  {
+    id: 1,
+    subject: "Grammar: Verb Forms",
+    grade: "Unit 1",
+    question: "A hummingbird _____ its wings 50 to 200 times per second.",
+    choices: [
+      ["beat", "beat"],
+      ["beats", "beats"],
+      ["beating", "beating"]
+    ],
+    ok: 1,
+    exp: "ประธานเอกพจน์ (A hummingbird) กริยาใน Simple Present ต้องเติม -s เป็น beats",
+    hints: ["A hummingbird เป็นประธานเอกพจน์ (นกฮัมมิงเบิร์ด 1 ตัว)", "กริยาของประธาน he, she, it หรือเอกพจน์ ต้องเติม -s"],
+    say: "ข้อ 1 A hummingbird เว้นวรรค its wings 50 to 200 times per second เลือกคำกริยาที่ถูกต้อง"
+  },
+  {
+    id: 2,
+    subject: "Grammar: Verb Forms",
+    grade: "Unit 1",
+    question: "The earth _____ the sun at an average speed of 30 km/sec.",
+    choices: [
+      ["orbit", "orbit"],
+      ["orbits", "orbits"],
+      ["orbites", "orbites"]
+    ],
+    ok: 1,
+    exp: "The earth เป็นเอกพจน์ และเป็นข้อเท็จจริงทางวิทยาศาสตร์ จึงเติม -s เป็น orbits",
+    hints: ["โลก (The earth) มีเพียงดวงเดียว เป็นประธานเอกพจน์", "คำว่า orbit เติม -s ได้เลยโดยไม่ต้องเติม -es"],
+    say: "ข้อ 2 The earth เว้นวรรค the sun at an average speed of 30 kilometers per second"
+  },
+  {
+    id: 3,
+    subject: "Grammar: Spelling Rules",
+    grade: "Unit 1",
+    question: "He _____ hard to qualify for a position at the call center.",
+    choices: [
+      ["trys", "trys"],
+      ["try", "try"],
+      ["tries", "tries"]
+    ],
+    ok: 2,
+    exp: "กริยาที่ลงท้ายด้วยพยัญชนะ + y (try) เมื่อประธานเป็น He ให้เปลี่ยน y เป็น i แล้วเติม -es เป็น tries",
+    hints: ["สังเกตตัวอักษรหน้าตัว y ในคำว่า try (r เป็นพยัญชนะ)", "เปลี่ยน y เป็น i แล้วเติม -es"],
+    say: "ข้อ 3 He เว้นวรรค hard to qualify for a position at the call center"
+  },
+  {
+    id: 4,
+    subject: "Grammar: Negative Form",
+    grade: "Unit 1",
+    question: "A baker _____ sell flowers. A baker sells bread.",
+    choices: [
+      ["don't", "don't"],
+      ["doesn't", "doesn't"],
+      ["isn't", "isn't"]
+    ],
+    ok: 1,
+    exp: "ประธานเอกพจน์ (A baker) ในประโยคปฏิเสธ ใช้ does not (doesn't) ตามด้วยกริยาช่องที่ 1 (sell)",
+    hints: ["A baker (คนทำขนมปัง) เป็นประธานเอกพจน์", "ประโยคปฏิเสธของประธานเอกพจน์ ใช้ doesn't + กริยาไม่ผัน"],
+    say: "ข้อ 4 A baker เว้นวรรค sell flowers. A baker sells bread."
+  },
+  {
+    id: 5,
+    subject: "Grammar: Questions",
+    grade: "Unit 1",
+    question: "_____ your cousin finish work at five o'clock?",
+    choices: [
+      ["Do", "Do"],
+      ["Does", "Does"],
+      ["Is", "Is"]
+    ],
+    ok: 1,
+    exp: "your cousin (ลูกพี่ลูกน้องของคุณ 1 คน) เป็นประธานเอกพจน์ จึงใช้ Does ขึ้นต้นประโยคคำถาม",
+    hints: ["ดูที่ประธาน your cousin เป็นเอกพจน์หรือพหูพจน์", "ประโยคคำถามที่มีกริยาแท้ (finish) และประธานเอกพจน์ ใช้ Does"],
+    say: "ข้อ 5 เว้นวรรค your cousin finish work at five o'clock?"
+  },
+  {
+    id: 6,
+    subject: "Usage: Facts vs Habits",
+    grade: "Unit 1",
+    question: "ประโยค 'Scorpions have eight legs.' จัดอยู่ในประเภทใด?",
+    choices: [
+      ["Fact / Truth (ข้อเท็จจริง)", "Fact or Truth ข้อเท็จจริง"],
+      ["Habitual Action (กิจวัตร)", "Habitual Action กิจวัตรประจำวัน"],
+      ["Future Plan (แผนอนาคต)", "Future Plan แผนในอนาคต"]
+    ],
+    ok: 0,
+    exp: "แมงป่องมี 8 ขา เป็นความจริงทั่วไปทางธรรมชาติ (Fact or Truth)",
+    hints: ["แมงป่องมี 8 ขา เป็นความจริงเสมอไม่ว่าเวลาใด", "เลือกระหว่าง ข้อเท็จจริง (Fact) กับ กิจวัตรประจำวัน (Habit)"],
+    say: "ข้อ 6 ประโยค Scorpions have eight legs. จัดอยู่ในประเภทใด"
+  },
+  {
+    id: 7,
+    subject: "Grammar: Question Words",
+    grade: "Unit 1",
+    question: "_____ do you have English classes? — Three times a week.",
+    choices: [
+      ["What time", "What time"],
+      ["Where", "Where"],
+      ["How often", "How often"]
+    ],
+    ok: 2,
+    exp: "คำตอบคือ 'Three times a week' (3 ครั้งต่อสัปดาห์) บอกความถี่ จึงต้องถามด้วย How often (บ่อยแค่ไหน)",
+    hints: ["สังเกตคำตอบ: Three times a week (สามครั้งต่อสัปดาห์)", "คำถามที่ถามถึงความถี่ในการทำกิจกรรมใช้คำว่า How often"],
+    say: "ข้อ 7 เว้นวรรค do you have English classes? คำตอบคือ Three times a week."
+  },
+  {
+    id: 8,
+    subject: "Reading: Call Centers",
+    grade: "Unit 1",
+    question: "Which city in India has become a principal center for IT and call centers?",
+    choices: [
+      ["Mumbai", "Mumbai"],
+      ["Bangalore", "Bangalore"],
+      ["New Delhi", "New Delhi"]
+    ],
+    ok: 1,
+    exp: "จากบทอ่าน 'Is That Mrs. Jones?' เมือง Bangalore ทางตอนใต้ของอินเดียเป็นศูนย์กลางด้าน IT และ Call Center ระดับโลก",
+    hints: ["ชื่อเมืองในบทอ่านอยู่ทางตอนใต้ของประเทศอินเดีย", "ขึ้นต้นด้วยตัว B"],
+    say: "ข้อ 8 Which city in India has become a principal center for IT and call centers?"
+  },
+  {
+    id: 9,
+    subject: "Reading: Call Centers",
+    grade: "Unit 1",
+    question: "Why do new call center employees in India receive language training first?",
+    choices: [
+      ["To slow down speech & practice accents", "To slow down speech and practice accents"],
+      ["To learn how to repair computers", "To learn how to repair computers"],
+      ["To write computer software", "To write computer software"]
+    ],
+    ok: 0,
+    exp: "พนักงานใหม่ต้องฝึกพูดให้ช้าลงและฝึกสำเนียง เพื่อให้ลูกค้าชาวต่างชาติเข้าใจภาษาอังกฤษได้ง่ายขึ้น",
+    hints: ["คนอินเดียพูดภาษาอังกฤษเร็วมาก จึงต้องฝึกปรับความเร็วและสำเนียง", "เกี่ยวข้องกับการพูด (speech) และสำเนียง (accents)"],
+    say: "ข้อ 9 Why do new call center employees in India receive language training first?"
+  },
+  {
+    id: 10,
+    subject: "Conversation: Customer Service",
+    grade: "Unit 1",
+    question: "In the conversation, why did Jessica call QUEST customer service?",
+    choices: [
+      ["To buy flowers", "To buy flowers"],
+      ["To report a stolen card", "To report a stolen card"],
+      ["To apply for a job", "To apply for a job"]
+    ],
+    ok: 1,
+    exp: "Jessica โทรติดต่อฝ่ายบริการลูกค้าของ QUEST เพื่อแจ้งบัตรถูกขโมย (I want to report a stolen card.)",
+    hints: ["ในบทสนทนา Jessica พูดว่า I want to report a...", "เกี่ยวข้องกับบัตรเครดิตของเธอที่หายไป"],
+    say: "ข้อ 10 In the conversation, why did Jessica call QUEST customer service?"
+  }
+];
+
+function applyInjectedQuestions(injected) {
+  let list = [];
+  if (Array.isArray(injected)) list = injected;
+  else if (injected && Array.isArray(injected.questions)) list = injected.questions;
+  else if (injected && Array.isArray(injected.items)) list = injected.items;
+  else if (injected && typeof injected === 'object') list = [injected];
+  if (list.length === 0) return;
+
+  try {
+    Q = list.map(function(item, idx) {
+      var rawChoices = ((item.payload && Array.isArray(item.payload.choices)) ? item.payload.choices : (item.choices || [])).slice(0, 3);
+      if (rawChoices.length < 3) {
+        while (rawChoices.length < 3) {
+          rawChoices.push({ id: 'dummy_' + rawChoices.length, text: 'ตัวเลือกสำรอง' });
+        }
+      }
+      var okIdx = rawChoices.findIndex(function(c) {
+        return c.isCorrect || c.id === item.correctChoiceId || (item.payload && item.payload.answer && item.payload.answer.choice_ids && item.payload.answer.choice_ids.includes(c.id));
+      });
+      if (okIdx < 0) okIdx = 0;
+      var prompt = item.prompt || item.title || item.question || ('ข้อที่ ' + (idx + 1));
+      return {
+        id: idx + 1,
+        subject: item.subject || item.skill_tag || 'English 5',
+        grade: 'Unit 1',
+        question: prompt,
+        choices: rawChoices.map(function(c) {
+          var txt = c.text || c.label || String(c);
+          return [txt, txt];
+        }),
+        ok: okIdx,
+        exp: item.explanation || (item.payload && item.payload.feedback && item.payload.feedback.correct) || 'เยี่ยมมาก! ถูกต้องแล้วจ้า',
+        hints: [item.hint || 'สังเกตคำถามให้ดีๆ นะ', 'ลองทบทวนหลัก Simple Present Tense ดูอีกครั้ง'],
+        say: item.audio_script || prompt
+      };
+    });
+    if (typeof S !== 'undefined') {
+      S.qi = 0;
+      if (typeof load === 'function') load();
+    }
+  } catch(e) { console.warn(e); }
+}
+
+window.dismissStartOverlay = function() {
+  if (typeof begin === 'function') begin();
+};
+
+if (window.INJECTED_QUESTIONS) {
+  applyInjectedQuestions(window.INJECTED_QUESTIONS);
+}
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'INJECT_QUESTIONS' && e.data.questions) {
+    applyInjectedQuestions(e.data.questions);
+  }
+});
+window.parent?.postMessage({ type: 'TEMPLATE_READY' }, '*');
+
+var $=function(i){return document.getElementById(i)};
+var S={on:false,mode:"wait",spd:1,rm:false,auto:false,mul:true,snd:true,paused:false,modal:null,
+ qi:0,lane:1,p:0,score:0,stars:0,streak:0,mult:1,first:0,tried:[],locked:false,run:-1,log:[],cur:null,t0:0,hints:0,picks:[],at:null,catX:null,parts:[]};
+var cv=$("cv"),cx=cv.getContext("2d"),W=0,H=0;
+
+function size(){var r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+new ResizeObserver(size).observe(cv);size();
+
+function speak(t){
+  if(!S.snd||!window.speechSynthesis)return;
+  try{
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(t);
+    // เลือกภาษาอัตโนมัติตามเนื้อหาข้อความ (หากมีอักษรไทยใช้ th-TH หากเป็นอังกฤษล้วนใช้ en-US)
+    u.lang=/[\u0E00-\u0E7F]/.test(t)?"th-TH":"en-US";
+    u.rate=.92;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+
+function load(){
+  if(S.qi>=Q.length){return finish()}
+  var q=Q[S.qi];
+  var ch=shuffle(q.choices.map(function(c,i){return{l:c[0],s:c[1],ok:i===q.ok}}));
+  S.cur={q:q,ch:ch};S.lane=1;S.p=0;S.tried=[];S.locked=false;S.run=-1;S.hints=0;S.picks=[1];S.t0=Date.now();S.fail=0;
+  $("q").textContent=q.question;$("tag").textContent=q.grade+" • "+q.subject;
+  $("vp").textContent=(S.qi+1)+"/"+Q.length;$("vs").textContent=S.stars;$("vc").textContent=S.score;
+  $("hint").classList.remove("on");
+  speak(q.say);
+}
+function stat(){$("vs").textContent=S.stars;$("vc").textContent=S.score;var m=$("vm");m.hidden=!(S.mult>1);m.textContent="x"+S.mult}
+
+function can(){return S.on&&!S.paused&&!S.modal&&!S.locked&&S.cur}
+function setLane(n){
+  if(!can())return;n=Math.max(0,Math.min(2,n));
+  if(n!==S.lane||S.picks.length===0){S.lane=n;S.picks.push(n);}
+  say();timer();
+}
+function say(){var c=S.cur.ch[S.lane];speak("เลน "+(S.lane+1)+" "+c.s)}
+function timer(){clearTimeout(S.at);if(S.auto&&S.mode==="wait")S.at=setTimeout(go,2000)}
+function go(){
+  if(!can())return;clearTimeout(S.at);
+  var c=S.cur.ch[S.lane];
+  if(S.tried.indexOf(S.lane)>-1){return}
+  S.log.push({q:S.cur.q.question,lane:S.lane+1,choice:c.l,correct:c.ok,secs:+((Date.now()-S.t0)/1000).toFixed(1),hints:S.hints,moves:S.picks.length-1});
+  if(c.ok){
+    if(S.fail===0)S.first++;
+    S.streak++;if(S.mul&&S.streak>=3)S.mult=2;
+    var pts=125*S.mult;S.score+=pts;S.stars++;stat();
+    S.locked=true;S.run=0;burst();
+    toast(true,"ถูกต้อง! (Correct!)","+"+pts+" คะแนน และได้ดาว ⭐ — "+S.cur.q.exp);
+    speak("ถูกต้อง เก่งมากเลย");
+    setTimeout(function(){hideToast();S.qi++;load()},2000);
+  }else{
+    S.fail++;S.streak=0;S.mult=1;stat();S.tried.push(S.lane);
+    toast(false,"ลองดูอีกครั้งนะ (Try again!)",S.cur.q.exp);
+    speak("ลองดูอีกครั้งนะ "+S.cur.q.exp);
+    if(S.mode==="run")S.p=0;
+    setTimeout(hideToast,3400);
+  }
+}
+function burst(){var l=lx(S.lane,S.p>.99?1:S.p);for(var i=0;i<22;i++)S.parts.push({x:l.x,y:l.y,vx:(Math.random()-.5)*5,vy:-Math.random()*5-1,life:1})}
+function toast(ok,t,d){var e=$("toast");e.className=ok?"on":"on bad";$("tt").textContent=t;$("td").textContent=d}
+function hideToast(){$("toast").className=""}
+function hint(){if(!can())return;var h=S.cur.q.hints,t=h[Math.min(S.hints,h.length-1)];S.hints++;$("ht").textContent=t;$("hint").classList.add("on");speak("คำใบ้ "+t)}
+function finish(){
+  S.locked=true;$("e-s").textContent=S.stars+" ดาว";$("e-c").textContent=S.score;
+  $("e-a").textContent=Math.round(S.first/Q.length*100)+"%";open("m-end");speak("จบรอบแล้ว เก่งมากเลย");
+}
+function reset(){S.qi=0;S.score=0;S.stars=0;S.streak=0;S.mult=1;S.first=0;S.log=[];S.parts=[];stat();load()}
+
+/* modals */
+function open(id){S.modal=id;["m-help","m-pause","m-set","m-end"].forEach(function(m){$(m).classList.toggle("on",m===id)});var b=document.querySelector("#"+id+" button");if(b)b.focus()}
+function closeM(){S.modal=null;["m-help","m-pause","m-set","m-end"].forEach(function(m){$(m).classList.remove("on")});if(S.paused){S.paused=false}$("stage").focus()}
+function pause(){if(!S.on)return;if(S.paused){S.paused=false;closeM()}else{S.paused=true;open("m-pause")}}
+
+/* settings */
+function apply(){
+  S.mode=$("s-mode").value;S.spd=+$("s-spd").value;S.rm=$("s-rm").checked;S.auto=$("s-auto").checked;S.mul=$("s-mul").checked;
+  document.body.className=$("s-bg").value+(S.rm?" rm":"");
+}
+function copyLog(){
+  var t=JSON.stringify(S.log,null,2),ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy")}catch(e){}ta.remove();
+  if(navigator.clipboard)navigator.clipboard.writeText(t).catch(function(){});
+  $("blog").textContent="✅ คัดลอกแล้ว";setTimeout(function(){$("blog").textContent="📋 คัดลอกบันทึกการเล่น (IEP)"},1800);
+}
+
+/* input: keyboard */
+function onKey(e){
+  var tg=e.target&&e.target.tagName;if(tg==="SELECT"||tg==="TEXTAREA"||tg==="INPUT")return;
+  var k=(e.code&&e.code!=="Unidentified")?e.code:e.key;
+  if(k==="Escape"||k==="Esc"){if(S.modal&&S.modal!=="m-end")closeM();return}
+  if(S.modal&&S.modal!=="m-pause")return;
+  if(k==="KeyP"){e.preventDefault();if(!e.repeat)pause();return}
+  if(!S.on){if(k==="Enter"||k==="Space"){e.preventDefault();begin()}return}
+  var act=null;
+  if(k==="ArrowLeft"||k==="KeyA"||k==="Numpad4")act=function(){setLane(S.lane-1)};
+  else if(k==="ArrowRight"||k==="KeyD"||k==="Numpad6")act=function(){setLane(S.lane+1)};
+  else if(k==="Digit1"||k==="Numpad1")act=function(){setLane(0)};
+  else if(k==="Digit2"||k==="Numpad2")act=function(){setLane(1)};
+  else if(k==="Digit3"||k==="Numpad3")act=function(){setLane(2)};
+  else if(k==="Enter"||k==="NumpadEnter"||k==="Space")act=go;
+  else if(k==="KeyR")act=function(){speak(S.cur.q.say)};
+  else if(k==="KeyO")act=function(){say()};
+  else if(k==="KeyH")act=hint;
+  if(!act)return;
+  e.preventDefault();
+  if(document.activeElement&&document.activeElement.tagName==="BUTTON")document.activeElement.blur();
+  if(!e.repeat&&!S.paused)act();
+}
+window.addEventListener("keydown",onKey,true);
+window.addEventListener("keyup",function(e){if(e.code==="Space"||e.code==="Enter")e.preventDefault()},true);
+
+/* input: touch swipe + tap on doors */
+var sx=null;
+$("stage").addEventListener("pointerdown",function(e){sx=e.clientX;$("stage").focus()});
+$("stage").addEventListener("pointerup",function(e){
+  if(sx===null||!S.on)return;var dx=e.clientX-sx;sx=null;
+  if(Math.abs(dx)>40){setLane(S.lane+(dx>0?1:-1))}
+  else{
+    var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
+    var target=x<.34?0:x<.67?1:2;
+    if(S.lane===target){go()}else{setLane(target)}
+  }
+});
+$("brep").onclick=function(){if(S.cur)speak(S.cur.q.say)};
+$("bhint").onclick=hint;
+$("bsnd").onclick=function(){S.snd=!S.snd;this.textContent=S.snd?"🔊":"🔇";if(!S.snd&&window.speechSynthesis)speechSynthesis.cancel()};
+$("bset").onclick=function(){S.paused=true;open("m-set")};
+$("bhelp").onclick=function(){S.paused=true;open("m-help")};
+$("bpause").onclick=pause;$("bresume").onclick=function(){S.paused=false;closeM()};
+$("bapply").onclick=function(){apply();S.paused=false;closeM();reset()};
+$("blog").onclick=copyLog;$("bagain").onclick=function(){closeM();reset()};
+document.querySelectorAll("[data-close]").forEach(function(b){b.onclick=function(){S.paused=false;closeM()}});
+["s-bg","s-rm"].forEach(function(i){$(i).onchange=apply});
+function begin(){S.on=true;$("start").classList.add("off");$("topbox").classList.add("on");apply();reset();$("stage").focus();window.focus()}
+var introTxt="ยินดีต้อนรับสู่เกม สปีดี้ เลน บทเรียนภาษาอังกฤษ Unit 1 Simple Present Tense กดลูกศรซ้าย ขวา หรือเลข 1 2 3 หรือแตะที่เลนเพื่อเลือกคำตอบ แล้วกด เอ็นเทอร์ เพื่อวิ่งผ่านประตู กดปุ่ม เริ่มเล่น ได้เลยนะ";
+function sayIntro(){speak(introTxt)}
+$("bintro").onclick=sayIntro;
+$("bstart").onclick=begin;
+window.addEventListener("load",function(){window.focus();$("bstart").focus()});
+
+/* drawing */
+var HOR=.26;
+function geo(y){var t=(y-H*HOR)/(H-H*HOR);return{t:t,hw:W*(.13+.37*t)}}
+function lx(i,p){var y=H*HOR+(H*.5-H*HOR)*Math.pow(p,1.15),g=geo(y);return{x:W/2+(i-1)*(2*g.hw/3),y:y,w:2*g.hw/3,t:g.t}}
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+function fit(t,w,px){var s=px;do{cx.font="800 "+s+"px Sarabun,'Noto Sans Thai',Tahoma,sans-serif";s-=2}while(cx.measureText(t).width>w&&s>10);return s+2}
+function splitTokens(str){
+  if(!str)return[];
+  // แยกคำภาษาอังกฤษด้วยช่องว่างก่อน เพื่อไม่ให้ตัดกลางคำภาษาอังกฤษ
+  var spaceTokens=str.split(' ');
+  if(spaceTokens.length>1){
+    var out=[];
+    spaceTokens.forEach(function(t,idx){if(idx>0)out.push(' ');out.push(t)});
+    return out;
+  }
+  if(typeof Intl!=='undefined'&&Intl.Segmenter){
+    try{
+      var seg=new Intl.Segmenter('th',{granularity:'word'});
+      var parts=[],it=seg.segment(str)[Symbol.iterator](),r;
+      while(!(r=it.next()).done){if(r.value.segment)parts.push(r.value.segment)}
+      if(parts.length>0)return parts;
+    }catch(e){}
+  }
+  var chunks=[];for(var k=0;k<str.length;k+=3){chunks.push(str.slice(k,k+3))}return chunks;
+}
+function wrapTextAtFont(text,maxW,maxH,fontPx){
+  var words=splitTokens(String(text||''));
+  cx.font="800 "+fontPx+"px Sarabun,'Noto Sans Thai',Tahoma,sans-serif";
+  var lineH=Math.round(fontPx*1.22);
+  var lines=[],cur="";
+  for(var i=0;i<words.length;i++){
+    var w=words[i],test=cur+w;
+    if(cx.measureText(test).width<=maxW){cur=test}
+    else{
+      if(cur.trim().length>0){lines.push(cur.trim());cur=w.trim()}
+      else{lines.push(w);cur=""}
+    }
+  }
+  if(cur.trim().length>0)lines.push(cur.trim());
+  if(lines.length>1&&lines.length*lineH>maxH){
+    lineH=Math.max(fontPx+1,Math.floor(maxH/lines.length));
+  }
+  return{lines:lines,font:fontPx,lineH:lineH};
+}
+function getBestChoiceLayout(choices,maxW,maxH){
+  var startFont=Math.min(20,Math.max(12,Math.floor(maxW*0.18)));
+  var minFont=Math.max(9,Math.floor(maxW*0.075));
+  for(var fs=startFont;fs>=minFont;fs--){
+    var allFit=true,allLines=[];
+    for(var k=0;k<choices.length;k++){
+      var res=wrapTextAtFont(choices[k].l,maxW,maxH,fs);
+      var widestLine=0;
+      cx.font="800 "+fs+"px Sarabun,'Noto Sans Thai',Tahoma,sans-serif";
+      res.lines.forEach(function(ln){widestLine=Math.max(widestLine,cx.measureText(ln).width)});
+      if((res.lines.length*res.lineH>maxH || widestLine>maxW) && fs>minFont){allFit=false;break}
+      allLines.push(res);
+    }
+    if(allFit)return allLines;
+  }
+  return choices.map(function(ch){return wrapTextAtFont(ch.l,maxW,maxH,minFont)});
+}
+var last=performance.now(),off=0;
+function frame(now){
+  var dt=Math.min(50,now-last)/16.7;last=now;
+  if(S.on&&!S.paused&&S.cur&&!S.locked){
+    var sp=.014*S.spd*dt;
+    if(S.mode==="wait"){if(S.p<1)S.p=Math.min(1,S.p+sp)}
+    else{S.p+=sp*.9;if(S.p>=1){S.p=1;go()}}
+  }
+  if(!S.rm&&S.on&&!S.paused)off+=dt*(S.locked&&S.run<0?0:1.6);
+  if(S.run>=0&&!S.paused)S.run=Math.min(1,S.run+.025*dt);
+  draw(now);requestAnimationFrame(frame)
+}
+function draw(now){
+  var hc=document.body.classList.contains("hc"),hy=H*HOR;
+  /* sky & soft sun */
+  var g=cx.createLinearGradient(0,0,0,hy+20);g.addColorStop(0,hc?"#000":"#8ec5fc");g.addColorStop(1,hc?"#111":"#ffe4f1");
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  if(!hc){cx.fillStyle="rgba(255,244,179,.85)";cx.beginPath();cx.arc(W*.78,hy*.34,Math.min(W,H)*.065,0,7);cx.fill()}
+  /* fluffy clouds */
+  cx.fillStyle="rgba(255,255,255,.88)";
+  [[.14,.11,1],[.48,.07,1.2],[.86,.14,.85]].forEach(function(c,i){var x=((c[0]*W+(S.rm?0:now*.004*(i+1)))%(W+160))-80,y=c[1]*H,s=c[2]*(H/260+.4);
+    cx.beginPath();cx.arc(x,y,18*s,0,7);cx.arc(x+20*s,y-8*s,22*s,0,7);cx.arc(x+44*s,y,16*s,0,7);cx.fill()});
+  /* distant soft hills */
+  if(!hc){cx.fillStyle="#c4eedb";cx.beginPath();cx.arc(W*.18,hy+10,W*.26,Math.PI,0);cx.arc(W*.82,hy+14,W*.28,Math.PI,0);cx.fill()}
+  /* rounded pastel town with roofs & windows */
+  var cols=["#ffb8d4","#c9b6ff","#ffe29a","#a9e5d0","#ffc6a8"],tops=["#f472b6","#8b5cf6","#f59e0b","#10b981","#f97316"];
+  for(var i=0;i<6;i++){var bw=W*.072,bh=H*(.11+((i*37)%9)/68),bx=i<3?i*bw*1.16+W*.02:W-(i-2)*bw*1.16-W*.02;
+    cx.fillStyle=hc?"#222":cols[i%5];rr(bx,hy-bh,bw,bh+6,bw*.26);cx.fill();
+    if(!hc){
+      cx.fillStyle=tops[i%5];rr(bx-2,hy-bh-3,bw+4,8,4);cx.fill();
+      cx.fillStyle="rgba(255,255,255,.78)";var ws=Math.max(4,bw*.18);
+      for(var wy=hy-bh+12;wy<hy-10;wy+=ws*2.1){rr(bx+bw*.24,wy,ws,ws,2);cx.fill();rr(bx+bw*.58,wy,ws,ws,2);cx.fill()}
+    }
+  }
+  /* ground + road with soft curbs */
+  cx.fillStyle=hc?"#111":"#d4f5e4";cx.fillRect(0,hy,W,H-hy);
+  var g0=geo(hy),g1=geo(H);
+  if(!hc){cx.fillStyle="#ffffff";cx.beginPath();cx.moveTo(W/2-g0.hw-4,hy);cx.lineTo(W/2+g0.hw+4,hy);cx.lineTo(W/2+g1.hw+16,H);cx.lineTo(W/2-g1.hw-16,H);cx.closePath();cx.fill()}
+  cx.fillStyle=hc?"#222":"#c9b9f2";
+  cx.beginPath();cx.moveTo(W/2-g0.hw,hy);cx.lineTo(W/2+g0.hw,hy);cx.lineTo(W/2+g1.hw,H);cx.lineTo(W/2-g1.hw,H);cx.closePath();cx.fill();
+  /* scrolling roadside trees & flowers */
+  if(!hc){
+    for(var k=0;k<4;k++){
+      var p=((k/4)+(off*.0038))%1,ty=hy+(H-hy)*Math.pow(p,1.6),tg=geo(ty),sc=.35+p*.85;
+      [-1,1].forEach(function(side){
+        var tx=W/2+side*(tg.hw+36*sc);
+        cx.fillStyle="#c08457";rr(tx-4*sc,ty-14*sc,8*sc,16*sc,3*sc);cx.fill();
+        cx.fillStyle="#6ee7b7";cx.beginPath();cx.arc(tx,ty-22*sc,15*sc,0,7);cx.arc(tx-10*sc,ty-16*sc,11*sc,0,7);cx.arc(tx+10*sc,ty-16*sc,11*sc,0,7);cx.fill();
+        cx.fillStyle="#a7f3d0";cx.beginPath();cx.arc(tx-3*sc,ty-25*sc,7*sc,0,7);cx.fill();
+      });
+    }
+  }
+  /* lane lines */
+  cx.strokeStyle=hc?"#ffe600":"#fff";cx.lineWidth=4;cx.setLineDash([14,16]);cx.lineDashOffset=-off;
+  [1,2].forEach(function(k){var f=(k/3)*2-1;cx.beginPath();cx.moveTo(W/2+f*g0.hw,hy);cx.lineTo(W/2+f*g1.hw,H);cx.stroke()});
+  cx.setLineDash([]);
+  /* selected lane glow */
+  if(S.cur&&S.on){
+    var f0=(S.lane/3)*2-1,f1=((S.lane+1)/3)*2-1;
+    cx.fillStyle=hc?"rgba(255,230,0,.22)":"rgba(124,58,237,.2)";
+    cx.beginPath();
+    cx.moveTo(W/2+f0*g0.hw,hy);
+    cx.lineTo(W/2+f1*g0.hw,hy);
+    cx.lineTo(W/2+f1*g1.hw,H);
+    cx.lineTo(W/2+f0*g1.hw,H);
+    cx.closePath();cx.fill();
+  }
+  /* doors (archway style with sign card) */
+  if(S.cur&&S.on){
+    var refL=lx(1,S.p),refW=refL.w*.86,refH=refW*.92;
+    var cardMaxW=refW*.88-12,cardMaxH=refH*.58-6;
+    var layouts=getBestChoiceLayout(S.cur.ch,cardMaxW,cardMaxH);
+
+    for(var i=0;i<3;i++){
+      var c=S.cur.ch[i],l=lx(i,S.p),w=l.w*.86,h=w*.92,x=l.x-w/2,y=l.y-h,sel=i===S.lane,tr=S.tried.indexOf(i)>-1;
+      var good=S.run>=0&&c.ok;
+      cx.globalAlpha=tr?.35:1;
+      /* arch shadow */
+      cx.fillStyle="rgba(45,31,69,.14)";rr(x+2,y+5,w,h,w*.32);cx.fill();
+      /* arch frame */
+      cx.fillStyle=good?"#34d399":(sel?"#8b5cf6":"#e879f9");rr(x,y,w,h,w*.32);cx.fill();
+      cx.lineWidth=sel?Math.max(4,w*.06):3;cx.strokeStyle=hc?"#ffe600":(sel?"#4c1d95":"#c026d3");cx.stroke();
+      /* inner doorway */
+      cx.fillStyle=good?"#d1fae5":"#f5f3ff";rr(x+w*.12,y+h*.16,w*.76,h*.82,w*.24);cx.fill();
+      /* answer board */
+      var bx=x+w*.06,by=y+h*.20,bw=w*.88,bh=h*.58,br=w*.16;
+      cx.fillStyle="#fff";rr(bx,by,bw,bh,br);cx.fill();
+      cx.lineWidth=sel?3.5:2.5;cx.strokeStyle=sel?"#7c3aed":"#d8b4fe";cx.stroke();
+
+      /* clip strictly inside card area so text NEVER bleeds outside */
+      cx.save();
+      rr(bx+1,by+1,bw-2,bh-2,br-1);
+      cx.clip();
+
+      var wrap=layouts[i]||wrapTextAtFont(c.l,bw-12,bh-6,12);
+      cx.fillStyle="#2d1f45";cx.textAlign="center";cx.textBaseline="middle";
+      cx.font="800 "+wrap.font+"px Sarabun,'Noto Sans Thai',Tahoma,sans-serif";
+
+      var totalTextH=wrap.lines.length*wrap.lineH;
+      var startY=(by+bh/2)-(totalTextH/2)+(wrap.lineH/2);
+      for(var j=0;j<wrap.lines.length;j++){
+        cx.fillText(wrap.lines[j],l.x,startY+j*wrap.lineH);
+      }
+      cx.restore();
+
+      /* number badge */
+      cx.fillStyle=sel?"#4c1d95":"#7c3aed";cx.beginPath();cx.arc(x+w*.16,y+h*.13,w*.11,0,7);cx.fill();
+      cx.fillStyle="#fff";fit(String(i+1),w*.2,Math.max(10,w*.13));cx.fillText(String(i+1),x+w*.16,y+h*.135);
+      cx.globalAlpha=1;
+    }
+  }
+  /* cat */
+  var run=S.run>=0?S.run:0,bob=S.rm?0:Math.sin(now*.012)*3,cy=H*.84-run*H*.36+bob,sc=(1-run*.45)*Math.min(1.25,Math.max(.7,H/330));
+  var cg=geo(cy),tx=W/2+(S.lane-1)*(2*cg.hw/3);if(S.catX===null)S.catX=W/2;S.catX+=(tx-S.catX)*(S.rm?1:.22);
+  cat(S.catX,cy,sc,S.run>=0,now);
+  /* particles */
+  cx.fillStyle="#fbbf24";cx.font="22px sans-serif";cx.textAlign="center";
+  S.parts=S.parts.filter(function(p){return p.life>0});
+  S.parts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.life-=.016;cx.globalAlpha=Math.max(0,p.life);cx.fillText("★",p.x,p.y)});cx.globalAlpha=1;
+}
+function cat(x,y,s,happy,now){
+  cx.save();cx.translate(x,y);cx.scale(s,s);
+  var wag=S.rm?0:Math.sin((now||0)*.015)*6;
+  /* ground shadow */
+  cx.fillStyle="rgba(45,31,69,.18)";cx.beginPath();cx.ellipse(0,48,26,8,0,0,7);cx.fill();
+  /* wagging tail */
+  cx.strokeStyle="#c2410c";cx.lineWidth=8;cx.lineCap="round";
+  cx.beginPath();cx.moveTo(16,36);cx.quadraticCurveTo(36,24+wag,32,6+wag);cx.stroke();
+  cx.strokeStyle="#fdba74";cx.lineWidth=4;
+  cx.beginPath();cx.moveTo(16,36);cx.quadraticCurveTo(36,24+wag,32,6+wag);cx.stroke();
+  /* body & shirt */
+  cx.lineWidth=3;cx.strokeStyle="#c2410c";
+  cx.fillStyle="#f472b6";rr(-22,12,44,36,15);cx.fill();cx.stroke();
+  /* shirt star emblem */
+  cx.fillStyle="#fde047";cx.beginPath();cx.arc(0,30,6,0,7);cx.fill();
+  /* cute paws */
+  cx.fillStyle="#fdba74";
+  cx.beginPath();cx.ellipse(-12,47,8,5,0,0,7);cx.fill();cx.stroke();
+  cx.beginPath();cx.ellipse(12,47,8,5,0,0,7);cx.fill();cx.stroke();
+  /* ears + inner pink ears */
+  cx.fillStyle="#fdba74";
+  cx.beginPath();cx.moveTo(-24,-14);cx.lineTo(-27,-45);cx.lineTo(-5,-26);cx.closePath();cx.fill();cx.stroke();
+  cx.beginPath();cx.moveTo(24,-14);cx.lineTo(27,-45);cx.lineTo(5,-26);cx.closePath();cx.fill();cx.stroke();
+  cx.fillStyle="#fda4af";
+  cx.beginPath();cx.moveTo(-21,-18);cx.lineTo(-23,-37);cx.lineTo(-9,-25);cx.closePath();cx.fill();
+  cx.beginPath();cx.moveTo(21,-18);cx.lineTo(23,-37);cx.lineTo(9,-25);cx.closePath();cx.fill();
+  /* head */
+  cx.fillStyle="#fdba74";cx.beginPath();cx.arc(0,0,30,0,7);cx.fill();cx.stroke();
+  /* forehead stripes */
+  cx.fillStyle="#ea580c";rr(-3,-28,6,9,3);cx.fill();rr(-12,-25,5,7,2.5);cx.fill();rr(7,-25,5,7,2.5);cx.fill();
+  /* cheeks */
+  cx.fillStyle="#fecdd3";cx.beginPath();cx.arc(-18,8,6,0,7);cx.arc(18,8,6,0,7);cx.fill();
+  /* whiskers */
+  cx.strokeStyle="#9a3412";cx.lineWidth=2;
+  cx.beginPath();cx.moveTo(-22,3);cx.lineTo(-34,0);cx.moveTo(-22,8);cx.lineTo(-34,9);
+  cx.moveTo(22,3);cx.lineTo(34,0);cx.moveTo(22,8);cx.lineTo(34,9);cx.stroke();
+  /* eyes, nose & smile */
+  cx.strokeStyle="#2d1f45";cx.fillStyle="#2d1f45";cx.lineWidth=3;
+  if(happy){cx.beginPath();cx.arc(-10,-4,5,Math.PI,0);cx.stroke();cx.beginPath();cx.arc(10,-4,5,Math.PI,0);cx.stroke()}
+  else{
+    cx.beginPath();cx.arc(-10,-4,4.5,0,7);cx.arc(10,-4,4.5,0,7);cx.fill();
+    cx.fillStyle="#fff";cx.beginPath();cx.arc(-11.5,-5.5,1.6,0,7);cx.arc(8.5,-5.5,1.6,0,7);cx.fill();
+  }
+  cx.fillStyle="#fb7185";cx.beginPath();cx.arc(0,2,3.2,0,7);cx.fill();
+  cx.beginPath();cx.arc(0,6,7.5,.1*Math.PI,.9*Math.PI);cx.stroke();
+  cx.restore();
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

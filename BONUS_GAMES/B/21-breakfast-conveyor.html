@@ -1,0 +1,3368 @@
+<!doctype html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>Chef Whiskers’ Breakfast Conveyor — สายพานอาหารเช้าของเชฟเหมียว</title>
+      <style>
+         /* =========================================================================
+       1. DESIGN TOKENS & ACCESSIBILITY THEME VARIABLES
+       ========================================================================= */
+         :root {
+            --bg-wall: #faf7f2;
+            --bg-tile-line: #e6dfd3;
+            --bg-counter: #f3e2c7;
+            --bg-counter-edge: #dfc39d;
+            --bg-signboard: #e0f2fe;
+            --border-signboard: #38bdf8;
+            --ink-dark: #26211d;
+            --ink-muted: #5c534a;
+            --belt-surface: #3f464e;
+            --belt-stripe: #555e68;
+            --cardboard: #c69863;
+            --cardboard-dark: #a57846;
+            --tape-blue: #38bdf8;
+            --accent-yellow: #facc15;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --accent-blue: #0ea5e9;
+            --tray-bg: #ffffff;
+            --tray-border: #26211d;
+            --panel-bg: #ffffff;
+            --sign-scale: 1;
+            --filter-mode: none;
+         }
+
+         /* High Contrast Mode for Low Vision */
+         body.high-contrast {
+            --bg-wall: #0a0a0a;
+            --bg-tile-line: #262626;
+            --bg-counter: #171717;
+            --bg-counter-edge: #facc15;
+            --bg-signboard: #000000;
+            --border-signboard: #facc15;
+            --ink-dark: #ffffff;
+            --ink-muted: #fde047;
+            --belt-surface: #111827;
+            --belt-stripe: #facc15;
+            --cardboard: #000000;
+            --cardboard-dark: #facc15;
+            --tape-blue: #00ffff;
+            --tray-bg: #000000;
+            --tray-border: #facc15;
+            --panel-bg: #0a0a0a;
+         }
+
+         /* Sensory Calm Mode for Autism Spectrum */
+         body.sensory-calm {
+            --filter-mode: saturate(0.68) contrast(0.94);
+            --bg-wall: #f3f1ed;
+            --bg-signboard: #e6eef2;
+            --border-signboard: #7ca5b8;
+            --accent-yellow: #e5c158;
+            --accent-red: #d96b6b;
+            --accent-green: #5fa87d;
+         }
+
+         /* Focus Mode for ADHD (Stops non-essential background motion) */
+         body.focus-mode .bg-animated {
+            animation: none !important;
+         }
+
+         * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+         }
+
+         html,
+         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family:
+               'Segoe UI',
+               'Trebuchet MS',
+               'Tahoma',
+               system-ui,
+               -apple-system,
+               sans-serif;
+            background-color: var(--bg-wall);
+            color: var(--ink-dark);
+            filter: var(--filter-mode);
+         }
+
+         /* =========================================================================
+       2. FULLSCREEN KITCHEN VIEWPORT & TILED WALL
+       ========================================================================= */
+         #game-app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            background-color: var(--bg-wall);
+            background-image: linear-gradient(to right, var(--bg-tile-line) 2px, transparent 2px), linear-gradient(to bottom, var(--bg-tile-line) 2px, transparent 2px);
+            background-size: 64px 42px;
+            transition: opacity 0.22s ease;
+         }
+
+         #game-app.scene-fade-pulse {
+            opacity: 0.72;
+         }
+
+         #kitchen-backdrop {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+         }
+
+         /* =========================================================================
+       3. TOP HUD (HOME, UNDO, VISUAL RECIPE SIGNBOARD, SETTINGS)
+       ========================================================================= */
+         #top-hud {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: clamp(8px, 1.5vh, 16px) clamp(10px, 2vw, 24px);
+            gap: 10px;
+            pointer-events: none;
+         }
+
+         .hud-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+         }
+
+         .circle-btn {
+            width: clamp(48px, 6.2vw, 62px);
+            height: clamp(48px, 6.2vw, 62px);
+            border-radius: 50%;
+            border: 3.5px solid var(--ink-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               box-shadow 0.1s ease,
+               background-color 0.2s;
+            position: relative;
+         }
+
+         .circle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--ink-dark);
+         }
+
+         .circle-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .circle-btn:focus-visible,
+         .tray-card:focus-visible,
+         .gauge-play-btn:focus-visible,
+         .modal-btn:focus-visible {
+            outline: 4px solid #38bdf8;
+            outline-offset: 3px;
+         }
+
+         .btn-home {
+            background-color: var(--accent-yellow);
+         }
+
+         .btn-undo {
+            background-color: #475569;
+         }
+
+         .btn-undo:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 3px 0 var(--ink-dark);
+         }
+
+         .btn-undo.btn-undo-attention {
+            background-color: #0284c7;
+            animation: undoPulse 0.9s ease-in-out infinite alternate;
+         }
+
+         @keyframes undoPulse {
+            0% {
+               transform: scale(1);
+            }
+            100% {
+               transform: scale(1.1);
+            }
+         }
+
+         .btn-settings {
+            background-color: var(--accent-red);
+         }
+
+         body.high-contrast .circle-btn {
+            border-color: #facc15;
+            box-shadow: 0 4px 0 #facc15;
+         }
+
+         .key-pill {
+            position: absolute;
+            bottom: -8px;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 8px;
+            letter-spacing: 0.4px;
+         }
+
+         body.high-contrast .key-pill {
+            background: #facc15;
+            color: #000000;
+         }
+
+         /* Visual Recipe Signboard (Top Center) */
+         #recipe-signboard-wrap {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(var(--sign-scale));
+            transform-origin: top center;
+            transition: transform 0.2s ease;
+            max-width: 68vw;
+         }
+
+         .sign-straps {
+            width: 66%;
+            height: 12px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 18px;
+         }
+
+         .sign-strap {
+            width: 8px;
+            height: 14px;
+            background: #94a3b8;
+            border-left: 2.5px solid var(--ink-dark);
+            border-right: 2.5px solid var(--ink-dark);
+         }
+
+         #recipe-signboard {
+            background: var(--bg-signboard);
+            border: 4px solid var(--ink-dark);
+            outline: 4px solid var(--border-signboard);
+            outline-offset: -8px;
+            border-radius: 22px;
+            padding: 10px 18px 12px;
+            box-shadow: 0 7px 0 rgba(38, 33, 29, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: clamp(250px, 38vw, 520px);
+            transition:
+               background-color 0.25s,
+               transform 0.2s;
+         }
+
+         body.high-contrast #recipe-signboard {
+            border-color: #facc15;
+         }
+
+         #recipe-signboard.sign-error-flash {
+            animation: signShake 0.4s ease;
+            background-color: #fee2e2;
+         }
+
+         @keyframes signShake {
+            0%,
+            100% {
+               transform: translateX(0);
+            }
+            25% {
+               transform: translateX(-8px);
+            }
+            50% {
+               transform: translateX(8px);
+            }
+            75% {
+               transform: translateX(-5px);
+            }
+         }
+
+         .sign-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: clamp(12px, 1.5vw, 15px);
+            font-weight: 800;
+            color: var(--ink-dark);
+         }
+
+         .sign-badge {
+            background: #0284c7;
+            color: #ffffff;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+         }
+
+         body.high-contrast .sign-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         .speak-btn {
+            background: #ffffff;
+            border: 2px solid var(--ink-dark);
+            border-radius: 999px;
+            padding: 2px 9px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink-dark);
+            cursor: pointer;
+         }
+
+         body.high-contrast .speak-btn {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         .sign-sequence-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(6px, 1.2vw, 12px);
+         }
+
+         .recipe-step-slot {
+            position: relative;
+            width: clamp(48px, 6.2vw, 66px);
+            height: clamp(48px, 6.2vw, 66px);
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition:
+               transform 0.2s,
+               border-color 0.2s,
+               box-shadow 0.2s;
+         }
+
+         body.high-contrast .recipe-step-slot {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .recipe-step-slot.step-done {
+            background: #dcfce7;
+            border-color: #16a34a;
+            opacity: 0.88;
+         }
+
+         .recipe-step-slot.step-wrong {
+            background: #fee2e2;
+            border-color: #ef4444;
+         }
+
+         .recipe-step-slot.step-active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.45);
+            transform: scale(1.08);
+         }
+
+         body.high-contrast .recipe-step-slot.step-active {
+            border-color: #00ffff;
+            box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.45);
+         }
+
+         .step-order-num {
+            position: absolute;
+            top: -7px;
+            left: -7px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .recipe-step-slot.step-done .step-order-num {
+            background: #16a34a;
+         }
+
+         .step-check-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            background: #22c55e;
+            border: 2px solid var(--ink-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .step-wrong-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            background: #ef4444;
+            border: 2px solid var(--ink-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .sign-plate-target {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-left: 4px;
+         }
+
+         /* =========================================================================
+       4. MIDDLE STAGE: CHEF WHISKERS & CONVEYOR BELT + 3-COLOR SPEED GAUGE
+       ========================================================================= */
+         #conveyor-stage {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            width: 100%;
+            min-height: 170px;
+         }
+
+         #chef-whiskers-container {
+            position: absolute;
+            right: clamp(16px, 6vw, 90px);
+            bottom: clamp(82px, 13vh, 118px);
+            width: clamp(120px, 15vw, 175px);
+            height: clamp(135px, 17vw, 195px);
+            z-index: 6;
+            pointer-events: none;
+            transform-origin: bottom center;
+            animation: chefIdleBob 2.8s ease-in-out infinite;
+         }
+
+         @keyframes chefIdleBob {
+            0%,
+            100% {
+               transform: translateY(0) rotate(0deg);
+            }
+            50% {
+               transform: translateY(-4px) rotate(1deg);
+            }
+         }
+
+         #chef-whiskers-container.chef-happy {
+            animation: chefJump 0.55s ease infinite alternate;
+         }
+
+         @keyframes chefJump {
+            0% {
+               transform: translateY(0) scale(1);
+            }
+            100% {
+               transform: translateY(-16px) scale(1.04);
+            }
+         }
+
+         #chef-whiskers-container.chef-oops {
+            animation: chefTilt 0.45s ease;
+         }
+
+         #chef-whiskers-container.chef-eating {
+            animation: chefEatBob 0.55s ease-in-out infinite alternate;
+         }
+
+         @keyframes chefEatBob {
+            0% {
+               transform: translateY(0) rotate(-2deg) scale(1);
+            }
+            100% {
+               transform: translateY(6px) rotate(3deg) scale(1.03);
+            }
+         }
+
+         #chef-mouth-eating {
+            transform-origin: 100px 131px;
+            animation: chefChew 0.34s ease-in-out infinite alternate;
+         }
+
+         @keyframes chefChew {
+            0% {
+               transform: scaleY(0.45) scaleX(1.08);
+            }
+            100% {
+               transform: scaleY(1.05) scaleX(0.95);
+            }
+         }
+
+         #chef-fork-arm {
+            transform-origin: 54px 175px;
+            animation: chefForkLift 0.68s ease-in-out infinite alternate;
+         }
+
+         @keyframes chefForkLift {
+            0% {
+               transform: rotate(10deg) translateY(6px);
+            }
+            100% {
+               transform: rotate(-14deg) translateY(-8px);
+            }
+         }
+
+         #chef-yum-effects {
+            animation: yumFloat 0.9s ease-in-out infinite alternate;
+         }
+
+         @keyframes yumFloat {
+            0% {
+               transform: translateY(2px);
+               opacity: 0.75;
+            }
+            100% {
+               transform: translateY(-7px);
+               opacity: 1;
+            }
+         }
+
+         body.focus-mode #chef-whiskers-container.chef-eating,
+         body.focus-mode #chef-yum-effects {
+            animation: none !important;
+         }
+
+         @keyframes chefTilt {
+            0%,
+            100% {
+               transform: rotate(0deg);
+            }
+            30% {
+               transform: rotate(-7deg);
+            }
+            70% {
+               transform: rotate(5deg);
+            }
+         }
+
+         /* Visual Sound Cue Bubble */
+         #visual-cue-banner {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 999px;
+            padding: 6px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(13px, 1.5vw, 16px);
+            font-weight: 800;
+            color: var(--ink-dark);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition:
+               opacity 0.2s ease,
+               transform 0.2s ease;
+            white-space: nowrap;
+         }
+
+         body.high-contrast #visual-cue-banner {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         #visual-cue-banner.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
+         }
+
+         /* Conveyor Belt Assembly */
+         #belt-assembly {
+            position: relative;
+            width: 100%;
+            height: clamp(86px, 13vh, 118px);
+            z-index: 12;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+         }
+
+         #plate-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: clamp(44px, 7vh, 62px);
+            height: 150px;
+            pointer-events: none;
+            z-index: 15;
+         }
+
+         #moving-plate-group {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 190px;
+            height: 145px;
+            transform: translateX(120px);
+            will-change: transform;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+         }
+
+         #moving-plate-group.plate-pop {
+            animation: plateBump 0.22s ease;
+         }
+
+         @keyframes plateBump {
+            0% {
+               transform: translateX(var(--plate-x, 120px)) scale(1);
+            }
+            50% {
+               transform: translateX(var(--plate-x, 120px)) scale(1.07, 0.94);
+            }
+            100% {
+               transform: translateX(var(--plate-x, 120px)) scale(1);
+            }
+         }
+
+         .belt-rail-top {
+            height: 14px;
+            width: 100%;
+            background: var(--cardboard);
+            border-top: 3px solid var(--ink-dark);
+            border-bottom: 2.5px solid var(--ink-dark);
+            position: relative;
+         }
+
+         .belt-rubber {
+            height: clamp(32px, 5vh, 46px);
+            width: 100%;
+            background-color: var(--belt-surface);
+            border-bottom: 3px solid var(--ink-dark);
+            position: relative;
+            overflow: hidden;
+         }
+
+         #belt-stripes {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -64px;
+            right: -64px;
+            background-image: repeating-linear-gradient(-55deg, transparent 0px, transparent 31.458px, var(--belt-stripe) 31.458px, var(--belt-stripe) 52.43px);
+            transform: translate3d(-64px, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform;
+         }
+
+         .belt-rail-bottom {
+            height: clamp(26px, 4vh, 36px);
+            width: 100%;
+            background: var(--cardboard-dark);
+            border-bottom: 3.5px solid var(--ink-dark);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+         }
+
+         .blue-tape-strip {
+            width: 44px;
+            height: 112%;
+            background: var(--tape-blue);
+            border-left: 2.5px solid var(--ink-dark);
+            border-right: 2.5px solid var(--ink-dark);
+            opacity: 0.92;
+            transform: rotate(-3deg);
+         }
+
+         .blue-tape-strip:nth-child(even) {
+            transform: rotate(4deg);
+         }
+
+         /* 3-Color Speed Gauge Mounted on Left Front of Belt */
+         #speed-gauge-widget {
+            position: absolute;
+            left: clamp(10px, 2.5vw, 34px);
+            bottom: clamp(14px, 2.5vh, 24px);
+            width: clamp(128px, 15vw, 162px);
+            height: clamp(82px, 10vw, 104px);
+            z-index: 25;
+            pointer-events: auto;
+         }
+
+         .gauge-sector {
+            cursor: pointer;
+            outline: none;
+            transition:
+               filter 0.15s ease,
+               opacity 0.15s ease;
+         }
+
+         .gauge-sector:hover {
+            filter: brightness(1.1);
+         }
+
+         .gauge-sector:active {
+            filter: brightness(0.92);
+         }
+
+         .gauge-sector:focus,
+         .gauge-sector:focus-visible {
+            outline: none;
+            filter: brightness(1.12);
+         }
+
+         #gauge-needle {
+            pointer-events: none;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .gauge-play-btn {
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            transform: translateX(-50%);
+            width: clamp(42px, 5vw, 52px);
+            height: clamp(42px, 5vw, 52px);
+            border-radius: 50%;
+            background: #0ea5e9;
+            border: 3.5px solid var(--ink-dark);
+            box-shadow: 0 3px 0 var(--ink-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.1s ease;
+         }
+
+         .gauge-play-btn:hover {
+            transform: translateX(-50%) scale(1.06);
+         }
+
+         .gauge-play-btn:active {
+            transform: translateX(-50%) translateY(2px);
+         }
+
+         /* =========================================================================
+       5. BOTTOM COUNTERTOP: 9-ITEM PREP STATION + VERTICAL STAR METER
+       ========================================================================= */
+         #countertop-area {
+            position: relative;
+            z-index: 18;
+            background: var(--bg-counter);
+            border-top: 4px solid var(--bg-counter-edge);
+            padding: clamp(8px, 1.4vh, 14px) clamp(10px, 2vw, 24px) clamp(10px, 1.8vh, 18px);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: clamp(8px, 1.5vw, 18px);
+            min-height: clamp(195px, 33vh, 275px);
+         }
+
+         #prep-station {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(8px, 1.3vh, 12px);
+            max-width: calc(100% - 92px);
+         }
+
+         .tray-row {
+            display: grid;
+            gap: clamp(6px, 1.1vw, 12px);
+            justify-content: center;
+         }
+
+         .tray-row-top {
+            grid-template-columns: repeat(4, minmax(64px, 138px));
+         }
+
+         .tray-row-bottom {
+            grid-template-columns: repeat(5, minmax(60px, 132px));
+         }
+
+         .tray-card {
+            position: relative;
+            background: var(--tray-bg);
+            border: 3.5px solid var(--tray-border);
+            border-radius: 18px;
+            padding: 6px 6px 4px;
+            min-height: clamp(78px, 13vh, 108px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--tray-border);
+            transition:
+               transform 0.12s ease,
+               box-shadow 0.12s ease,
+               border-color 0.2s;
+         }
+
+         .tray-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 var(--tray-border);
+         }
+
+         .tray-card:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--tray-border);
+         }
+
+         .tray-num-badge {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         body.high-contrast .tray-num-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         body.hide-numbers .tray-num-badge {
+            display: none;
+         }
+
+         .tray-svg-box {
+            width: 100%;
+            height: clamp(50px, 8.5vh, 72px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .tray-label {
+            font-size: clamp(10px, 1.15vw, 12.5px);
+            font-weight: 800;
+            color: var(--ink-dark);
+            text-align: center;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+         }
+
+         /* Bottom-Right Vertical Star Gauge & Order Counter (1/5) */
+         #star-progress-widget {
+            width: clamp(68px, 7.5vw, 84px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            background: #fffbeb;
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 8px 6px;
+            box-shadow: 0 5px 0 var(--ink-dark);
+         }
+
+         body.high-contrast #star-progress-widget {
+            background: #000000;
+            border-color: #facc15;
+            box-shadow: 0 5px 0 #facc15;
+         }
+
+         .star-tube-wrap {
+            position: relative;
+            width: 26px;
+            flex: 1;
+            min-height: 110px;
+            background: #e2e8f0;
+            border: 3px solid var(--ink-dark);
+            border-radius: 999px;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin: 4px 0;
+         }
+
+         #star-tube-fill {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, #facc15 0%, #f59e0b 100%);
+            border-radius: 999px;
+            transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+         }
+
+         .tube-star-marker {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.35s ease;
+         }
+
+         .tube-star-marker.earned {
+            transform: translate(-50%, 50%) scale(1.18);
+         }
+
+         #order-counter-badge {
+            background: var(--ink-dark);
+            color: #ffffff;
+            font-size: clamp(13px, 1.5vw, 16px);
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+         }
+
+         body.high-contrast #order-counter-badge {
+            background: #facc15;
+            color: #000000;
+         }
+
+         /* =========================================================================
+       6. FLYING INGREDIENT ANIMATION LAYER
+       ========================================================================= */
+         .flying-item {
+            position: fixed;
+            z-index: 60;
+            pointer-events: none;
+            width: 72px;
+            height: 72px;
+            transition:
+               transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+               opacity 0.34s ease;
+         }
+
+         /* =========================================================================
+       7. MODALS: START MENU, SETTINGS (ACCESSIBILITY), VICTORY / SUMMARY
+       ========================================================================= */
+         .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(250, 247, 242, 0.76);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(10px, 2vw, 20px);
+            backdrop-filter: blur(5px);
+         }
+
+         body.high-contrast .modal-backdrop {
+            background: rgba(0, 0, 0, 0.85);
+         }
+
+         .modal-backdrop.hidden {
+            display: none;
+         }
+
+         .modal-card {
+            background: #fffdf9;
+            border: 4px solid var(--ink-dark);
+            border-radius: 30px;
+            box-shadow: 0 10px 0 var(--ink-dark);
+            width: 100%;
+            max-width: 680px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: clamp(16px, 2.6vw, 24px);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+         }
+
+         body.high-contrast .modal-card {
+            background: #0a0a0a;
+            border-color: #facc15;
+            box-shadow: 0 10px 0 #facc15;
+         }
+
+         .game-hero-banner {
+            background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 24px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            position: relative;
+            box-shadow: 0 5px 0 rgba(38, 33, 29, 0.16);
+         }
+
+         body.high-contrast .game-hero-banner {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .hero-title-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+         }
+
+         .hero-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            background: #facc15;
+            color: #26211d;
+            border: 2.5px solid var(--ink-dark);
+            border-radius: 999px;
+            padding: 2px 12px;
+            font-size: 12px;
+            font-weight: 900;
+         }
+
+         .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #e0f2fe;
+            border: 3px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 10px 16px;
+         }
+
+         body.high-contrast .modal-header {
+            background: #111111;
+            border-color: #facc15;
+         }
+
+         .modal-title {
+            margin: 0;
+            font-size: clamp(19px, 2.6vw, 26px);
+            font-weight: 900;
+            color: var(--ink-dark);
+            line-height: 1.2;
+         }
+
+         .modal-subtitle {
+            margin: 2px 0 0;
+            font-size: clamp(12.5px, 1.5vw, 14.5px);
+            font-weight: 800;
+            color: var(--ink-muted);
+         }
+
+         .visual-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+         }
+
+         .visual-guide-card {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 0 var(--ink-dark);
+            text-align: center;
+         }
+
+         body.high-contrast .visual-guide-card {
+            background: #141414;
+            border-color: #facc15;
+            box-shadow: 0 4px 0 #facc15;
+         }
+
+         .visual-guide-caption {
+            font-size: clamp(12px, 1.4vw, 14px);
+            font-weight: 900;
+            color: var(--ink-dark);
+         }
+
+         .modal-btn {
+            border: 3.5px solid var(--ink-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-size: clamp(16px, 1.9vw, 19px);
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               box-shadow 0.1s ease;
+         }
+
+         .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--ink-dark);
+         }
+
+         .modal-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .btn-primary {
+            background: #22c55e;
+            color: #ffffff;
+         }
+
+         .btn-secondary {
+            background: #ef4444;
+            color: #ffffff;
+         }
+
+         .btn-warning {
+            background: #facc15;
+            color: #26211d;
+         }
+
+         .order-select-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+         }
+
+         .order-pill-btn {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 18px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-weight: 900;
+            color: var(--ink-dark);
+            box-shadow: 0 4px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+         }
+
+         .order-pill-btn:hover {
+            transform: translateY(-2px);
+         }
+
+         body.high-contrast .order-pill-btn {
+            background: #111111;
+            border-color: #facc15;
+            color: #facc15;
+         }
+
+         .order-pill-btn.active {
+            background: #fef08a;
+            border-color: #0284c7;
+            box-shadow: 0 4px 0 #0284c7;
+            transform: translateY(-2px);
+         }
+
+         .layer-dots {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .layer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 1.5px solid var(--ink-dark);
+         }
+
+         .a11y-section {
+            background: #f3e2c7;
+            border: 3px solid var(--ink-dark);
+            border-radius: 22px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+         }
+
+         body.high-contrast .a11y-section {
+            background: #141414;
+            border-color: #facc15;
+         }
+
+         .a11y-section-title {
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.3px;
+            color: var(--ink-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+         }
+
+         .speed-segment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+         }
+
+         .speed-chip {
+            padding: 8px 6px;
+            border-radius: 16px;
+            border: 3px solid var(--ink-dark);
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--ink-dark);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 3px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+         }
+
+         .speed-chip.selected {
+            background: #38bdf8;
+            color: #ffffff;
+            transform: translateY(-2px);
+         }
+
+         body.high-contrast .speed-chip {
+            background: #000000;
+            color: #facc15;
+            border-color: #facc15;
+         }
+
+         body.high-contrast .speed-chip.selected {
+            background: #facc15;
+            color: #000000;
+         }
+
+         .a11y-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+         }
+
+         .a11y-icon-tile {
+            background: #ffffff;
+            border: 3px solid var(--ink-dark);
+            border-radius: 18px;
+            padding: 10px 6px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--ink-dark);
+            transition:
+               transform 0.1s ease,
+               background-color 0.15s;
+            text-align: center;
+         }
+
+         .a11y-icon-tile:hover {
+            transform: translateY(-2px);
+         }
+
+         .a11y-icon-tile:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--ink-dark);
+         }
+
+         .a11y-icon-tile[aria-pressed='true'] {
+            background: #dcfce7;
+            border-color: #16a34a;
+            box-shadow: 0 4px 0 #16a34a;
+         }
+
+         body.high-contrast .a11y-icon-tile {
+            background: #0a0a0a;
+            border-color: #facc15;
+            color: #ffffff;
+         }
+
+         body.high-contrast .a11y-icon-tile[aria-pressed='true'] {
+            background: #1e293b;
+            border-color: #00ffff;
+            box-shadow: 0 4px 0 #00ffff;
+         }
+
+         .tile-title {
+            font-size: 11.5px;
+            font-weight: 900;
+            color: var(--ink-dark);
+            line-height: 1.15;
+         }
+
+         .tile-state-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            border: 2px solid var(--ink-dark);
+            background: #e2e8f0;
+            color: #475569;
+         }
+
+         .a11y-icon-tile[aria-pressed='true'] .tile-state-pill {
+            background: #22c55e;
+            color: #ffffff;
+         }
+
+         body.high-contrast .a11y-icon-tile[aria-pressed='true'] .tile-state-pill {
+            background: #facc15;
+            color: #000000;
+         }
+
+         @media (max-width: 680px) {
+            #recipe-signboard {
+               min-width: 210px;
+               padding: 7px 10px 8px;
+            }
+            .tray-row-top {
+               grid-template-columns: repeat(4, minmax(54px, 1fr));
+            }
+            .tray-row-bottom {
+               grid-template-columns: repeat(5, minmax(48px, 1fr));
+            }
+            #chef-whiskers-container {
+               right: 8px;
+               width: 105px;
+               height: 120px;
+            }
+            .order-select-grid {
+               grid-template-columns: repeat(5, 1fr);
+               gap: 5px;
+            }
+            .a11y-icon-grid {
+               grid-template-columns: repeat(2, 1fr);
+            }
+            .speed-segment-grid {
+               grid-template-columns: repeat(2, 1fr);
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <div id="game-app" role="application" aria-label="Chef Whiskers Breakfast Conveyor Educational Game">
+         <!-- =====================================================================
+         BACKGROUND KITCHEN PROPS (SINK, PANS, RANGE HOOD & STOVE)
+         ===================================================================== -->
+         <svg id="kitchen-backdrop" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <g opacity="0.72">
+               <rect x="44" y="340" width="190" height="160" rx="14" fill="#E2E8F0" stroke="#94A3B8" stroke-width="4" />
+               <rect x="64" y="325" width="150" height="22" rx="8" fill="#CBD5E1" stroke="#94A3B8" stroke-width="3.5" />
+               <path d="M138 325 V278 C138 258, 168 258, 168 278 V290" fill="none" stroke="#94A3B8" stroke-width="8" stroke-linecap="round" />
+               <rect x="115" y="312" width="46" height="14" rx="5" fill="#94A3B8" />
+            </g>
+
+            <g opacity="0.65">
+               <line x1="275" y1="0" x2="275" y2="175" stroke="#94A3B8" stroke-width="4" />
+               <circle cx="275" cy="215" r="38" fill="#CBD5E1" stroke="#94A3B8" stroke-width="4" />
+               <circle cx="275" cy="215" r="26" fill="#E2E8F0" />
+               <line x1="345" y1="0" x2="345" y2="145" stroke="#94A3B8" stroke-width="4" />
+               <circle cx="345" cy="178" r="30" fill="#CBD5E1" stroke="#94A3B8" stroke-width="4" />
+            </g>
+
+            <g opacity="0.68">
+               <rect x="1165" y="0" width="110" height="110" fill="#E2E8F0" stroke="#94A3B8" stroke-width="4" />
+               <polygon points="1165,110 1275,110 1345,185 1095,185" fill="#CBD5E1" stroke="#94A3B8" stroke-width="4" stroke-linejoin="round" />
+               <rect x="1095" y="185" width="250" height="22" rx="6" fill="#E2E8F0" stroke="#94A3B8" stroke-width="4" />
+               <rect x="1115" y="345" width="215" height="145" rx="14" fill="#E2E8F0" stroke="#94A3B8" stroke-width="4" />
+            </g>
+         </svg>
+
+         <!-- =====================================================================
+         TOP HUD: HOME, UNDO, VISUAL RECIPE SIGNBOARD, SETTINGS
+         ===================================================================== -->
+         <header id="top-hud">
+            <div class="hud-btn-group">
+               <button id="btn-home" class="circle-btn btn-home" type="button" aria-label="กลับหน้าหลัก (Home)">
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path
+                        d="M5 15L16 5.5L27 15V26.5C27 27.3 26.3 28 25.5 28H19.5V20.5H12.5V28H6.5C5.7 28 5 27.3 5 26.5V15Z"
+                        fill="#FFFFFF"
+                        stroke="#26211D"
+                        stroke-width="2.6"
+                        stroke-linejoin="round" />
+                  </svg>
+               </button>
+
+               <button id="btn-undo" class="circle-btn btn-undo" type="button" aria-label="หยิบวัตถุดิบชิ้นล่าสุดออก (Backspace)" disabled>
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path d="M12 8L5 15L12 22" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+                     <path d="M6 15H20C24.4 15 27 17.6 27 21.5C27 24.5 25 26.5 22 26.5H17" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" />
+                  </svg>
+                  <span class="key-pill">⌫</span>
+               </button>
+            </div>
+
+            <div id="recipe-signboard-wrap">
+               <div class="sign-straps" aria-hidden="true">
+                  <div class="sign-strap"></div>
+                  <div class="sign-strap"></div>
+               </div>
+               <div id="recipe-signboard" role="region" aria-label="ป้ายคำสั่งเมนูอาหารเช้า">
+                  <div class="sign-header">
+                     <span id="sign-order-label" class="sign-badge">ออเดอร์ที่ 1 / 5</span>
+                     <span id="sign-order-title">ฐานแพนเค้กช็อกชิป</span>
+                     <button id="btn-speak-order" class="speak-btn" type="button" aria-label="ฟังเสียงอ่านคำสั่ง">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <path d="M4 9V15H8L14 20V4L8 9H4Z" fill="#0284C7" stroke="#26211D" stroke-width="2" />
+                           <path d="M18 8C19.8 10 19.8 14 18 16" stroke="#26211D" stroke-width="2.2" stroke-linecap="round" />
+                        </svg>
+                        <span>ฟัง</span>
+                     </button>
+                  </div>
+                  <div id="sign-sequence-row" class="sign-sequence-row"></div>
+               </div>
+            </div>
+
+            <div class="hud-btn-group">
+               <button id="btn-settings" class="circle-btn btn-settings" type="button" aria-label="ตั้งค่าการเข้าถึง (Settings)">
+                  <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                     <path
+                        d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                        fill="#FFFFFF"
+                        stroke="#26211D"
+                        stroke-width="2.4"
+                        stroke-linejoin="round" />
+                     <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                  </svg>
+               </button>
+            </div>
+         </header>
+
+         <!-- =====================================================================
+         MIDDLE STAGE: CHEF WHISKERS + CONVEYOR BELT + 3-COLOR SPEED GAUGE
+         ===================================================================== -->
+         <main id="conveyor-stage">
+            <div id="visual-cue-banner" role="status" aria-live="polite">
+               <svg id="cue-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"></svg>
+               <span id="cue-text">พร้อมประกอบอาหารเช้าแล้ว!</span>
+            </div>
+
+            <!-- Chef Whiskers Blue-and-White Cat Mascot -->
+            <div id="chef-whiskers-container" aria-hidden="true">
+               <svg viewBox="0 0 200 225" width="100%" height="100%">
+                  <path d="M62 66 C46 62, 44 38, 64 34 C66 16, 94 12, 102 26 C112 12, 140 16, 140 35 C158 39, 156 62, 138 66 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.2" />
+                  <rect x="64" y="60" width="72" height="15" rx="5" fill="#F8FAFC" stroke="#26211D" stroke-width="4.2" />
+                  <polygon points="56,82 44,44 82,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" stroke-linejoin="round" />
+                  <polygon points="59,77 51,53 74,69" fill="#FACC15" />
+                  <polygon points="144,82 156,44 118,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" stroke-linejoin="round" />
+                  <polygon points="141,77 149,53 126,69" fill="#FACC15" />
+                  <path d="M54 152 C50 185, 52 215, 52 220 H148 C148 215, 150 185, 146 152 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.2" />
+                  <path d="M84 154 L100 170 L116 154" fill="none" stroke="#38BDF8" stroke-width="4" />
+                  <ellipse cx="100" cy="112" rx="52" ry="44" fill="#60A5FA" stroke="#26211D" stroke-width="4.2" />
+                  <path d="M56 116 C56 100, 144 100, 144 116 C144 140, 124 153, 100 153 C76 153, 56 140, 56 116 Z" fill="#FFFFFF" />
+                  <g id="chef-eyes-normal">
+                     <circle cx="80" cy="105" r="7" fill="#1E293B" />
+                     <circle cx="82" cy="102" r="2.5" fill="#FFFFFF" />
+                     <circle cx="120" cy="105" r="7" fill="#1E293B" />
+                     <circle cx="122" cy="102" r="2.5" fill="#FFFFFF" />
+                  </g>
+                  <g id="chef-eyes-happy" style="display: none">
+                     <path d="M72 108 Q80 97 88 108" fill="none" stroke="#1E293B" stroke-width="4.2" stroke-linecap="round" />
+                     <path d="M112 108 Q120 97 128 108" fill="none" stroke="#1E293B" stroke-width="4.2" stroke-linecap="round" />
+                  </g>
+                  <ellipse cx="66" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                  <ellipse cx="134" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                  <polygon points="95,116 105,116 100,122" fill="#F472B6" />
+                  <path id="chef-mouth-normal" d="M90 127 Q95 133 100 126 Q105 133 110 127" fill="none" stroke="#26211D" stroke-width="3.2" stroke-linecap="round" />
+                  <g id="chef-mouth-eating" style="display: none">
+                     <ellipse cx="100" cy="132" rx="11" ry="9" fill="#991B1B" stroke="#26211D" stroke-width="3" />
+                     <path d="M92 135 Q100 129 108 135 Q104 140 100 140 Q96 140 92 135 Z" fill="#FB7185" />
+                  </g>
+                  <line x1="36" y1="112" x2="58" y2="115" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="36" y1="123" x2="58" y2="122" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="142" y1="115" x2="164" y2="112" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+                  <line x1="142" y1="122" x2="164" y2="123" stroke="#26211D" stroke-width="2.8" stroke-linecap="round" />
+
+                  <g id="chef-utensils" style="display: none">
+                     <g id="chef-fork-arm">
+                        <rect x="42" y="128" width="5" height="44" rx="2.5" fill="#CBD5E1" stroke="#26211D" stroke-width="2.4" />
+                        <path d="M37 116 V127 C37 131, 52 131, 52 127 V116" fill="none" stroke="#26211D" stroke-width="2.6" stroke-linecap="round" />
+                        <line x1="42" y1="116" x2="42" y2="128" stroke="#26211D" stroke-width="2.4" stroke-linecap="round" />
+                        <line x1="47" y1="116" x2="47" y2="128" stroke="#26211D" stroke-width="2.4" stroke-linecap="round" />
+                        <ellipse cx="44.5" cy="115" rx="9" ry="6" fill="#FBBF24" stroke="#26211D" stroke-width="2.2" />
+                        <circle cx="44.5" cy="111" r="3.5" fill="#EF4444" />
+                        <ellipse cx="46" cy="166" rx="14" ry="12" fill="#FFFFFF" stroke="#26211D" stroke-width="3.2" />
+                     </g>
+                  </g>
+
+                  <g id="chef-yum-effects" style="display: none">
+                     <path d="M26 76 C22 70, 14 73, 16 80 C18 85, 26 90, 26 90 C26 90, 34 85, 36 80 C38 73, 30 70, 26 76 Z" fill="#FB7185" stroke="#26211D" stroke-width="2" />
+                     <polygon points="174,64 177,71 184,72 178,77 180,84 174,80 168,84 170,77 164,72 171,71" fill="#FACC15" stroke="#26211D" stroke-width="2" stroke-linejoin="round" />
+                  </g>
+               </svg>
+            </div>
+
+            <!-- Conveyor Belt & Moving Plate Track -->
+            <div id="belt-assembly">
+               <div id="plate-track">
+                  <div id="moving-plate-group">
+                     <svg viewBox="0 0 200 155" width="190" height="145" aria-label="จานอาหารบนสายพาน">
+                        <ellipse cx="100" cy="136" rx="84" ry="15" fill="#CBD5E1" stroke="#26211D" stroke-width="3.2" />
+                        <ellipse cx="100" cy="131" rx="82" ry="13.5" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <ellipse cx="100" cy="131" rx="58" ry="8.5" fill="none" stroke="#94A3B8" stroke-width="2" />
+                        <g id="plate-food-layers"></g>
+                     </svg>
+                  </div>
+               </div>
+
+               <div class="belt-rail-top"></div>
+               <div class="belt-rubber">
+                  <div id="belt-stripes" class="bg-animated"></div>
+               </div>
+               <div class="belt-rail-bottom">
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+                  <div class="blue-tape-strip"></div>
+               </div>
+
+               <!-- 3-Color Speed Gauge (Red = Slow, Yellow = Medium, Green = Fast) + Blue Play/Pause Button -->
+               <div id="speed-gauge-widget" role="group" aria-label="แผงควบคุมความเร็วสายพาน">
+                  <svg viewBox="0 0 180 112" width="100%" height="100%">
+                     <path d="M 12 98 A 78 78 0 0 1 168 98 Z" fill="#C69863" stroke="#26211D" stroke-width="4.5" stroke-linejoin="round" />
+                     <path
+                        id="gauge-zone-slow"
+                        class="gauge-sector"
+                        data-speed-mode="slow"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วช้า (สีแดง)"
+                        d="M 24 98 A 66 66 0 0 1 57 41 L 90 98 Z"
+                        fill="#EF4444"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <path
+                        id="gauge-zone-normal"
+                        class="gauge-sector"
+                        data-speed-mode="normal"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วปานกลาง (สีเหลือง)"
+                        d="M 57 41 A 66 66 0 0 1 123 41 L 90 98 Z"
+                        fill="#FACC15"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <path
+                        id="gauge-zone-fast"
+                        class="gauge-sector"
+                        data-speed-mode="fast"
+                        role="button"
+                        tabindex="0"
+                        aria-label="ความเร็วเร็ว (สีเขียว)"
+                        d="M 123 41 A 66 66 0 0 1 156 98 L 90 98 Z"
+                        fill="#22C55E"
+                        stroke="#26211D"
+                        stroke-width="3" />
+                     <g id="gauge-needle" transform="rotate(0 90 98)">
+                        <polygon points="86,98 94,98 90,34" fill="#26211D" />
+                     </g>
+                  </svg>
+                  <button id="btn-belt-toggle" class="gauge-play-btn" type="button" aria-label="หยุดหรือเดินสายพาน (Spacebar)">
+                     <svg id="icon-belt-pause" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="6" y="5" width="4.5" height="14" rx="1.5" fill="#FFFFFF" />
+                        <rect x="13.5" y="5" width="4.5" height="14" rx="1.5" fill="#FFFFFF" />
+                     </svg>
+                     <svg id="icon-belt-play" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display: none" aria-hidden="true">
+                        <polygon points="7,5 19,12 7,19" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round" />
+                     </svg>
+                  </button>
+               </div>
+            </div>
+         </main>
+
+         <!-- =====================================================================
+         BOTTOM COUNTERTOP: 9-ITEM PREP STATION + VERTICAL 3-STAR PROGRESS GAUGE
+         ===================================================================== -->
+         <section id="countertop-area" aria-label="ถาดวัตถุดิบอาหารเช้า 9 ชนิด">
+            <div id="prep-station">
+               <div id="tray-row-top" class="tray-row tray-row-top"></div>
+               <div id="tray-row-bottom" class="tray-row tray-row-bottom"></div>
+            </div>
+
+            <aside id="star-progress-widget" aria-label="ความคืบหน้าดาวและลำดับออเดอร์">
+               <div class="star-tube-wrap">
+                  <div id="star-tube-fill"></div>
+                  <div id="star-marker-3" class="tube-star-marker" style="bottom: 92%"></div>
+                  <div id="star-marker-2" class="tube-star-marker" style="bottom: 54%"></div>
+                  <div id="star-marker-1" class="tube-star-marker" style="bottom: 18%"></div>
+               </div>
+               <div id="order-counter-badge">1 / 5</div>
+            </aside>
+         </section>
+
+         <!-- =====================================================================
+         MODAL 1: GAME-STYLED VISUAL START SCREEN (ICON-FIRST, LIGHT THEME)
+         ===================================================================== -->
+         <div id="modal-start" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="start-title">
+            <div class="modal-card">
+               <div class="game-hero-banner">
+                  <div class="hero-title-stack">
+                     <span class="hero-pill-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                           <polygon points="12,2 15,9 22,9.5 16.8,14 18.4,21 12,17.2 5.6,21 7.2,14 2,9.5 9,9" fill="#FFFFFF" stroke="#26211D" stroke-width="2" />
+                        </svg>
+                        <span>KITCHEN PUZZLE</span>
+                     </span>
+                     <h1 id="start-title" class="modal-title">Chef Whiskers’ Breakfast</h1>
+                     <p class="modal-subtitle">สายพานอาหารเช้าของเชฟเหมียว</p>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0" aria-hidden="true">
+                     <svg width="78" height="78" viewBox="0 0 200 200">
+                        <path d="M62 66 C46 62, 44 38, 64 34 C66 16, 94 12, 102 26 C112 12, 140 16, 140 35 C158 39, 156 62, 138 66 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="4.5" />
+                        <rect x="64" y="60" width="72" height="15" rx="5" fill="#F8FAFC" stroke="#26211D" stroke-width="4.5" />
+                        <polygon points="56,82 44,44 82,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <polygon points="59,77 51,53 74,69" fill="#FACC15" />
+                        <polygon points="144,82 156,44 118,68" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <polygon points="141,77 149,53 126,69" fill="#FACC15" />
+                        <ellipse cx="100" cy="112" rx="52" ry="44" fill="#60A5FA" stroke="#26211D" stroke-width="4.5" />
+                        <path d="M56 116 C56 100, 144 100, 144 116 C144 140, 124 153, 100 153 C76 153, 56 140, 56 116 Z" fill="#FFFFFF" />
+                        <path d="M72 108 Q80 97 88 108" fill="none" stroke="#1E293B" stroke-width="4.5" stroke-linecap="round" />
+                        <path d="M112 108 Q120 97 128 108" fill="none" stroke="#1E293B" stroke-width="4.5" stroke-linecap="round" />
+                        <ellipse cx="66" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                        <ellipse cx="134" cy="120" rx="8" ry="4.5" fill="#FDA4AF" />
+                        <polygon points="95,116 105,116 100,122" fill="#F472B6" />
+                        <path d="M90 127 Q95 133 100 126 Q105 133 110 127" fill="none" stroke="#26211D" stroke-width="3.5" stroke-linecap="round" />
+                     </svg>
+                  </div>
+               </div>
+
+               <div class="visual-guide-grid" aria-label="วิธีเล่น 3 ขั้นตอน">
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <rect x="8" y="8" width="74" height="44" rx="12" fill="#E0F2FE" stroke="#26211D" stroke-width="3" />
+                        <ellipse cx="32" cy="32" rx="14" ry="7" fill="#FBBF24" stroke="#26211D" stroke-width="2.2" />
+                        <path d="M52 30 H68 M68 30 L62 24 M68 30 L62 36" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="72" cy="48" r="11" fill="#FFFFFF" stroke="#26211D" stroke-width="2.5" />
+                        <circle cx="72" cy="48" r="4.5" fill="#0284C7" />
+                     </svg>
+                     <span class="visual-guide-caption">1. ดูป้ายภาพ</span>
+                  </div>
+
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <ellipse cx="45" cy="48" rx="34" ry="8" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8" />
+                        <ellipse cx="45" cy="40" rx="24" ry="7" fill="#FBBF24" stroke="#26211D" stroke-width="2.5" />
+                        <path d="M35 28 C33 21, 43 20, 44 28 Z" fill="#EF4444" stroke="#26211D" stroke-width="2" />
+                        <path d="M46 28 C47 20, 57 21, 55 28 Z" fill="#EF4444" stroke="#26211D" stroke-width="2" />
+                        <path d="M45 6 V17 M39 12 L45 18 L51 12" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                     </svg>
+                     <span class="visual-guide-caption">2. วางซ้อนตามลำดับ</span>
+                  </div>
+
+                  <div class="visual-guide-card">
+                     <svg width="76" height="54" viewBox="0 0 90 64" fill="none" aria-hidden="true">
+                        <path d="M 15 48 A 30 30 0 0 1 75 48 Z" fill="#FACC15" stroke="#26211D" stroke-width="2.8" />
+                        <path d="M 15 48 A 30 30 0 0 1 32 23 L 45 48 Z" fill="#EF4444" stroke="#26211D" stroke-width="2" />
+                        <path d="M 58 23 A 30 30 0 0 1 75 48 L 45 48 Z" fill="#22C55E" stroke="#26211D" stroke-width="2" />
+                        <circle cx="45" cy="46" r="12" fill="#0EA5E9" stroke="#26211D" stroke-width="2.5" />
+                        <rect x="41" y="41" width="3" height="10" rx="1" fill="#FFFFFF" />
+                        <rect x="46" y="41" width="3" height="10" rx="1" fill="#FFFFFF" />
+                     </svg>
+                     <span class="visual-guide-caption">3. หยุด / ปรับความเร็ว</span>
+                  </div>
+               </div>
+
+               <div class="order-select-grid" id="start-order-grid" aria-label="เลือกด่านออเดอร์ 1 ถึง 5"></div>
+
+               <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 2px">
+                  <button id="btn-open-a11y-from-start" class="modal-btn btn-secondary" type="button" aria-label="ตั้งค่าการเข้าถึง (Settings)">
+                     <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                        <path
+                           d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                           fill="#FFFFFF"
+                           stroke="#26211D"
+                           stroke-width="2.4"
+                           stroke-linejoin="round" />
+                        <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                     </svg>
+                     <span>ตั้งค่า</span>
+                  </button>
+
+                  <button id="btn-start-play" class="modal-btn btn-primary" type="button" style="flex: 1; font-size: clamp(18px, 2.2vw, 22px)">
+                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                        <circle cx="14" cy="14" r="12" fill="#FFFFFF" stroke="#26211D" stroke-width="2.5" />
+                        <polygon points="11,8.5 20.5,14 11,19.5" fill="#22C55E" stroke="#26211D" stroke-width="2" stroke-linejoin="round" />
+                     </svg>
+                     <span>เริ่มเล่น (PLAY)</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- =====================================================================
+         MODAL 2: ICON-DRIVEN SETTINGS & ACCESSIBILITY (LIGHT THEME)
+         ===================================================================== -->
+         <div id="modal-settings" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="modal-card">
+               <div class="modal-header">
+                  <div style="display: flex; align-items: center; gap: 10px">
+                     <div
+                        style="
+                           width: 42px;
+                           height: 42px;
+                           border-radius: 50%;
+                           background: #ef4444;
+                           border: 3px solid #26211d;
+                           display: flex;
+                           align-items: center;
+                           justify-content: center;
+                           flex-shrink: 0;
+                        "
+                        aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                           <path
+                              d="M13.6 4.2H18.4L19.2 7.3C20.1 7.6 20.9 8.1 21.7 8.7L24.7 7.6L27.1 11.8L24.7 13.9C24.9 14.9 24.9 15.9 24.7 16.9L27.1 19L24.7 23.2L21.7 22.1C20.9 22.7 20.1 23.2 19.2 23.5L18.4 26.6H13.6L12.8 23.5C11.9 23.2 11.1 22.7 10.3 22.1L7.3 23.2L4.9 19L7.3 16.9C7.1 15.9 7.1 14.9 7.3 13.9L4.9 11.8L7.3 7.6L10.3 8.7C11.1 8.1 11.9 7.6 12.8 7.3L13.6 4.2Z"
+                              fill="#FFFFFF"
+                              stroke="#26211D"
+                              stroke-width="2.4" />
+                           <circle cx="16" cy="15.4" r="4" fill="#EF4444" stroke="#26211D" stroke-width="2.2" />
+                        </svg>
+                     </div>
+                     <div>
+                        <h2 id="settings-title" class="modal-title">ตั้งค่า (Settings)</h2>
+                        <p class="modal-subtitle">ปรับความเร็วสายพานและตัวช่วยการเล่น</p>
+                     </div>
+                  </div>
+
+                  <button id="btn-close-settings" class="modal-btn btn-primary" type="button" style="padding: 10px 18px">
+                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M5 13L9.5 17.5L19 7" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+                     </svg>
+                     <span>ตกลง</span>
+                  </button>
+               </div>
+
+               <div class="a11y-section">
+                  <h3 class="a11y-section-title">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 17A9 9 0 0 1 21 17Z" fill="#FACC15" stroke="#26211D" stroke-width="2.2" />
+                        <line x1="12" y1="17" x2="16" y2="10" stroke="#26211D" stroke-width="2.4" stroke-linecap="round" />
+                     </svg>
+                     <span>จังหวะสายพาน</span>
+                  </h3>
+                  <div class="speed-segment-grid" role="group" aria-label="เลือกความเร็วสายพาน">
+                     <button type="button" class="speed-chip" data-speed-mode="manual">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <rect x="8" y="4" width="9" height="22" rx="3" fill="#0EA5E9" stroke="#26211D" stroke-width="2.4" />
+                           <rect x="23" y="4" width="9" height="22" rx="3" fill="#0EA5E9" stroke="#26211D" stroke-width="2.4" />
+                        </svg>
+                        <span>หยุดรอ</span>
+                     </button>
+
+                     <button type="button" class="speed-chip" data-speed-mode="slow">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#EF4444" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="17,10 26,15 17,20" fill="#FFFFFF" />
+                        </svg>
+                        <span>ช้า</span>
+                     </button>
+
+                     <button type="button" class="speed-chip selected" data-speed-mode="normal">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#FACC15" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="13,10 21,15 13,20" fill="#26211D" />
+                           <polygon points="21,10 29,15 21,20" fill="#26211D" />
+                        </svg>
+                        <span>ปานกลาง</span>
+                     </button>
+
+                     <button type="button" class="speed-chip" data-speed-mode="fast">
+                        <svg width="34" height="26" viewBox="0 0 40 30" fill="none" aria-hidden="true">
+                           <circle cx="20" cy="15" r="11" fill="#22C55E" stroke="#26211D" stroke-width="2.4" />
+                           <polygon points="11,10 18,15 11,20" fill="#FFFFFF" />
+                           <polygon points="18,10 25,15 18,20" fill="#FFFFFF" />
+                           <polygon points="25,10 32,15 25,20" fill="#FFFFFF" />
+                        </svg>
+                        <span>เร็ว</span>
+                     </button>
+                  </div>
+               </div>
+
+               <div class="a11y-icon-grid" role="group" aria-label="ตัวช่วยการเข้าถึง">
+                  <button id="toggle-high-contrast" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="22" cy="22" r="16" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <path d="M22 6 A16 16 0 0 1 22 38 Z" fill="#26211D" />
+                     </svg>
+                     <span class="tile-title">สีคมชัดสูง</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-large-sign" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="20" cy="20" r="12" fill="#E0F2FE" stroke="#26211D" stroke-width="3" />
+                        <path d="M20 14V26M14 20H26" stroke="#0284C7" stroke-width="3" stroke-linecap="round" />
+                        <line x1="29" y1="29" x2="38" y2="38" stroke="#26211D" stroke-width="4" stroke-linecap="round" />
+                     </svg>
+                     <span class="tile-title">ขยายป้าย</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-tts" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M8 17V27H15L24 34V10L15 17H8Z" fill="#38BDF8" stroke="#26211D" stroke-width="2.8" stroke-linejoin="round" />
+                        <path d="M29 16C32 19 32 25 29 28" stroke="#26211D" stroke-width="3" stroke-linecap="round" />
+                        <path d="M34 12C39 17 39 27 34 32" stroke="#26211D" stroke-width="3" stroke-linecap="round" />
+                     </svg>
+                     <span class="tile-title">เสียงอ่าน</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-visual-cues" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M22 8C16 8 12 12 12 18V26L8 30H36L32 26V18C32 12 28 8 22 8Z" fill="#FACC15" stroke="#26211D" stroke-width="2.8" stroke-linejoin="round" />
+                        <circle cx="22" cy="34" r="3.5" fill="#26211D" />
+                        <circle cx="34" cy="11" r="5" fill="#22C55E" stroke="#26211D" stroke-width="2" />
+                     </svg>
+                     <span class="tile-title">ภาพแทนเสียง</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-sfx" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path d="M18 30V13L33 10V27" stroke="#26211D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="14" cy="30" r="4.5" fill="#FACC15" stroke="#26211D" stroke-width="2.6" />
+                        <circle cx="29" cy="27" r="4.5" fill="#38BDF8" stroke="#26211D" stroke-width="2.6" />
+                     </svg>
+                     <span class="tile-title">เสียงเอฟเฟกต์</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-tray-numbers" class="a11y-icon-tile" type="button" aria-pressed="true">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <rect x="8" y="8" width="28" height="28" rx="8" fill="#FFFFFF" stroke="#26211D" stroke-width="3" />
+                        <text x="22" y="28" text-anchor="middle" font-size="18" font-weight="900" fill="#26211D">1-9</text>
+                     </svg>
+                     <span class="tile-title">เลข 1–9</span>
+                     <span class="tile-state-pill">เปิด</span>
+                  </button>
+
+                  <button id="toggle-sensory-calm" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <path
+                           d="M13 31C8.5 31 6 27.5 7.5 23.5C8.5 18 14.5 16 19 19C22 14.5 29.5 15.5 31 21C35.5 21.5 37.5 26 35 29.5C33.5 31 31 31 28 31H13Z"
+                           fill="#BAE6FD"
+                           stroke="#26211D"
+                           stroke-width="2.8"
+                           stroke-linejoin="round" />
+                     </svg>
+                     <span class="tile-title">โหมดสบายตา</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+
+                  <button id="toggle-focus-mode" class="a11y-icon-tile" type="button" aria-pressed="false">
+                     <svg width="42" height="42" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                        <circle cx="22" cy="22" r="15" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8" />
+                        <circle cx="22" cy="22" r="9" fill="#FCA5A5" stroke="#26211D" stroke-width="2.4" />
+                        <circle cx="22" cy="22" r="3.5" fill="#EF4444" />
+                     </svg>
+                     <span class="tile-title">โหมดโฟกัส</span>
+                     <span class="tile-state-pill">ปิด</span>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- =====================================================================
+         MODAL 3: ORDER COMPLETE / VICTORY SUMMARY
+         ===================================================================== -->
+         <div id="modal-victory" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title">
+            <div class="modal-card" style="text-align: center; align-items: center">
+               <div id="victory-stars-row" style="display: flex; gap: 14px; justify-content: center; margin-top: 4px"></div>
+               <h2 id="victory-title" class="modal-title">ยอดเยี่ยมมาก! เชฟเหมียวภูมิใจในตัวคุณ!</h2>
+               <p id="victory-summary-text" class="modal-subtitle">คุณจัดเตรียมอาหารเช้าครบทั้ง 5 ออเดอร์ตามลำดับได้อย่างถูกต้องแม่นยำ!</p>
+               <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px">
+                  <button id="btn-replay-all" class="modal-btn btn-warning" type="button">เล่นใหม่อีกครั้ง (1/5)</button>
+                  <button id="btn-endless-chef" class="modal-btn btn-primary" type="button">เมนูพิเศษท้าทายต่อเนื่อง</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         /**
+          * =========================================================================
+          * CHEF WHISKERS' BREAKFAST CONVEYOR — COMPLETE GAME ENGINE
+          * Offline 100% | Procedural SVG Art | Web Audio API | Web Speech API
+          * =========================================================================
+          */
+         (function () {
+            'use strict';
+
+            /* -----------------------------------------------------------------------
+             * 1. INGREDIENT DEFINITIONS & PROCEDURAL 2D FLAT VECTOR SVG GENERATORS
+             * ----------------------------------------------------------------------- */
+            const INGREDIENTS = {
+               bacon: {
+                  id: 'bacon',
+                  keyNum: 1,
+                  row: 'top',
+                  nameTh: 'เบคอน',
+                  category: 'savory',
+                  stackHeight: 10,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M12 22 C24 12, 36 28, 48 18 C60 8, 70 22, 80 16 L82 28 C70 35, 60 21, 48 31 C36 41, 24 25, 12 35 Z" fill="#DC2626" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <path d="M13 27 C24 18, 36 33, 48 23 C60 13, 70 27, 81 21" fill="none" stroke="#FECACA" stroke-width="3" stroke-linecap="round"/>
+              <path d="M10 40 C22 30, 34 46, 46 36 C58 26, 68 40, 78 34 L80 46 C68 53, 58 39, 46 49 C34 59, 22 43, 10 53 Z" fill="#B91C1C" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <path d="M11 45 C22 36, 34 51, 46 41 C58 31, 68 45, 79 39" fill="none" stroke="#FEE2E2" stroke-width="3" stroke-linecap="round"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="8" y="14" width="94" height="50" rx="12" fill="#E2E8F0" stroke="#26211D" stroke-width="3"/>
+              <rect x="14" y="19" width="82" height="40" rx="8" fill="#F8FAFC"/>
+              <g transform="translate(14, 8) scale(0.92)">
+                <path d="M10 20 C22 10, 34 26, 46 16 C58 6, 68 20, 78 14 L80 25 C68 32, 58 18, 46 28 C34 38, 22 22, 10 32 Z" fill="#DC2626" stroke="#26211D" stroke-width="2.5"/>
+                <path d="M11 25 C22 16, 34 31, 46 21 C58 11, 68 25, 79 19" fill="none" stroke="#FECACA" stroke-width="2.8" stroke-linecap="round"/>
+                <path d="M8 36 C20 26, 32 42, 44 32 C56 22, 66 36, 76 30 L78 41 C66 48, 56 34, 44 44 C32 54, 20 38, 8 48 Z" fill="#B91C1C" stroke="#26211D" stroke-width="2.5"/>
+                <path d="M9 41 C20 32, 32 47, 44 37 C56 27, 66 41, 77 35" fill="none" stroke="#FEE2E2" stroke-width="2.8" stroke-linecap="round"/>
+              </g>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(52, ${y - 24})">
+              <path d="M6 12 C20 2, 36 18, 52 8 C68 -2, 80 12, 92 6 L94 17 C80 24, 68 10, 52 20 C36 30, 20 14, 6 24 Z" fill="#DC2626" stroke="#26211D" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M8 17 C20 8, 36 23, 52 13 C68 3, 80 17, 92 11" fill="none" stroke="#FECACA" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M2 23 C18 13, 34 29, 50 19 C66 9, 78 23, 90 17 L92 27 C78 34, 66 20, 50 30 C34 40, 18 24, 2 34 Z" fill="#B91C1C" stroke="#26211D" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M4 28 C18 19, 34 34, 50 24 C66 14, 78 28, 90 22" fill="none" stroke="#FEE2E2" stroke-width="2.8" stroke-linecap="round"/>
+            </g>`,
+               },
+
+               egg: {
+                  id: 'egg',
+                  keyNum: 2,
+                  row: 'top',
+                  nameTh: 'ไข่ดาว',
+                  category: 'savory',
+                  stackHeight: 9,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M18 36 C10 26, 22 14, 38 15 C50 10, 68 14, 74 26 C82 36, 72 52, 54 51 C38 54, 20 48, 18 36 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8"/>
+              <circle cx="46" cy="33" r="12" fill="#FACC15" stroke="#26211D" stroke-width="2.5"/>
+              <circle cx="42" cy="29" r="3.5" fill="#FEF9C3"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="8" y="14" width="94" height="50" rx="12" fill="#E2E8F0" stroke="#26211D" stroke-width="3"/>
+              <rect x="14" y="19" width="82" height="40" rx="8" fill="#CBD5E1"/>
+              <path d="M18 40 C13 30, 22 22, 34 23 C45 20, 56 26, 55 37 C55 48, 42 54, 30 52 C21 51, 19 46, 18 40 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.4"/>
+              <circle cx="36" cy="37" r="8" fill="#FACC15" stroke="#26211D" stroke-width="2"/>
+              <path d="M53 41 C51 31, 61 22, 74 23 C85 24, 93 32, 90 42 C87 52, 74 55, 63 52 C55 50, 54 46, 53 41 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.4"/>
+              <circle cx="72" cy="38" r="8" fill="#FACC15" stroke="#26211D" stroke-width="2"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(46, ${y - 24})">
+              <path d="M14 22 C4 14, 18 4, 42 5 C66 2, 92 6, 98 18 C104 28, 86 36, 56 35 C30 37, 16 30, 14 22 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="54" cy="19" rx="16" ry="10" fill="#FACC15" stroke="#26211D" stroke-width="2.4"/>
+              <ellipse cx="49" cy="16" rx="5" ry="2.5" fill="#FEF9C3"/>
+            </g>`,
+               },
+
+               blueberry: {
+                  id: 'blueberry',
+                  keyNum: 3,
+                  row: 'top',
+                  nameTh: 'บลูเบอร์รี',
+                  category: 'fruit',
+                  stackHeight: 8,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <circle cx="32" cy="36" r="13" fill="#3B82F6" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M28 27 L32 30 L36 27" fill="none" stroke="#1E3A8A" stroke-width="2.2" stroke-linecap="round"/>
+              <circle cx="58" cy="36" r="13" fill="#2563EB" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M54 27 L58 30 L62 27" fill="none" stroke="#1E3A8A" stroke-width="2.2" stroke-linecap="round"/>
+              <circle cx="45" cy="24" r="13" fill="#60A5FA" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M41 15 L45 18 L49 15" fill="none" stroke="#1E3A8A" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <circle cx="34" cy="27" r="9" fill="#2563EB" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="48" cy="22" r="9.5" fill="#3B82F6" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="63" cy="23" r="9.5" fill="#2563EB" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="76" cy="28" r="9" fill="#60A5FA" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="42" cy="31" r="9" fill="#60A5FA" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="56" cy="31" r="9" fill="#3B82F6" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="69" cy="32" r="9" fill="#2563EB" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M20 32 H90 C88 55, 74 65, 55 65 C36 65, 22 55, 20 32 Z" fill="#34D399" stroke="#26211D" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M24 44 Q39 38 55 44 T86 44" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(56, ${y - 16})">
+              <circle cx="14" cy="12" r="7.5" fill="#2563EB" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="30" cy="9" r="8" fill="#3B82F6" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="46" cy="13" r="7.5" fill="#60A5FA" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="62" cy="9" r="8" fill="#2563EB" stroke="#26211D" stroke-width="2.2"/>
+              <circle cx="76" cy="13" r="7.5" fill="#3B82F6" stroke="#26211D" stroke-width="2.2"/>
+            </g>`,
+               },
+
+               syrup: {
+                  id: 'syrup',
+                  keyNum: 4,
+                  row: 'top',
+                  nameTh: 'น้ำเชื่อมเมเปิล',
+                  category: 'sauce',
+                  stackHeight: 6,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M33 24 C25 24, 23 36, 31 36" fill="none" stroke="#26211D" stroke-width="3"/>
+              <rect x="38" y="9" width="14" height="7" rx="2" fill="#EF4444" stroke="#26211D" stroke-width="2.4"/>
+              <path d="M34 16 H56 L62 34 C64 46, 58 56, 45 56 C32 56, 26 46, 28 34 Z" fill="#D97706" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <ellipse cx="45" cy="40" rx="9" ry="7" fill="#FEF3C7" stroke="#26211D" stroke-width="1.8"/>
+              <circle cx="45" cy="40" r="3.5" fill="#B45309"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <path d="M40 22 C30 22, 28 37, 38 37" fill="none" stroke="#26211D" stroke-width="3.5"/>
+              <rect x="46" y="7" width="18" height="8" rx="3" fill="#DC2626" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M42 15 H68 L75 36 C78 51, 71 64, 55 64 C39 64, 32 51, 35 36 Z" fill="#D97706" stroke="#26211D" stroke-width="3" stroke-linejoin="round"/>
+              <path d="M41 34 C44 26, 48 26, 49 34" fill="none" stroke="#FDE68A" stroke-width="2.5" stroke-linecap="round"/>
+              <rect x="45" y="38" width="20" height="14" rx="4" fill="#FFFBEB" stroke="#26211D" stroke-width="2"/>
+              <polygon points="55,40 58,45 61,44 58,49 52,49 49,44 52,45" fill="#D97706"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(46, ${y - 10})">
+              <path d="M12 10 C22 4, 86 4, 96 10 C102 14, 92 18, 86 15 C82 13, 80 26, 75 26 C70 26, 69 14, 63 14 C57 14, 55 29, 49 29 C43 29, 41 14, 34 14 C27 14, 25 24, 20 24 C15 24, 15 15, 10 14 Z" fill="#D97706" stroke="#26211D" stroke-width="2.3" stroke-linejoin="round"/>
+              <path d="M24 9 H82" stroke="#FDE68A" stroke-width="2.5" stroke-linecap="round"/>
+            </g>`,
+               },
+
+               pancake: {
+                  id: 'pancake',
+                  keyNum: 5,
+                  row: 'bottom',
+                  nameTh: 'แพนเค้กธรรมดา',
+                  category: 'base',
+                  stackHeight: 16,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <ellipse cx="45" cy="44" rx="32" ry="11" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="40" rx="32" ry="10" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="31" rx="32" ry="11" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="27" rx="32" ry="10" fill="#FCD34D" stroke="#26211D" stroke-width="2.6"/>
+              <rect x="38" y="21" width="14" height="7" rx="2" fill="#FEF9C3" stroke="#26211D" stroke-width="2"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="8" y="24" width="94" height="40" rx="12" fill="#E2E8F0" stroke="#26211D" stroke-width="3"/>
+              <ellipse cx="55" cy="48" rx="35" ry="11" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="44" rx="35" ry="10" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="36" rx="35" ry="11" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="32" rx="35" ry="10" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="24" rx="35" ry="11" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="20" rx="35" ry="10" fill="#FCD34D" stroke="#26211D" stroke-width="2.6"/>
+              <rect x="47" y="15" width="16" height="7" rx="2" fill="#FEF9C3" stroke="#26211D" stroke-width="2"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(42, ${y - 24})">
+              <ellipse cx="58" cy="18" rx="54" ry="13" fill="#D97706" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="58" cy="13" rx="54" ry="12" fill="#FCD34D" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="58" cy="12" rx="42" ry="7" fill="none" stroke="#F59E0B" stroke-width="1.8" opacity="0.7"/>
+            </g>`,
+               },
+
+               choco_pancake: {
+                  id: 'choco_pancake',
+                  keyNum: 6,
+                  row: 'bottom',
+                  nameTh: 'แพนเค้กช็อกชิป',
+                  category: 'base',
+                  stackHeight: 16,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <ellipse cx="45" cy="44" rx="32" ry="11" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="40" rx="32" ry="10" fill="#F59E0B" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="31" rx="32" ry="11" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="45" cy="27" rx="32" ry="10" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <circle cx="31" cy="26" r="3.2" fill="#3E1F0D"/>
+              <circle cx="45" cy="23" r="3.4" fill="#3E1F0D"/>
+              <circle cx="59" cy="27" r="3.2" fill="#3E1F0D"/>
+              <circle cx="41" cy="31" r="3" fill="#3E1F0D"/>
+              <circle cx="52" cy="30" r="2.8" fill="#3E1F0D"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="8" y="24" width="94" height="40" rx="12" fill="#E2E8F0" stroke="#26211D" stroke-width="3"/>
+              <ellipse cx="55" cy="48" rx="35" ry="11" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="44" rx="35" ry="10" fill="#F59E0B" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="36" rx="35" ry="11" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="32" rx="35" ry="10" fill="#F59E0B" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="24" rx="35" ry="11" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="55" cy="20" rx="35" ry="10" fill="#FBBF24" stroke="#26211D" stroke-width="2.6"/>
+              <circle cx="37" cy="19" r="3.2" fill="#3E1F0D"/>
+              <circle cx="52" cy="16" r="3.4" fill="#3E1F0D"/>
+              <circle cx="69" cy="19" r="3.2" fill="#3E1F0D"/>
+              <circle cx="46" cy="23" r="3" fill="#3E1F0D"/>
+              <circle cx="61" cy="23" r="3" fill="#3E1F0D"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(42, ${y - 24})">
+              <ellipse cx="58" cy="18" rx="54" ry="13" fill="#B45309" stroke="#26211D" stroke-width="2.8"/>
+              <ellipse cx="58" cy="13" rx="54" ry="12" fill="#FBBF24" stroke="#26211D" stroke-width="2.8"/>
+              <circle cx="28" cy="12" r="4" fill="#3E1F0D"/>
+              <circle cx="46" cy="9" r="4.2" fill="#3E1F0D"/>
+              <circle cx="66" cy="9" r="4.2" fill="#3E1F0D"/>
+              <circle cx="86" cy="13" r="4" fill="#3E1F0D"/>
+              <circle cx="56" cy="16" r="3.8" fill="#3E1F0D"/>
+              <circle cx="38" cy="17" r="3.5" fill="#3E1F0D"/>
+              <circle cx="75" cy="17" r="3.5" fill="#3E1F0D"/>
+            </g>`,
+               },
+
+               waffle: {
+                  id: 'waffle',
+                  keyNum: 7,
+                  row: 'bottom',
+                  nameTh: 'วาฟเฟิล',
+                  category: 'base',
+                  stackHeight: 16,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <rect x="16" y="18" width="58" height="34" rx="8" fill="#D97706" stroke="#26211D" stroke-width="2.8"/>
+              <rect x="16" y="14" width="58" height="32" rx="8" fill="#F59E0B" stroke="#26211D" stroke-width="2.8"/>
+              <g fill="#B45309">
+                <rect x="24" y="20" width="9" height="7" rx="2"/>
+                <rect x="36" y="20" width="9" height="7" rx="2"/>
+                <rect x="48" y="20" width="9" height="7" rx="2"/>
+                <rect x="60" y="20" width="7" height="7" rx="2"/>
+                <rect x="24" y="31" width="9" height="7" rx="2"/>
+                <rect x="36" y="31" width="9" height="7" rx="2"/>
+                <rect x="48" y="31" width="9" height="7" rx="2"/>
+                <rect x="60" y="31" width="7" height="7" rx="2"/>
+              </g>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <rect x="8" y="24" width="94" height="40" rx="12" fill="#E2E8F0" stroke="#26211D" stroke-width="3"/>
+              <rect x="22" y="37" width="66" height="20" rx="6" fill="#B45309" stroke="#26211D" stroke-width="2.6"/>
+              <rect x="22" y="26" width="66" height="20" rx="6" fill="#D97706" stroke="#26211D" stroke-width="2.6"/>
+              <rect x="22" y="14" width="66" height="21" rx="6" fill="#F59E0B" stroke="#26211D" stroke-width="2.6"/>
+              <g fill="#B45309">
+                <rect x="29" y="18" width="10" height="5" rx="1.5"/>
+                <rect x="43" y="18" width="10" height="5" rx="1.5"/>
+                <rect x="57" y="18" width="10" height="5" rx="1.5"/>
+                <rect x="71" y="18" width="10" height="5" rx="1.5"/>
+                <rect x="29" y="26" width="10" height="5" rx="1.5"/>
+                <rect x="43" y="26" width="10" height="5" rx="1.5"/>
+                <rect x="57" y="26" width="10" height="5" rx="1.5"/>
+                <rect x="71" y="26" width="10" height="5" rx="1.5"/>
+              </g>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(42, ${y - 24})">
+              <rect x="8" y="7" width="100" height="22" rx="8" fill="#B45309" stroke="#26211D" stroke-width="2.8"/>
+              <rect x="8" y="2" width="100" height="21" rx="8" fill="#F59E0B" stroke="#26211D" stroke-width="2.8"/>
+              <g fill="#B45309">
+                <rect x="18" y="6" width="14" height="5" rx="1.5"/>
+                <rect x="38" y="6" width="14" height="5" rx="1.5"/>
+                <rect x="58" y="6" width="14" height="5" rx="1.5"/>
+                <rect x="78" y="6" width="14" height="5" rx="1.5"/>
+                <rect x="18" y="14" width="14" height="5" rx="1.5"/>
+                <rect x="38" y="14" width="14" height="5" rx="1.5"/>
+                <rect x="58" y="14" width="14" height="5" rx="1.5"/>
+                <rect x="78" y="14" width="14" height="5" rx="1.5"/>
+              </g>
+            </g>`,
+               },
+
+               strawberry: {
+                  id: 'strawberry',
+                  keyNum: 8,
+                  row: 'bottom',
+                  nameTh: 'สตรอว์เบอร์รี',
+                  category: 'fruit',
+                  stackHeight: 11,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M28 24 C24 38, 36 54, 45 55 C54 54, 66 38, 62 24 C56 18, 34 18, 28 24 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.6"/>
+              <path d="M32 22 L40 14 L45 21 L50 14 L58 22 L45 25 Z" fill="#22C55E" stroke="#26211D" stroke-width="2.2" stroke-linejoin="round"/>
+              <circle cx="39" cy="33" r="1.6" fill="#FEF08A"/>
+              <circle cx="51" cy="33" r="1.6" fill="#FEF08A"/>
+              <circle cx="45" cy="42" r="1.6" fill="#FEF08A"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <path d="M30 33 C28 22, 44 20, 46 33 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M46 31 C45 18, 63 18, 62 31 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M62 33 C63 20, 80 22, 78 33 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M48 18 L54 13 L60 18 Z" fill="#22C55E" stroke="#26211D" stroke-width="1.8"/>
+              <path d="M20 32 H90 C88 55, 74 65, 55 65 C36 65, 22 55, 20 32 Z" fill="#38BDF8" stroke="#26211D" stroke-width="3" stroke-linejoin="round"/>
+              <circle cx="38" cy="46" r="3" fill="#FFFFFF"/>
+              <circle cx="55" cy="50" r="3" fill="#FFFFFF"/>
+              <circle cx="72" cy="46" r="3" fill="#FFFFFF"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(52, ${y - 20})">
+              <path d="M12 18 C10 6, 26 6, 26 18 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M34 16 C32 3, 50 3, 50 16 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M56 16 C54 3, 72 3, 72 16 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M76 18 C76 6, 92 6, 90 18 Z" fill="#EF4444" stroke="#26211D" stroke-width="2.2"/>
+              <path d="M37 5 L41 1 L45 5 Z" fill="#22C55E"/>
+              <path d="M59 5 L63 1 L67 5 Z" fill="#22C55E"/>
+            </g>`,
+               },
+
+               whipped_cream: {
+                  id: 'whipped_cream',
+                  keyNum: 9,
+                  row: 'bottom',
+                  nameTh: 'วิปครีม',
+                  category: 'topping',
+                  stackHeight: 16,
+                  drawIcon: () => `
+            <svg viewBox="0 0 90 65" width="100%" height="100%">
+              <path d="M22 48 C18 40, 26 35, 30 35 C28 27, 36 23, 41 24 C42 15, 50 12, 48 20 C56 21, 62 28, 60 35 C66 36, 72 41, 68 48 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.8" stroke-linejoin="round"/>
+              <path d="M32 36 Q45 39 58 36" fill="none" stroke="#CBD5E1" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>`,
+                  drawTray: () => `
+            <svg viewBox="0 0 110 72" width="100%" height="100%">
+              <polygon points="48,14 62,14 58,4 52,4" fill="#FFFFFF" stroke="#26211D" stroke-width="2.4" stroke-linejoin="round"/>
+              <rect x="43" y="14" width="24" height="7" rx="3" fill="#EF4444" stroke="#26211D" stroke-width="2.4"/>
+              <rect x="38" y="21" width="34" height="44" rx="8" fill="#0284C7" stroke="#26211D" stroke-width="3"/>
+              <path d="M44 47 C41 47, 40 42, 44 41 C45 36, 52 35, 55 39 C58 36, 64 38, 64 42 C67 43, 67 47, 63 47 Z" fill="#FFFFFF"/>
+            </svg>`,
+                  drawOnPlate: (y) => `
+            <g transform="translate(68, ${y - 26})">
+              <path d="M8 26 C4 19, 12 15, 16 15 C14 9, 22 6, 27 7 C29 0, 36 -2, 34 5 C42 6, 48 11, 46 16 C52 17, 58 21, 54 26 Z" fill="#FFFFFF" stroke="#26211D" stroke-width="2.6" stroke-linejoin="round"/>
+              <path d="M17 16 Q31 19 45 16" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+            </g>`,
+               },
+            };
+
+            const INGREDIENT_LIST = Object.values(INGREDIENTS);
+
+            /* -----------------------------------------------------------------------
+             * 2. FIVE STRUCTURED LEARNING UNITS (ORDERS 1 TO 5)
+             * ----------------------------------------------------------------------- */
+            const ORDERS = [
+               {
+                  id: 1,
+                  title: 'ฐานแพนเค้กช็อกชิป',
+                  hint: 'กดเลือก แพนเค้กช็อกชิป (หมายเลข 6) วางลงบนจานสีขาวเลย!',
+                  recipe: ['choco_pancake'],
+               },
+               {
+                  id: 2,
+                  title: 'วาฟเฟิลคู่เบคอนกรอบ',
+                  hint: 'วาง วาฟเฟิล (7) เป็นฐานก่อน แล้วตามด้วย เบคอน (1)',
+                  recipe: ['waffle', 'bacon'],
+               },
+               {
+                  id: 3,
+                  title: 'วาฟเฟิลสตรอว์เบอร์รีวิปครีม',
+                  hint: 'เรียง 3 ชั้น: วาฟเฟิล (7) → สตรอว์เบอร์รี (8) → วิปครีม (9)',
+                  recipe: ['waffle', 'strawberry', 'whipped_cream'],
+               },
+               {
+                  id: 4,
+                  title: 'แพนเค้กช็อกชิปบลูเบอร์รี',
+                  hint: 'สังเกตให้ดี: แพนเค้กช็อกชิป (6) → บลูเบอร์รีชามเขียว (3) → น้ำเชื่อม (4) → วิปครีม (9)',
+                  recipe: ['choco_pancake', 'blueberry', 'syrup', 'whipped_cream'],
+               },
+               {
+                  id: 5,
+                  title: 'ชุดอาหารเช้าเชฟเหมียว 5 ชั้น',
+                  hint: 'เมนูใหญ่: แพนเค้กธรรมดา (5) → ไข่ดาว (2) → เบคอน (1) → น้ำเชื่อม (4) → วิปครีม (9)',
+                  recipe: ['pancake', 'egg', 'bacon', 'syrup', 'whipped_cream'],
+               },
+            ];
+
+            function generateRandomOrder(num) {
+               const bases = ['pancake', 'choco_pancake', 'waffle'];
+               const savories = ['bacon', 'egg'];
+               const fruits = ['blueberry', 'strawberry'];
+               const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+               const recipe = [pick(bases), pick(savories), pick(fruits), 'syrup', 'whipped_cream'];
+               return {
+                  id: num,
+                  title: `เมนูพิเศษเชฟเหมียว #${num}`,
+                  hint: recipe.map((id) => INGREDIENTS[id].nameTh).join(' → '),
+                  recipe,
+               };
+            }
+
+            /* -----------------------------------------------------------------------
+             * 3. GAME & ACCESSIBILITY STATE + SAFE LOCALSTORAGE PERSISTENCE
+             * ----------------------------------------------------------------------- */
+            const STORAGE_KEY = 'chef_whiskers_breakfast_v1';
+
+            const state = {
+               screen: 'start',
+               orderIndex: 0,
+               endlessMode: false,
+               currentOrder: ORDERS[0],
+               placedItems: [],
+               completedOrdersCount: 0,
+               starsEarned: 0,
+
+               beltPaused: false,
+               speedMode: 'normal',
+               currentBeltVelocity: 0,
+               plateX: 120,
+               beltStripeOffset: 0,
+               plateDeliveredLock: false,
+
+               a11y: {
+                  highContrast: false,
+                  largeSign: false,
+                  tts: true,
+                  visualCues: true,
+                  sfx: true,
+                  trayNumbers: true,
+                  sensoryCalm: false,
+                  focusMode: false,
+               },
+            };
+
+            const SPEED_CONFIG = {
+               manual: { pxPerSec: 0, angle: -60, label: 'หยุดรอผู้เล่น' },
+               slow: { pxPerSec: 46, angle: -60, label: 'ช้า (สีแดง)' },
+               normal: { pxPerSec: 86, angle: 0, label: 'ปานกลาง (สีเหลือง)' },
+               fast: { pxPerSec: 138, angle: 60, label: 'เร็ว (สีเขียว)' },
+            };
+
+            let deliveryAnimFrameId = null;
+            let deliveryTimers = [];
+            let cueTimeoutId = null;
+
+            function clearDeliverySequence() {
+               if (deliveryAnimFrameId !== null) {
+                  cancelAnimationFrame(deliveryAnimFrameId);
+                  deliveryAnimFrameId = null;
+               }
+               deliveryTimers.forEach((timerId) => clearTimeout(timerId));
+               deliveryTimers = [];
+            }
+
+            function saveProgressAndSettings() {
+               try {
+                  const payload = {
+                     completedOrdersCount: state.completedOrdersCount,
+                     starsEarned: state.starsEarned,
+                     speedMode: state.speedMode,
+                     a11y: state.a11y,
+                  };
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+               } catch (err) {
+                  // Safely ignore storage errors in restricted contexts
+               }
+            }
+
+            function loadProgressAndSettings() {
+               try {
+                  const raw = localStorage.getItem(STORAGE_KEY);
+                  if (!raw) return;
+                  const parsed = JSON.parse(raw);
+                  if (typeof parsed.completedOrdersCount === 'number') {
+                     state.completedOrdersCount = Math.max(0, parsed.completedOrdersCount);
+                  }
+                  if (typeof parsed.starsEarned === 'number') {
+                     state.starsEarned = Math.min(3, Math.max(0, parsed.starsEarned));
+                  }
+                  if (parsed.speedMode && SPEED_CONFIG[parsed.speedMode]) {
+                     state.speedMode = parsed.speedMode;
+                  }
+                  if (parsed.a11y && typeof parsed.a11y === 'object') {
+                     Object.assign(state.a11y, parsed.a11y);
+                  }
+               } catch (err) {
+                  // Fallback cleanly to default settings
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 4. WEB AUDIO API (OFFLINE SOUND EFFECTS) & WEB SPEECH API (THAI TTS)
+             * ----------------------------------------------------------------------- */
+            let audioCtx = null;
+
+            function ensureAudio() {
+               try {
+                  if (!audioCtx) {
+                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                     if (AudioContextClass) {
+                        audioCtx = new AudioContextClass();
+                     }
+                  }
+                  if (audioCtx && audioCtx.state === 'suspended') {
+                     audioCtx.resume();
+                  }
+               } catch (err) {
+                  // Audio unavailable
+               }
+            }
+
+            function playTone(type) {
+               if (!state.a11y.sfx) return;
+               try {
+                  ensureAudio();
+                  if (!audioCtx) return;
+
+                  const now = audioCtx.currentTime;
+                  const baseGain = state.a11y.sensoryCalm ? 0.05 : 0.12;
+
+                  const playNote = (freqStart, freqEnd, startTime, duration, wave = 'sine') => {
+                     const osc = audioCtx.createOscillator();
+                     const gain = audioCtx.createGain();
+                     osc.type = wave;
+                     osc.frequency.setValueAtTime(freqStart, startTime);
+                     if (freqEnd !== freqStart) {
+                        osc.frequency.exponentialRampToValueAtTime(freqEnd, startTime + duration);
+                     }
+                     gain.gain.setValueAtTime(0.001, startTime);
+                     gain.gain.linearRampToValueAtTime(baseGain, startTime + 0.015);
+                     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                     osc.connect(gain);
+                     gain.connect(audioCtx.destination);
+                     osc.start(startTime);
+                     osc.stop(startTime + duration + 0.02);
+                  };
+
+                  if (type === 'place') {
+                     playNote(440, 660, now, 0.12, 'triangle');
+                  } else if (type === 'undo') {
+                     playNote(520, 310, now, 0.14, 'sine');
+                  } else if (type === 'error') {
+                     playNote(230, 175, now, 0.2, 'sawtooth');
+                  } else if (type === 'eat') {
+                     playNote(380, 560, now, 0.09, 'sine');
+                  } else if (type === 'success') {
+                     playNote(523.25, 523.25, now, 0.12, 'triangle');
+                     playNote(659.25, 659.25, now + 0.1, 0.12, 'triangle');
+                     playNote(783.99, 783.99, now + 0.2, 0.14, 'triangle');
+                     playNote(1046.5, 1046.5, now + 0.32, 0.28, 'triangle');
+                  }
+               } catch (err) {
+                  // Ignore audio playback errors
+               }
+            }
+
+            function speakThai(text) {
+               if (!state.a11y.tts) return;
+               try {
+                  if ('speechSynthesis' in window) {
+                     window.speechSynthesis.cancel();
+                     const utter = new SpeechSynthesisUtterance(text);
+                     utter.lang = 'th-TH';
+                     utter.rate = state.a11y.sensoryCalm ? 0.9 : 1.02;
+                     window.speechSynthesis.speak(utter);
+                  }
+               } catch (err) {
+                  // Ignore speech synthesis errors
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 5. VISUAL CUES, CHEF MOOD & SPEED GAUGE UI
+             * ----------------------------------------------------------------------- */
+            function showVisualCue(message, type = 'info') {
+               const banner = document.getElementById('visual-cue-banner');
+               const iconEl = document.getElementById('cue-icon');
+               const textEl = document.getElementById('cue-text');
+               if (!banner || !iconEl || !textEl) return;
+
+               if (!state.a11y.visualCues) {
+                  banner.classList.remove('visible');
+                  return;
+               }
+
+               const icons = {
+                  success: `<circle cx="12" cy="12" r="10" fill="#22C55E" stroke="#26211D" stroke-width="2"/><path d="M7.5 12.5L10.5 15.5L16.5 9" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+                  error: `<circle cx="12" cy="12" r="10" fill="#EF4444" stroke="#26211D" stroke-width="2"/><path d="M8.5 8.5L15.5 15.5M15.5 8.5L8.5 15.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>`,
+                  info: `<circle cx="12" cy="12" r="10" fill="#38BDF8" stroke="#26211D" stroke-width="2"/><circle cx="12" cy="8" r="1.4" fill="#FFFFFF"/><path d="M12 11.5V16.5" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>`,
+               };
+
+               iconEl.innerHTML = icons[type] || icons.info;
+               textEl.textContent = message;
+               banner.classList.add('visible');
+
+               if (cueTimeoutId) clearTimeout(cueTimeoutId);
+               cueTimeoutId = setTimeout(() => {
+                  banner.classList.remove('visible');
+               }, 2600);
+            }
+
+            function setChefMood(mood) {
+               const container = document.getElementById('chef-whiskers-container');
+               const eyesNormal = document.getElementById('chef-eyes-normal');
+               const eyesHappy = document.getElementById('chef-eyes-happy');
+               const mouthNormal = document.getElementById('chef-mouth-normal');
+               const mouthEating = document.getElementById('chef-mouth-eating');
+               const utensils = document.getElementById('chef-utensils');
+               const yumEffects = document.getElementById('chef-yum-effects');
+               if (!container) return;
+
+               container.classList.remove('chef-happy', 'chef-oops', 'chef-eating');
+
+               if (eyesNormal) eyesNormal.style.display = mood === 'happy' || mood === 'eating' ? 'none' : 'block';
+               if (eyesHappy) eyesHappy.style.display = mood === 'happy' || mood === 'eating' ? 'block' : 'none';
+               if (mouthNormal) mouthNormal.style.display = mood === 'eating' ? 'none' : 'block';
+               if (mouthEating) mouthEating.style.display = mood === 'eating' ? 'block' : 'none';
+               if (utensils) utensils.style.display = mood === 'eating' ? 'block' : 'none';
+               if (yumEffects) yumEffects.style.display = mood === 'eating' ? 'block' : 'none';
+
+               if (mood === 'happy') {
+                  container.classList.add('chef-happy');
+               } else if (mood === 'eating') {
+                  container.classList.add('chef-eating');
+               } else if (mood === 'oops') {
+                  container.classList.add('chef-oops');
+                  setTimeout(() => {
+                     if (!state.plateDeliveredLock) {
+                        setChefMood('idle');
+                     }
+                  }, 750);
+               }
+            }
+
+            function updateBeltToggleIcon() {
+               const pauseIcon = document.getElementById('icon-belt-pause');
+               const playIcon = document.getElementById('icon-belt-play');
+               const toggleBtn = document.getElementById('btn-belt-toggle');
+               const isStopped = state.beltPaused || state.speedMode === 'manual';
+
+               if (pauseIcon) pauseIcon.style.display = isStopped ? 'none' : 'block';
+               if (playIcon) playIcon.style.display = isStopped ? 'block' : 'none';
+               if (toggleBtn) toggleBtn.setAttribute('aria-pressed', isStopped ? 'true' : 'false');
+            }
+
+            function setBeltSpeedMode(mode, announce = false) {
+               const validMode = SPEED_CONFIG[mode] ? mode : 'normal';
+               state.speedMode = validMode;
+               state.beltPaused = validMode === 'manual';
+
+               const cfg = SPEED_CONFIG[validMode];
+               const needle = document.getElementById('gauge-needle');
+               if (needle) {
+                  needle.setAttribute('transform', `rotate(${cfg.angle} 90 98)`);
+               }
+
+               document.querySelectorAll('.speed-chip').forEach((chip) => {
+                  chip.classList.toggle('selected', chip.dataset.speedMode === validMode);
+               });
+
+               updateBeltToggleIcon();
+               saveProgressAndSettings();
+
+               if (announce) {
+                  playTone('place');
+                  showVisualCue(`ความเร็วสายพาน: ${cfg.label}`, 'info');
+                  speakThai(`ความเร็วสายพาน ${cfg.label}`);
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 6. PREP TRAYS, VISUAL SIGNBOARD & LAYERED PLATE RENDERING
+             * ----------------------------------------------------------------------- */
+            function buildPrepTrays() {
+               const topRow = document.getElementById('tray-row-top');
+               const bottomRow = document.getElementById('tray-row-bottom');
+               if (!topRow || !bottomRow) return;
+
+               topRow.innerHTML = '';
+               bottomRow.innerHTML = '';
+
+               INGREDIENT_LIST.forEach((item) => {
+                  const card = document.createElement('button');
+                  card.type = 'button';
+                  card.id = `tray-${item.id}`;
+                  card.className = 'tray-card';
+                  card.setAttribute('aria-label', `${item.nameTh} (ปุ่มเลข ${item.keyNum})`);
+                  card.innerHTML = `
+            <span class="tray-num-badge">${item.keyNum}</span>
+            <div class="tray-svg-box" aria-hidden="true">${item.drawTray()}</div>
+            <span class="tray-label">${item.nameTh}</span>
+          `;
+
+                  card.addEventListener('click', () => {
+                     handleSelectIngredient(item.id, card);
+                  });
+
+                  if (item.row === 'top') {
+                     topRow.appendChild(card);
+                  } else {
+                     bottomRow.appendChild(card);
+                  }
+               });
+            }
+
+            function renderSignboard() {
+               const order = state.currentOrder;
+               const labelEl = document.getElementById('sign-order-label');
+               const titleEl = document.getElementById('sign-order-title');
+               const rowEl = document.getElementById('sign-sequence-row');
+               if (!labelEl || !titleEl || !rowEl) return;
+
+               labelEl.textContent = state.endlessMode ? `เมนูพิเศษ #${order.id}` : `ออเดอร์ที่ ${order.id} / ${ORDERS.length}`;
+               titleEl.textContent = order.title;
+
+               let html = '';
+               order.recipe.forEach((ingId, idx) => {
+                  const ing = INGREDIENTS[ingId];
+                  const isPlaced = idx < state.placedItems.length;
+                  const isMatch = isPlaced && state.placedItems[idx] === ingId;
+                  const isWrong = isPlaced && state.placedItems[idx] !== ingId;
+                  const isActive = idx === state.placedItems.length;
+
+                  let slotClass = 'recipe-step-slot';
+                  if (isMatch) slotClass += ' step-done';
+                  else if (isWrong) slotClass += ' step-wrong';
+                  else if (isActive) slotClass += ' step-active';
+
+                  let statusBadge = '';
+                  if (isMatch) {
+                     statusBadge = `
+              <span class="step-check-badge" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>`;
+                  } else if (isWrong) {
+                     statusBadge = `
+              <span class="step-wrong-badge" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <path d="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </span>`;
+                  }
+
+                  html += `
+            <div class="${slotClass}" title="${idx + 1}. ${ing.nameTh}" aria-label="ขั้นตอนที่ ${idx + 1}: ${ing.nameTh}">
+              <span class="step-order-num">${idx + 1}</span>
+              <div style="width:82%; height:82%;">${ing.drawIcon()}</div>
+              ${statusBadge}
+            </div>
+          `;
+
+                  if (idx < order.recipe.length - 1) {
+                     html += `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            `;
+                  }
+               });
+
+               html += `
+          <div class="sign-plate-target" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#0284C7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg width="42" height="32" viewBox="0 0 60 44" fill="none">
+              <ellipse cx="30" cy="30" rx="24" ry="7" fill="#FFFFFF" stroke="#26211D" stroke-width="2.6"/>
+              <ellipse cx="30" cy="30" rx="15" ry="4" fill="none" stroke="#94A3B8" stroke-width="1.8"/>
+              <path d="M30 5V18M24 13L30 19L36 13" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        `;
+
+               rowEl.innerHTML = html;
+            }
+
+            function renderPlateLayers() {
+               const layersGroup = document.getElementById('plate-food-layers');
+               if (!layersGroup) return;
+
+               let currentY = 128;
+               let svgLayers = '';
+
+               state.placedItems.forEach((ingId) => {
+                  const ing = INGREDIENTS[ingId];
+                  if (!ing) return;
+                  svgLayers += ing.drawOnPlate(currentY);
+                  currentY -= ing.stackHeight;
+               });
+
+               layersGroup.innerHTML = svgLayers;
+               updateUndoButtonState();
+            }
+
+            function updateUndoButtonState() {
+               const undoBtn = document.getElementById('btn-undo');
+               if (!undoBtn) return;
+
+               const hasItems = state.placedItems.length > 0;
+               const canGoPrevOrder = !state.endlessMode && state.orderIndex > 0;
+               const hasWrongItem = state.placedItems.some((id, idx) => id !== state.currentOrder.recipe[idx]);
+
+               undoBtn.disabled = state.plateDeliveredLock || (!hasItems && !canGoPrevOrder);
+               undoBtn.classList.toggle('btn-undo-attention', !state.plateDeliveredLock && hasWrongItem);
+            }
+
+            function animateIngredientToPlate(ingredientId, sourceEl) {
+               if (state.a11y.focusMode || !sourceEl) return;
+               const plateEl = document.getElementById('moving-plate-group');
+               const ing = INGREDIENTS[ingredientId];
+               if (!plateEl || !ing) return;
+
+               const srcRect = sourceEl.getBoundingClientRect();
+               const dstRect = plateEl.getBoundingClientRect();
+
+               const flyer = document.createElement('div');
+               flyer.className = 'flying-item';
+               flyer.innerHTML = ing.drawIcon();
+               flyer.style.left = `${srcRect.left + srcRect.width / 2 - 36}px`;
+               flyer.style.top = `${srcRect.top + srcRect.height / 2 - 36}px`;
+               document.body.appendChild(flyer);
+
+               requestAnimationFrame(() => {
+                  const dx = dstRect.left + dstRect.width / 2 - (srcRect.left + srcRect.width / 2);
+                  const dy = dstRect.top + dstRect.height * 0.65 - (srcRect.top + srcRect.height / 2);
+                  flyer.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(0.85)`;
+                  flyer.style.opacity = '0.2';
+               });
+
+               setTimeout(() => {
+                  if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+               }, 360);
+            }
+
+            function handleSelectIngredient(ingredientId, sourceEl) {
+               if (state.screen !== 'playing' || state.plateDeliveredLock) return;
+               ensureAudio();
+
+               const recipe = state.currentOrder.recipe;
+               if (state.placedItems.length >= recipe.length) {
+                  playTone('error');
+                  showVisualCue('จานเต็มแล้ว กดปุ่มย้อนกลับหากต้องการเปลี่ยนวัตถุดิบ', 'error');
+                  return;
+               }
+
+               const stepIdx = state.placedItems.length;
+               const expectedId = recipe[stepIdx];
+               const ing = INGREDIENTS[ingredientId];
+
+               state.placedItems.push(ingredientId);
+               animateIngredientToPlate(ingredientId, sourceEl);
+               renderPlateLayers();
+               renderSignboard();
+
+               const plateGroup = document.getElementById('moving-plate-group');
+               if (plateGroup) {
+                  plateGroup.classList.remove('plate-pop');
+                  void plateGroup.offsetWidth;
+                  plateGroup.classList.add('plate-pop');
+               }
+
+               const allSoFarCorrect = state.placedItems.every((id, idx) => id === recipe[idx]);
+
+               if (ingredientId === expectedId && allSoFarCorrect) {
+                  if (state.placedItems.length === recipe.length) {
+                     completeCurrentOrder();
+                  } else {
+                     playTone('place');
+                     setChefMood('happy');
+                     setTimeout(() => {
+                        if (!state.plateDeliveredLock) setChefMood('idle');
+                     }, 600);
+                     showVisualCue(`วาง${ing.nameTh}ถูกต้อง! (${state.placedItems.length}/${recipe.length})`, 'success');
+                     speakThai(ing.nameTh);
+                  }
+               } else {
+                  playTone('error');
+                  setChefMood('oops');
+                  const signboard = document.getElementById('recipe-signboard');
+                  if (signboard) {
+                     signboard.classList.remove('sign-error-flash');
+                     void signboard.offsetWidth;
+                     signboard.classList.add('sign-error-flash');
+                  }
+                  showVisualCue(`วาง${ing.nameTh}ยังไม่ตรงป้ายคำสั่ง กดปุ่มย้อนกลับเพื่อหยิบออก`, 'error');
+                  speakThai(`วาง${ing.nameTh} ยังไม่ตรงป้ายคำสั่ง กดปุ่มย้อนกลับเพื่อหยิบออก`);
+               }
+            }
+
+            function handleUndoLastItem() {
+               if (state.screen !== 'playing' || state.plateDeliveredLock) return;
+               ensureAudio();
+
+               if (state.placedItems.length > 0) {
+                  const removedId = state.placedItems.pop();
+                  const ing = INGREDIENTS[removedId];
+                  renderPlateLayers();
+                  renderSignboard();
+                  playTone('undo');
+                  showVisualCue(`หยิบ${ing ? ing.nameTh : 'วัตถุดิบ'}ออกจากจานแล้ว`, 'info');
+                  if (ing) speakThai(`หยิบ${ing.nameTh}ออก`);
+               } else if (!state.endlessMode && state.orderIndex > 0) {
+                  state.orderIndex -= 1;
+                  state.currentOrder = ORDERS[state.orderIndex];
+                  playTone('undo');
+                  triggerAccessibleSceneTransition();
+                  resetPlateForOrder();
+               }
+            }
+
+            /* -----------------------------------------------------------------------
+             * 7. TRANSITIONS, ORDER COMPLETION & CHEF EATING ANIMATION
+             * ----------------------------------------------------------------------- */
+            function triggerAccessibleSceneTransition() {
+               const app = document.getElementById('game-app');
+               if (!app || state.a11y.focusMode) return;
+               app.classList.add('scene-fade-pulse');
+               setTimeout(() => {
+                  app.classList.remove('scene-fade-pulse');
+               }, 230);
+            }
+
+            function advanceBeltStripes(deltaPx) {
+               state.beltStripeOffset = (((state.beltStripeOffset + deltaPx) % 64) + 64) % 64;
+               const stripesEl = document.getElementById('belt-stripes');
+               if (stripesEl) {
+                  stripesEl.style.transform = `translate3d(${(state.beltStripeOffset - 64).toFixed(3)}px, 0, 0)`;
+               }
+            }
+
+            function setPlatePositionX(x) {
+               state.plateX = x;
+               const plateEl = document.getElementById('moving-plate-group');
+               if (plateEl) {
+                  const roundedX = x.toFixed(2);
+                  plateEl.style.setProperty('--plate-x', `${roundedX}px`);
+                  plateEl.style.transform = `translate3d(${roundedX}px, 0, 0)`;
+               }
+            }
+
+            function completeCurrentOrder() {
+               clearDeliverySequence();
+               state.plateDeliveredLock = true;
+               updateUndoButtonState();
+               playTone('success');
+               setChefMood('happy');
+
+               state.completedOrdersCount += 1;
+               state.starsEarned = Math.min(3, Math.ceil((state.completedOrdersCount / ORDERS.length) * 3));
+               updateStarGauge();
+               saveProgressAndSettings();
+
+               const msg = `ส่งเมนู "${state.currentOrder.title}" ให้เชฟเหมียวชิม!`;
+               showVisualCue(msg, 'success');
+               speakThai(`เยี่ยมมาก ส่ง${state.currentOrder.title}ให้เชฟเหมียวชิม`);
+
+               // Step 1: Pause 550ms so player can admire the completed dish
+               const t1 = setTimeout(() => {
+                  const chefEl = document.getElementById('chef-whiskers-container');
+                  const chefRect = chefEl ? chefEl.getBoundingClientRect() : null;
+                  const targetX = chefRect ? Math.max(220, Math.min(window.innerWidth - 260, chefRect.left - 85)) : Math.max(240, window.innerWidth - 320);
+
+                  let lastSlideTime = performance.now();
+                  const maxSlideSpeed = state.a11y.sensoryCalm ? 165 : 225;
+
+                  function slideToChef(now) {
+                     const dt = Math.min(0.05, (now - lastSlideTime) / 1000);
+                     lastSlideTime = now;
+
+                     const dist = targetX - state.plateX;
+                     if (Math.abs(dist) > 1.5) {
+                        const dir = dist > 0 ? 1 : -1;
+                        const easedSpeed = Math.max(48, Math.min(maxSlideSpeed, Math.abs(dist) * 4.2));
+                        let stepDx = dir * easedSpeed * dt;
+                        if (Math.abs(stepDx) > Math.abs(dist)) {
+                           stepDx = dist;
+                        }
+                        setPlatePositionX(state.plateX + stepDx);
+                        advanceBeltStripes(stepDx);
+                        deliveryAnimFrameId = requestAnimationFrame(slideToChef);
+                     } else {
+                        // Step 2: Plate arrives in front of Chef Whiskers -> Eating animation!
+                        setPlatePositionX(targetX);
+                        deliveryAnimFrameId = null;
+                        setChefMood('eating');
+                        playTone('eat');
+                        showVisualCue('งั่มๆ อร่อยจังเลย เหมียว!', 'success');
+
+                        const totalBites = Math.max(1, state.placedItems.length);
+                        const biteInterval = state.a11y.sensoryCalm ? 480 : 380;
+
+                        for (let b = 0; b < totalBites; b++) {
+                           const biteTimer = setTimeout(
+                              () => {
+                                 if (state.placedItems.length > 0) {
+                                    state.placedItems.pop();
+                                    renderPlateLayers();
+                                    if (b > 0) playTone('eat');
+                                 }
+                              },
+                              (b + 1) * biteInterval,
+                           );
+                           deliveryTimers.push(biteTimer);
+                        }
+
+                        // Step 3: Finish eating -> Celebrate & slide empty plate out
+                        const afterEatDelay = totalBites * biteInterval + 380;
+                        const tFinishEat = setTimeout(() => {
+                           setChefMood('happy');
+                           playTone('place');
+
+                           let lastExitTime = performance.now();
+                           const exitTargetX = window.innerWidth + 160;
+                           const exitSpeed = state.a11y.sensoryCalm ? 220 : 300;
+
+                           function slideEmptyPlateOut(nowExit) {
+                              const dtExit = Math.min(0.05, (nowExit - lastExitTime) / 1000);
+                              lastExitTime = nowExit;
+
+                              if (state.plateX < exitTargetX) {
+                                 const stepExit = exitSpeed * dtExit;
+                                 setPlatePositionX(state.plateX + stepExit);
+                                 advanceBeltStripes(stepExit);
+                                 deliveryAnimFrameId = requestAnimationFrame(slideEmptyPlateOut);
+                              } else {
+                                 deliveryAnimFrameId = null;
+                                 setChefMood('idle');
+                                 triggerAccessibleSceneTransition();
+
+                                 if (!state.endlessMode && state.orderIndex + 1 >= ORDERS.length) {
+                                    openVictoryModal();
+                                 } else if (state.endlessMode) {
+                                    state.orderIndex += 1;
+                                    state.currentOrder = generateRandomOrder(state.orderIndex + 1);
+                                    resetPlateForOrder();
+                                 } else {
+                                    state.orderIndex += 1;
+                                    state.currentOrder = ORDERS[state.orderIndex];
+                                    resetPlateForOrder();
+                                 }
+                              }
+                           }
+
+                           deliveryAnimFrameId = requestAnimationFrame(slideEmptyPlateOut);
+                        }, afterEatDelay);
+                        deliveryTimers.push(tFinishEat);
+                     }
+                  }
+
+                  deliveryAnimFrameId = requestAnimationFrame(slideToChef);
+               }, 550);
+
+               deliveryTimers.push(t1);
+            }
+
+            function resetPlateForOrder() {
+               clearDeliverySequence();
+               state.placedItems = [];
+               state.plateDeliveredLock = false;
+               state.currentBeltVelocity = 0;
+               setPlatePositionX(110);
+               renderPlateLayers();
+               renderSignboard();
+               updateStarGauge();
+               setChefMood('idle');
+
+               const order = state.currentOrder;
+               const stepNames = order.recipe.map((id) => INGREDIENTS[id].nameTh).join(' ตามด้วย ');
+               showVisualCue(`ออเดอร์ใหม่: ${order.title}`, 'info');
+               speakThai(`ออเดอร์ที่ ${order.id} ${order.title} วาง ${stepNames}`);
+            }
+
+            function updateStarGauge() {
+               const fillEl = document.getElementById('star-tube-fill');
+               const counterEl = document.getElementById('order-counter-badge');
+               const pct = state.endlessMode ? 100 : Math.min(100, Math.round((state.completedOrdersCount / ORDERS.length) * 100));
+
+               if (fillEl) fillEl.style.height = `${pct}%`;
+               if (counterEl) {
+                  counterEl.textContent = state.endlessMode ? `★ ${state.completedOrdersCount}` : `${state.currentOrder.id} / ${ORDERS.length}`;
+               }
+
+               const thresholds = [20, 60, 100];
+               [1, 2, 3].forEach((starNum, idx) => {
+                  const marker = document.getElementById(`star-marker-${starNum}`);
+                  if (!marker) return;
+                  const earned = pct >= thresholds[idx];
+                  marker.classList.toggle('earned', earned);
+                  marker.innerHTML = `
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <polygon points="16,3 20,11.5 29.5,12.5 22.5,19 24.5,28.5 16,23.8 7.5,28.5 9.5,19 2.5,12.5 12,11.5"
+                fill="${earned ? '#FACC15' : '#CBD5E1'}"
+                stroke="#26211D"
+                stroke-width="2.5"
+                stroke-linejoin="round"/>
+            </svg>`;
+               });
+            }
+
+            /* -----------------------------------------------------------------------
+             * 8. MODALS, START ORDER SELECTOR & ACCESSIBILITY CONTROLS
+             * ----------------------------------------------------------------------- */
+            function buildStartOrderSelector() {
+               const grid = document.getElementById('start-order-grid');
+               if (!grid) return;
+               grid.innerHTML = '';
+
+               ORDERS.forEach((order, idx) => {
+                  const btn = document.createElement('button');
+                  btn.type = 'button';
+                  btn.className = `order-pill-btn ${idx === state.orderIndex ? 'active' : ''}`;
+                  btn.setAttribute('aria-label', `เริ่มที่ออเดอร์ที่ ${order.id}: ${order.title}`);
+
+                  const dotsHtml = order.recipe.map(() => `<span class="layer-dot"></span>`).join('');
+                  btn.innerHTML = `
+            <span style="font-size:15px;">${order.id} / 5</span>
+            <div class="layer-dots" aria-hidden="true">${dotsHtml}</div>
+          `;
+
+                  btn.addEventListener('click', () => {
+                     state.orderIndex = idx;
+                     state.currentOrder = ORDERS[idx];
+                     document.querySelectorAll('.order-pill-btn').forEach((el, i) => {
+                        el.classList.toggle('active', i === idx);
+                     });
+                     playTone('place');
+                  });
+
+                  grid.appendChild(btn);
+               });
+            }
+
+            function startOrder(index, endless = false) {
+               ensureAudio();
+               state.endlessMode = endless;
+               state.orderIndex = index;
+               state.currentOrder = endless ? generateRandomOrder(1) : ORDERS[index];
+               state.screen = 'playing';
+
+               document.getElementById('modal-start').classList.add('hidden');
+               document.getElementById('modal-victory').classList.add('hidden');
+               document.getElementById('modal-settings').classList.add('hidden');
+
+               resetPlateForOrder();
+            }
+
+            function openVictoryModal() {
+               state.screen = 'victory';
+               const row = document.getElementById('victory-stars-row');
+               row.innerHTML = [1, 2, 3]
+                  .map(
+                     () => `
+            <svg width="56" height="56" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <polygon points="16,3 20,11.5 29.5,12.5 22.5,19 24.5,28.5 16,23.8 7.5,28.5 9.5,19 2.5,12.5 12,11.5"
+                fill="#FACC15" stroke="#26211D" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg>`,
+                  )
+                  .join('');
+
+               document.getElementById('modal-victory').classList.remove('hidden');
+               speakThai('ยอดเยี่ยมมาก คุณจัดเตรียมอาหารเช้าครบทั้ง 5 ออเดอร์แล้ว');
+            }
+
+            function applyAccessibilityClasses() {
+               document.body.classList.toggle('high-contrast', state.a11y.highContrast);
+               document.body.classList.toggle('sensory-calm', state.a11y.sensoryCalm);
+               document.body.classList.toggle('focus-mode', state.a11y.focusMode);
+               document.body.classList.toggle('hide-numbers', !state.a11y.trayNumbers);
+               document.documentElement.style.setProperty('--sign-scale', state.a11y.largeSign ? '1.14' : '1');
+
+               const toggleMap = [
+                  ['toggle-high-contrast', 'highContrast'],
+                  ['toggle-large-sign', 'largeSign'],
+                  ['toggle-tts', 'tts'],
+                  ['toggle-visual-cues', 'visualCues'],
+                  ['toggle-sfx', 'sfx'],
+                  ['toggle-tray-numbers', 'trayNumbers'],
+                  ['toggle-sensory-calm', 'sensoryCalm'],
+                  ['toggle-focus-mode', 'focusMode'],
+               ];
+
+               toggleMap.forEach(([elId, key]) => {
+                  const btn = document.getElementById(elId);
+                  if (!btn) return;
+                  const active = Boolean(state.a11y[key]);
+                  btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                  const pill = btn.querySelector('.tile-state-pill');
+                  if (pill) pill.textContent = active ? 'เปิด' : 'ปิด';
+               });
+            }
+
+            function bindModalAndHudEvents() {
+               // Top HUD buttons
+               document.getElementById('btn-home').addEventListener('click', () => {
+                  clearDeliverySequence();
+                  state.plateDeliveredLock = false;
+                  state.screen = 'start';
+                  buildStartOrderSelector();
+                  document.getElementById('modal-start').classList.remove('hidden');
+                  playTone('place');
+               });
+
+               document.getElementById('btn-undo').addEventListener('click', handleUndoLastItem);
+
+               document.getElementById('btn-speak-order').addEventListener('click', () => {
+                  ensureAudio();
+                  const order = state.currentOrder;
+                  const stepNames = order.recipe.map((id) => INGREDIENTS[id].nameTh).join(' ตามด้วย ');
+                  speakThai(`ออเดอร์ที่ ${order.id} ${order.title} วาง ${stepNames}`);
+               });
+
+               // Settings open/close
+               let screenBeforeSettings = 'start';
+               const openSettings = () => {
+                  if (state.screen !== 'paused') {
+                     screenBeforeSettings = state.screen;
+                  }
+                  state.screen = 'paused';
+                  document.getElementById('modal-settings').classList.remove('hidden');
+                  playTone('place');
+               };
+
+               document.getElementById('btn-settings').addEventListener('click', openSettings);
+               document.getElementById('btn-open-a11y-from-start').addEventListener('click', openSettings);
+
+               document.getElementById('btn-close-settings').addEventListener('click', () => {
+                  document.getElementById('modal-settings').classList.add('hidden');
+                  state.screen = screenBeforeSettings;
+                  playTone('place');
+               });
+
+               // Start & Victory buttons
+               document.getElementById('btn-start-play').addEventListener('click', () => {
+                  startOrder(state.orderIndex, false);
+               });
+
+               document.getElementById('btn-replay-all').addEventListener('click', () => {
+                  state.completedOrdersCount = 0;
+                  state.starsEarned = 0;
+                  saveProgressAndSettings();
+                  startOrder(0, false);
+               });
+
+               document.getElementById('btn-endless-chef').addEventListener('click', () => {
+                  startOrder(0, true);
+               });
+
+               // Speed Gauge 3 color zones + Play/Pause toggle
+               document.querySelectorAll('.gauge-sector').forEach((sector) => {
+                  const chooseSpeed = () => {
+                     ensureAudio();
+                     setBeltSpeedMode(sector.dataset.speedMode, true);
+                     sector.blur();
+                  };
+                  sector.addEventListener('click', chooseSpeed);
+                  sector.addEventListener('keydown', (e) => {
+                     if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        chooseSpeed();
+                     }
+                  });
+               });
+
+               document.getElementById('btn-belt-toggle').addEventListener('click', () => {
+                  ensureAudio();
+                  if (state.speedMode === 'manual') {
+                     setBeltSpeedMode('normal', true);
+                     return;
+                  }
+                  state.beltPaused = !state.beltPaused;
+                  updateBeltToggleIcon();
+                  playTone('place');
+                  showVisualCue(state.beltPaused ? 'หยุดสายพานชั่วคราว' : 'เดินสายพานต่อ', 'info');
+               });
+
+               // Settings speed chips
+               document.querySelectorAll('.speed-chip').forEach((chip) => {
+                  chip.addEventListener('click', () => {
+                     ensureAudio();
+                     setBeltSpeedMode(chip.dataset.speedMode, true);
+                  });
+               });
+
+               // 8 Accessibility toggles
+               const togglePairs = [
+                  ['toggle-high-contrast', 'highContrast'],
+                  ['toggle-large-sign', 'largeSign'],
+                  ['toggle-tts', 'tts'],
+                  ['toggle-visual-cues', 'visualCues'],
+                  ['toggle-sfx', 'sfx'],
+                  ['toggle-tray-numbers', 'trayNumbers'],
+                  ['toggle-sensory-calm', 'sensoryCalm'],
+                  ['toggle-focus-mode', 'focusMode'],
+               ];
+
+               togglePairs.forEach(([btnId, prop]) => {
+                  const btn = document.getElementById(btnId);
+                  if (!btn) return;
+                  btn.addEventListener('click', () => {
+                     state.a11y[prop] = !state.a11y[prop];
+                     applyAccessibilityClasses();
+                     saveProgressAndSettings();
+                     playTone('place');
+                  });
+               });
+
+               // Keyboard shortcuts: 1-9 ingredients, Spacebar pause/play, Backspace undo
+               window.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape') {
+                     const settingsModal = document.getElementById('modal-settings');
+                     if (!settingsModal.classList.contains('hidden')) {
+                        settingsModal.classList.add('hidden');
+                        state.screen = screenBeforeSettings;
+                     }
+                     return;
+                  }
+
+                  if (state.screen !== 'playing') return;
+
+                  if (e.key >= '1' && e.key <= '9') {
+                     const num = parseInt(e.key, 10);
+                     const found = INGREDIENT_LIST.find((it) => it.keyNum === num);
+                     if (found) {
+                        e.preventDefault();
+                        const el = document.getElementById(`tray-${found.id}`);
+                        handleSelectIngredient(found.id, el);
+                     }
+                  } else if (e.key === 'Backspace') {
+                     e.preventDefault();
+                     handleUndoLastItem();
+                  } else if (e.code === 'Space' && document.activeElement.tagName !== 'BUTTON') {
+                     e.preventDefault();
+                     document.getElementById('btn-belt-toggle').click();
+                  }
+               });
+            }
+
+            /* -----------------------------------------------------------------------
+             * 9. MAIN CONVEYOR BELT & PLATE LOOP
+             * ----------------------------------------------------------------------- */
+            function startGameLoop() {
+               let lastTime = performance.now();
+
+               function loop(now) {
+                  const dt = Math.min(0.05, (now - lastTime) / 1000);
+                  lastTime = now;
+
+                  if (state.screen === 'playing' && !state.plateDeliveredLock) {
+                     const cfg = SPEED_CONFIG[state.speedMode] || SPEED_CONFIG.normal;
+                     const targetSpeed = state.beltPaused ? 0 : cfg.pxPerSec;
+
+                     // Smooth acceleration & deceleration for mechanical belt feel
+                     const accelFactor = Math.min(1, dt * 10);
+                     state.currentBeltVelocity += (targetSpeed - state.currentBeltVelocity) * accelFactor;
+                     if (Math.abs(targetSpeed - state.currentBeltVelocity) < 0.15) {
+                        state.currentBeltVelocity = targetSpeed;
+                     }
+
+                     if (state.currentBeltVelocity > 0.01) {
+                        const moveDx = state.currentBeltVelocity * dt;
+                        advanceBeltStripes(moveDx);
+
+                        let nextPlateX = state.plateX + moveDx;
+                        const rightExitEdge = window.innerWidth + 110;
+                        if (nextPlateX > rightExitEdge) {
+                           // Smoothly exit off-screen right and glide back in from off-screen left
+                           nextPlateX = -150;
+                           showVisualCue('จานวนกลับมาเริ่มรอบใหม่แล้ว ประกอบต่อได้เลย!', 'info');
+                        }
+
+                        setPlatePositionX(nextPlateX);
+                     }
+                  }
+
+                  requestAnimationFrame(loop);
+               }
+
+               requestAnimationFrame(loop);
+            }
+
+            /* -----------------------------------------------------------------------
+             * 10. INITIALIZATION
+             * ----------------------------------------------------------------------- */
+            function init() {
+               loadProgressAndSettings();
+               applyAccessibilityClasses();
+               setBeltSpeedMode(state.speedMode, false);
+               buildPrepTrays();
+               buildStartOrderSelector();
+               renderSignboard();
+               renderPlateLayers();
+               updateStarGauge();
+               bindModalAndHudEvents();
+               startGameLoop();
+            }
+
+            if (document.readyState === 'loading') {
+               window.addEventListener('DOMContentLoaded', init);
+            } else {
+               init();
+            }
+         })();
+      </script>
+   </body>
+</html>
